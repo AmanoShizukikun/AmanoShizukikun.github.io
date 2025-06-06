@@ -1,41 +1,10 @@
-<?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-require_once '../include/auth.php';
-
-$message_sent = false;
-$error_message = '';
-$success_message = '';
-
-// 處理表單提交
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = $_POST['name'] ?? '';
-    $email = $_POST['email'] ?? '';
-    $message = $_POST['message'] ?? '';
-    $subject = $_POST['subject'] ?? '';
-    
-    if (empty($name) || empty($email) || empty($message) || empty($subject)) {
-        $error_message = '請填寫所有必填欄位';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error_message = '請輸入有效的電子郵件地址';
-    } elseif (strlen($message) < 10) {
-        $error_message = '訊息內容至少需要 10 個字符';
-    } else {
-        $success_message = '訊息發送成功！我們會盡快回覆您。';
-        $message_sent = true;
-        // 清空表單數據
-        $name = $email = $message = $subject = '';
-    }
-}
-?>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CONTACT - Communication Terminal</title>
-    <?php include '../include/style.php'; ?>
+    <link rel="stylesheet" href="../include/style.css">
     <style>
         /* 主要聯絡容器 */
         .contact-hud {
@@ -151,14 +120,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 filter: hue-rotate(90deg);
                 transform: translateX(-2px);
             }
-        }
-        
-        @keyframes glitchShift {
-            0%, 100% { transform: translate(0); }
-            20% { transform: translate(-1px, 1px); }
-            40% { transform: translate(1px, -1px); }
-            60% { transform: translate(-1px, 2px); }
-            80% { transform: translate(1px, -2px); }
         }
         
         .contact-subtitle {
@@ -375,7 +336,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 10px;
         }
         
-        /* 修改後的提交按鈕 - 參考 about.php 的 cyber-return-button 風格 */
+        /* 提交按鈕 */
         .submit-container {
             text-align: center;
             margin-top: 40px;
@@ -514,6 +475,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             position: relative;
             z-index: 10;
             animation: messageSlideIn 0.5s ease;
+            display: none;
         }
         
         @keyframes messageSlideIn {
@@ -661,7 +623,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             word-break: break-all;
         }
         
-        /* 返回按鈕 - 參考 about.php 風格 */
+        /* 返回按鈕 */
         .return-hud {
             text-align: center;
             margin-top: 40px;
@@ -689,7 +651,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             overflow: hidden;
             text-shadow: 0 0 10px currentColor;
             box-shadow: 
-                0 5px 15px rgba(0, 255, 255, 0.3),
                 inset 0 0 20px rgba(0, 255, 255, 0.05);
             backdrop-filter: blur(10px);
             transform-style: preserve-3d;
@@ -706,9 +667,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: conic-gradient(
                 from 0deg,
                 transparent,
-                rgba(0, 255, 255, 0.3),
+                rgba(0, 255, 255, 0.2),
                 transparent,
-                rgba(255, 0, 255, 0.3),
+                rgba(255, 0, 255, 0.2),
                 transparent
             );
             animation: returnButtonRotate 6s linear infinite;
@@ -722,13 +683,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         .cyber-return-button:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.4), rgba(0, 150, 255, 0.4));
             border-color: #ffffff;
             color: #ffffff;
             transform: translateY(-3px) rotateX(5deg) rotateY(5deg) scale(1.05);
             text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
             box-shadow: 
-                0 8px 25px rgba(0, 255, 255, 0.4),
-                inset 0 0 40px rgba(0, 255, 255, 0.2);
+                0 8px 30px rgba(0, 255, 255, 0.4),
+                inset 0 0 30px rgba(0, 255, 255, 0.15);
         }
         
         .cyber-return-button:hover::before {
@@ -756,13 +718,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         /* 響應式設計 */
         @media (max-width: 768px) {
             .contact-hud {
-                padding: 25px 20px;
+                padding: 25px 15px;
                 margin: 20px 0;
             }
             
             .contact-title {
                 font-size: 1.8em;
-                letter-spacing: 2px;
+                letter-spacing: 1px;
             }
             
             .form-grid {
@@ -772,6 +734,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             .contact-methods {
                 grid-template-columns: 1fr;
+                gap: 15px;
             }
             
             .system-status {
@@ -780,8 +743,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             .cyber-submit-button {
-                padding: 18px 35px;
+                padding: 18px 40px;
                 font-size: 1em;
+                letter-spacing: 2px;
             }
             
             .form-section-title::before {
@@ -800,12 +764,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             .contact-title {
                 font-size: 1.5em;
-                letter-spacing: 1px;
             }
             
             .form-input, .form-select {
-                padding: 15px 18px;
-                font-size: 0.95em;
+                padding: 15px;
+                font-size: 0.9em;
             }
             
             .contact-method {
@@ -814,7 +777,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             .contact-method-icon {
                 font-size: 2em;
-                margin-bottom: 12px;
             }
         }
     </style>
@@ -823,154 +785,134 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="animated-bg"></div>
     <div class="particles" id="particles"></div>
     
-    <?php include '../include/menu.php'; ?>
+    <!-- Navigation Menu -->
+    <header>
+        <a href="../index.html">
+            <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
+        </a>
+        <div class="nav-container">
+            <ul class="nav-links">
+                <li><a href="../dir/about.html">◆ ABOUT</a></li>
+                <li><a href="../dir/exprience.html">◆ EXPERIENCE</a></li>
+                <li><a href="../dir/product.html">◆ PRODUCTS</a></li>
+                <li><a href="../dir/contact.html">◆ CONTACT</a></li>
+            </ul>
+        </div>
+    </header>
     
     <div class="container">
         <div class="contact-hud">
             <div class="contact-header">
-                <h1 class="contact-title">◆ COMMUNICATION TERMINAL ◆</h1>
-                <p class="contact-subtitle">SECURE MESSAGE TRANSMISSION</p>
+                <h1 class="contact-title">◆ CONTACT ◆</h1>
+                <div class="contact-subtitle">COMMUNICATION TERMINAL</div>
                 <div class="system-status">
                     <div class="status-indicator">
-                        <span class="status-dot"></span>
+                        <div class="status-dot"></div>
                         <span>SYSTEM ONLINE</span>
                     </div>
                     <div class="status-indicator">
-                        <span class="status-dot"></span>
-                        <span>ENCRYPTION ACTIVE</span>
+                        <div class="status-dot"></div>
+                        <span>SECURE CONNECTION</span>
                     </div>
                     <div class="status-indicator">
-                        <span class="status-dot"></span>
+                        <div class="status-dot"></div>
                         <span>READY TO TRANSMIT</span>
                     </div>
                 </div>
             </div>
             
-            <?php if ($error_message): ?>
-                <div class="message-status error-message">
-                    ◆ ERROR: <?php echo htmlspecialchars($error_message); ?> ◆
-                </div>
-            <?php endif; ?>
-            
-            <?php if ($success_message): ?>
-                <div class="message-status success-message">
-                    ◆ SUCCESS: <?php echo htmlspecialchars($success_message); ?> ◆
-                </div>
-            <?php endif; ?>
+            <!-- 訊息顯示區域 -->
+            <div id="messageContainer" class="message-status"></div>
             
             <div class="contact-form-container">
-                <h2 class="form-section-title">MESSAGE TRANSMISSION PROTOCOL</h2>
-                
-                <form method="POST" action="contact.php" id="contactForm">
+                <h2 class="form-section-title">◆ MESSAGE TRANSMISSION ◆</h2>
+                <form id="contactForm" class="cyber-form">
                     <div class="form-grid">
                         <div class="form-group">
-                            <label class="form-label" for="name">傳送者識別碼</label>
-                            <input type="text" 
-                                   id="name" 
-                                   name="name" 
-                                   class="form-input" 
-                                   placeholder="請輸入您的姓名" 
-                                   value="<?php echo htmlspecialchars($name ?? ''); ?>"
-                                   required>
+                            <label for="name" class="form-label">姓名 / Name</label>
+                            <input type="text" id="name" name="name" class="form-input" placeholder="輸入您的姓名..." required>
                         </div>
-                        
                         <div class="form-group">
-                            <label class="form-label" for="email">通訊頻道</label>
-                            <input type="email" 
-                                   id="email" 
-                                   name="email" 
-                                   class="form-input" 
-                                   placeholder="請輸入您的電子郵件" 
-                                   value="<?php echo htmlspecialchars($email ?? ''); ?>"
-                                   required>
+                            <label for="email" class="form-label">電子郵件 / Email</label>
+                            <input type="email" id="email" name="email" class="form-input" placeholder="your.email@example.com" required>
                         </div>
-                        
                         <div class="form-group full-width">
-                            <label class="form-label" for="subject">訊息類別</label>
+                            <label for="subject" class="form-label">主旨 / Subject</label>
                             <select id="subject" name="subject" class="form-select" required>
-                                <option value="">請選擇訊息類別</option>
-                                <option value="general" <?php echo ($subject ?? '') === 'general' ? 'selected' : ''; ?>>一般詢問</option>
-                                <option value="technical" <?php echo ($subject ?? '') === 'technical' ? 'selected' : ''; ?>>技術支援</option>
-                                <option value="collaboration" <?php echo ($subject ?? '') === 'collaboration' ? 'selected' : ''; ?>>合作提案</option>
-                                <option value="feedback" <?php echo ($subject ?? '') === 'feedback' ? 'selected' : ''; ?>>意見反饋</option>
-                                <option value="other" <?php echo ($subject ?? '') === 'other' ? 'selected' : ''; ?>>其他事項</option>
+                                <option value="">請選擇主旨...</option>
+                                <option value="general">一般詢問 / General Inquiry</option>
+                                <option value="collaboration">合作提案 / Collaboration Proposal</option>
+                                <option value="technical">技術問題 / Technical Issue</option>
+                                <option value="business">商業洽談 / Business Discussion</option>
+                                <option value="other">其他 / Other</option>
                             </select>
                         </div>
-                        
                         <div class="form-group full-width">
-                            <label class="form-label" for="message">訊息內容</label>
-                            <textarea id="message" 
-                                      name="message" 
-                                      class="form-input form-textarea" 
-                                      rows="6" 
-                                      placeholder="請輸入您的訊息內容（至少10個字符）"
-                                      required><?php echo htmlspecialchars($message ?? ''); ?></textarea>
+                            <label for="message" class="form-label">訊息內容 / Message</label>
+                            <textarea id="message" name="message" class="form-input form-textarea" placeholder="請詳細描述您的訊息..." required></textarea>
                         </div>
                     </div>
                     
                     <div class="submit-container">
-                        <button type="submit" class="cyber-submit-button" id="submitButton">
-                            <span class="submit-icon">◢</span>
-                            <span class="submit-text">傳送訊息</span>
+                        <button type="submit" class="cyber-submit-button">
+                            <span class="submit-icon">⚡</span>
+                            <span class="submit-text">TRANSMIT MESSAGE</span>
                         </button>
                     </div>
                 </form>
             </div>
             
             <div class="contact-info-panel">
-                <h2 class="contact-info-title">其他聯絡方式</h2>
+                <h2 class="contact-info-title">◆ DIRECT COMMUNICATION CHANNELS ◆</h2>
                 <div class="contact-methods">
-                    <!-- 電子郵件 - 可點擊開啟郵件應用程式 -->
-                    <a href="mailto:3b017128@gm.student.ncut.edu.tw" class="contact-method">
-                        <div class="contact-method-icon">📧</div>
-                        <div class="contact-method-label">電子郵件</div>
+                    <div class="contact-method" onclick="copyToClipboard('3b017128@gm.student.ncut.edu.tw', 'Email')">
+                        <span class="contact-method-icon">📧</span>
+                        <div class="contact-method-label">PRIMARY EMAIL</div>
                         <div class="contact-method-value">3b017128@gm.student.ncut.edu.tw</div>
-                    </a>
-                    
-                    <!-- Discord - 可點擊複製使用者名稱 -->
+                    </div>
                     <div class="contact-method" onclick="copyDiscordUsername()">
-                        <div class="contact-method-icon">💬</div>
-                        <div class="contact-method-label">Discord</div>
+                        <span class="contact-method-icon">💬</span>
+                        <div class="contact-method-label">DISCORD CHANNEL</div>
                         <div class="contact-method-value">amano_shizuki_kun</div>
                     </div>
-                    
-                    <!-- GitHub - 可點擊開啟GitHub頁面 -->
-                    <a href="https://github.com/AmanoShizukikun" class="contact-method" target="_blank" rel="noopener noreferrer">
-                        <div class="contact-method-icon">🔗</div>
-                        <div class="contact-method-label">GitHub</div>
-                        <div class="contact-method-value">AmanoShizukikun</div>
-                    </a>
+                    <div class="contact-method" onclick="openGitHub()">
+                        <span class="contact-method-icon">🔗</span>
+                        <div class="contact-method-label">CODE REPOSITORY</div>
+                        <div class="contact-method-value">GitHub Profile</div>
+                    </div>
                 </div>
             </div>
         </div>
         
         <div class="return-hud">
-            <a href="../index.php" class="cyber-return-button">
-                <span class="return-icon">◀</span>
-                <span class="return-text">返回主界面</span>
+            <a href="../index.html" class="cyber-return-button">
+                <span class="return-icon">⬅</span>
+                <span class="return-text">RETURN TO NEXUS</span>
             </a>
         </div>
     </div>
     
     <script>
-        // 複製Discord使用者名稱到剪貼簿
-        function copyDiscordUsername() {
-            const username = 'amano_shizuki_kun';
-            
-            // 嘗試使用現代 API
+        // 複製到剪貼簿功能
+        function copyToClipboard(text, type) {
             if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(username).then(function() {
-                    showCopyNotification('Discord 使用者名稱已複製到剪貼簿！');
-                }).catch(function() {
-                    fallbackCopyMethod(username);
+                navigator.clipboard.writeText(text).then(() => {
+                    showMessage(`${type} 已複製到剪貼簿！`, 'success');
+                }).catch(err => {
+                    fallbackCopyMethod(text, type);
                 });
             } else {
-                fallbackCopyMethod(username);
+                fallbackCopyMethod(text, type);
             }
         }
         
+        // 複製Discord使用者名稱
+        function copyDiscordUsername() {
+            copyToClipboard('amano_shizuki_kun', 'Discord 使用者名稱');
+        }
+        
         // 後備複製方法
-        function fallbackCopyMethod(text) {
+        function fallbackCopyMethod(text, type) {
             const textArea = document.createElement('textarea');
             textArea.value = text;
             textArea.style.position = 'fixed';
@@ -982,162 +924,145 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             try {
                 document.execCommand('copy');
-                showCopyNotification('Discord 使用者名稱已複製到剪貼簿！');
+                showMessage(`${type} 已複製到剪貼簿！`, 'success');
             } catch (err) {
-                showCopyNotification('複製失敗，請手動選取：amano_shizuki_kun');
+                showMessage(`無法複製 ${type}，請手動選取複製。`, 'error');
             }
             
             document.body.removeChild(textArea);
         }
         
-        // 顯示複製通知
-        function showCopyNotification(message) {
-            // 創建通知元素
-            const notification = document.createElement('div');
-            notification.className = 'copy-notification';
-            notification.textContent = message;
-            notification.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: linear-gradient(135deg, rgba(0, 255, 255, 0.9), rgba(0, 150, 255, 0.9));
-                color: #000000;
-                padding: 15px 25px;
-                border-radius: 10px;
-                font-family: 'Rajdhani', sans-serif;
-                font-weight: bold;
-                font-size: 1.1em;
-                z-index: 10000;
-                box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
-                animation: notificationSlide 3s ease forwards;
-                text-shadow: none;
-                clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
-            `;
-            
-            // 添加動畫樣式
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes notificationSlide {
-                    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-                    20% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
-                    80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-                    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
-                }
-            `;
-            document.head.appendChild(style);
-            
-            document.body.appendChild(notification);
-            
-            // 3秒後移除通知
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-                if (style.parentNode) {
-                    style.parentNode.removeChild(style);
-                }
-            }, 3000);
+        // 打開外部連結
+        function openGitHub() {
+            window.open('https://github.com/AmanoShizukikun', '_blank');
         }
         
-        // 增強粒子效果
+        
+        // 顯示訊息
+        function showMessage(message, type) {
+            const messageContainer = document.getElementById('messageContainer');
+            messageContainer.className = `message-status ${type}-message`;
+            messageContainer.textContent = message;
+            messageContainer.style.display = 'block';
+            
+            // 自動隱藏訊息
+            setTimeout(() => {
+                messageContainer.style.display = 'none';
+            }, 5000);
+        }
+        
+        // 表單提交處理
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const submitButton = document.querySelector('.cyber-submit-button');
+            const submitIcon = document.querySelector('.submit-icon');
+            const submitText = document.querySelector('.submit-text');
+            
+            // 獲取表單數據
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                subject: document.getElementById('subject').value,
+                message: document.getElementById('message').value
+            };
+            
+            // 基本驗證
+            if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+                showMessage('請填寫所有必填欄位！', 'error');
+                return;
+            }
+            
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+                showMessage('請輸入有效的電子郵件地址！', 'error');
+                return;
+            }
+            
+            if (formData.message.length < 10) {
+                showMessage('訊息內容至少需要 10 個字符！', 'error');
+                return;
+            }
+            
+            // 顯示載入狀態
+            submitButton.classList.add('loading');
+            submitIcon.textContent = '⟲';
+            submitText.textContent = 'TRANSMITTING...';
+            
+            // 模擬表單提交（實際應用中這裡會發送到後端或使用服務如EmailJS）
+            setTimeout(() => {
+                // 重置按鈕狀態
+                submitButton.classList.remove('loading');
+                submitIcon.textContent = '⚡';
+                submitText.textContent = 'TRANSMIT MESSAGE';
+                
+                // 顯示成功訊息
+                showMessage('訊息發送成功！我們會盡快回覆您。', 'success');
+                
+                // 清空表單
+                this.reset();
+                
+                // 可選：使用 EmailJS 或其他服務發送實際郵件
+                // emailjs.send('service_id', 'template_id', formData);
+                
+            }, 2000);
+        });
+        
+        // 創建粒子效果
         function createParticles() {
             const particlesContainer = document.getElementById('particles');
-            const particleCount = window.innerWidth > 768 ? 50 : 25;
+            if (!particlesContainer) return;
             
-            // 清除舊粒子
+            // 清除現有粒子
             particlesContainer.innerHTML = '';
+            
+            const particleCount = 50;
             
             for (let i = 0; i < particleCount; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
                 particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
                 particle.style.animationDelay = Math.random() * 10 + 's';
-                particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
+                particle.style.animationDuration = (Math.random() * 8 + 8) + 's';
                 particlesContainer.appendChild(particle);
             }
         }
         
-        // 表單驗證增強
-        function enhanceFormValidation() {
-            const form = document.getElementById('contactForm');
-            const inputs = form.querySelectorAll('.form-input, .form-select');
+        // 表單欄位增強效果
+        function enhanceFormFields() {
+            const formInputs = document.querySelectorAll('.form-input, .form-select');
             
-            inputs.forEach(input => {
-                // 即時驗證反饋
-                input.addEventListener('blur', function() {
-                    validateField(this);
-                });
-                
-                // 輸入時的視覺反饋
-                input.addEventListener('input', function() {
-                    this.style.borderColor = 'rgba(0, 255, 255, 0.6)';
-                    clearTimeout(this.feedbackTimer);
-                    this.feedbackTimer = setTimeout(() => {
-                        validateField(this);
-                    }, 1000);
-                });
-                
-                // 焦點效果增強
+            formInputs.forEach(input => {
                 input.addEventListener('focus', function() {
                     this.style.borderColor = '#00ffff';
-                    this.style.boxShadow = '0 0 20px rgba(0, 255, 255, 0.4)';
+                    this.style.boxShadow = '0 0 20px rgba(0, 255, 255, 0.3)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    if (!this.value) {
+                        this.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+                        this.style.boxShadow = 'none';
+                    }
+                });
+                
+                input.addEventListener('input', function() {
+                    if (this.checkValidity()) {
+                        this.style.borderColor = '#00ff00';
+                    } else {
+                        this.style.borderColor = '#ff6b6b';
+                    }
                 });
             });
         }
         
-        function validateField(field) {
-            const value = field.value.trim();
-            let isValid = true;
+        // 狀態指示器動畫
+        function enhanceStatusIndicators() {
+            const statusIndicators = document.querySelectorAll('.status-indicator');
             
-            switch (field.type) {
-                case 'email':
-                    isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-                    break;
-                case 'text':
-                    isValid = value.length >= 2;
-                    break;
-                default:
-                    if (field.tagName.toLowerCase() === 'textarea') {
-                        isValid = value.length >= 10;
-                    } else {
-                        isValid = value.length > 0;
-                    }
-            }
-            
-            if (isValid) {
-                field.style.borderColor = 'rgba(0, 255, 0, 0.6)';
-                field.style.boxShadow = '0 0 15px rgba(0, 255, 0, 0.3)';
-            } else {
-                field.style.borderColor = 'rgba(255, 0, 0, 0.6)';
-                field.style.boxShadow = '0 0 15px rgba(255, 0, 0, 0.3)';
-            }
-        }
-        
-        // 表單提交動畫增強
-        function enhanceFormSubmission() {
-            const form = document.getElementById('contactForm');
-            const submitButton = document.getElementById('submitButton');
-            const originalText = submitButton.querySelector('.submit-text').textContent;
-            const submitIcon = submitButton.querySelector('.submit-icon');
-            
-            form.addEventListener('submit', function(e) {
-                // 添加載入狀態
-                submitButton.classList.add('loading');
-                submitButton.querySelector('.submit-text').textContent = '傳送中...';
-                submitIcon.style.animation = 'spin 1s linear infinite';
-                submitButton.disabled = true;
-                
-                // 模擬載入完成
+            statusIndicators.forEach((indicator, index) => {
                 setTimeout(() => {
-                    if (!document.querySelector('.success-message')) {
-                        submitButton.classList.remove('loading');
-                        submitButton.querySelector('.submit-text').textContent = originalText;
-                        submitIcon.style.animation = 'submitIconPulse 2s ease-in-out infinite';
-                        submitButton.disabled = false;
-                    }
-                }, 3000);
+                    indicator.style.animation = 'fadeInUp 0.8s ease forwards';
+                    indicator.style.opacity = '1';
+                }, index * 200);
             });
         }
         
@@ -1149,85 +1074,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             let i = 0;
             const typeInterval = setInterval(() => {
-                title.textContent += originalText.charAt(i);
-                i++;
-                if (i >= originalText.length) {
+                if (i < originalText.length) {
+                    title.textContent += originalText.charAt(i);
+                    i++;
+                } else {
                     clearInterval(typeInterval);
                 }
-            }, 80);
+            }, 100);
         }
         
-        // 狀態指示器動畫增強
-        function enhanceStatusIndicators() {
-            const indicators = document.querySelectorAll('.status-indicator');
+        // 隨機故障效果
+        function randomGlitchEffect() {
+            const glitchElements = document.querySelectorAll('.contact-title, .form-section-title, .contact-info-title');
             
-            indicators.forEach((indicator, index) => {
-                setTimeout(() => {
-                    indicator.style.opacity = '0';
-                    indicator.style.transform = 'translateX(-20px)';
-                    indicator.style.transition = 'all 0.5s ease';
-                    
-                    setTimeout(() => {
-                        indicator.style.opacity = '1';
-                        indicator.style.transform = 'translateX(0)';
-                    }, 100);
-                }, index * 200);
-            });
-        }
-        
-        // 自動消失訊息
-        function autoHideMessages() {
-            const messages = document.querySelectorAll('.message-status');
-            messages.forEach(message => {
-                setTimeout(() => {
-                    message.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                    message.style.opacity = '0';
-                    message.style.transform = 'translateY(-20px)';
-                    setTimeout(() => {
-                        if (message.parentNode) {
-                            message.remove();
-                        }
-                    }, 500);
-                }, 8000);
-            });
-        }
-        
-        // 聯絡方式懸停效果增強
-        function enhanceContactMethods() {
-            const methods = document.querySelectorAll('.contact-method');
-            
-            methods.forEach(method => {
-                method.addEventListener('mouseenter', function() {
-                    const icon = this.querySelector('.contact-method-icon');
-                    if (icon) {
-                        icon.style.transform = 'scale(1.2) rotate(10deg)';
-                        icon.style.transition = 'transform 0.3s ease';
-                    }
-                });
-                
-                method.addEventListener('mouseleave', function() {
-                    const icon = this.querySelector('.contact-method-icon');
-                    if (icon) {
-                        icon.style.transform = 'scale(1) rotate(0deg)';
-                    }
-                });
-            });
+            setInterval(() => {
+                if (Math.random() > 0.8) {
+                    glitchElements.forEach(el => {
+                        el.style.animation = 'glitch 0.3s ease-in-out';
+                        setTimeout(() => {
+                            el.style.animation = '';
+                        }, 300);
+                    });
+                }
+            }, 4000);
         }
         
         // 頁面載入完成後執行
         document.addEventListener('DOMContentLoaded', function() {
             createParticles();
-            enhanceFormValidation();
-            enhanceFormSubmission();
+            enhanceFormFields();
             enhanceStatusIndicators();
-            autoHideMessages();
-            enhanceContactMethods();
             
-            // 延遲執行打字機效果
-            setTimeout(typewriterEffect, 500);
+            setTimeout(() => {
+                typewriterEffect();
+            }, 500);
             
-            // 定期重新生成粒子效果
+            setTimeout(() => {
+                randomGlitchEffect();
+            }, 2000);
+            
+            // 定期重新創建粒子效果
             setInterval(createParticles, 30000);
+        });
+        
+        // 響應式處理
+        window.addEventListener('resize', function() {
+            clearTimeout(window.resizeTimeout);
+            window.resizeTimeout = setTimeout(createParticles, 300);
         });
     </script>
 </body>

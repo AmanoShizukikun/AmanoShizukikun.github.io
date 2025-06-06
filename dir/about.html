@@ -1,16 +1,10 @@
-<?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-require_once '../include/auth.php';
-?>
 <!DOCTYPE html>
 <html>
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>ABOUT - Digital Chronicles</title>
-        <?php include '../include/style.php'; ?>
+        <link rel="stylesheet" href="../include/style.css">
         <style>
             .hud-container {
                 position: relative;
@@ -778,7 +772,20 @@ require_once '../include/auth.php';
         <div class="animated-bg"></div>
         <div class="particles" id="particles"></div>
         
-        <?php include '../include/menu.php'; ?>
+        <!-- Navigation Menu -->
+        <header>
+            <a href="../index.html">
+                <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
+            </a>
+            <div class="nav-container">
+                <ul class="nav-links">
+                    <li><a href="../dir/about.html">◆ ABOUT</a></li>
+                    <li><a href="../dir/exprience.html">◆ EXPERIENCE</a></li>
+                    <li><a href="../dir/product.html">◆ PRODUCTS</a></li>
+                    <li><a href="../dir/contact.html">◆ CONTACT</a></li>
+                </ul>
+            </div>
+        </header>
         
         <div class="container">
             <div class="hud-container">
@@ -934,7 +941,7 @@ require_once '../include/auth.php';
             </div>
             
             <div class="return-hud">
-                <a href="../index.php" class="cyber-return-button">
+                <a href="../index.html" class="cyber-return-button">
                     <span class="return-icon">◀</span>
                     <span>返回主界面</span>
                 </a>

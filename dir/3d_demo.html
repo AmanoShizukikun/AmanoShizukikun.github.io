@@ -1,16 +1,10 @@
-<?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-require_once '../include/auth.php';
-?>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D NEURAL MATRIX - Cyber Nexus</title>
-    <?php include '../include/style.php'; ?>
+    <link rel="stylesheet" href="../include/style.css">
     <style>
         /* 全域增強效果 */
         body {
@@ -441,7 +435,20 @@ require_once '../include/auth.php';
     <div class="animated-bg"></div>
     <div class="particles" id="particles"></div>
     
-    <?php include '../include/menu.php'; ?>
+    <!-- Header Navigation -->
+    <header>
+        <a href="../index.html">
+            <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
+        </a>
+        <div class="nav-container">
+            <ul class="nav-links">
+                <li><a href="../dir/about.html">◆ ABOUT</a></li>
+                <li><a href="../dir/exprience.html">◆ EXPERIENCE</a></li>
+                <li><a href="../dir/product.html">◆ PRODUCTS</a></li>
+                <li><a href="../dir/contact.html">◆ CONTACT</a></li>
+            </ul>
+        </div>
+    </header>
     
     <div class="container">
         <div class="visualization-hud">
@@ -519,8 +526,8 @@ require_once '../include/auth.php';
                     
                     <div class="control-module">
                         <div class="control-label">
-                            Quantum Coherence
-                            <span class="control-value" id="coherenceValue">95%</span>
+                            Matrix Stability
+                            <span class="control-value">Active</span>
                         </div>
                         <div class="control-note">Auto-stabilizing</div>
                     </div>
@@ -550,7 +557,7 @@ require_once '../include/auth.php';
         </div>
         
         <div class="return-hud">
-            <a href="../index.php" class="cyber-return-btn">
+            <a href="../index.html" class="cyber-return-btn">
                 <span class="btn-icon">◆</span>
                 <span>RETURN TO MAIN TERMINAL</span>
             </a>
@@ -654,7 +661,6 @@ require_once '../include/auth.php';
         const fpsDisplay = document.getElementById('fpsCount');
         const stabilityDisplay = document.getElementById('stability');
         const quantumStateDisplay = document.getElementById('quantumState');
-        const coherenceDisplay = document.getElementById('coherenceValue');
         
         // 神經網絡參數
         let numNeurons = PERFORMANCE_CONFIG.MAX_NEURONS;
@@ -729,31 +735,27 @@ require_once '../include/auth.php';
             neuronElements.length = 0;
             
             for (let i = 0; i < numNeurons; i++) {
-                const distanceMultiplier = Math.random() * 1.0 + 0.8; // 擴大分布範圍
-                const coords = generateSpherePoint(neuralCoreRadius * distanceMultiplier);
-                
+                const spherePos = generateSpherePoint(Math.random() * 300 + 100);
                 const neuron = {
-                    id: i,
-                    x: 0, y: 0, z: 0,
-                    originalX: coords.x,
-                    originalY: coords.y,
-                    originalZ: coords.z,
-                    size: Math.random() * 2.0 + 2.0, // 增大神經元尺寸
+                    x: spherePos.x,
+                    y: spherePos.y,
+                    z: spherePos.z,
+                    size: Math.random() * 8 + 4,
+                    opacity: Math.random() * 0.8 + 0.2,
                     type: generateNeuronTypes(),
-                    activity: Math.random(),
-                    screenX: 0, screenY: 0,
-                    opacity: 0.9,
-                    lastPulse: 0
+                    pulse: Math.random() * Math.PI * 2,
+                    targetX: spherePos.x,
+                    targetY: spherePos.y,
+                    targetZ: spherePos.z
                 };
                 
-                neurons.push(neuron);
-                
-                // 創建神經元DOM元素
                 const neuronElement = document.createElement('div');
-                neuronElement.className = `neuron ${neuron.type !== 'default' ? 'type-' + neuron.type : ''}`;
-                neuronElement.style.width = (neuron.size * 2) + 'px';
-                neuronElement.style.height = (neuron.size * 2) + 'px';
+                neuronElement.className = `neuron type-${neuron.type}`;
+                neuronElement.style.width = neuron.size + 'px';
+                neuronElement.style.height = neuron.size + 'px';
                 neuronsLayer.appendChild(neuronElement);
+                
+                neurons.push(neuron);
                 neuronElements.push(neuronElement);
             }
             
@@ -769,8 +771,7 @@ require_once '../include/auth.php';
             for (let i = 0; i < maxSynapses; i++) {
                 const synapseElement = document.createElement('div');
                 synapseElement.className = 'synapse';
-                synapseElement.style.opacity = '0';
-                synapseElement.style.transition = 'opacity 0.6s ease';
+                synapseElement.style.display = 'none';
                 synapsesLayer.appendChild(synapseElement);
                 synapseElements.push(synapseElement);
             }
@@ -783,24 +784,21 @@ require_once '../include/auth.php';
             const numSynapses = Math.floor(numNeurons * PERFORMANCE_CONFIG.MAX_SYNAPSES_RATIO * density);
             
             for (let i = 0; i < numSynapses && i < synapseElements.length; i++) {
-                const sourceIndex = Math.floor(Math.random() * numNeurons);
-                let targetIndex;
-                let attempts = 0;
+                const neuron1 = neurons[Math.floor(Math.random() * neurons.length)];
+                const neuron2 = neurons[Math.floor(Math.random() * neurons.length)];
                 
-                do {
-                    targetIndex = Math.floor(Math.random() * numNeurons);
-                    attempts++;
-                } while (targetIndex === sourceIndex && attempts < 8); // 增加嘗試次數
-                
-                if (attempts < 8) {
-                    synapses.push({
-                        source: sourceIndex,
-                        target: targetIndex,
-                        strength: Math.random() * 0.5 + 0.5, // 提高連接強度
-                        activity: 0,
-                        fadeIn: true,
-                        age: 0
-                    });
+                if (neuron1 !== neuron2) {
+                    const distance = getDistance3D(neuron1.x, neuron1.y, neuron1.z, neuron2.x, neuron2.y, neuron2.z);
+                    
+                    if (distance < 400) { // 增加連接距離閾值
+                        synapses.push({
+                            from: neuron1,
+                            to: neuron2,
+                            strength: Math.random() * 0.8 + 0.2,
+                            activity: Math.random(),
+                            lastPulse: 0
+                        });
+                    }
                 }
             }
             
@@ -811,84 +809,61 @@ require_once '../include/auth.php';
         function updateNetwork() {
             const now = Date.now();
             if (!isUpdatingNetwork && now - lastNetworkUpdate > networkUpdateInterval) {
-                isUpdatingNetwork = true;
                 lastNetworkUpdate = now;
+                isUpdatingNetwork = true;
                 
-                // 更頻繁的網絡更新
-                const updateCount = Math.floor(synapses.length * 0.15);
-                for (let i = 0; i < updateCount; i++) {
-                    const index = Math.floor(Math.random() * synapses.length);
-                    if (synapses[index]) {
-                        synapses[index].fadeIn = false;
-                    }
-                }
-                
-                // 縮短重新生成時間
                 setTimeout(() => {
-                    synapses = synapses.filter(synapse => synapse.fadeIn);
-                    
-                    const density = parseFloat(densityControl.value);
-                    const newSynapses = Math.floor(updateCount * density);
-                    
-                    for (let i = 0; i < newSynapses; i++) {
-                        const sourceIndex = Math.floor(Math.random() * numNeurons);
-                        let targetIndex;
-                        let attempts = 0;
-                        
-                        do {
-                            targetIndex = Math.floor(Math.random() * numNeurons);
-                            attempts++;
-                        } while (targetIndex === sourceIndex && attempts < 8);
-                        
-                        if (attempts < 8) {
-                            synapses.push({
-                                source: sourceIndex,
-                                target: targetIndex,
-                                strength: Math.random() * 0.5 + 0.5,
-                                activity: 0,
-                                fadeIn: true,
-                                age: 0
-                            });
-                        }
-                    }
-                    
-                    document.getElementById('synapseCount').textContent = synapses.length;
+                    generateNetwork();
                     isUpdatingNetwork = false;
-                }, 1500); // 縮短到1.5秒
+                    
+                    // 更新系統狀態
+                    systemStatus.textContent = 'NETWORK EVOLVED - COMPLEXITY INCREASED';
+                    setTimeout(() => {
+                        updateSystemStatus();
+                    }, 3000);
+                }, 100);
             }
         }
         
         // 增強的數據脈衝
         function createDataPulse(synapse) {
             if (Math.random() < PERFORMANCE_CONFIG.PULSE_CHANCE) {
-                const sourceNeuron = neurons[synapse.source];
-                const targetNeuron = neurons[synapse.target];
-                
                 const pulse = document.createElement('div');
                 pulse.className = 'data-pulse';
                 
-                const startX = sourceNeuron.screenX;
-                const startY = sourceNeuron.screenY;
-                const endX = targetNeuron.screenX;
-                const endY = targetNeuron.screenY;
+                const startX = synapse.from.x;
+                const startY = synapse.from.y;
+                const endX = synapse.to.x;
+                const endY = synapse.to.y;
                 
-                pulse.style.left = startX + 'px';
-                pulse.style.top = startY + 'px';
+                pulse.style.left = (centerX + startX * zoomScale) + 'px';
+                pulse.style.top = (centerY + startY * zoomScale) + 'px';
                 
-                const distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
-                const duration = Math.max(0.2, distance / 400); // 加快脈衝速度
+                synapsesLayer.appendChild(pulse);
                 
-                pulse.style.transition = `transform ${duration}s ease-out, opacity ${duration}s ease-out`;
-                pulse.style.transform = `translate(${endX - startX}px, ${endY - startY}px)`;
-                pulse.style.opacity = '0';
+                // 動畫脈衝移動
+                const duration = 1000;
+                const startTime = Date.now();
                 
-                container.appendChild(pulse);
-                
-                setTimeout(() => {
-                    if (pulse.parentNode) {
+                function animatePulse() {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    const currentX = startX + (endX - startX) * progress;
+                    const currentY = startY + (endY - startY) * progress;
+                    
+                    pulse.style.left = (centerX + currentX * zoomScale) + 'px';
+                    pulse.style.top = (centerY + currentY * zoomScale) + 'px';
+                    pulse.style.opacity = 1 - progress;
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animatePulse);
+                    } else {
                         pulse.remove();
                     }
-                }, duration * 1000);
+                }
+                
+                requestAnimationFrame(animatePulse);
             }
         }
         
@@ -920,6 +895,9 @@ require_once '../include/auth.php';
         densityControl.addEventListener('input', function() {
             const value = this.value;
             densityValue.textContent = value;
+            setTimeout(() => {
+                generateNetwork();
+            }, 100);
         });
         
         // 增強的矩陣更新
@@ -931,6 +909,9 @@ require_once '../include/auth.php';
             }
             frameSkipCounter = 0;
             
+            // 更新旋轉角度
+            rotationAngle += rotationSpeed;
+            
             // 更新神經核心
             neuralCore.style.width = (neuralCoreRadius * 2 * zoomScale) + 'px';
             neuralCore.style.height = (neuralCoreRadius * 2 * zoomScale) + 'px';
@@ -941,77 +922,80 @@ require_once '../include/auth.php';
             const sinA = Math.sin(rotationAngle);
             
             neurons.forEach((neuron, index) => {
-                // 旋轉計算
-                neuron.x = neuron.originalX * cosA + neuron.originalZ * sinA;
-                neuron.z = -neuron.originalX * sinA + neuron.originalZ * cosA;
-                neuron.y = neuron.originalY;
-                
-                // 3D投影 - 增加透視深度
-                const perspective = 1200; // 增加透視距離
-                const scale = perspective / (perspective + neuron.z);
-                neuron.screenX = centerX + neuron.x * scale * zoomScale;
-                neuron.screenY = centerY + neuron.y * scale * zoomScale;
-                
-                // 深度效果
-                const depthFactor = (neuron.z + 400) / 800; // 擴大深度範圍
-                const targetOpacity = Math.max(0.2, Math.min(1, depthFactor));
-                neuron.opacity = smoothTransition(neuron.opacity, targetOpacity, 0.2);
-                
-                const sizeScale = 0.6 + depthFactor * 0.8;
-                const visualSize = neuron.size * sizeScale * zoomScale;
-                
-                // 更新DOM元素
                 const neuronElement = neuronElements[index];
-                neuronElement.style.width = (visualSize * 2) + 'px';
-                neuronElement.style.height = (visualSize * 2) + 'px';
-                neuronElement.style.left = neuron.screenX + 'px';
-                neuronElement.style.top = neuron.screenY + 'px';
-                neuronElement.style.opacity = neuron.opacity * neuronOpacity;
+                if (!neuronElement) return;
+                
+                // 3D旋轉計算
+                const rotatedX = neuron.x * cosA - neuron.z * sinA;
+                const rotatedZ = neuron.x * sinA + neuron.z * cosA;
+                const rotatedY = neuron.y;
+                
+                // 透視投影
+                const perspective = 800;
+                const scale = perspective / (perspective + rotatedZ);
+                
+                const screenX = centerX + rotatedX * scale * zoomScale;
+                const screenY = centerY + rotatedY * scale * zoomScale;
+                
+                // 更新脈衝效果
+                neuron.pulse += 0.1;
+                const pulseEffect = Math.sin(neuron.pulse) * 0.2 + 0.8;
+                
+                neuronElement.style.left = screenX + 'px';
+                neuronElement.style.top = screenY + 'px';
+                neuronElement.style.transform = `translate(-50%, -50%) scale(${scale})`;
+                neuronElement.style.opacity = neuron.opacity * neuronOpacity * pulseEffect;
+                neuronElement.style.zIndex = Math.floor(rotatedZ + 1000);
             });
             
             // 批量更新突觸
             const synapseOpacity = parseFloat(synapseOpacityControl.value);
             synapses.forEach((synapse, index) => {
-                if (index >= synapseElements.length) return;
-                
-                const sourceNeuron = neurons[synapse.source];
-                const targetNeuron = neurons[synapse.target];
                 const synapseElement = synapseElements[index];
+                if (!synapseElement) return;
                 
-                if (synapse.fadeIn) {
-                    const distance = getDistance3D(
-                        sourceNeuron.screenX, sourceNeuron.screenY, 0,
-                        targetNeuron.screenX, targetNeuron.screenY, 0
-                    );
-                    const angle = getAngle(
-                        sourceNeuron.screenX, sourceNeuron.screenY,
-                        targetNeuron.screenX, targetNeuron.screenY
-                    );
-                    
-                    synapseElement.style.left = sourceNeuron.screenX + 'px';
-                    synapseElement.style.top = sourceNeuron.screenY + 'px';
-                    synapseElement.style.width = distance + 'px';
-                    synapseElement.style.height = '3px'; // 增加突觸厚度
-                    synapseElement.style.transform = `rotate(${angle}rad)`;
-                    
-                    const avgDepth = (sourceNeuron.z + targetNeuron.z) / 2;
-                    const depthOpacity = Math.max(0.2, Math.min(1, (avgDepth + 400) / 800));
-                    
-                    const finalOpacity = depthOpacity * synapse.strength * synapseOpacity;
-                    synapseElement.style.opacity = finalOpacity;
-                    
-                    // 提高數據脈衝頻率
-                    if (Math.random() < 0.5) {
-                        createDataPulse(synapse);
-                    }
-                } else {
-                    synapseElement.style.opacity = '0';
-                }
+                // 計算旋轉後的位置
+                const fromRotatedX = synapse.from.x * cosA - synapse.from.z * sinA;
+                const fromRotatedZ = synapse.from.x * sinA + synapse.from.z * cosA;
+                const fromRotatedY = synapse.from.y;
+                
+                const toRotatedX = synapse.to.x * cosA - synapse.to.z * sinA;
+                const toRotatedZ = synapse.to.x * sinA + synapse.to.z * cosA;
+                const toRotatedY = synapse.to.y;
+                
+                // 透視投影
+                const perspective = 800;
+                const fromScale = perspective / (perspective + fromRotatedZ);
+                const toScale = perspective / (perspective + toRotatedZ);
+                
+                const fromScreenX = centerX + fromRotatedX * fromScale * zoomScale;
+                const fromScreenY = centerY + fromRotatedY * fromScale * zoomScale;
+                const toScreenX = centerX + toRotatedX * toScale * zoomScale;
+                const toScreenY = centerY + toRotatedY * toScale * zoomScale;
+                
+                // 計算連線
+                const dx = toScreenX - fromScreenX;
+                const dy = toScreenY - fromScreenY;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx);
+                
+                // 更新突觸樣式
+                synapseElement.style.display = 'block';
+                synapseElement.style.left = fromScreenX + 'px';
+                synapseElement.style.top = fromScreenY + 'px';
+                synapseElement.style.width = length + 'px';
+                synapseElement.style.height = '2px';
+                synapseElement.style.transform = `rotate(${angle}rad)`;
+                synapseElement.style.opacity = synapse.strength * synapseOpacity;
+                synapseElement.style.zIndex = Math.floor((fromRotatedZ + toRotatedZ) / 2 + 500);
+                
+                // 隨機數據脈衝
+                createDataPulse(synapse);
             });
             
             // 隱藏未使用的突觸元素
             for (let i = synapses.length; i < synapseElements.length; i++) {
-                synapseElements[i].style.opacity = '0';
+                synapseElements[i].style.display = 'none';
             }
         }
         
@@ -1019,42 +1003,35 @@ require_once '../include/auth.php';
         function updatePerformance(currentTime) {
             frameCount++;
             if (currentTime - lastTime >= 1000) {
-                fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
-                fpsDisplay.textContent = fps;
+                fps = frameCount;
                 frameCount = 0;
                 lastTime = currentTime;
                 
-                // 動態調整性能（更寬鬆的條件）
-                if (fps < 25 && PERFORMANCE_CONFIG.QUALITY_MODE !== 'low') {
-                    console.log('性能不足，降低品質');
-                    PERFORMANCE_CONFIG.ANIMATION_FRAME_SKIP = 1;
-                    PERFORMANCE_CONFIG.UPDATE_INTERVAL = 50;
-                }
+                fpsDisplay.textContent = fps;
                 
-                // 更新量子信息 - 提高更新頻率
-                if (Math.random() < 0.5) {
-                    const stability = (97 + Math.random() * 3).toFixed(1) + '%';
-                    stabilityDisplay.textContent = stability;
-                    
-                    const coherence = (90 + Math.random() * 10).toFixed(0) + '%';
-                    coherenceDisplay.textContent = coherence;
-                    
-                    const states = ['COHERENT', 'ENTANGLED', 'SUPERPOSITION', 'ENHANCED', 'SYNCHRONIZED'];
-                    quantumStateDisplay.textContent = states[Math.floor(Math.random() * states.length)];
-                }
+                // 更新其他量子信息
+                const stability = 95 + Math.random() * 5;
+                stabilityDisplay.textContent = stability.toFixed(1) + '%';
+                
+                const states = ['COHERENT', 'ENTANGLED', 'SUPERPOSED', 'COLLAPSED'];
+                const randomState = states[Math.floor(Math.random() * states.length)];
+                quantumStateDisplay.textContent = randomState;
             }
         }
         
         // 更新系統狀態
         function updateSystemStatus() {
             const statusMessages = [
-                'NEURAL MATRIX SYNCHRONIZED',
-                'QUANTUM COHERENCE ENHANCED', 
-                'DATA STREAM OPTIMIZED',
-                'SYNAPTIC TRANSMISSION BOOSTED',
-                'CONSCIOUSNESS SIMULATION ADVANCED',
-                'NETWORK DENSITY MAXIMIZED',
-                'NEURAL PATHWAYS OPTIMIZED'
+                'NEURAL MATRIX ACTIVE',
+                'SYNAPTIC OPTIMIZATION IN PROGRESS',
+                'QUANTUM COHERENCE STABLE',
+                'DATA FLOW SYNCHRONIZED',
+                'NETWORK TOPOLOGY EVOLVING',
+                'CONSCIOUSNESS SIMULATION RUNNING',
+                'ARTIFICIAL INTUITION ACTIVATED',
+                'PATTERN RECOGNITION ENHANCED',
+                'NEURAL PLASTICITY ENGAGED',
+                'DEEP LEARNING PROTOCOLS ACTIVE'
             ];
             
             const randomStatus = statusMessages[Math.floor(Math.random() * statusMessages.length)];
@@ -1066,13 +1043,9 @@ require_once '../include/auth.php';
         function animate(currentTime) {
             // 限制更新頻率
             if (currentTime - lastUpdateTime >= PERFORMANCE_CONFIG.UPDATE_INTERVAL) {
-                updatePerformance(currentTime);
-                
-                rotationAngle += rotationSpeed;
-                
-                updateNetwork();
                 updateNeuralMatrix();
-                
+                updatePerformance(currentTime);
+                updateNetwork();
                 lastUpdateTime = currentTime;
             }
             
@@ -1088,22 +1061,11 @@ require_once '../include/auth.php';
                 createSynapsePool();
                 generateNetwork();
                 
-                systemStatus.textContent = 'CONSCIOUSNESS SIMULATION ENHANCED';
+                systemStatus.textContent = 'NEURAL MATRIX ONLINE';
+                animate(0);
                 
-                // 啟動動畫循環
-                requestAnimationFrame(animate);
-                
-                // 定期更新系統狀態 - 縮短間隔
-                setInterval(updateSystemStatus, 5000);
-                
-                // 自動調整網絡密度 - 縮短間隔
-                setInterval(() => {
-                    const currentDensity = parseFloat(densityControl.value);
-                    const variation = (Math.random() - 0.5) * 0.08; // 增加變化幅度
-                    const newDensity = Math.max(0.3, Math.min(1.0, currentDensity + variation));
-                    densityControl.value = newDensity;
-                    densityValue.textContent = newDensity.toFixed(2);
-                }, 15000); // 縮短到15秒
+                // 開始狀態更新循環
+                setInterval(updateSystemStatus, 15000); // 縮短到15秒
             }, 1000);
         }
         

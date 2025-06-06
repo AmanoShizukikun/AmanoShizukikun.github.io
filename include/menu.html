@@ -1,0 +1,77 @@
+<!-- include/menu.html -->
+<header>
+    <a href="../index.html">
+        <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
+    </a>
+    <div class="nav-container">
+        <ul class="nav-links">
+            <li><a href="../dir/about.html">◆ ABOUT</a></li>
+            <li><a href="../dir/exprience.html">◆ EXPERIENCE</a></li>
+            <li><a href="../dir/product.html">◆ PRODUCTS</a></li>
+            <li><a href="../dir/contact.html">◆ CONTACT</a></li>
+        </ul>
+    </div>
+</header>
+
+<script>
+// Menu navigation script for GitHub Pages
+(function() {
+    // 獲取當前頁面路徑
+    const currentPath = window.location.pathname;
+    const menuLinks = document.querySelectorAll('.nav-links a');
+    
+    // 設定當前頁面的高亮效果
+    menuLinks.forEach(link => {
+        const linkPath = new URL(link.href).pathname;
+        if (currentPath.includes(linkPath.split('/').pop().replace('.html', ''))) {
+            link.style.background = 'linear-gradient(45deg, rgba(0, 255, 255, 0.3), rgba(255, 0, 255, 0.3))';
+            link.style.color = '#ffffff';
+            link.style.borderColor = '#00ffff';
+        }
+    });
+    
+    // 自動修正連結路徑（根據當前頁面位置）
+    function fixMenuPaths() {
+        const isInSubdir = currentPath.includes('/dir/');
+        
+        menuLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            
+            // 如果在子目錄中，確保路徑正確
+            if (isInSubdir) {
+                if (!href.startsWith('../')) {
+                    link.setAttribute('href', '../' + href);
+                }
+            } else {
+                // 如果在根目錄中，移除 ../
+                if (href.startsWith('../')) {
+                    link.setAttribute('href', href.replace('../', ''));
+                }
+            }
+        });
+        
+        // 修正首頁連結
+        const homeLink = document.querySelector('header > a');
+        if (homeLink) {
+            if (isInSubdir) {
+                homeLink.setAttribute('href', '../index.html');
+            } else {
+                homeLink.setAttribute('href', 'index.html');
+            }
+        }
+    }
+    
+    fixMenuPaths();
+    
+    // 添加懸停效果
+    menuLinks.forEach(link => {
+        link.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px) scale(1.02)';
+        });
+        
+        link.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+})();
+</script>

@@ -1,16 +1,10 @@
-<?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-require_once '../include/auth.php';
-?>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ORDER PROCESSING - Transaction Terminal</title>
-    <?php include '../include/style.php'; ?>
+    <link rel="stylesheet" href="../include/style.css">
     <style>
         /* 主要訂單處理容器 */
         .order-processing-hud {
@@ -109,17 +103,6 @@ require_once '../include/auth.php';
             letter-spacing: clamp(1px, 0.5vw, 3px);
             font-weight: 900;
             z-index: 2;
-        }
-
-        .order-title::before {
-            content: '◆ ORDER PROCESSING ◆';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            color: #ff00ff;
-            z-index: -1;
-            animation: glitchShift 6s infinite;
         }
 
         @keyframes titleGlitch {
@@ -696,7 +679,20 @@ require_once '../include/auth.php';
     <div class="animated-bg"></div>
     <div class="particles" id="particles"></div>
     
-    <?php include '../include/menu.php'; ?>
+    <!-- Navigation Menu -->
+    <header>
+        <a href="../index.html">
+            <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
+        </a>
+        <div class="nav-container">
+            <ul class="nav-links">
+                <li><a href="../dir/about.html">◆ ABOUT</a></li>
+                <li><a href="../dir/exprience.html">◆ EXPERIENCE</a></li>
+                <li><a href="../dir/product.html">◆ PRODUCTS</a></li>
+                <li><a href="../dir/contact.html">◆ CONTACT</a></li>
+            </ul>
+        </div>
+    </header>
     
     <div class="container">
         <div class="order-processing-hud">
@@ -719,125 +715,26 @@ require_once '../include/auth.php';
                 </div>
             </div>
 
-            <?php
-            if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                // 訂購者資料
-                $name = isset($_POST['name']) ? htmlspecialchars($_POST['name']) : '';
-                $phone = isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : '';
-                $email = isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '';
-                $address = isset($_POST['address']) ? htmlspecialchars($_POST['address']) : '';
-
-                // 產品資料
-                $product_names = isset($_POST['product_name']) ? $_POST['product_name'] : array();
-                $product_prices = isset($_POST['product_price']) ? $_POST['product_price'] : array();
-                $quantities = isset($_POST['quantity']) ? $_POST['quantity'] : array();
-
-                if (!empty($name) && !empty($phone) && !empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL) && !empty($address)) {
-                    $has_products = false;
-                    $total_amount = 0;
-
-                    // 顯示訂購者資訊
-                    echo '<div class="customer-info-hud">';
-                    echo '<h2 class="info-section-title">◆ Customer Information ◆</h2>';
-                    echo '<div class="customer-info-grid">';
-                    echo '<div class="info-item">';
-                    echo '<span class="info-label">Name:</span>';
-                    echo '<span class="info-value">' . $name . '</span>';
-                    echo '</div>';
-                    echo '<div class="info-item">';
-                    echo '<span class="info-label">Phone:</span>';
-                    echo '<span class="info-value">' . $phone . '</span>';
-                    echo '</div>';
-                    echo '<div class="info-item">';
-                    echo '<span class="info-label">Email:</span>';
-                    echo '<span class="info-value">' . $email . '</span>';
-                    echo '</div>';
-                    echo '<div class="info-item">';
-                    echo '<span class="info-label">Address:</span>';
-                    echo '<span class="info-value">' . $address . '</span>';
-                    echo '</div>';
-                    echo '</div>';
-                    echo '</div>';
-
-                    // 顯示產品訂單明細
-                    echo '<div class="order-details-hud">';
-                    echo '<h2 class="info-section-title">◆ Order Details ◆</h2>';
-                    echo '<div class="order-table-container">';
-                    echo '<table class="order-table">';
-                    echo '<thead>';
-                    echo '<tr>';
-                    echo '<th>Product Name</th>';
-                    echo '<th>Unit Price (NT$)</th>';
-                    echo '<th>Quantity</th>';
-                    echo '<th>Subtotal (NT$)</th>';
-                    echo '</tr>';
-                    echo '</thead>';
-                    echo '<tbody>';
-
-                    foreach ($quantities as $key => $quantity) {
-                        $quantity = intval($quantity);
-                        if ($quantity > 0) {
-                            $has_products = true;
-                            $product_name = isset($product_names[$key]) ? htmlspecialchars($product_names[$key]) : '未知產品';
-                            $product_price = isset($product_prices[$key]) ? floatval($product_prices[$key]) : 0;
-                            $subtotal = $product_price * $quantity;
-                            $total_amount += $subtotal;
-
-                            echo '<tr>';
-                            echo '<td>' . $product_name . '</td>';
-                            echo '<td>' . number_format($product_price, 0) . '</td>';
-                            echo '<td>' . $quantity . '</td>';
-                            echo '<td>' . number_format($subtotal, 0) . '</td>';
-                            echo '</tr>';
-                        }
-                    }
-
-                    echo '<tr class="total-row">';
-                    echo '<td colspan="3" style="text-align:right; font-weight: bold;">TOTAL AMOUNT:</td>';
-                    echo '<td style="font-weight: bold;">' . number_format($total_amount, 0) . '</td>';
-                    echo '</tr>';
-                    echo '</tbody>';
-                    echo '</table>';
-                    echo '</div>';
-                    echo '</div>';
-
-                    // 顯示處理結果訊息
-                    if ($has_products) {
-                        echo '<div class="message-hud success-message-hud">';
-                        echo '<span class="message-icon">✓</span>';
-                        echo '<div class="message-text">Transaction Successful!</div>';
-                        echo '<div class="message-subtitle">Order has been successfully processed. Thank you for your purchase!</div>';
-                        echo '<div class="message-subtitle">We will process your order as soon as possible.</div>';
-                        echo '</div>';
-                    } else {
-                        echo '<div class="message-hud poor-message">';
-                        echo '<span class="message-icon">⚠</span>';
-                        echo '<div class="message-text">No Products Selected</div>';
-                        echo '<div class="message-subtitle">我知道你很窮沒錢，但還是請你返回上頁選購商品。</div>';
-                        echo '</div>';
-                    }
-                } else {
-                    echo '<div class="message-hud error-message-hud">';
-                    echo '<span class="message-icon">✗</span>';
-                    echo '<div class="message-text">Data Validation Failed</div>';
-                    echo '<div class="message-subtitle">提交的資料不完整或格式錯誤，請返回上一頁檢查後重新提交。</div>';
-                    echo '</div>';
-                }
-            } else {
-                echo '<div class="message-hud error-message-hud">';
-                echo '<span class="message-icon">⚠</span>';
-                echo '<div class="message-text">Invalid Request</div>';
-                echo '<div class="message-subtitle">Access denied. Please use the proper order form.</div>';
-                echo '</div>';
-            }
-            ?>
+            <!-- 內容區域，將由 JavaScript 動態生成 -->
+            <div id="orderContent">
+                <!-- 載入畫面 -->
+                <div class="message-hud" id="loadingMessage">
+                    <span class="message-icon">⚡</span>
+                    <div class="message-text" style="color: #ffff00; text-shadow: 0 0 15px rgba(255, 255, 0, 0.8);">
+                        Loading Order Data...
+                    </div>
+                    <div class="message-subtitle" style="color: #ffff00;">
+                        Please wait while we process your request.
+                    </div>
+                </div>
+            </div>
 
             <div class="navigation-hud">
-                <a href="product.php" class="cyber-nav-btn">
+                <a href="product.html" class="cyber-nav-btn">
                     <span class="nav-icon">◀</span>
                     <span class="nav-text">Return to Products</span>
                 </a>
-                <a href="../index.php" class="cyber-nav-btn home-btn">
+                <a href="../index.html" class="cyber-nav-btn home-btn">
                     <span class="nav-icon">◆</span>
                     <span class="nav-text">Return to Main</span>
                 </a>
@@ -875,6 +772,211 @@ require_once '../include/auth.php';
                 
                 particlesContainer.appendChild(particle);
             }
+        }
+
+        // 從 URL 參數或 sessionStorage 獲取訂單數據
+        function getOrderData() {
+            const storedData = sessionStorage.getItem('orderData');
+            if (storedData) {
+                try {
+                    return JSON.parse(storedData);
+                } catch (e) {
+                    console.error('Failed to parse order data:', e);
+                    return { error: true, message: 'Invalid order data format' };
+                }
+            }
+
+            // 如果沒有存儲的數據，返回錯誤
+            return {
+                error: true,
+                message: 'No order data found'
+            };
+        }
+
+        // 顯示客戶信息
+        function displayCustomerInfo(customerData) {
+            return `
+                <div class="customer-info-hud">
+                    <h2 class="info-section-title">◆ Customer Information ◆</h2>
+                    <div class="customer-info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Name:</span>
+                            <span class="info-value">${customerData.name || 'N/A'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Phone:</span>
+                            <span class="info-value">${customerData.phone || 'N/A'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Email:</span>
+                            <span class="info-value">${customerData.email || 'N/A'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Address:</span>
+                            <span class="info-value">${customerData.address || 'N/A'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 顯示訂單明細
+        function displayOrderDetails(orderItems, totalAmount) {
+            let tableRows = '';
+            
+            orderItems.forEach(item => {
+                const subtotal = item.price * item.quantity;
+                tableRows += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${formatNumber(item.price)}</td>
+                        <td>${item.quantity}</td>
+                        <td>${formatNumber(subtotal)}</td>
+                    </tr>
+                `;
+            });
+
+            return `
+                <div class="order-details-hud">
+                    <h2 class="info-section-title">◆ Order Details ◆</h2>
+                    <div class="order-table-container">
+                        <table class="order-table">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Unit Price (NT$)</th>
+                                    <th>Quantity</th>
+                                    <th>Subtotal (NT$)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                                <tr class="total-row">
+                                    <td colspan="3" style="text-align:right; font-weight: bold;">TOTAL AMOUNT:</td>
+                                    <td style="font-weight: bold;">${formatNumber(totalAmount)}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 顯示處理結果訊息
+        function displayResultMessage(hasProducts, hasValidCustomer) {
+            if (!hasValidCustomer) {
+                return `
+                    <div class="message-hud error-message-hud">
+                        <span class="message-icon">✗</span>
+                        <div class="message-text">Data Validation Failed</div>
+                        <div class="message-subtitle">提交的資料不完整或格式錯誤，請返回上一頁檢查後重新提交。</div>
+                    </div>
+                `;
+            }
+
+            if (!hasProducts) {
+                return `
+                    <div class="message-hud poor-message">
+                        <span class="message-icon">⚠</span>
+                        <div class="message-text">No Products Selected</div>
+                        <div class="message-subtitle">我知道你很窮沒錢，但還是請你返回上頁選購商品。</div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="message-hud success-message-hud">
+                    <span class="message-icon">✓</span>
+                    <div class="message-text">Transaction Successful!</div>
+                    <div class="message-subtitle">Order has been successfully processed. Thank you for your purchase!</div>
+                    <div class="message-subtitle">We will process your order as soon as possible.</div>
+                </div>
+            `;
+        }
+
+        // 格式化數字
+        function formatNumber(num) {
+            return parseInt(num).toLocaleString();
+        }
+
+        // 驗證客戶數據
+        function validateCustomerData(customerData) {
+            if (!customerData) return false;
+            
+            const { name, phone, email, address } = customerData;
+            
+            // 檢查必填欄位
+            if (!name || !phone || !email || !address) return false;
+            
+            // 驗證 email 格式
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) return false;
+            
+            return true;
+        }
+
+        // 處理訂單數據並顯示結果
+        function processOrderData() {
+            const orderData = getOrderData();
+            const orderContent = document.getElementById('orderContent');
+            const loadingMessage = document.getElementById('loadingMessage');
+
+            // 模擬載入延遲
+            setTimeout(() => {
+                loadingMessage.style.display = 'none';
+
+                if (orderData.error) {
+                    // 顯示錯誤訊息
+                    orderContent.innerHTML = `
+                        <div class="message-hud error-message-hud">
+                            <span class="message-icon">⚠</span>
+                            <div class="message-text">Invalid Request</div>
+                            <div class="message-subtitle">Access denied. Please use the proper order form.</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const { customerData, orderItems } = orderData;
+                
+                // 驗證客戶數據
+                const isValidCustomer = validateCustomerData(customerData);
+                
+                // 檢查是否有產品
+                const hasProducts = orderItems && orderItems.length > 0;
+                
+                // 計算總金額
+                let totalAmount = 0;
+                if (hasProducts) {
+                    totalAmount = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                }
+
+                let content = '';
+
+                // 顯示客戶信息（如果有效）
+                if (isValidCustomer) {
+                    content += displayCustomerInfo(customerData);
+                }
+
+                // 顯示訂單明細（如果有產品）
+                if (hasProducts) {
+                    content += displayOrderDetails(orderItems, totalAmount);
+                }
+
+                // 顯示結果訊息
+                content += displayResultMessage(hasProducts, isValidCustomer);
+
+                orderContent.innerHTML = content;
+
+                // 啟動增強效果
+                setTimeout(() => {
+                    enhanceStatusIndicators();
+                    enhanceTableRows();
+                    enhanceMessages();
+                    animateNumbers();
+                }, 500);
+
+            }, 1500); // 1.5秒載入時間
         }
 
         // 狀態指示器動畫增強
@@ -1077,20 +1179,17 @@ require_once '../include/auth.php';
         // 頁面載入完成後執行
         document.addEventListener('DOMContentLoaded', function() {
             createParticles();
-            enhanceStatusIndicators();
-            enhanceTableRows();
-            enhanceMessages();
+            processOrderData();
             enhanceNavigationButtons();
             
             // 延遲執行的效果
             setTimeout(() => {
                 typewriterEffect();
-                animateNumbers();
-            }, 1000);
+            }, 2000);
             
             setTimeout(() => {
                 randomGlitchEffect();
-            }, 3000);
+            }, 4000);
             
             // 定期重新創建粒子效果
             setInterval(createParticles, 30000);
@@ -1101,6 +1200,27 @@ require_once '../include/auth.php';
             clearTimeout(window.resizeTimeout);
             window.resizeTimeout = setTimeout(createParticles, 300);
         });
+
+        // 添加眨眼動畫 CSS
+        const blinkStyle = document.createElement('style');
+        blinkStyle.textContent = `
+            @keyframes blink {
+                0%, 50% { border-color: transparent; }
+                51%, 100% { border-color: #00ffff; }
+            }
+            
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(blinkStyle);
     </script>
 </body>
 </html>
