@@ -355,6 +355,7 @@
                 <button class="tab" data-tab="features">功能特色</button>
                 <button class="tab" data-tab="docs">技術文檔</button>
                 <button class="tab" data-tab="demo">示範演示</button>
+                <button class="tab" data-tab="derivatives">衍生項目</button>
             </div>
 
             <div class="tab-content active" id="overview">
@@ -369,8 +370,8 @@
                     </p>
                 </div>
 
-                <div class="content-grid" style="margin-top: 2rem;">
-                    <div class="card">
+                <div class="content-grid" style="margin-top: 1rem;">
+                    <div class="card" style="margin-top: 1rem;">
                         <h3 style="color: var(--primary-magenta); margin-bottom: 1rem;">🎯 項目目標</h3>
                         <ul>
                             <li>開發情感感知能力</li>
@@ -379,7 +380,7 @@
                             <li>保護用戶隱私</li>
                         </ul>
                     </div>
-                    <div class="card">
+                    <div class="card" style="margin-top: 1rem;">
                         <h3 style="color: var(--primary-magenta); margin-bottom: 1rem;">🚀 技術棧</h3>
                         <ul>
                             <li>Python 3.10+</li>
@@ -434,6 +435,7 @@
     <script src="../../assets/js/navigation.js"></script>
     <script src="../../assets/js/animations.js"></script>
     <script src="../../assets/js/markdown.js"></script>
+
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -475,47 +477,9 @@
                 docsContent.setAttribute('data-loaded', 'true');
                 
                 // 這裡可以載入真實的 Markdown 文件
-                // await MarkdownRenderer.renderFile('docs/readme.md', docsContent);
+                await MarkdownRenderer.renderFile('docs/README.md', docsContent);
                 
-                // 示例內容
-                const sampleMarkdown = `
-# 技術文檔
 
-## 安裝
-
-\`\`\`bash
-pip install nagato-sakura
-\`\`\`
-
-## 快速開始
-
-\`\`\`python
-from nagato_sakura import NagatoAI
-
-# 初始化 AI
-ai = NagatoAI()
-
-# 開始對話
-response = ai.chat("你好，長門櫻！")
-print(response)
-\`\`\`
-
-## 配置
-
-系統支持以下配置選項：
-
-| 參數 | 類型 | 說明 |
-|------|------|------|
-| model | string | 使用的模型名稱 |
-| temperature | float | 回應的創造性 (0-1) |
-| max_tokens | int | 最大生成長度 |
-
-## API 文檔
-
-更多詳細信息請參考 [完整 API 文檔](https://github.com/example/nagato-sakura)。
-                `;
-
-                docsContent.innerHTML = marked.parse(sampleMarkdown);
                 MarkdownRenderer.addCopyButtons(docsContent);
             }
 
