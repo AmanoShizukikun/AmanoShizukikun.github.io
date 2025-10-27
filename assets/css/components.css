@@ -1,0 +1,596 @@
+/* ============================================
+   Header - 導航欄
+   ============================================ */
+header {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.85), rgba(26, 26, 46, 0.85));
+    backdrop-filter: blur(20px);
+    padding: 15px 0;
+    font-size: 28px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(90deg, var(--accent-cyan), var(--primary-magenta), var(--accent-cyan)) 1;
+    box-shadow: 
+        0 3px 30px rgba(0, 255, 255, 0.4),
+        0 0 100px rgba(0, 255, 255, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    margin: 0;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+    animation: headerScan 5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes headerScan {
+    0%, 100% { 
+        transform: translateX(-100%); 
+        opacity: 0; 
+    }
+    50% { 
+        transform: translateX(100%); 
+        opacity: 1; 
+    }
+}
+
+header a {
+    color: #00ffff !important;
+    text-decoration: none;
+    text-shadow: 0 0 15px #00ffff;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 10;
+    font-family: 'Orbitron', sans-serif;
+}
+
+header a:hover {
+    color: #ffffff !important;
+    text-shadow: 0 0 30px #00ffff, 0 0 50px #ff00ff;
+    animation: glitch 0.3s ease-in-out;
+}
+
+/* 連結樣式增強 - 僅針對header中的標題連結 */
+header > a {
+    color: #00ffff;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+}
+
+header > a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background: linear-gradient(90deg, #00ffff, #ff00ff);
+    transition: width 0.3s ease;
+}
+
+header > a:hover {
+    color: #ff00ff;
+    text-shadow: 0 0 15px rgba(255, 0, 255, 0.8);
+}
+
+header > a:hover::after {
+    width: 100%;
+}
+
+.nav-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    z-index: 10;
+}
+
+.nav-links {
+    font-size: 16px;
+    display: flex;
+    list-style: none;
+    gap: 40px;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-links li {
+    position: relative;
+}
+
+.nav-links a {
+    color: #00ffff !important;
+    text-decoration: none;
+    padding: 12px 25px;
+    border: 2px solid transparent;
+    border-radius: 0;
+    background: linear-gradient(45deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: bold;
+    font-family: 'Rajdhani', sans-serif;
+    position: relative;
+    overflow: hidden;
+    display: block;
+    z-index: 100;
+    pointer-events: auto;
+}
+
+.nav-links a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+    pointer-events: none;
+}
+
+.nav-links a:hover {
+    background: linear-gradient(45deg, rgba(0, 255, 255, 0.3), rgba(255, 0, 255, 0.3));
+    color: #ffffff !important;
+    text-shadow: 0 0 20px #00ffff;
+    box-shadow: 
+        0 0 30px rgba(0, 255, 255, 0.6),
+        inset 0 0 30px rgba(0, 255, 255, 0.2);
+    transform: translateY(-3px) scale(1.05);
+    border: 2px solid #00ffff;
+}
+
+.nav-links a:hover::before {
+    left: 100%;
+}
+
+.nav-links a:hover::before {
+    left: 100%;
+}
+
+.nav-links a:hover::after {
+    opacity: 1;
+}
+
+.nav-links a.active {
+    background: linear-gradient(45deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+    border: 2px solid #00ffff;
+}
+
+/* ============================================
+   Side Navigation - 側邊導航
+   ============================================ */
+.side-nav {
+    position: fixed;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.side-nav a {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 212, 255, 0.5);
+    background: transparent;
+    transition: all var(--transition-normal);
+    position: relative;
+}
+
+.side-nav a::after {
+    content: attr(title);
+    position: absolute;
+    right: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(10, 10, 15, 0.9);
+    color: var(--primary-cyan);
+    padding: 0.1rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all var(--transition-normal);
+    border: 1px solid var(--primary-cyan);
+}
+
+.side-nav a:hover::after,
+.side-nav a.active::after {
+    opacity: 1;
+    right: 30px;
+}
+
+.side-nav a.active,
+.side-nav a:hover {
+    background: var(--primary-cyan);
+    border-color: var(--primary-cyan);
+    box-shadow: var(--neon-glow) var(--primary-cyan);
+}
+
+/* ============================================
+   Buttons - 按鈕組件
+   ============================================ */
+.btn {
+    padding: 15px 30px;
+    background: linear-gradient(45deg, rgba(0, 212, 255, 0.2), rgba(255, 0, 128, 0.2));
+    border: 2px solid var(--primary-cyan);
+    color: var(--primary-cyan);
+    text-decoration: none;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 2px;
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    cursor: pointer;
+    text-shadow: var(--neon-glow) currentColor;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left var(--transition-slow);
+}
+
+.btn:hover {
+    background: linear-gradient(45deg, rgba(0, 212, 255, 0.4), rgba(255, 0, 128, 0.4));
+    border-color: var(--primary-magenta);
+    color: #ffffff;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: var(--neon-glow) var(--primary-cyan);
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn-secondary {
+    border-color: var(--primary-magenta);
+    color: var(--primary-magenta);
+}
+
+.btn-secondary:hover {
+    border-color: var(--accent-cyan);
+    box-shadow: var(--neon-glow) var(--primary-magenta);
+}
+
+/* ============================================
+   Cards - 卡片組件
+   ============================================ */
+.card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(0, 212, 255, 0.3);
+    border-radius: 20px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: all var(--transition-normal);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left var(--transition-slow);
+}
+
+.card:hover {
+    border-color: var(--primary-magenta);
+    transform: translateY(-5px);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        var(--neon-glow) var(--primary-cyan);
+}
+
+.card:hover::before {
+    left: 100%;
+}
+
+/* 項目連結包裝 */
+.project-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+/* 項目卡片變體 */
+.project-card {
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 100%;
+}
+
+.project-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(
+        from 0deg,
+        transparent,
+        rgba(0, 212, 255, 0.35),
+        transparent,
+        rgba(255, 0, 128, 0.35),
+        transparent
+    );
+    animation: projectCardRotate 15s linear infinite;
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.project-card:hover::after {
+    opacity: 0.3;
+}
+
+@keyframes projectCardRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.project-icon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    display: inline-block;
+    animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.project-title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--primary-cyan);
+    margin-bottom: 1rem;
+    text-shadow: var(--neon-glow) var(--primary-cyan);
+}
+
+.project-description {
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+}
+
+.project-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    position: relative;
+    z-index: 5;
+}
+
+.tech-tag {
+    padding: 0.3rem 0.8rem;
+    background: linear-gradient(45deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+    border: 1px solid var(--primary-cyan);
+    border-radius: 15px;
+    color: var(--primary-cyan);
+    font-size: 0.8rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    text-shadow: var(--neon-glow) currentColor;
+    transition: all 0.3s ease;
+}
+
+.tech-tag:hover {
+    background: linear-gradient(45deg, rgba(0, 255, 255, 0.4), rgba(255, 0, 255, 0.4));
+    transform: scale(1.05);
+    box-shadow: var(--neon-glow) rgba(0, 255, 255, 0.5);
+}
+
+/* ============================================
+   Section Headers - 區塊標題
+   ============================================ */
+.section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    color: var(--primary-cyan);
+    margin-bottom: 1rem;
+    letter-spacing: 3px;
+    text-shadow: var(--neon-glow) var(--primary-cyan);
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--primary-cyan), transparent);
+    animation: titleUnderline 3s ease-in-out infinite;
+}
+
+@keyframes titleUnderline {
+    0%, 100% { width: 60%; opacity: 0.5; }
+    50% { width: 80%; opacity: 1; }
+}
+
+.section-subtitle {
+    font-size: 1.2rem;
+    color: var(--primary-magenta);
+    font-weight: 600;
+    letter-spacing: 2px;
+}
+
+/* ============================================
+   移動端選單
+   ============================================ */
+.menu-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+.menu-toggle span {
+    width: 25px;
+    height: 3px;
+    background: var(--primary-cyan);
+    transition: all var(--transition-normal);
+    border-radius: 2px;
+}
+
+.menu-toggle.active span:nth-child(1) {
+    transform: rotate(45deg) translate(8px, 8px);
+}
+
+.menu-toggle.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-toggle.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* 返回頂部按鈕 */
+.back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 50px;
+    height: 50px;
+    background: transparent;
+    color: var(--primary-cyan);
+    border: 2px solid var(--primary-cyan);
+    border-radius: 50%;
+    font-size: 2rem;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-normal);
+    z-index: 999;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.back-to-top:hover {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.6), 0 0 30px rgba(0, 212, 255, 0.4), inset 0 0 10px rgba(0, 212, 255, 0.2);
+}
+
+/* ============================================
+   響應式斷點
+   ============================================ */
+@media (max-width: 1200px) {
+    .side-nav {
+        right: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    header {
+        padding: 1rem 1.5rem;
+    }
+    
+    .menu-toggle {
+        display: flex;
+    }
+    
+    .nav-links {
+        position: fixed;
+        top: 70px;
+        right: -100%;
+        width: 80%;
+        max-width: 300px;
+        height: calc(100vh - 70px);
+        background: rgba(10, 10, 15, 0.95);
+        backdrop-filter: blur(20px);
+        flex-direction: column;
+        padding: 2rem;
+        gap: 0;
+        border-left: 2px solid var(--primary-cyan);
+        transition: right var(--transition-normal);
+        z-index: 999;
+    }
+    
+    .nav-links.active {
+        right: 0;
+    }
+    
+    .nav-links li {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .nav-links a {
+        display: block;
+        padding: 1rem;
+        border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+    }
+    
+    .side-nav {
+        display: none;
+    }
+    
+    .card {
+        padding: 1.5rem;
+    }
+    
+    .back-to-top {
+        bottom: 1rem;
+        right: 1rem;
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+}

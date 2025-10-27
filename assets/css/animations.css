@@ -1,0 +1,693 @@
+/* Loader 容器 */
+.loader-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, 
+        rgba(5, 5, 25, 0.95) 0%, 
+        rgba(20, 5, 40, 0.95) 50%,
+        rgba(5, 20, 40, 0.95) 100%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.8s cubic-bezier(0.8, 0, 0.2, 1), visibility 0.8s ease;
+    overflow: hidden;
+}
+
+.loader-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: gridShift 20s linear infinite;
+    opacity: 0.5;
+}
+
+.loader-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        0deg,
+        transparent 0%,
+        rgba(0, 212, 255, 0.05) 50%,
+        transparent 100%
+    );
+    animation: scanlineDown 3s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes gridShift {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(50px, 50px); }
+}
+
+@keyframes scanlineDown {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
+
+.loader-container.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* 主 Logo 動畫 */
+.loader-logo {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    font-weight: 900;
+    position: relative;
+    z-index: 2;
+    margin-bottom: 0;
+    letter-spacing: 6px;
+    opacity: 0;
+    animation: logoDataRender 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes logoDataRender {
+    0% {
+        opacity: 0;
+        clip-path: inset(0 100% 0 0);
+        filter: brightness(2);
+    }
+    50% {
+        filter: brightness(1.5);
+    }
+    100% {
+        opacity: 1;
+        clip-path: inset(0 0 0 0);
+        filter: brightness(1);
+    }
+}
+
+.loader-logo::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 0;
+    right: 0;
+    bottom: -20px;
+    background: linear-gradient(90deg, 
+        transparent,
+        var(--primary-cyan),
+        var(--primary-magenta),
+        var(--primary-cyan),
+        transparent
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 3s ease infinite;
+    z-index: -1;
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 200% 0; }
+    50% { background-position: -200% 0; }
+}
+
+/* 副標題 */
+.loader-subtitle {
+    position: relative;
+    z-index: 2;
+    font-family: 'Rajdhani', monospace;
+    font-size: 0.9rem;
+    color: var(--primary-cyan);
+    letter-spacing: 4px;
+    opacity: 0;
+    animation: subtitleFadeIn 0.8s ease 0.4s forwards;
+    margin-top: 1rem;
+}
+
+@keyframes subtitleFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 掃描線框 */
+.scan-frame {
+    position: relative;
+    z-index: 2;
+    width: 300px;
+    height: 3px;
+    margin: 1.5rem 0 0 0;
+    background: transparent;
+    border: 1px solid var(--primary-cyan);
+    border-left: 3px solid var(--primary-cyan);
+    border-right: 3px solid var(--primary-magenta);
+    box-shadow: 
+        inset 0 0 10px rgba(0, 212, 255, 0.3),
+        0 0 20px rgba(0, 212, 255, 0.5);
+    animation: framePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes framePulse {
+    0%, 100% {
+        box-shadow: 
+            inset 0 0 10px rgba(0, 212, 255, 0.3),
+            0 0 20px rgba(0, 212, 255, 0.5);
+    }
+    50% {
+        box-shadow: 
+            inset 0 0 15px rgba(255, 0, 128, 0.3),
+            0 0 30px rgba(255, 0, 128, 0.6);
+    }
+}
+
+/* Loading Bar */
+.loading-bar-container {
+    position: relative;
+    z-index: 3;
+    width: 300px;
+    height: 3px;
+    margin: -3px 0 0 0;
+    background: rgba(0, 212, 255, 0.1);
+    border-radius: 0;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+    opacity: 0;
+    animation: barContainerAppear 0.6s ease 0.6s forwards;
+}
+
+@keyframes barContainerAppear {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.loading-bar {
+    height: 100%;
+    background: linear-gradient(90deg, 
+        var(--primary-cyan) 0%,
+        var(--primary-magenta) 50%,
+        var(--primary-cyan) 100%
+    );
+    background-size: 200% 100%;
+    border-radius: 0;
+    animation: barSweep 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards, barGradient 2s linear infinite;
+    box-shadow: 
+        0 0 15px var(--primary-cyan),
+        inset 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+@keyframes barSweep {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+@keyframes barGradient {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
+}
+
+/* Loading Text */
+.loading-text {
+    position: relative;
+    z-index: 2;
+    margin-top: 1.5rem;
+    font-family: 'Rajdhani', monospace;
+    font-size: 0.85rem;
+    color: var(--primary-magenta);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: textGlitchIn 0.8s ease-out 0.8s forwards;
+}
+
+@keyframes textGlitchIn {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+        filter: blur(5px);
+    }
+    60% {
+        opacity: 1;
+        transform: translateY(-2px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+/* 數據流效果 - 科幻感十足 */
+.data-stream {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.data-line {
+    position: absolute;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent 0%,
+        var(--primary-cyan) 20%,
+        var(--primary-magenta) 50%,
+        var(--primary-cyan) 80%,
+        transparent 100%
+    );
+    animation: dataFlowX 2s linear infinite;
+    box-shadow: 0 0 10px currentColor;
+}
+
+@keyframes dataFlowX {
+    0% {
+        left: -100%;
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        left: 100%;
+        opacity: 0;
+    }
+}
+
+/* 數據塊 - 矩陣雨 */
+.data-block {
+    position: absolute;
+    font-family: monospace;
+    font-size: 10px;
+    color: var(--primary-cyan);
+    opacity: 0.3;
+    animation: dataBlockFall 3s linear infinite;
+}
+
+@keyframes dataBlockFall {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.6;
+    }
+    90% {
+        opacity: 0.6;
+    }
+    100% {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+}
+
+
+/* ============================================
+   頁面轉場動畫 - 未來 UI CG 感日本動畫風 (保留備用)
+   ============================================ */
+
+.page-transition {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, 
+        rgba(5, 5, 25, 0.98) 0%, 
+        rgba(20, 5, 40, 0.98) 50%,
+        rgba(5, 20, 40, 0.98) 100%);
+    z-index: 9998;
+    display: none;
+    overflow: hidden;
+}
+
+.page-transition::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        repeating-linear-gradient(
+            0deg,
+            rgba(0, 212, 255, 0.08) 0px,
+            rgba(0, 212, 255, 0.08) 1px,
+            transparent 1px,
+            transparent 2px
+        );
+    animation: transitionScanlines 0.5s linear;
+    pointer-events: none;
+    z-index: 2;
+}
+
+@keyframes transitionScanlines {
+    0% { opacity: 0; transform: scaleY(0); }
+    30% { opacity: 0.8; }
+    100% { opacity: 0.2; transform: scaleY(1); }
+}
+
+.page-transition::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.6) 100%),
+        radial-gradient(ellipse at 20% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 50%, rgba(255, 0, 128, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.page-transition.active {
+    display: block;
+    animation: transitionWarpIn 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.page-transition.out {
+    animation: transitionWarpOut 0.6s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+}
+
+
+/* ============================================
+   元素進入動畫 - 科幻渲染風格
+   ============================================ */
+
+.fade-in-up {
+    opacity: 0;
+    animation: fadeInUpCyber 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.fade-in-up-1 { animation-delay: 0.1s; }
+.fade-in-up-2 { animation-delay: 0.25s; }
+.fade-in-up-3 { animation-delay: 0.4s; }
+.fade-in-up-4 { animation-delay: 0.55s; }
+.fade-in-up-5 { animation-delay: 0.7s; }
+.fade-in-up-6 { animation-delay: 0.85s; }
+
+@keyframes fadeInUpCyber {
+    0% {
+        opacity: 0;
+        transform: translateY(40px);
+        filter: blur(10px) brightness(0.8);
+    }
+    50% {
+        filter: brightness(1.2);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0) brightness(1);
+    }
+}
+
+.fade-in-left {
+    opacity: 0;
+    animation: fadeInLeftCyber 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes fadeInLeftCyber {
+    0% {
+        opacity: 0;
+        transform: translateX(-60px) skewX(10deg);
+        filter: blur(8px);
+    }
+    60% {
+        transform: translateX(5px) skewX(-3deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) skewX(0);
+        filter: blur(0);
+    }
+}
+
+.fade-in-right {
+    opacity: 0;
+    animation: fadeInRightCyber 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes fadeInRightCyber {
+    0% {
+        opacity: 0;
+        transform: translateX(60px) skewX(-10deg);
+        filter: blur(8px);
+    }
+    60% {
+        transform: translateX(-5px) skewX(3deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) skewX(0);
+        filter: blur(0);
+    }
+}
+
+.scale-in {
+    opacity: 0;
+    animation: scaleInCyber 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes scaleInCyber {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) rotate(-10deg);
+        filter: blur(15px) brightness(1.5);
+    }
+    70% {
+        transform: scale(1.1) rotate(2deg);
+        filter: brightness(1.1);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+        filter: blur(0) brightness(1);
+    }
+}
+
+/* ============================================
+   懸浮效果 - Hover Animations
+   ============================================ */
+.hover-lift {
+    transition: transform var(--transition-normal);
+}
+
+.hover-lift:hover {
+    transform: translateY(-10px);
+}
+
+.hover-glow-cyan:hover {
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+}
+
+.hover-glow-magenta:hover {
+    box-shadow: 0 0 30px rgba(255, 0, 128, 0.6);
+}
+
+/* ============================================
+   特殊效果動畫
+   ============================================ */
+
+/* 掃描線效果 */
+.scan-line {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--primary-cyan), transparent);
+    animation: scan 3s ease-in-out infinite;
+}
+
+@keyframes scan {
+    0%, 100% {
+        top: 0%;
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        top: 100%;
+        opacity: 0;
+    }
+}
+
+/* 故障效果 */
+.glitch-effect {
+    position: relative;
+}
+
+.glitch-effect::before,
+.glitch-effect::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+}
+
+.glitch-effect::before {
+    animation: glitchTop 2s infinite;
+    color: var(--primary-cyan);
+    z-index: -1;
+}
+
+.glitch-effect::after {
+    animation: glitchBottom 2.5s infinite;
+    color: var(--primary-magenta);
+    z-index: -2;
+}
+
+@keyframes glitchTop {
+    0%, 90%, 100% {
+        opacity: 0;
+        transform: translate(0);
+    }
+    91% {
+        opacity: 1;
+        transform: translate(-2px, -2px);
+    }
+    93% {
+        opacity: 0;
+        transform: translate(2px, 2px);
+    }
+}
+
+@keyframes glitchBottom {
+    0%, 93%, 100% {
+        opacity: 0;
+        transform: translate(0);
+    }
+    94% {
+        opacity: 1;
+        transform: translate(2px, 2px);
+    }
+    96% {
+        opacity: 0;
+        transform: translate(-2px, -2px);
+    }
+}
+
+/* Glitch 文字效果 - 用於 header hover */
+@keyframes glitch {
+    0% {
+        text-shadow: 0.05em 0 0 #00ffff, -0.05em -0.025em 0 #ff00ff, 0.025em 0.05em 0 #ffff00;
+    }
+    15% {
+        text-shadow: 0.05em 0 0 #00ffff, -0.05em -0.025em 0 #ff00ff, 0.025em 0.05em 0 #ffff00;
+    }
+    16% {
+        text-shadow: -0.05em -0.025em 0 #00ffff, 0.025em 0.025em 0 #ff00ff, -0.05em -0.05em 0 #ffff00;
+    }
+    49% {
+        text-shadow: -0.05em -0.025em 0 #00ffff, 0.025em 0.025em 0 #ff00ff, -0.05em -0.05em 0 #ffff00;
+    }
+    50% {
+        text-shadow: 0.025em 0.05em 0 #00ffff, 0.05em 0 0 #ff00ff, 0 -0.05em 0 #ffff00;
+    }
+    99% {
+        text-shadow: 0.025em 0.05em 0 #00ffff, 0.05em 0 0 #ff00ff, 0 -0.05em 0 #ffff00;
+    }
+    100% {
+        text-shadow: -0.025em 0 0 #00ffff, -0.025em -0.025em 0 #ff00ff, -0.025em -0.05em 0 #ffff00;
+    }
+}
+
+/* 打字機效果 */
+.typewriter {
+    overflow: hidden;
+    border-right: 2px solid var(--primary-cyan);
+    white-space: nowrap;
+    animation: 
+        typing 3.5s steps(40, end),
+        blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent; }
+    50% { border-color: var(--primary-cyan); }
+}
+
+/* 櫻花飄落效果（為長門櫻計畫準備） */
+@keyframes sakuraFall {
+    to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+.sakura {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    background: radial-gradient(circle, var(--accent-pink), transparent);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: sakuraFall 8s linear infinite;
+    opacity: 0.6;
+}
+
+/* ============================================
+   數字計數動畫
+   ============================================ */
+.number-count {
+    display: inline-block;
+    animation: numberPulse 2s ease-in-out;
+}
+
+@keyframes numberPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+        color: var(--primary-cyan);
+    }
+}
+
+/* ============================================
+   滾動觸發動畫
+   ============================================ */
+.scroll-reveal {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.8s ease;
+}
+
+.scroll-reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}

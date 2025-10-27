@@ -1,0 +1,381 @@
+:root {
+    /* 主色調 */
+    --primary-cyan: #00d4ff;
+    --primary-magenta: #ff0080;
+    --accent-cyan: #00ffff;
+    --accent-pink: #ff69b4; 
+    --accent-purple: #8b5cf6;
+    --primary-yellow: #ffff00;
+    
+    /* 背景 */
+    --dark-bg: #0a0a0f;
+    --darker-bg: #050507;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    
+    /* 效果 */
+    --neon-glow: 0 0 20px;
+    
+    /* 字體 */
+    --font-display: 'Orbitron', monospace;
+    --font-body: 'Rajdhani', sans-serif;
+    
+    /* 間距 */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 2rem;
+    --spacing-lg: 4rem;
+    --spacing-xl: 6rem;
+    
+    /* 轉場 */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
+/* ============================================
+   重置與基礎樣式
+   ============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+}
+
+body {
+    font-family: var(--font-body);
+    background: var(--dark-bg);
+    color: #ffffff;
+    overflow-x: hidden;
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+/* ============================================
+   背景系統 - 固定層級 (增強版)
+   ============================================ */
+.cyber-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -10;
+    background: 
+        radial-gradient(circle at 25% 25%, rgba(0, 212, 255, 0.2) 0%, transparent 40%),
+        radial-gradient(circle at 75% 75%, rgba(255, 0, 128, 0.2) 0%, transparent 40%),
+        radial-gradient(circle at 50% 10%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+        linear-gradient(135deg, var(--dark-bg) 0%, var(--darker-bg) 50%, var(--dark-bg) 100%);
+    animation: bgShift 25s ease-in-out infinite, bgPulse 8s ease-in-out infinite;
+}
+
+@keyframes bgShift {
+    0%, 100% { 
+        filter: hue-rotate(0deg) brightness(1);
+        background-position: 0% 0%, 100% 100%, 50% 0%;
+    }
+    25% { 
+        filter: hue-rotate(15deg) brightness(1.1);
+        background-position: 25% 25%, 75% 75%, 75% 25%;
+    }
+    50% { 
+        filter: hue-rotate(30deg) brightness(0.9);
+        background-position: 50% 50%, 50% 50%, 25% 50%;
+    }
+    75% { 
+        filter: hue-rotate(15deg) brightness(1.1);
+        background-position: 75% 25%, 25% 75%, 75% 75%;
+    }
+}
+
+@keyframes bgPulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+}
+
+.grid-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -9;
+    background-image: 
+        linear-gradient(rgba(0, 212, 255, 0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.15) 1px, transparent 1px),
+        radial-gradient(circle at 20% 20%, rgba(255, 0, 128, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px, 40px 40px, 20px 20px;
+    animation: gridMove 35s linear infinite, gridPulse 6s ease-in-out infinite;
+    opacity: 0.4;
+}
+
+@keyframes gridMove {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(20px, 20px) rotate(0.5deg); }
+    50% { transform: translate(40px, 40px) rotate(1deg); }
+    75% { transform: translate(20px, 40px) rotate(0.5deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes gridPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+}
+
+/* ============================================
+   粒子系統容器
+   ============================================ */
+.particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -8;
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--primary-cyan);
+    border-radius: 50%;
+    animation: float 22s infinite linear;
+    box-shadow: 
+        0 0 10px var(--primary-cyan),
+        0 0 20px var(--primary-cyan),
+        0 0 40px var(--primary-cyan);
+    opacity: 0.9;
+}
+
+.particle:nth-child(even) {
+    background: var(--primary-magenta);
+    animation-duration: 20s;
+    box-shadow: 
+        0 0 10px var(--primary-magenta),
+        0 0 20px var(--primary-magenta),
+        0 0 40px var(--primary-magenta);
+}
+
+.particle:nth-child(3n) {
+    background: var(--accent-purple);
+    animation-duration: 18s;
+    box-shadow: 
+        0 0 10px var(--accent-purple),
+        0 0 20px var(--accent-purple),
+        0 0 40px var(--accent-purple);
+    width: 3px;
+    height: 3px;
+}
+
+@keyframes float {
+    0% {
+        transform: translate(0, 100vh) scale(0);
+        opacity: 0;
+    }
+    5% { opacity: 0.8; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    95% { opacity: 0.8; }
+    100% {
+        transform: translate(calc(100vw * var(--random-x, 0.5)), -100px) scale(1);
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   滾動條樣式
+   ============================================ */
+::-webkit-scrollbar {
+    width: 9px;
+    background: transparent;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(10, 10, 15, 0.15);
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(120deg, #00d5ffcb 0%, #ff00c8c7 100%);
+    border-radius: 8px;
+    transition: filter 0.18s ease, transform 0.18s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(120deg, #00d4ff 0%, #ff00c8 100%);
+    border-radius: 8px;
+    transition: filter 0.18s ease, transform 0.18s ease;
+}
+::-webkit-scrollbar-button:vertical:decrement {
+    height: 22px;
+    background: rgba(0, 0, 0, 0.18);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpolygon points='2,7 8,7 5,3' fill='%2300d4ff'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    /* 增大箭頭圖示尺寸 */
+    background-size: 16px 16px;
+    border-radius: 6px;
+    margin: 2px 0;
+    cursor: pointer;
+    transition: filter 0.18s ease;
+}
+
+::-webkit-scrollbar-button:vertical:increment {
+    height: 22px;
+    background: rgba(0, 0, 0, 0.18);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpolygon points='2,3 8,3 5,7' fill='%23ff00c8'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    /* 增大箭頭圖示尺寸 */
+    background-size: 16px 16px;
+    border-radius: 6px;
+    margin: 2px 0;
+    cursor: pointer;
+    transition: filter 0.18s ease;
+}
+
+/* ============================================
+   通用工具類
+   ============================================ */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+}
+
+.section {
+    padding: var(--spacing-xl) 0;
+    min-height: 100vh;
+}
+
+.text-gradient-cyan {
+    color: transparent;
+    background: linear-gradient(45deg, var(--primary-cyan), var(--accent-cyan));
+    background-clip: text;
+    -webkit-background-clip: text;
+}
+
+.text-gradient-magenta {
+    color: transparent;
+    background: linear-gradient(45deg, var(--primary-magenta), var(--primary-yellow));
+    background-clip: text;
+    -webkit-background-clip: text;
+}
+
+.neon-text-cyan {
+    text-shadow: var(--neon-glow) var(--primary-cyan);
+}
+
+.neon-text-magenta {
+    text-shadow: var(--neon-glow) var(--primary-magenta);
+}
+
+/* ============================================
+   通用動畫
+   ============================================ */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(0.98);
+    }
+}
+
+@keyframes glitch {
+    0%, 100% {
+        transform: translate(0);
+        filter: hue-rotate(0deg);
+    }
+    20% {
+        transform: translate(-2px, 2px);
+        filter: hue-rotate(90deg);
+    }
+    40% {
+        transform: translate(2px, -2px);
+        filter: hue-rotate(180deg);
+    }
+    60% {
+        transform: translate(-2px, -2px);
+        filter: hue-rotate(270deg);
+    }
+    80% {
+        transform: translate(2px, 2px);
+        filter: hue-rotate(360deg);
+    }
+}
+
+/* ===== Typewriter effect ===== */
+.typewriter-text {
+    display: inline-block;
+    font-family: var(--font-display);
+    white-space: nowrap;
+    overflow: hidden;
+    vertical-align: bottom;
+}
+
+.typewriter-text::after {
+    content: '';
+    display: inline-block;
+    width: 2px;
+    height: 1.1em;
+    margin-left: 8px;
+    background: var(--primary-cyan);
+    vertical-align: middle;
+    animation: typewriter-caret 1s steps(2, start) infinite;
+    box-shadow: 0 0 8px var(--primary-cyan);
+}
+
+@keyframes typewriter-caret {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* small fade-in while typing to blend with existing entrance animation */
+.hero-subtitle .typewriter-text {
+    opacity: 0;
+    transition: opacity 0.25s ease 0.05s;
+}
+
+.hero-subtitle.typing .typewriter-text {
+    opacity: 1;
+}
+
+/* 當打字完成後移除游標的樣式 (父層加入 .typed) */
+.hero-subtitle.typed .typewriter-text::after {
+    opacity: 0;
+    animation: none;
+    transition: opacity 0.25s ease;
+}
+
+/* 可選：完成後微微移除游標寬度，避免殘影 */
+.hero-subtitle.typed .typewriter-text::after {
+    width: 0 !important;
+    margin-left: 0 !important;
+}
+
+/* 確保已標記為 typed 時文字仍然可見（避免移除 typing 導致 opacity 變回 0） */
+.hero-subtitle.typed .typewriter-text {
+    opacity: 1 !important;
+}
+

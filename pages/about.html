@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="關於天野靜樹">
+    <title>關於我 - 天野靜樹</title>
+    <link rel="icon" href="../assets/images/logo.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/core.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link rel="stylesheet" href="../assets/css/animations.css">
+    <style>
+        .page-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 2rem 4rem;
+            min-height: 100vh;
+        }
+
+        .page-title {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 6vw, 5rem);
+            font-weight: 900;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .page-description {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.2rem;
+            margin-bottom: 4rem;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .content-section {
+            margin-bottom: 3rem;
+        }
+
+        .content-section h2 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            color: var(--primary-cyan);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-cyan);
+        }
+
+        .content-section p {
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 1rem;
+        }
+
+        .info-card {
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-label {
+            color: var(--primary-cyan);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-value {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .skill-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--primary-cyan);
+            border-radius: 8px;
+            transition: all var(--transition-normal);
+        }
+
+        .skill-item:hover {
+            background: var(--primary-cyan);
+            color: var(--dark-bg);
+            transform: translateY(-5px);
+        }
+
+        .skill-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cyber-bg"></div>
+    <div class="grid-overlay"></div>
+    <div class="particles" id="particles"></div>
+
+    <header>
+        <a href="../index.html">
+            <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
+        </a>
+        <div class="nav-container">
+            <ul class="nav-links">
+                <li><a href="about.html">◆ ABOUT</a></li>
+                <li><a href="experience.html">◆ EXPERIENCE</a></li>
+                <li><a href="skills.html">◆ SKILLS</a></li>
+                <li><a href="contact.html">◆ CONTACT</a></li>
+            </ul>
+        </div>
+    </header>
+
+
+    <main class="page-content">
+        <section id="hero">
+            <h1 class="page-title text-gradient-cyan fade-in-up-1">關於我</h1>
+            <p class="page-description fade-in-up-2">About Me / 私について</p>
+        </section>
+
+        <section id="about" class="content-grid">
+            <div class="fade-in-left">
+                <div class="info-card card">
+                    <div class="info-label">姓名 / Name</div>
+                    <div class="info-value">天野靜樹 (Amano Seiki)</div>
+                </div>
+                <div class="info-card card">
+                    <div class="info-label">職業 / Occupation</div>
+                    <div class="info-value">AI Developer / System Architect</div>
+                </div>
+                <div class="info-card card">
+                    <div class="info-label">專長 / Expertise</div>
+                    <div class="info-value">人工智能、深度學習、系統架構</div>
+                </div>
+                <div class="info-card card">
+                    <div class="info-label">位置 / Location</div>
+                    <div class="info-value">Cyber Space / 賽博空間</div>
+                </div>
+            </div>
+
+            <div class="fade-in-right">
+                <div class="card" style="padding: 2rem;">
+                    <h3 style="color: var(--primary-magenta); margin-bottom: 1rem;">個人簡介</h3>
+                    <p>
+                        我是天野靜樹，一位對人工智能充滿熱情的開發者。
+                        致力於探索 AI 技術的邊界，創造能夠真正理解人類的智能系統。
+                    </p>
+                    <p>
+                        在賽博龐克的世界觀中，我相信技術不僅是工具，
+                        更是連接現實與虛擬、人類與機器的橋樑。
+                    </p>
+                    <p>
+                        長門櫻計畫是我的代表作，這個項目融合了自然語言處理、
+                        情感計算和深度學習等多項前沿技術。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="background" class="content-section fade-in-up-3">
+            <h2>核心價值</h2>
+            <div class="content-grid">
+                <div class="card">
+                    <h3 style="color: var(--primary-cyan); margin-bottom: 1rem;">🎯 創新驅動</h3>
+                    <p>
+                        不斷探索新技術，挑戰技術極限，
+                        將前沿研究轉化為實際應用。
+                    </p>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--primary-cyan); margin-bottom: 1rem;">🔧 實用主義</h3>
+                    <p>
+                        技術服務於人，注重用戶體驗，
+                        創造真正有價值的產品。
+                    </p>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--primary-cyan); margin-bottom: 1rem;">🌐 開源精神</h3>
+                    <p>
+                        相信知識共享的力量，
+                        積極參與開源社群，回饋技術社群。
+                    </p>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--primary-cyan); margin-bottom: 1rem;">🚀 持續學習</h3>
+                    <p>
+                        技術日新月異，保持學習熱情，
+                        與時俱進，不斷提升自我。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="interests" class="content-section fade-in-up-4">
+            <h2>技術棧</h2>
+            <div class="skills-grid">
+                <div class="skill-item">
+                    <div class="skill-icon">🐍</div>
+                    <div>Python</div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-icon">🧠</div>
+                    <div>TensorFlow</div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-icon">🔥</div>
+                    <div>PyTorch</div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-icon">⚡</div>
+                    <div>JavaScript</div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-icon">📦</div>
+                    <div>Node.js</div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-icon">🎨</div>
+                    <div>React</div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-icon">🗄️</div>
+                    <div>SQL</div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-icon">🐳</div>
+                    <div>Docker</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="../assets/js/core.js"></script>
+    <script src="../assets/js/navigation.js"></script>
+    <script src="../assets/js/animations.js"></script>
+    <script src="../assets/js/markdown.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            Core.init();
+            Navigation.init();
+            Animations.init();
+            Markdown.init();
+        });
+    </script>
+</body>
+</html>

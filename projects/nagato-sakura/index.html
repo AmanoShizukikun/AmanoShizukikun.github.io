@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="長門櫻計畫 - AI 助手系統">
+    <title>長門櫻計畫 - 天野靜樹</title>
+    <link rel="icon" href="../../assets/images/logo.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/core.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <link rel="stylesheet" href="../../assets/css/animations.css">
+    
+    <!-- Markdown 渲染 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/tokyo-night-dark.min.css">
+    
+    <style>
+        .project-hero {
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 270px 2rem 4rem;
+            position: relative;
+        }
+
+        .project-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(255, 105, 180, 0.2) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .project-icon-large {
+            font-size: 8rem;
+            margin-bottom: 2rem;
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+
+        .project-hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 6vw, 5rem);
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+
+        .project-hero-subtitle {
+            font-size: clamp(1.2rem, 2vw, 1.5rem);
+            color: var(--accent-cyan);
+            margin-bottom: 2rem;
+        }
+
+        .project-meta {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .project-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--primary-cyan);
+            border-radius: 20px;
+        }
+
+        .project-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid rgba(0, 212, 255, 0.2);
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            position: relative;
+        }
+
+        .tab::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-cyan);
+            transition: width var(--transition-normal);
+        }
+
+        .tab.active {
+            color: var(--primary-cyan);
+        }
+
+        .tab.active::after {
+            width: 100%;
+        }
+
+        .tab:hover {
+            color: var(--primary-cyan);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        /* Markdown 內容樣式 */
+        .markdown-content {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.8;
+        }
+
+        .markdown-content h1,
+        .markdown-content h2,
+        .markdown-content h3 {
+            font-family: var(--font-display);
+            color: var(--primary-cyan);
+            margin: 2rem 0 1rem;
+        }
+
+        .markdown-content h1 { font-size: 2.5rem; }
+        .markdown-content h2 { font-size: 2rem; }
+        .markdown-content h3 { font-size: 1.5rem; }
+
+        .markdown-content p {
+            margin-bottom: 1rem;
+        }
+
+        .markdown-content code {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: var(--primary-cyan);
+        }
+
+        .markdown-content pre {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            position: relative;
+        }
+
+        .markdown-content pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        .markdown-content blockquote {
+            border-left: 4px solid var(--primary-cyan);
+            padding-left: 1.5rem;
+            margin: 1.5rem 0;
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+        }
+
+        .markdown-content ul,
+        .markdown-content ol {
+            padding-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .markdown-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .markdown-content a {
+            color: var(--primary-cyan);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color var(--transition-fast);
+        }
+
+        .markdown-content a:hover {
+            border-bottom-color: var(--primary-cyan);
+        }
+
+        .markdown-content img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+
+        .markdown-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        .markdown-content th,
+        .markdown-content td {
+            padding: 0.75rem;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .markdown-content th {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--primary-cyan);
+            font-weight: 600;
+        }
+
+        /* 代碼複製按鈕 */
+        .copy-code-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid var(--primary-cyan);
+            color: var(--primary-cyan);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all var(--transition-fast);
+        }
+
+        .copy-code-btn:hover {
+            background: var(--primary-cyan);
+            color: var(--dark-bg);
+        }
+
+        .copy-code-btn.copied {
+            background: #00ff00;
+            border-color: #00ff00;
+            color: #000;
+        }
+
+        /* 載入動畫 */
+        .loading-spinner {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(0, 212, 255, 0.2);
+            border-top-color: var(--primary-cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 錯誤訊息 */
+        .error-message {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #ff6b6b;
+        }
+
+        .error-message h3 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .error-detail {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-family: monospace;
+        }
+
+        @media (max-width: 768px) {
+            .tabs {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cyber-bg"></div>
+    <div class="grid-overlay"></div>
+    <div class="particles" id="particles"></div>
+
+    <header>
+        <a href="../../index.html">
+            <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
+        </a>
+        <div class="nav-container">
+            <ul class="nav-links">
+                <li><a href="../../pages/about.html">◆ ABOUT</a></li>
+                <li><a href="../../pages/experience.html">◆ EXPERIENCE</a></li>
+                <li><a href="../../pages/skills.html">◆ SKILLS</a></li>
+                <li><a href="../../pages/contact.html">◆ CONTACT</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="project-hero">
+            <div>
+                <div class="project-icon-large">🌸</div>
+                <h1 class="project-hero-title text-gradient-magenta">長門櫻計畫</h1>
+                <p class="project-hero-subtitle">Nagato Sakura Project</p>
+                <div class="project-meta">
+                    <span class="project-meta-item">
+                        <span>📅</span>
+                        <span>2024</span>
+                    </span>
+                    <span class="project-meta-item">
+                        <span>🔧</span>
+                        <span>Python / TensorFlow</span>
+                    </span>
+                    <span class="project-meta-item">
+                        <span>⚡</span>
+                        <span>AI / NLP</span>
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Content Section -->
+        <section class="project-content">
+            <div class="tabs">
+                <button class="tab active" data-tab="overview">專案概述</button>
+                <button class="tab" data-tab="features">功能特色</button>
+                <button class="tab" data-tab="docs">技術文檔</button>
+                <button class="tab" data-tab="demo">示範演示</button>
+            </div>
+
+            <div class="tab-content active" id="overview">
+                <div class="card">
+                    <h2 style="color: var(--primary-cyan); margin-bottom: 1.5rem;">專案簡介</h2>
+                    <p>
+                        長門櫻計畫是一個新一代 AI 助手系統，旨在創造能夠真正理解人類情感和意圖的智能助手。
+                        該項目結合了最先進的自然語言處理、情感計算和深度學習技術。
+                    </p>
+                    <p>
+                        項目名稱"長門櫻"靈感來自於日本櫻花的美麗與短暫，象徵著 AI 與人類互動中的每一刻都應該被珍惜。
+                    </p>
+                </div>
+
+                <div class="content-grid" style="margin-top: 2rem;">
+                    <div class="card">
+                        <h3 style="color: var(--primary-magenta); margin-bottom: 1rem;">🎯 項目目標</h3>
+                        <ul>
+                            <li>開發情感感知能力</li>
+                            <li>實現自然對話交互</li>
+                            <li>提供個性化服務</li>
+                            <li>保護用戶隱私</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3 style="color: var(--primary-magenta); margin-bottom: 1rem;">🚀 技術棧</h3>
+                        <ul>
+                            <li>Python 3.10+</li>
+                            <li>TensorFlow / PyTorch</li>
+                            <li>Transformers</li>
+                            <li>FastAPI</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="features">
+                <div class="card">
+                    <h2 style="color: var(--primary-cyan); margin-bottom: 1.5rem;">核心功能</h2>
+                    <div class="content-grid">
+                        <div style="padding: 1.5rem; background: rgba(0, 212, 255, 0.05); border-radius: 8px;">
+                            <h4 style="color: var(--primary-cyan); margin-bottom: 0.5rem;">💬 自然對話</h4>
+                            <p>基於先進的語言模型，實現流暢自然的對話體驗。</p>
+                        </div>
+                        <div style="padding: 1.5rem; background: rgba(255, 0, 128, 0.05); border-radius: 8px;">
+                            <h4 style="color: var(--primary-magenta); margin-bottom: 0.5rem;">❤️ 情感識別</h4>
+                            <p>通過情感計算技術，理解用戶的情緒狀態。</p>
+                        </div>
+                        <div style="padding: 1.5rem; background: rgba(0, 212, 255, 0.05); border-radius: 8px;">
+                            <h4 style="color: var(--primary-cyan); margin-bottom: 0.5rem;">🧠 上下文記憶</h4>
+                            <p>記住對話歷史，提供連貫的交互體驗。</p>
+                        </div>
+                        <div style="padding: 1.5rem; background: rgba(255, 0, 128, 0.05); border-radius: 8px;">
+                            <h4 style="color: var(--primary-magenta); margin-bottom: 0.5rem;">🎨 個性化</h4>
+                            <p>根據用戶偏好調整回應風格和內容。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="docs">
+                <div class="card markdown-content" id="docsContent">
+                    <p>載入文檔中...</p>
+                </div>
+            </div>
+
+            <div class="tab-content" id="demo">
+                <div class="card">
+                    <h2 style="color: var(--primary-cyan); margin-bottom: 1.5rem;">演示影片與範例</h2>
+                    <p>敬請期待...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="../../assets/js/core.js"></script>
+    <script src="../../assets/js/navigation.js"></script>
+    <script src="../../assets/js/animations.js"></script>
+    <script src="../../assets/js/markdown.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化基礎功能
+            Core.initBackground();
+            Navigation.init();
+            Animations.init();
+            Core.initSmoothScroll();
+            
+            // 初始化 Markdown 渲染器
+            MarkdownRenderer.init();
+
+            // 標籤切換
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetId = tab.getAttribute('data-tab');
+                    
+                    // 移除所有活動狀態
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // 添加活動狀態
+                    tab.classList.add('active');
+                    document.getElementById(targetId).classList.add('active');
+
+                    // 如果切換到文檔標籤且尚未載入，則載入文檔
+                    if (targetId === 'docs' && !document.getElementById('docsContent').hasAttribute('data-loaded')) {
+                        loadDocumentation();
+                    }
+                });
+            });
+
+            // 載入技術文檔（示例）
+            async function loadDocumentation() {
+                const docsContent = document.getElementById('docsContent');
+                docsContent.setAttribute('data-loaded', 'true');
+                
+                // 這裡可以載入真實的 Markdown 文件
+                // await MarkdownRenderer.renderFile('docs/readme.md', docsContent);
+                
+                // 示例內容
+                const sampleMarkdown = `
+# 技術文檔
+
+## 安裝
+
+\`\`\`bash
+pip install nagato-sakura
+\`\`\`
+
+## 快速開始
+
+\`\`\`python
+from nagato_sakura import NagatoAI
+
+# 初始化 AI
+ai = NagatoAI()
+
+# 開始對話
+response = ai.chat("你好，長門櫻！")
+print(response)
+\`\`\`
+
+## 配置
+
+系統支持以下配置選項：
+
+| 參數 | 類型 | 說明 |
+|------|------|------|
+| model | string | 使用的模型名稱 |
+| temperature | float | 回應的創造性 (0-1) |
+| max_tokens | int | 最大生成長度 |
+
+## API 文檔
+
+更多詳細信息請參考 [完整 API 文檔](https://github.com/example/nagato-sakura)。
+                `;
+
+                docsContent.innerHTML = marked.parse(sampleMarkdown);
+                MarkdownRenderer.addCopyButtons(docsContent);
+            }
+
+            // 添加櫻花特效
+            setInterval(() => {
+                if (Math.random() > 0.95) {
+                    Animations.createSakuraEffect(5000);
+                }
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
