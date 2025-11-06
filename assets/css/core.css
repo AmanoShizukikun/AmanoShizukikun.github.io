@@ -41,9 +41,17 @@
     box-sizing: border-box;
 }
 
+/* 防止水平滾動 */
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
 html {
     scroll-behavior: smooth;
     font-size: 16px;
+    overflow-x: hidden;
 }
 
 body {
@@ -53,6 +61,8 @@ body {
     overflow-x: hidden;
     min-height: 100vh;
     line-height: 1.6;
+    position: relative;
+    width: 100%;
 }
 
 /* ============================================
@@ -374,8 +384,88 @@ body {
     margin-left: 0 !important;
 }
 
-/* 確保已標記為 typed 時文字仍然可見（避免移除 typing 導致 opacity 變回 0） */
+/* 確保已標記為 typed 時文字仍然可見(避免移除 typing 導致 opacity 變回 0) */
 .hero-subtitle.typed .typewriter-text {
     opacity: 1 !important;
 }
 
+/* ============================================
+   響應式基礎樣式
+   ============================================ */
+@media (max-width: 1024px) {
+    :root {
+        --spacing-lg: 3rem;
+        --spacing-xl: 4rem;
+    }
+
+    .container {
+        padding: 0 var(--spacing-sm);
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        font-size: 15px;
+        --spacing-md: 1.5rem;
+        --spacing-lg: 2.5rem;
+        --spacing-xl: 3.5rem;
+    }
+
+    body {
+        padding-top: 60px; /* Header height compensation */
+    }
+
+    .container {
+        padding: 0 1rem;
+    }
+
+    .section {
+        padding: 3rem 0;
+        min-height: auto;
+    }
+
+    /* 背景效果優化 */
+    .grid-overlay {
+        background-size: 30px 30px, 30px 30px, 15px 15px;
+        opacity: 0.3;
+    }
+
+    .particle {
+        width: 3px;
+        height: 3px;
+    }
+
+    .particle:nth-child(3n) {
+        width: 2px;
+        height: 2px;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        font-size: 14px;
+        --spacing-sm: 0.75rem;
+        --spacing-md: 1rem;
+        --spacing-lg: 2rem;
+        --spacing-xl: 2.5rem;
+    }
+
+    body {
+        padding-top: 55px;
+    }
+
+    .section {
+        padding: 2rem 0;
+    }
+
+    /* 進一步簡化背景效果 */
+    .grid-overlay {
+        background-size: 25px 25px, 25px 25px, 12px 12px;
+        opacity: 0.25;
+    }
+
+    /* 減少粒子數量 (由 JavaScript 控制) */
+    .particle:nth-child(n+30) {
+        display: none;
+    }
+}

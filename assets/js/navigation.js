@@ -112,17 +112,61 @@ const Navigation = {
 
         if (!menuToggle || !navLinks) return;
 
-        menuToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-            menuToggle.classList.toggle('active');
+        // 創建遮罩層
+        let overlay = document.querySelector('.nav-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.className = 'nav-overlay';
+            document.body.appendChild(overlay);
+        }
+
+        // 切換選單
+        const toggleMenu = (show) => {
+            if (show) {
+                navLinks.classList.add('active');
+                menuToggle.classList.add('active');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden'; // 防止背景滾動
+            } else {
+                navLinks.classList.remove('active');
+                menuToggle.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = ''; // 恢復滾動
+            }
+        };
+
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isActive = navLinks.classList.contains('active');
+            toggleMenu(!isActive);
         });
 
         // 點擊選單項後關閉選單
         navLinks.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
-                navLinks.classList.remove('active');
-                menuToggle.classList.remove('active');
+                toggleMenu(false);
             });
+        });
+
+        // 點擊遮罩關閉選單
+        overlay.addEventListener('click', () => {
+            toggleMenu(false);
+        });
+
+        // 點擊頁面其他地方關閉選單
+        document.addEventListener('click', (e) => {
+            if (!menuToggle.contains(e.target) && 
+                !navLinks.contains(e.target) && 
+                navLinks.classList.contains('active')) {
+                toggleMenu(false);
+            }
+        });
+
+        // ESC 鍵關閉選單
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+                toggleMenu(false);
+            }
         });
     },
 

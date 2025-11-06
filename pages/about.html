@@ -3,259 +3,824 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="關於天野靜樹">
-    <title>關於我 - 天野靜樹</title>
+    <meta name="description" content="天野靜樹 - AI 開發者與系統架構師，長門櫻計畫創始人">
+    <meta name="keywords" content="天野靜樹,AI開發,深度學習,長門櫻計畫,賽博龐克">
+    <title>關於我 - 天野靜樹 | AMANO SHIZUKI</title>
     <link rel="icon" href="../assets/images/logo.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/core.css">
     <link rel="stylesheet" href="../assets/css/components.css">
     <link rel="stylesheet" href="../assets/css/animations.css">
     <style>
+        /* ============================================
+           主要內容區域
+           ============================================ */
         .page-content {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 120px 2rem 4rem;
-            min-height: 100vh;
+            padding: 0;
+            position: relative;
+            z-index: 1;
         }
 
-        .page-title {
+        /* Hero 區域後的內容區塊添加 padding */
+        .profile-grid,
+        .features-grid,
+        .skills-section,
+        .timeline-section {
+            padding: 0 2rem;
+        }
+
+        /* ============================================
+           Hero 區域
+           ============================================ */
+        .hero-section {
+            text-align: center;
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 100px;
+            background: linear-gradient(to bottom, transparent, var(--primary-cyan));
+            animation: scanlineDown 2s ease-in-out infinite;
+        }
+
+        .glitch-title {
             font-family: var(--font-display);
-            font-size: clamp(3rem, 6vw, 5rem);
+            font-size: clamp(2.5rem, 8vw, 6rem);
             font-weight: 900;
             margin-bottom: 1rem;
-            text-align: center;
+            position: relative;
+            display: inline-block;
         }
 
-        .page-description {
-            text-align: center;
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.5rem);
             color: rgba(255, 255, 255, 0.7);
-            font-size: 1.2rem;
-            margin-bottom: 4rem;
+            font-family: var(--font-body);
+            letter-spacing: 0.3em;
+            margin-bottom: 2rem;
         }
 
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 3rem;
-        }
-
-        .content-section {
-            margin-bottom: 3rem;
-        }
-
-        .content-section h2 {
-            font-family: var(--font-display);
-            font-size: 2rem;
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--primary-cyan);
             color: var(--primary-cyan);
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--primary-cyan);
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            letter-spacing: 0.2em;
+            animation: pulse 2s ease-in-out infinite;
         }
 
-        .content-section p {
-            line-height: 1.8;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 1rem;
+        .status-badge::before {
+            content: '●';
+            margin-right: 0.5rem;
+            animation: blink 1s ease-in-out infinite;
         }
 
-        .info-card {
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.3; }
+        }
+
+        /* ============================================
+           個人資料卡片區
+           ============================================ */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2.5rem;
+            margin: 3rem 0;
+        }
+
+        .profile-card {
+            position: relative;
             padding: 1.5rem;
+        }
+
+        .profile-avatar {
+            width: 100%;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(170, 0, 255, 0.2));
+            border: 2px solid var(--primary-cyan);
             margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: relative;
+            z-index: 2;
+        }
+
+        .profile-avatar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 212, 255, 0.1) 0px,
+                transparent 2px,
+                transparent 4px,
+                rgba(0, 212, 255, 0.1) 6px
+            );
+            animation: gridMove 20s linear infinite;
+            z-index: 1;
+        }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            font-family: var(--font-body);
         }
 
         .info-label {
             color: var(--primary-cyan);
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
         }
 
         .info-value {
             color: rgba(255, 255, 255, 0.9);
-            font-size: 1.1rem;
+            text-align: right;
+            font-size: 0.95rem;
         }
 
-        .skills-grid {
+        /* ============================================
+           關於區域
+           ============================================ */
+        .about-content {
+            position: relative;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+            color: var(--primary-magenta);
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, var(--primary-magenta), transparent);
+        }
+
+        .text-block {
+            margin-bottom: 1.2rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 1rem;
+            position: relative;
+            padding-left: 1.2rem;
+        }
+
+        .text-block::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--primary-cyan);
+            font-weight: bold;
+        }
+
+        /* ============================================
+           特色卡片網格
+           ============================================ */
+        .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
         }
 
-        .skill-item {
-            text-align: center;
-            padding: 1rem;
-            background: rgba(0, 212, 255, 0.1);
-            border: 1px solid var(--primary-cyan);
-            border-radius: 8px;
-            transition: all var(--transition-normal);
+        .feature-card {
+            position: relative;
+            padding: 2.5rem;
+            background: rgba(13, 17, 23, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            transition: all 0.3s ease;
         }
 
-        .skill-item:hover {
-            background: var(--primary-cyan);
-            color: var(--dark-bg);
-            transform: translateY(-5px);
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-cyan), var(--primary-magenta));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
         }
 
-        .skill-icon {
-            font-size: 2rem;
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary-cyan);
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .feature-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            color: var(--primary-cyan);
+            margin-bottom: 1rem;
+        }
+
+        .feature-description {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.7;
+            font-size: 1rem;
+        }
+
+        /* ============================================
+           技能條區域
+           ============================================ */
+        .skills-section {
+            margin: 5rem 0;
+        }
+
+        .skills-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .skill-category {
+            padding: 2rem;
+            background: rgba(13, 17, 23, 0.6);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .category-title {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            color: var(--primary-magenta);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .skill-bar-wrapper {
+            margin-bottom: 1.5rem;
+        }
+
+        .skill-name {
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 0.5rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+        }
+
+        .skill-level {
+            color: var(--primary-cyan);
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+        }
+
+        .skill-bar {
+            height: 8px;
+            background: rgba(0, 212, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skill-bar-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary-cyan), var(--primary-magenta));
+            position: relative;
+            transition: width 1.5s ease;
+            width: 0;
+        }
+
+        .skill-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            filter: blur(10px);
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        /* ============================================
+           時間軸
+           ============================================ */
+        .timeline-section {
+            margin: 5rem 0;
+            position: relative;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 3rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary-cyan), var(--primary-magenta));
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: rgba(13, 17, 23, 0.6);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-left: 3px solid var(--primary-cyan);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -3.6rem;
+            top: 2rem;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary-cyan);
+            border: 3px solid var(--dark-bg);
+            box-shadow: 0 0 20px var(--primary-cyan);
+        }
+
+        .timeline-date {
+            font-family: var(--font-display);
+            color: var(--primary-magenta);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.1em;
+        }
+
+        .timeline-title {
+            font-size: 1.5rem;
+            color: var(--primary-cyan);
+            margin-bottom: 1rem;
+            font-family: var(--font-display);
+        }
+
+        .timeline-content {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.7;
+        }
+
+        /* ============================================
+           響應式設計
+           ============================================ */
+        @media (max-width: 1024px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .features-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
         }
 
         @media (max-width: 768px) {
-            .content-grid {
+            .page-content {
+                padding: 0;
+            }
+
+            .hero-section {
+                min-height: auto;
+                padding: 6rem 1rem 4rem;
+            }
+
+            .profile-grid,
+            .features-grid,
+            .skills-section,
+            .timeline-section {
+                padding: 0 1rem;
+            }
+
+            .profile-avatar {
+                font-size: 5rem;
+            }
+
+            .skills-container {
                 grid-template-columns: 1fr;
+            }
+
+            .timeline {
+                padding-left: 2rem;
+            }
+
+            .timeline-item::before {
+                left: -2.6rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-section {
+                padding: 5rem 0.8rem 3rem;
+            }
+
+            .profile-grid,
+            .features-grid,
+            .skills-section,
+            .timeline-section {
+                padding: 0 0.8rem;
+            }
+
+            .glitch-title {
+                font-size: 2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 0.8rem;
+                letter-spacing: 0.2em;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .feature-card,
+            .skill-category,
+            .timeline-item {
+                padding: 1.5rem;
+            }
+
+            .text-block {
+                font-size: 1rem;
+                padding-left: 1rem;
             }
         }
     </style>
 </head>
 <body>
+    <!-- 背景系統 -->
     <div class="cyber-bg"></div>
     <div class="grid-overlay"></div>
     <div class="particles" id="particles"></div>
 
+    <!-- 頂部導航 -->
     <header>
         <a href="../index.html">
             <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
         </a>
+        <button class="menu-toggle" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
         <div class="nav-container">
             <ul class="nav-links">
-                <li><a href="about.html">◆ ABOUT</a></li>
-                <li><a href="experience.html">◆ EXPERIENCE</a></li>
-                <li><a href="skills.html">◆ SKILLS</a></li>
-                <li><a href="contact.html">◆ CONTACT</a></li>
+                <li><a href="about.html" class="active">◆ ABOUT</a></li>
+                <li><a href="../index.html#projects">◆ PROJECTS</a></li>
+                <li><a href="../index.html#skills">◆ SKILLS</a></li>
+                <li><a href="../index.html#contact">◆ CONTACT</a></li>
             </ul>
         </div>
     </header>
 
-
+    <!-- 主要內容 -->
     <main class="page-content">
-        <section id="hero">
-            <h1 class="page-title text-gradient-cyan fade-in-up-1">關於我</h1>
-            <p class="page-description fade-in-up-2">About Me / 私について</p>
+        <!-- Hero 區域 -->
+        <section class="hero-section fade-in-up-1">
+            <h1 class="glitch-title text-gradient-cyan">ABOUT ME</h1>
+            <p class="hero-subtitle">個人檔案 / PERSONAL PROFILE</p>
+            <div class="status-badge">SYSTEM ONLINE</div>
         </section>
 
-        <section id="about" class="content-grid">
-            <div class="fade-in-left">
-                <div class="info-card card">
-                    <div class="info-label">姓名 / Name</div>
-                    <div class="info-value">天野靜樹 (Amano Seiki)</div>
+        <!-- 個人資料卡片 -->
+        <section class="profile-grid">
+            <div class="profile-card card fade-in-left">
+                <div class="profile-avatar">
+                    <img src="../assets/images/avatar.jpg" alt="天野靜樹">
                 </div>
-                <div class="info-card card">
-                    <div class="info-label">職業 / Occupation</div>
-                    <div class="info-value">AI Developer / System Architect</div>
-                </div>
-                <div class="info-card card">
-                    <div class="info-label">專長 / Expertise</div>
-                    <div class="info-value">人工智能、深度學習、系統架構</div>
-                </div>
-                <div class="info-card card">
-                    <div class="info-label">位置 / Location</div>
-                    <div class="info-value">Cyber Space / 賽博空間</div>
-                </div>
+                <ul class="info-list">
+                    <li class="info-item">
+                        <span class="info-label">NAME</span>
+                        <span class="info-value">天野靜樹</span>
+                    </li>
+                    <li class="info-item">
+                        <span class="info-label">ALIAS</span>
+                        <span class="info-value">Amano Shizuki</span>
+                    </li>
+                    <li class="info-item">
+                        <span class="info-label">ROLE</span>
+                        <span class="info-value">AI Developer</span>
+                    </li>
+                    <li class="info-item">
+                        <span class="info-label">SPECIALTY</span>
+                        <span class="info-value">Deep Learning</span>
+                    </li>
+                    <li class="info-item">
+                        <span class="info-label">LOCATION</span>
+                        <span class="info-value">Cyber Space</span>
+                    </li>
+                    <li class="info-item">
+                        <span class="info-label">STATUS</span>
+                        <span class="info-value" style="color: var(--primary-cyan);">Active</span>
+                    </li>
+                </ul>
             </div>
 
-            <div class="fade-in-right">
-                <div class="card" style="padding: 2rem;">
-                    <h3 style="color: var(--primary-magenta); margin-bottom: 1rem;">個人簡介</h3>
-                    <p>
-                        我是天野靜樹，一位對人工智能充滿熱情的開發者。
-                        致力於探索 AI 技術的邊界，創造能夠真正理解人類的智能系統。
-                    </p>
-                    <p>
-                        在賽博龐克的世界觀中，我相信技術不僅是工具，
-                        更是連接現實與虛擬、人類與機器的橋樑。
-                    </p>
-                    <p>
-                        長門櫻計畫是我的代表作，這個項目融合了自然語言處理、
-                        情感計算和深度學習等多項前沿技術。
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <section id="background" class="content-section fade-in-up-3">
-            <h2>核心價值</h2>
-            <div class="content-grid">
-                <div class="card">
-                    <h3 style="color: var(--primary-cyan); margin-bottom: 1rem;">🎯 創新驅動</h3>
-                    <p>
-                        不斷探索新技術，挑戰技術極限，
-                        將前沿研究轉化為實際應用。
-                    </p>
-                </div>
-                <div class="card">
-                    <h3 style="color: var(--primary-cyan); margin-bottom: 1rem;">🔧 實用主義</h3>
-                    <p>
-                        技術服務於人，注重用戶體驗，
-                        創造真正有價值的產品。
-                    </p>
-                </div>
-                <div class="card">
-                    <h3 style="color: var(--primary-cyan); margin-bottom: 1rem;">🌐 開源精神</h3>
-                    <p>
-                        相信知識共享的力量，
-                        積極參與開源社群，回饋技術社群。
-                    </p>
-                </div>
-                <div class="card">
-                    <h3 style="color: var(--primary-cyan); margin-bottom: 1rem;">🚀 持續學習</h3>
-                    <p>
-                        技術日新月異，保持學習熱情，
-                        與時俱進，不斷提升自我。
-                    </p>
-                </div>
+            <div class="about-content card fade-in-right">
+                <h2 class="section-title">WHO AM I</h2>
+                <p class="text-block">
+                    我是天野靜樹，一位熱衷於探索人工智能邊界的開發者。在這個數據與代碼交織的賽博時代，我致力於創造能夠真正理解人類、服務人類的智能系統。
+                </p>
+                <p class="text-block">
+                    我相信技術不僅僅是冰冷的工具，而是連接現實與虛擬、人類與機器之間的溫暖橋樑。每一行代碼都承載著對未來的想像，每一個算法都蘊含著對世界的理解。
+                </p>
+                <p class="text-block">
+                    「長門櫻計畫」是我的代表作品，這個項目融合了自然語言處理、情感計算、深度學習等前沿技術，旨在打造一個真正懂你的 AI 助手。從 Discord Bot 到多模態交互系統，這個項目見證了我對 AI 技術的執著追求。
+                </p>
+                <p class="text-block">
+                    在這個充滿可能性的時代,我願意用技術點亮更多人的生活，讓 AI 不再是遙不可及的科幻概念，而是觸手可及的智能夥伴。
+                </p>
             </div>
         </section>
 
-        <section id="interests" class="content-section fade-in-up-4">
-            <h2>技術棧</h2>
-            <div class="skills-grid">
-                <div class="skill-item">
-                    <div class="skill-icon">🐍</div>
-                    <div>Python</div>
+        <!-- 核心特色 -->
+        <section class="fade-in-up-2">
+            <h2 class="section-title" style="text-align: center; display: block; margin: 3rem auto;">CORE VALUES</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">⚡</span>
+                    <h3 class="feature-title">創新驅動</h3>
+                    <p class="feature-description">
+                        不斷探索前沿技術，將學術研究轉化為實際應用。從 ChatGLM 到多模態 AI，永遠走在技術的最前沿。
+                    </p>
                 </div>
-                <div class="skill-item">
-                    <div class="skill-icon">🧠</div>
-                    <div>TensorFlow</div>
+                <div class="feature-card">
+                    <span class="feature-icon">🎯</span>
+                    <h3 class="feature-title">實用主義</h3>
+                    <p class="feature-description">
+                        技術服務於人。注重用戶體驗，追求簡潔優雅的解決方案，讓複雜的技術變得觸手可及。
+                    </p>
                 </div>
-                <div class="skill-item">
-                    <div class="skill-icon">🔥</div>
-                    <div>PyTorch</div>
+                <div class="feature-card">
+                    <span class="feature-icon">🌐</span>
+                    <h3 class="feature-title">開源精神</h3>
+                    <p class="feature-description">
+                        相信知識共享的力量。積極參與開源社群，將長門櫻計畫開源，讓更多人能夠學習和使用。
+                    </p>
                 </div>
-                <div class="skill-item">
-                    <div class="skill-icon">⚡</div>
-                    <div>JavaScript</div>
+                <div class="feature-card">
+                    <span class="feature-icon">🚀</span>
+                    <h3 class="feature-title">持續進化</h3>
+                    <p class="feature-description">
+                        技術日新月異，保持學習熱情。從 Python 到深度學習框架，不斷擴展技術棧，追求卓越。
+                    </p>
                 </div>
-                <div class="skill-item">
-                    <div class="skill-icon">📦</div>
-                    <div>Node.js</div>
+            </div>
+        </section>
+
+        <!-- 技能體系 -->
+        <section class="skills-section fade-in-up-3">
+            <h2 class="section-title" style="text-align: center; display: block; margin: 0 auto 3rem;">SKILL MATRIX</h2>
+            <div class="skills-container">
+                <div class="skill-category card">
+                    <h3 class="category-title">
+                        <span>🧠</span>
+                        <span>AI & Machine Learning</span>
+                    </h3>
+                    <div class="skill-bar-wrapper">
+                        <div class="skill-name">
+                            <span>Deep Learning</span>
+                            <span class="skill-level">90%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-bar-fill" data-width="90"></div>
+                        </div>
+                    </div>
+                    <div class="skill-bar-wrapper">
+                        <div class="skill-name">
+                            <span>NLP / LLM</span>
+                            <span class="skill-level">85%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-bar-fill" data-width="85"></div>
+                        </div>
+                    </div>
+                    <div class="skill-bar-wrapper">
+                        <div class="skill-name">
+                            <span>PyTorch / TensorFlow</span>
+                            <span class="skill-level">88%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-bar-fill" data-width="88"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="skill-item">
-                    <div class="skill-icon">🎨</div>
-                    <div>React</div>
+
+                <div class="skill-category card">
+                    <h3 class="category-title">
+                        <span>💻</span>
+                        <span>Programming</span>
+                    </h3>
+                    <div class="skill-bar-wrapper">
+                        <div class="skill-name">
+                            <span>Python</span>
+                            <span class="skill-level">95%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-bar-fill" data-width="95"></div>
+                        </div>
+                    </div>
+                    <div class="skill-bar-wrapper">
+                        <div class="skill-name">
+                            <span>JavaScript / Node.js</span>
+                            <span class="skill-level">80%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-bar-fill" data-width="80"></div>
+                        </div>
+                    </div>
+                    <div class="skill-bar-wrapper">
+                        <div class="skill-name">
+                            <span>C++ / CUDA</span>
+                            <span class="skill-level">75%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-bar-fill" data-width="75"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="skill-item">
-                    <div class="skill-icon">🗄️</div>
-                    <div>SQL</div>
+
+                <div class="skill-category card">
+                    <h3 class="category-title">
+                        <span>🛠️</span>
+                        <span>DevOps & Tools</span>
+                    </h3>
+                    <div class="skill-bar-wrapper">
+                        <div class="skill-name">
+                            <span>Docker / Kubernetes</span>
+                            <span class="skill-level">82%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-bar-fill" data-width="82"></div>
+                        </div>
+                    </div>
+                    <div class="skill-bar-wrapper">
+                        <div class="skill-name">
+                            <span>Git / CI/CD</span>
+                            <span class="skill-level">88%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-bar-fill" data-width="88"></div>
+                        </div>
+                    </div>
+                    <div class="skill-bar-wrapper">
+                        <div class="skill-name">
+                            <span>Linux / Shell</span>
+                            <span class="skill-level">85%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-bar-fill" data-width="85"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="skill-item">
-                    <div class="skill-icon">🐳</div>
-                    <div>Docker</div>
+            </div>
+        </section>
+
+        <!-- 發展時間軸 -->
+        <section class="timeline-section fade-in-up-4">
+            <h2 class="section-title" style="text-align: center; display: block; margin: 0 auto 3rem;">DEVELOPMENT TIMELINE</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">2024 - PRESENT</div>
+                    <h3 class="timeline-title">長門櫻計畫 2.0</h3>
+                    <p class="timeline-content">
+                        重構整個系統架構，升級至 GLM4 模型，實現多模態交互。添加語音識別、圖像生成等功能，打造真正的全能 AI 助手。
+                    </p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">2023 - 2024</div>
+                    <h3 class="timeline-title">AI 技術深化</h3>
+                    <p class="timeline-content">
+                        深入研究大型語言模型，掌握 ChatGLM 系列模型的微調與部署。開發多個基於深度學習的應用項目，積累豐富的工程經驗。
+                    </p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">2022 - 2023</div>
+                    <h3 class="timeline-title">長門櫻計畫啟動</h3>
+                    <p class="timeline-content">
+                        正式啟動長門櫻計畫，以 Discord Bot 為起點，開始探索 AI 助手系統的開發。實現基礎的對話、音樂播放等功能。
+                    </p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">2021 - 2022</div>
+                    <h3 class="timeline-title">技術探索期</h3>
+                    <p class="timeline-content">
+                        學習 Python 與深度學習基礎，接觸 TensorFlow、PyTorch 等框架。開始關注自然語言處理領域，為未來的項目打下基礎。
+                    </p>
                 </div>
             </div>
         </section>
     </main>
 
+    <!-- 腳本 -->
     <script src="../assets/js/core.js"></script>
     <script src="../assets/js/navigation.js"></script>
     <script src="../assets/js/animations.js"></script>
-    <script src="../assets/js/markdown.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            Core.init();
+            // 初始化核心系統
+            Core.initBackground();
+            Core.initParticles(document.getElementById('particles'), 70);
             Navigation.init();
             Animations.init();
-            Markdown.init();
+
+            // 技能條動畫
+            const observerOptions = {
+                threshold: 0.5,
+                rootMargin: '0px'
+            };
+
+            const skillObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const skillBars = entry.target.querySelectorAll('.skill-bar-fill');
+                        skillBars.forEach(bar => {
+                            const width = bar.getAttribute('data-width');
+                            setTimeout(() => {
+                                bar.style.width = width + '%';
+                            }, 100);
+                        });
+                        skillObserver.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.skill-category').forEach(category => {
+                skillObserver.observe(category);
+            });
+
+            // 添加故障效果到標題
+            const glitchTitle = document.querySelector('.glitch-title');
+            if (glitchTitle) {
+                setInterval(() => {
+                    if (Math.random() > 0.95) {
+                        Animations.glitchEffect(glitchTitle, 200);
+                    }
+                }, 3000);
+            }
         });
     </script>
 </body>

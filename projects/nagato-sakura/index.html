@@ -298,9 +298,108 @@
         }
 
         @media (max-width: 768px) {
+            .project-hero {
+                padding: 4rem 1rem 3rem;
+                min-height: 50vh;
+            }
+
+            .project-icon-large {
+                font-size: 4rem;
+            }
+
+            .project-hero-title {
+                font-size: 2rem;
+            }
+
+            .project-hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .project-meta {
+                flex-direction: column;
+                gap: 0.8rem;
+                align-items: center;
+            }
+
+            .project-meta-item {
+                font-size: 0.85rem;
+            }
+
+            .project-content {
+                padding: 2rem 1rem;
+            }
+
             .tabs {
                 overflow-x: auto;
                 flex-wrap: nowrap;
+                gap: 0.5rem;
+                padding-bottom: 0.5rem;
+            }
+
+            .tab {
+                flex-shrink: 0;
+                font-size: 0.85rem;
+                padding: 0.6rem 1rem;
+            }
+
+            .markdown-content {
+                padding: 1rem;
+            }
+
+            .markdown-content h1 {
+                font-size: 1.8rem;
+            }
+
+            .markdown-content h2 {
+                font-size: 1.5rem;
+            }
+
+            .markdown-content h3 {
+                font-size: 1.2rem;
+            }
+
+            .markdown-content pre {
+                font-size: 0.85rem;
+            }
+
+            .copy-button {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .project-hero {
+                padding: 3rem 0.8rem 2rem;
+            }
+
+            .project-icon-large {
+                font-size: 3rem;
+            }
+
+            .project-hero-title {
+                font-size: 1.5rem;
+            }
+
+            .project-hero-subtitle {
+                font-size: 0.85rem;
+            }
+
+            .tab {
+                font-size: 0.75rem;
+                padding: 0.5rem 0.8rem;
+            }
+
+            .markdown-content {
+                padding: 0.8rem;
+            }
+
+            .markdown-content h1 {
+                font-size: 1.5rem;
+            }
+
+            .markdown-content h2 {
+                font-size: 1.2rem;
             }
         }
     </style>
@@ -314,6 +413,11 @@
         <a href="../../index.html">
             <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
         </a>
+        <button class="menu-toggle" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
         <div class="nav-container">
             <ul class="nav-links">
                 <li><a href="../../pages/about.html">◆ ABOUT</a></li>

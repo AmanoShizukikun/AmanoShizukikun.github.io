@@ -116,48 +116,20 @@
         .hero-cta {
             display: flex;
             gap: 1.5rem;
-            /* 調整左字高度 */
-            margin-bottom: -8rem;
+            margin-bottom: 2rem;
             flex-wrap: wrap;
             opacity: 0;
             animation: fadeInUp 1s ease 1s forwards;
-        }
-
-        .cta-button {
-            padding: 15px 30px;
-            background: linear-gradient(45deg, rgba(0, 212, 255, 0.2), rgba(255, 0, 128, 0.2));
-            border: 2px solid var(--primary-cyan);
-            color: var(--primary-cyan);
-            text-decoration: none;
-            text-transform: uppercase;
-            font-weight: bold;
-            letter-spacing: 2px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
-            clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
-            transition: all 0.3s ease;
             position: relative;
-            overflow: hidden;
-            text-shadow: var(--neon-glow) currentColor;
+            z-index: 500; /* 提高到 500,確保高於導航遮罩 (999) 之下的所有元素 */
         }
 
-        .cta-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .cta-button:hover {
-            background: linear-gradient(45deg, rgba(0, 212, 255, 0.4), rgba(255, 0, 128, 0.4));
-            border-color: var(--primary-magenta);
-            color: #ffffff;
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: var(--neon-glow) var(--primary-cyan);
+        /* 確保按鈕有正確的 z-index 和可點擊性 */
+        .hero-cta .btn {
+            position: relative;
+            z-index: 500;
+            pointer-events: auto; /* 確保可以點擊 */
+            cursor: pointer;
         }
 
         .cta-button:hover::before {
@@ -179,8 +151,18 @@
         .profile-card {
             padding: 2.5rem;
             margin-bottom: -9.2rem;
+            margin-top: 2rem; /* 增加頂部間距,避免與按鈕重疊 */
             position: relative;
             overflow: hidden;
+            z-index: 1; /* 設置較低的 z-index,確保不會覆蓋按鈕 */
+            pointer-events: none; /* 卡片背景不攔截點擊 */
+        }
+
+        /* 確保卡片內的可互動元素可以點擊 */
+        .profile-card .avatar,
+        .profile-card .contact-link,
+        .profile-card .stat-item {
+            pointer-events: auto;
         }
 
         .profile-card::before {
@@ -414,6 +396,30 @@
             margin: 0 auto;
         }
 
+        /* 確保項目連結可以點擊 */
+        .project-link {
+            text-decoration: none;
+            display: block;
+            position: relative;
+            z-index: 500; /* 提高 z-index */
+            pointer-events: auto;
+            cursor: pointer;
+            -webkit-tap-highlight-color: rgba(0, 212, 255, 0.3); /* 添加觸控反饋 */
+        }
+
+        /* 確保卡片內的所有元素都可點擊 */
+        .project-card {
+            cursor: pointer;
+            pointer-events: auto;
+            position: relative;
+            touch-action: manipulation; /* 優化觸控響應 */
+            z-index: 500;
+        }
+
+        .project-card * {
+            pointer-events: none; /* 讓子元素不攔截點擊,直接傳遞到父層 */
+        }
+
         /* Spacer under projects to ensure the page has enough height for side-nav anchors */
         .projects-spacer {
             height: 80px; /* 可依需求調整 */
@@ -434,11 +440,230 @@
         }
 
         @media (max-width: 768px) {
+            /* Hero Section Mobile */
+            .hero-section {
+                padding: 1rem;
+                min-height: auto;
+            }
+
+            .hero-container {
+                gap: 2rem;
+            }
+
+            .hero-content {
+                padding: 0 1rem;
+            }
+
+            .hero-greeting {
+                font-size: 1rem;
+                letter-spacing: 2px;
+            }
+
+            .hero-content h1 {
+                font-size: 2.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .hero-content .first-name,
+            .hero-content .last-name {
+                margin-bottom: -1rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.2rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .hero-description {
+                font-size: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .hero-cta {
+                margin-bottom: 3rem; /* 增加底部間距,與 profile card 保持足夠距離 */
+                gap: 1rem;
+                flex-direction: row; /* 改為橫向排列 */
+                justify-content: flex-start;
+                z-index: 500; /* 確保在手機上也高於其他元素 */
+            }
+
+            .hero-cta .btn {
+                flex: 1; /* 讓兩個按鈕平均分配空間 */
+                text-align: center;
+                padding: 12px 20px;
+                font-size: 0.85rem;
+                min-height: 44px; /* 確保觸控目標至少 44px */
+                z-index: 500;
+                pointer-events: auto; /* 強制可點擊 */
+                touch-action: manipulation; /* 優化觸控響應 */
+            }
+
+            /* Profile Card Mobile */
+            .profile-card {
+                padding: 1.5rem;
+                margin-bottom: 2rem; /* 增加底部間距 */
+                margin-top: 0; /* 移除頂部間距,因為 hero-cta 已有足夠間距 */
+                pointer-events: none; /* 確保不會攔截上方按鈕的點擊 */
+            }
+
+            .avatar {
+                width: 150px;
+                height: 150px;
+            }
+
+            .profile-name {
+                font-size: 1.3rem;
+            }
+
+            .profile-title {
+                font-size: 0.85rem;
+            }
+
+            .profile-stats {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.8rem;
+            }
+
+            .stat-item {
+                padding: 0.5rem;
+            }
+
+            .stat-number {
+                font-size: 1.1rem;
+            }
+
+            .stat-label {
+                font-size: 0.7rem;
+            }
+
+            /* Projects Section Mobile */
+            .projects-section {
+                padding: 3rem 1rem;
+                margin-top: 2rem; /* 增加與上方內容的間距 */
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .section-subtitle {
+                font-size: 1rem;
+            }
+
             .projects-grid {
                 grid-template-columns: 1fr;
                 padding: 0 1rem;
+                gap: 1.5rem;
             }
-            .projects-spacer { height: 600px; }
+
+            .project-card {
+                padding: 1.5rem;
+            }
+
+            .project-icon {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .project-title {
+                font-size: 1.3rem;
+            }
+
+            .project-description {
+                font-size: 0.95rem;
+                line-height: 1.6;
+            }
+
+            .tech-tag {
+                padding: 0.25rem 0.6rem;
+                font-size: 0.75rem;
+            }
+
+            .projects-spacer { 
+                height: 300px; 
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* Extra Small Devices */
+            .hero-section {
+                padding: 0.5rem;
+            }
+
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .hero-greeting {
+                font-size: 0.9rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .hero-description {
+                font-size: 0.9rem;
+            }
+
+            .hero-cta {
+                flex-direction: row; /* 保持橫向,如果太擠可以改為 column */
+                gap: 0.5rem;
+                margin-bottom: 2rem; /* 確保與下方保持間距 */
+            }
+
+            .hero-cta .btn {
+                padding: 10px 12px;
+                font-size: 0.75rem;
+                letter-spacing: 1px;
+                min-height: 44px; /* 確保觸控目標至少 44px */
+            }
+
+            .profile-card {
+                margin-top: 0; /* 移除頂部間距 */
+                margin-bottom: 2.5rem; /* 增加底部間距 */
+            }
+
+            .avatar {
+                width: 120px;
+                height: 120px;
+            }
+
+            .profile-name {
+                font-size: 1.1rem;
+            }
+
+            .profile-title {
+                font-size: 0.75rem;
+            }
+
+            .stat-number {
+                font-size: 1rem;
+            }
+
+            .stat-label {
+                font-size: 0.65rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .projects-section {
+                margin-top: 1.5rem; /* 小螢幕上稍微減少間距 */
+            }
+
+            .project-card {
+                padding: 1rem;
+            }
+
+            .project-icon {
+                font-size: 2rem;
+            }
+
+            .project-title {
+                font-size: 1.1rem;
+            }
         }
     </style>
 </head>
@@ -453,6 +678,11 @@
         <a href="index.html">
             <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
         </a>
+        <button class="menu-toggle" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
         <div class="nav-container">
             <ul class="nav-links">
                 <li><a href="pages/about.html">◆ ABOUT</a></li>
@@ -687,13 +917,26 @@
             }
 
             // 專案卡片點擊事件 - 使用科幻日本動畫風過場動畫
-            document.querySelectorAll('.project-card').forEach((card, index) => {
-                card.addEventListener('click', function() {
-                    const projectId = this.getAttribute('data-project');
-                    if (projectId) {
+            // 注意: 由於使用了 <a> 標籤,需要在點擊時阻止默認行為並手動導航
+            document.querySelectorAll('.project-link').forEach((link, index) => {
+                link.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    
+                    // 如果是外部連結,直接跳轉不做過場動畫
+                    if (href && (href.startsWith('http://') || href.startsWith('https://'))) {
+                        return; // 讓瀏覽器自然處理外部連結
+                    }
+                    
+                    // 內部連結才做過場動畫
+                    if (href && !href.startsWith('#')) {
+                        e.preventDefault(); // 阻止默認跳轉
+                        
+                        const card = this.querySelector('.project-card');
+                        const projectId = card ? card.getAttribute('data-project') : null;
+                        
                         // 長門櫻計畫特殊效果 - 點擊時觸發櫻花動畫
                         if (projectId === 'nagato-sakura') {
-                            Animations.createSakuraEffect(5000);
+                            Animations.createSakuraEffect(3000);
                         }
                         
                         // 科幻過場效果列表（8種選擇）
@@ -710,10 +953,15 @@
                         
                         const exitType = exitTypes[index % exitTypes.length];
                         
-                        Navigation.pageTransition(
-                            `projects/${projectId}/index.html`,
-                            exitType
-                        );
+                        // 檢查 Navigation.pageTransition 是否存在
+                        if (typeof Navigation !== 'undefined' && Navigation.pageTransition) {
+                            Navigation.pageTransition(href, exitType);
+                        } else {
+                            // 如果沒有過場動畫功能,直接跳轉
+                            setTimeout(() => {
+                                window.location.href = href;
+                            }, 300);
+                        }
                     }
                 });
             });
