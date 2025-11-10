@@ -130,14 +130,27 @@ const Navigation = {
             } else {
                 navLinks.classList.remove('active');
                 menuToggle.classList.remove('active');
-                overlay.classList.remove('active');
-                document.body.style.overflow = ''; // 恢復滾動
+                // 只有當設定面板也關閉時才關閉遮罩
+                const settingsPanel = document.querySelector('.settings-panel');
+                if (!settingsPanel || !settingsPanel.classList.contains('active')) {
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = ''; // 恢復滾動
+                }
             }
         };
 
         menuToggle.addEventListener('click', (e) => {
             e.stopPropagation();
             const isActive = navLinks.classList.contains('active');
+            
+            // 如果設定面板開啟，先關閉它
+            const settingsPanel = document.querySelector('.settings-panel');
+            const settingsToggle = document.querySelector('.settings-toggle');
+            if (settingsPanel && settingsPanel.classList.contains('active')) {
+                settingsPanel.classList.remove('active');
+                if (settingsToggle) settingsToggle.classList.remove('active');
+            }
+            
             toggleMenu(!isActive);
         });
 
@@ -168,6 +181,317 @@ const Navigation = {
                 toggleMenu(false);
             }
         });
+    },
+
+    /**
+     * 設定面板切換
+     */
+    initSettingsPanel() {
+        const settingsToggle = document.querySelector('.settings-toggle');
+        const settingsPanel = document.querySelector('.settings-panel');
+        
+        if (!settingsToggle || !settingsPanel) return;
+
+        // 獲取或創建遮罩層
+        let overlay = document.querySelector('.nav-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.className = 'nav-overlay';
+            document.body.appendChild(overlay);
+        }
+
+        // 切換設定面板
+        const toggleSettings = (show) => {
+            const header = document.querySelector('header');
+            
+            if (show) {
+                settingsPanel.classList.add('active');
+                settingsToggle.classList.add('active');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                
+                // 打開面板時，暫時固定 header
+                if (header) {
+                    header.style.position = 'fixed';
+                    document.body.style.paddingTop = header.offsetHeight + 'px';
+                }
+            } else {
+                settingsPanel.classList.remove('active');
+                settingsToggle.classList.remove('active');
+                // 只有當導航選單也關閉時才關閉遮罩
+                const navLinks = document.querySelector('.nav-links');
+                if (!navLinks || !navLinks.classList.contains('active')) {
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+                
+                // 面板關閉時，恢復 header 到用戶設定的狀態
+                const headerFixed = localStorage.getItem('headerFixed') !== 'false';
+                if (header) {
+                    if (headerFixed) {
+                        header.style.position = 'fixed';
+                        document.body.style.paddingTop = header.offsetHeight + 'px';
+                    } else {
+                        header.style.position = 'relative';
+                        document.body.style.paddingTop = '0';
+                    }
+                }
+            }
+        };
+
+        settingsToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isActive = settingsPanel.classList.contains('active');
+            
+            // 如果導航選單開啟,先關閉它
+            const navLinks = document.querySelector('.nav-links');
+            const menuToggle = document.querySelector('.menu-toggle');
+            if (navLinks && navLinks.classList.contains('active')) {
+                navLinks.classList.remove('active');
+                if (menuToggle) menuToggle.classList.remove('active');
+            }
+            
+            toggleSettings(!isActive);
+        });
+
+        // 點擊遮罩關閉設定面板
+        overlay.addEventListener('click', () => {
+            toggleSettings(false);
+        });
+
+        // 點擊頁面其他地方關閉設定面板
+        document.addEventListener('click', (e) => {
+            if (!settingsToggle.contains(e.target) && 
+                !settingsPanel.contains(e.target) && 
+                settingsPanel.classList.contains('active')) {
+                toggleSettings(false);
+            }
+        });
+
+        // ESC 鍵關閉設定面板
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && settingsPanel.classList.contains('active')) {
+                toggleSettings(false);
+            }
+        });
+
+        // 初始化設定功能
+        this.initSettings();
+    },
+
+    /**
+     * 初始化設定功能
+     */
+    initSettings() {
+        // 從 localStorage 載入設定
+        const loadSettings = () => {
+            return {
+                headerFixed: localStorage.getItem('headerFixed') !== 'false',
+                theme: localStorage.getItem('theme') || 'dark',
+                animationStrength: parseInt(localStorage.getItem('animationStrength')) || 100,
+                soundEnabled: localStorage.getItem('soundEnabled') !== 'false'
+            };
+        };
+
+        // 儲存設定到 localStorage
+        const saveSettings = (settings) => {
+            localStorage.setItem('headerFixed', settings.headerFixed);
+            localStorage.setItem('theme', settings.theme);
+            localStorage.setItem('animationStrength', settings.animationStrength);
+            localStorage.setItem('soundEnabled', settings.soundEnabled);
+        };
+
+        // 應用設定
+        const applySettings = (settings, skipHeaderFixed = false) => {
+            const header = document.querySelector('header');
+            const html = document.documentElement;
+
+            // Header 固定 - 可選擇跳過
+            if (header && !skipHeaderFixed) {
+                if (settings.headerFixed) {
+                    header.style.position = 'fixed';
+                    document.body.style.paddingTop = header.offsetHeight + 'px';
+                } else {
+                    header.style.position = 'relative';
+                    document.body.style.paddingTop = '0';
+                }
+            }
+
+            // 主題模式
+            html.setAttribute('data-theme', settings.theme);
+            if (settings.theme === 'light') {
+                // 淺色模式 - 背景與主要顏色
+                html.style.setProperty('--dark-bg', '#f5f5f7');
+                html.style.setProperty('--darker-bg', '#e8e8ea');
+                html.style.setProperty('--glass-bg', 'rgba(255, 255, 255, 0.7)');
+                
+                // 主題顏色稍微調整以適配淺色背景
+                html.style.setProperty('--primary-cyan', '#0099cc');
+                html.style.setProperty('--primary-magenta', '#cc0066');
+                html.style.setProperty('--accent-cyan', '#00bbdd');
+                html.style.setProperty('--primary-yellow', '#ffbb00');
+                
+                // 文字顏色
+                document.body.style.color = '#1a1a1a';
+                
+                // 調整背景元素
+                const cyberBg = document.querySelector('.cyber-bg');
+                if (cyberBg) {
+                    cyberBg.style.background = `
+                        radial-gradient(circle at 25% 25%, rgba(0, 153, 204, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 75% 75%, rgba(204, 0, 102, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 50% 10%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                        linear-gradient(135deg, #f5f5f7 0%, #e8e8ea 50%, #f5f5f7 100%)
+                    `;
+                }
+                
+                // 調整網格覆蓋層
+                const gridOverlay = document.querySelector('.grid-overlay');
+                if (gridOverlay) {
+                    gridOverlay.style.backgroundImage = `
+                        linear-gradient(rgba(0, 153, 204, 0.1) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0, 153, 204, 0.1) 1px, transparent 1px),
+                        radial-gradient(circle at 20% 20%, rgba(204, 0, 102, 0.08) 1px, transparent 1px)
+                    `;
+                    gridOverlay.style.opacity = '0.5';
+                }
+                
+                // 調整粒子顏色
+                document.querySelectorAll('.particle').forEach((particle, index) => {
+                    if (index % 3 === 0) {
+                        particle.style.background = '#8b5cf6';
+                        particle.style.boxShadow = '0 0 10px #8b5cf6, 0 0 20px #8b5cf6';
+                    } else if (index % 2 === 0) {
+                        particle.style.background = '#cc0066';
+                        particle.style.boxShadow = '0 0 10px #cc0066, 0 0 20px #cc0066';
+                    } else {
+                        particle.style.background = '#0099cc';
+                        particle.style.boxShadow = '0 0 10px #0099cc, 0 0 20px #0099cc';
+                    }
+                    particle.style.opacity = '0.6';
+                });
+            } else {
+                // 深色模式 - 恢復原始設定
+                html.style.setProperty('--dark-bg', '#0a0a0f');
+                html.style.setProperty('--darker-bg', '#050507');
+                html.style.setProperty('--glass-bg', 'rgba(255, 255, 255, 0.05)');
+                
+                html.style.setProperty('--primary-cyan', '#00d4ff');
+                html.style.setProperty('--primary-magenta', '#ff0080');
+                html.style.setProperty('--accent-cyan', '#00ffff');
+                html.style.setProperty('--primary-yellow', '#ffff00');
+                
+                document.body.style.color = '#ffffff';
+                
+                // 恢復背景元素
+                const cyberBg = document.querySelector('.cyber-bg');
+                if (cyberBg) {
+                    cyberBg.style.background = `
+                        radial-gradient(circle at 25% 25%, rgba(0, 212, 255, 0.2) 0%, transparent 40%),
+                        radial-gradient(circle at 75% 75%, rgba(255, 0, 128, 0.2) 0%, transparent 40%),
+                        radial-gradient(circle at 50% 10%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                        linear-gradient(135deg, #0a0a0f 0%, #050507 50%, #0a0a0f 100%)
+                    `;
+                }
+                
+                const gridOverlay = document.querySelector('.grid-overlay');
+                if (gridOverlay) {
+                    gridOverlay.style.backgroundImage = `
+                        linear-gradient(rgba(0, 212, 255, 0.15) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0, 212, 255, 0.15) 1px, transparent 1px),
+                        radial-gradient(circle at 20% 20%, rgba(255, 0, 128, 0.1) 1px, transparent 1px)
+                    `;
+                    gridOverlay.style.opacity = '0.4';
+                }
+                
+                // 恢復粒子顏色
+                document.querySelectorAll('.particle').forEach((particle, index) => {
+                    if (index % 3 === 0) {
+                        particle.style.background = '#8b5cf6';
+                        particle.style.boxShadow = '0 0 10px #8b5cf6, 0 0 20px #8b5cf6, 0 0 40px #8b5cf6';
+                    } else if (index % 2 === 0) {
+                        particle.style.background = '#ff0080';
+                        particle.style.boxShadow = '0 0 10px #ff0080, 0 0 20px #ff0080, 0 0 40px #ff0080';
+                    } else {
+                        particle.style.background = '#00d4ff';
+                        particle.style.boxShadow = '0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 40px #00d4ff';
+                    }
+                    particle.style.opacity = '0.9';
+                });
+            }
+
+            // 動畫強度
+            const animationScale = settings.animationStrength / 100;
+            html.style.setProperty('--animation-duration', `${animationScale}s`);
+            
+            // 調整所有動畫速度
+            document.querySelectorAll('*').forEach(el => {
+                const computedStyle = window.getComputedStyle(el);
+                const animationDuration = computedStyle.animationDuration;
+                if (animationDuration && animationDuration !== '0s') {
+                    const duration = parseFloat(animationDuration);
+                    el.style.animationDuration = `${duration * animationScale}s`;
+                }
+            });
+
+            // 聲音開關 (預留,可在其他功能中使用)
+            window.soundEnabled = settings.soundEnabled;
+        };
+
+        // 初始化設定值
+        const settings = loadSettings();
+        applySettings(settings);
+
+        // Header 固定切換
+        const headerFixedToggle = document.getElementById('headerFixed');
+        if (headerFixedToggle) {
+            headerFixedToggle.classList.toggle('active', settings.headerFixed);
+            headerFixedToggle.addEventListener('click', () => {
+                settings.headerFixed = !settings.headerFixed;
+                headerFixedToggle.classList.toggle('active', settings.headerFixed);
+                saveSettings(settings);
+                // 不立即應用 header 固定變更，等到面板關閉時才應用
+                applySettings(settings, true); // 跳過 headerFixed 的應用
+            });
+        }
+
+        // 主題切換
+        const themeSelect = document.getElementById('themeMode');
+        if (themeSelect) {
+            themeSelect.value = settings.theme;
+            themeSelect.addEventListener('change', (e) => {
+                settings.theme = e.target.value;
+                saveSettings(settings);
+                applySettings(settings);
+            });
+        }
+
+        // 動畫強度
+        const animationSlider = document.getElementById('animationStrength');
+        const animationValue = document.getElementById('animationValue');
+        if (animationSlider && animationValue) {
+            animationSlider.value = settings.animationStrength;
+            animationValue.textContent = settings.animationStrength + '%';
+            animationSlider.addEventListener('input', (e) => {
+                const value = parseInt(e.target.value);
+                animationValue.textContent = value + '%';
+                settings.animationStrength = value;
+                saveSettings(settings);
+                applySettings(settings);
+            });
+        }
+
+        // 聲音開關
+        const soundToggle = document.getElementById('soundEnabled');
+        if (soundToggle) {
+            soundToggle.classList.toggle('active', settings.soundEnabled);
+            soundToggle.addEventListener('click', () => {
+                settings.soundEnabled = !settings.soundEnabled;
+                soundToggle.classList.toggle('active', settings.soundEnabled);
+                saveSettings(settings);
+                applySettings(settings);
+            });
+        }
     },
 
     /**
@@ -233,12 +557,37 @@ const Navigation = {
     },
 
     /**
+     * 計算並設置 header 高度 CSS 變數
+     * 確保側滑選單不會蓋過 header
+     */
+    setHeaderHeightVariable() {
+        const header = document.querySelector('header');
+        if (!header) return;
+
+        // 獲取 header 的實際高度（包括 padding 和邊框）
+        const headerHeight = header.offsetHeight;
+        
+        // 設置 CSS 變數
+        document.documentElement.style.setProperty('--header-height', headerHeight + 'px');
+        
+        // 在窗口大小改變時重新計算
+        const updateHeaderHeight = Core.debounce(() => {
+            const newHeight = header.offsetHeight;
+            document.documentElement.style.setProperty('--header-height', newHeight + 'px');
+        }, 200);
+        
+        window.addEventListener('resize', updateHeaderHeight);
+    },
+
+    /**
      * 初始化所有導航功能
      */
     init() {
+        this.setHeaderHeightVariable(); // 首先設置 header 高度
         this.initTopNav();
         this.initSideNav();
         this.initMobileMenu();
+        this.initSettingsPanel();
         this.initBackToTop();
         this.generateBreadcrumb();
     }

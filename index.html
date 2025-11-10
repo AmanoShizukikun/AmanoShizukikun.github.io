@@ -20,6 +20,58 @@
     <link rel="stylesheet" href="assets/css/animations.css">
     
     <style>
+        /* 淺色模式全域樣式 */
+        [data-theme="light"] .hero-description {
+            color: rgba(26, 26, 26, 0.9);
+        }
+
+        [data-theme="light"] .profile-card {
+            background: rgba(255, 255, 255, 0.85);
+            border: 2px solid rgba(0, 153, 204, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .profile-name {
+            color: var(--primary-magenta);
+        }
+
+        [data-theme="light"] .profile-title {
+            color: var(--primary-cyan);
+        }
+
+        [data-theme="light"] .stat-item {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(0, 153, 204, 0.2);
+        }
+
+        [data-theme="light"] .stat-item:hover {
+            background: rgba(0, 153, 204, 0.1);
+            border-color: var(--primary-cyan);
+        }
+
+        [data-theme="light"] .stat-label {
+            color: rgba(26, 26, 26, 0.7);
+        }
+
+        [data-theme="light"] .contact-link {
+            background: rgba(0, 153, 204, 0.1);
+            border: 1px solid var(--primary-cyan);
+            color: var(--primary-cyan);
+        }
+
+        [data-theme="light"] .contact-link:hover {
+            background: rgba(0, 153, 204, 0.2);
+            box-shadow: 0 0 20px rgba(0, 153, 204, 0.4);
+        }
+
+        [data-theme="light"] .project-description {
+            color: rgba(26, 26, 26, 0.8);
+        }
+
+        [data-theme="light"] .section-subtitle {
+            color: var(--primary-magenta);
+        }
+        
         /* Hero Section */
         .hero-section {
             min-height: 100vh;
@@ -47,7 +99,7 @@
         }
 
         .hero-greeting {
-            margin-top: 7.5rem;
+            margin-top: -4rem;
             font-family: 'Rajdhani', sans-serif;
             font-size: clamp(1.2rem, 2vw, 1.5rem);
             color: var(--primary-cyan);
@@ -128,6 +180,8 @@
             position: relative;
             pointer-events: auto;
             cursor: pointer;
+            min-width: 180px; /* 設定最小寬度,確保按鈕大小一致 */
+            text-align: center; /* 文字置中 */
         }
 
         .cta-button:hover::before {
@@ -149,7 +203,7 @@
         .profile-card {
             padding: 2.5rem;
             margin-bottom: -9.2rem;
-            margin-top: -3.5rem; /* 增加頂部間距,避免與按鈕重疊 */
+            margin-top: -13rem; /* 增加頂部間距,避免與按鈕重疊 */
             position: relative;
             overflow: hidden;
             z-index: 1; /* 設置較低的 z-index,確保不會覆蓋按鈕 */
@@ -579,7 +633,7 @@
             }
 
             .projects-spacer { 
-                height: 300px; 
+                height: 20px; /* 手機版減少空白 */
             }
         }
 
@@ -664,6 +718,10 @@
             .project-title {
                 font-size: 1.1rem;
             }
+
+            .projects-spacer { 
+                height: 10px; /* 超小螢幕進一步減少空白 */
+            }
         }
     </style>
 </head>
@@ -678,20 +736,126 @@
         <a href="index.html">
             <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
         </a>
-        <button class="menu-toggle" aria-label="Toggle menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
         <div class="nav-container">
             <ul class="nav-links">
-                <li><a href="pages/about.html">◆ ABOUT</a></li>
-                <li><a href="pages/experience.html">◆ EXPERIENCE</a></li>
-                <li><a href="pages/skills.html">◆ SKILLS</a></li>
-                <li><a href="pages/contact.html">◆ CONTACT</a></li>
+                <div class="nav-header">
+                    <h2 class="nav-title">選單導航</h2>
+                </div>
+                
+                <div class="nav-section">
+                    <h3 class="nav-section-title">主要頁面</h3>
+                    <li><a href="pages/about.html">◆ ABOUT</a></li>
+                    <li><a href="pages/experience.html">◆ EXPERIENCE</a></li>
+                    <li><a href="pages/skills.html">◆ SKILLS</a></li>
+                    <li><a href="pages/contact.html">◆ CONTACT</a></li>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-section-title">更多連結</h3>
+                    <li>
+                        <a href="https://www.youtube.com/@AmanoShizukikun" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
+                            YouTube
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/AmanoShizukikun" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                            GitHub
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://discord.gg/yourdiscord" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                            </svg>
+                            Discord
+                        </a>
+                    </li>
+                    <li>
+                        <a href="mailto:3b017128@gm.student.ncut.edu.tw" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            Email
+                        </a>
+                    </li>
+                </div>
             </ul>
         </div>
+        <div class="header-actions">
+            <button class="settings-toggle" aria-label="Settings"></button>
+            <button class="menu-toggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
     </header>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel">
+        <div class="settings-header">
+            <h2 class="settings-title">系統設定</h2>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="settings-section-title">顯示設定</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>固定導航欄</span>
+                    <span class="setting-description">保持導航欄在頂部固定</span>
+                </div>
+                <div class="toggle-switch" id="headerFixed"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>主題模式</span>
+                    <span class="setting-description">切換深色/淺色模式</span>
+                </div>
+                <div class="select-control">
+                    <select id="themeMode">
+                        <option value="dark">深色模式</option>
+                        <option value="light">淺色模式</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="settings-section-title">效能設定</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>動畫強度</span>
+                    <span class="setting-description">調整頁面動畫效果強度</span>
+                </div>
+                <div class="slider-control">
+                    <div class="slider-value" id="animationValue">100%</div>
+                    <input type="range" class="slider-range" id="animationStrength" min="0" max="100" value="100" step="10">
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="settings-section-title">音效設定</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>音效開關</span>
+                    <span class="setting-description">啟用/關閉互動音效</span>
+                </div>
+                <div class="toggle-switch active" id="soundEnabled"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- Side Navigation -->
     <div class="side-nav">
@@ -729,7 +893,7 @@
                             <img src="assets/images/avatar.jpg" alt="天野靜樹" class="avatar">
                         </div>
                         <h2 class="profile-name">天野靜樹</h2>
-                        <p class="profile-title">國立勤益科技大學 - 四技日間部資訊工程系 - 研修</p>
+                        <p class="profile-title">國立勤益科技大學 - 四技日間部資訊工程系 - 四訊延</p>
                         <div class="profile-stats">
                             <div class="stat-item">
                                 <div class="stat-number" data-target="12" data-suffix="+">0</div>

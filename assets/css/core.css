@@ -30,6 +30,9 @@
     --transition-fast: 0.2s ease;
     --transition-normal: 0.3s ease;
     --transition-slow: 0.5s ease;
+    
+    /* Header 高度 */
+    --header-height: 75px;
 }
 
 /* ============================================
@@ -221,6 +224,29 @@ body {
     background: linear-gradient(120deg, #00d4ff 0%, #ff00c8 100%);
     border-radius: 8px;
     transition: filter 0.18s ease, transform 0.18s ease;
+}
+
+/* 淺色模式滾動條 */
+[data-theme="light"] ::-webkit-scrollbar-track {
+    background: rgba(240, 240, 240, 0.5);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+    background: linear-gradient(120deg, #0099cc 0%, #cc0066 100%);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(120deg, #00bbdd 0%, #dd0077 100%);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-button:vertical:decrement {
+    background: rgba(240, 240, 240, 0.8);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpolygon points='2,7 8,7 5,3' fill='%230099cc'/%3E%3C/svg%3E");
+}
+
+[data-theme="light"] ::-webkit-scrollbar-button:vertical:increment {
+    background: rgba(240, 240, 240, 0.8);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpolygon points='2,3 8,3 5,7' fill='%23cc0066'/%3E%3C/svg%3E");
 }
 ::-webkit-scrollbar-button:vertical:decrement {
     height: 22px;

@@ -521,11 +521,6 @@
         <a href="../index.html">
             <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
         </a>
-        <button class="menu-toggle" aria-label="Toggle menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
         <div class="nav-container">
             <ul class="nav-links">
                 <li><a href="about.html" class="active">◆ ABOUT</a></li>
@@ -534,7 +529,74 @@
                 <li><a href="../index.html#contact">◆ CONTACT</a></li>
             </ul>
         </div>
+        <div class="header-actions">
+            <button class="settings-toggle" aria-label="Settings"></button>
+            <button class="menu-toggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
     </header>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel">
+        <div class="settings-header">
+            <h2 class="settings-title">系統設定</h2>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="settings-section-title">顯示設定</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>固定導航欄</span>
+                    <span class="setting-description">保持導航欄在頂部固定</span>
+                </div>
+                <div class="toggle-switch" id="headerFixed"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>主題模式</span>
+                    <span class="setting-description">切換深色/淺色模式</span>
+                </div>
+                <div class="select-control">
+                    <select id="themeMode">
+                        <option value="dark">深色模式</option>
+                        <option value="light">淺色模式</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="settings-section-title">效能設定</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>動畫強度</span>
+                    <span class="setting-description">調整頁面動畫效果強度</span>
+                </div>
+                <div class="slider-control">
+                    <div class="slider-value" id="animationValue">100%</div>
+                    <input type="range" class="slider-range" id="animationStrength" min="0" max="100" value="100" step="10">
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="settings-section-title">音效設定</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>音效開關</span>
+                    <span class="setting-description">啟用/關閉互動音效</span>
+                </div>
+                <div class="toggle-switch active" id="soundEnabled"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- 主要內容 -->
     <main class="page-content">
@@ -557,20 +619,17 @@
                         <span class="info-value">天野靜樹</span>
                     </li>
                     <li class="info-item">
-                        <span class="info-label">ALIAS</span>
-                        <span class="info-value">Amano Shizuki</span>
+                        <span class="info-label">POSITION</span>
+                        <span class="info-value">N/A</span>
                     </li>
                     <li class="info-item">
-                        <span class="info-label">ROLE</span>
-                        <span class="info-value">AI Developer</span>
+                        <span class="info-label">MOTTO</span>
+                        <span class="info-value">今天的事能拖就拖，明天的事明天再說。</span>
                     </li>
+                </ul>
                     <li class="info-item">
-                        <span class="info-label">SPECIALTY</span>
-                        <span class="info-value">Deep Learning</span>
-                    </li>
-                    <li class="info-item">
-                        <span class="info-label">LOCATION</span>
-                        <span class="info-value">Cyber Space</span>
+                        <span class="info-label">MAJOR</span>
+                        <span class="info-value">資訊工程</span>
                     </li>
                     <li class="info-item">
                         <span class="info-label">STATUS</span>
