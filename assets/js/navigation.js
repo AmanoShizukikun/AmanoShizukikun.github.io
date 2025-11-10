@@ -143,12 +143,25 @@ const Navigation = {
             e.stopPropagation();
             const isActive = navLinks.classList.contains('active');
             
-            // 如果設定面板開啟，先關閉它
+            // 如果設定面板開啟，先關閉它並觸發齒輪動畫
             const settingsPanel = document.querySelector('.settings-panel');
             const settingsToggle = document.querySelector('.settings-toggle');
             if (settingsPanel && settingsPanel.classList.contains('active')) {
                 settingsPanel.classList.remove('active');
-                if (settingsToggle) settingsToggle.classList.remove('active');
+                
+                // 觸發齒輪逆時針旋轉動畫
+                if (settingsToggle && settingsToggle.classList.contains('active')) {
+                    settingsToggle.classList.remove('active');
+                    settingsToggle.classList.add('closing');
+                    
+                    const handleAnimEnd = (ev) => {
+                        if (ev && ev.animationName && ev.animationName.indexOf('spinReverse') === -1) {
+                            return;
+                        }
+                        settingsToggle.classList.remove('closing');
+                    };
+                    settingsToggle.addEventListener('animationend', handleAnimEnd, { once: true });
+                }
             }
             
             toggleMenu(!isActive);
@@ -157,6 +170,28 @@ const Navigation = {
         // 點擊選單項後關閉選單
         navLinks.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
+                // 如果設定面板開啟，先關閉它並觸發齒輪動畫
+                const settingsPanel = document.querySelector('.settings-panel');
+                const settingsToggle = document.querySelector('.settings-toggle');
+                
+                if (settingsPanel && settingsPanel.classList.contains('active')) {
+                    settingsPanel.classList.remove('active');
+                    
+                    // 觸發齒輪逆時針旋轉動畫
+                    if (settingsToggle && settingsToggle.classList.contains('active')) {
+                        settingsToggle.classList.remove('active');
+                        settingsToggle.classList.add('closing');
+                        
+                        const handleAnimEnd = (ev) => {
+                            if (ev && ev.animationName && ev.animationName.indexOf('spinReverse') === -1) {
+                                return;
+                            }
+                            settingsToggle.classList.remove('closing');
+                        };
+                        settingsToggle.addEventListener('animationend', handleAnimEnd, { once: true });
+                    }
+                }
+                
                 toggleMenu(false);
             });
         });
@@ -171,6 +206,29 @@ const Navigation = {
             if (!menuToggle.contains(e.target) && 
                 !navLinks.contains(e.target) && 
                 navLinks.classList.contains('active')) {
+                
+                // 如果設定面板開啟，先關閉它並觸發齒輪動畫
+                const settingsPanel = document.querySelector('.settings-panel');
+                const settingsToggle = document.querySelector('.settings-toggle');
+                
+                if (settingsPanel && settingsPanel.classList.contains('active')) {
+                    settingsPanel.classList.remove('active');
+                    
+                    // 觸發齒輪逆時針旋轉動畫
+                    if (settingsToggle && settingsToggle.classList.contains('active')) {
+                        settingsToggle.classList.remove('active');
+                        settingsToggle.classList.add('closing');
+                        
+                        const handleAnimEnd = (ev) => {
+                            if (ev && ev.animationName && ev.animationName.indexOf('spinReverse') === -1) {
+                                return;
+                            }
+                            settingsToggle.classList.remove('closing');
+                        };
+                        settingsToggle.addEventListener('animationend', handleAnimEnd, { once: true });
+                    }
+                }
+                
                 toggleMenu(false);
             }
         });
@@ -178,6 +236,28 @@ const Navigation = {
         // ESC 鍵關閉選單
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+                // 如果設定面板開啟，先關閉它並觸發齒輪動畫
+                const settingsPanel = document.querySelector('.settings-panel');
+                const settingsToggle = document.querySelector('.settings-toggle');
+                
+                if (settingsPanel && settingsPanel.classList.contains('active')) {
+                    settingsPanel.classList.remove('active');
+                    
+                    // 觸發齒輪逆時針旋轉動畫
+                    if (settingsToggle && settingsToggle.classList.contains('active')) {
+                        settingsToggle.classList.remove('active');
+                        settingsToggle.classList.add('closing');
+                        
+                        const handleAnimEnd = (ev) => {
+                            if (ev && ev.animationName && ev.animationName.indexOf('spinReverse') === -1) {
+                                return;
+                            }
+                            settingsToggle.classList.remove('closing');
+                        };
+                        settingsToggle.addEventListener('animationend', handleAnimEnd, { once: true });
+                    }
+                }
+                
                 toggleMenu(false);
             }
         });
@@ -216,8 +296,28 @@ const Navigation = {
                     document.body.style.paddingTop = header.offsetHeight + 'px';
                 }
             } else {
+                // 關閉面板：先移除 active（停止常轉動畫），再觸發一次快速逆時針關閉動畫
                 settingsPanel.classList.remove('active');
-                settingsToggle.classList.remove('active');
+
+                // 如果按鈕目前為 active，先移除再加上 closing 以觸發單次逆時針動畫
+                if (settingsToggle.classList.contains('active')) {
+                    settingsToggle.classList.remove('active');
+
+                    // 加上 closing 類別觸發 CSS 動畫，並在結束後移除該類別
+                    settingsToggle.classList.add('closing');
+                    const handleAnimEnd = (ev) => {
+                        // 僅處理我們觸發的 animationName
+                        if (ev && ev.animationName && ev.animationName.indexOf('spinReverse') === -1) {
+                            return;
+                        }
+                        settingsToggle.classList.remove('closing');
+                    };
+                    settingsToggle.addEventListener('animationend', handleAnimEnd, { once: true });
+                } else {
+                    // 若非 active，確保沒有 lingering 的 closing 類別
+                    settingsToggle.classList.remove('closing');
+                }
+                
                 // 只有當導航選單也關閉時才關閉遮罩
                 const navLinks = document.querySelector('.nav-links');
                 if (!navLinks || !navLinks.classList.contains('active')) {
@@ -228,11 +328,18 @@ const Navigation = {
                 // 面板關閉時，恢復 header 到用戶設定的狀態
                 const headerFixed = localStorage.getItem('headerFixed') !== 'false';
                 if (header) {
+                    // 添加過渡效果
+                    header.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease, position 0.3s ease';
+                    
                     if (headerFixed) {
                         header.style.position = 'fixed';
+                        header.style.transform = 'translateY(0)';
+                        header.style.opacity = '1';
                         document.body.style.paddingTop = header.offsetHeight + 'px';
                     } else {
                         header.style.position = 'relative';
+                        header.style.transform = 'translateY(0)';
+                        header.style.opacity = '1';
                         document.body.style.paddingTop = '0';
                     }
                 }
@@ -287,8 +394,9 @@ const Navigation = {
         const loadSettings = () => {
             return {
                 headerFixed: localStorage.getItem('headerFixed') !== 'false',
+                sideNavTextVisible: localStorage.getItem('sideNavTextVisible') !== 'false',
                 theme: localStorage.getItem('theme') || 'dark',
-                animationStrength: parseInt(localStorage.getItem('animationStrength')) || 100,
+                animationStrength: parseInt(localStorage.getItem('animationStrength')) || 2, // 0=關, 1=低, 2=強
                 soundEnabled: localStorage.getItem('soundEnabled') !== 'false'
             };
         };
@@ -296,6 +404,7 @@ const Navigation = {
         // 儲存設定到 localStorage
         const saveSettings = (settings) => {
             localStorage.setItem('headerFixed', settings.headerFixed);
+            localStorage.setItem('sideNavTextVisible', settings.sideNavTextVisible);
             localStorage.setItem('theme', settings.theme);
             localStorage.setItem('animationStrength', settings.animationStrength);
             localStorage.setItem('soundEnabled', settings.soundEnabled);
@@ -308,11 +417,18 @@ const Navigation = {
 
             // Header 固定 - 可選擇跳過
             if (header && !skipHeaderFixed) {
+                // 添加過渡效果
+                header.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease, position 0.3s ease';
+                
                 if (settings.headerFixed) {
                     header.style.position = 'fixed';
+                    header.style.transform = 'translateY(0)';
+                    header.style.opacity = '1';
                     document.body.style.paddingTop = header.offsetHeight + 'px';
                 } else {
                     header.style.position = 'relative';
+                    header.style.transform = 'translateY(0)';
+                    header.style.opacity = '1';
                     document.body.style.paddingTop = '0';
                 }
             }
@@ -420,19 +536,52 @@ const Navigation = {
                 });
             }
 
-            // 動畫強度
-            const animationScale = settings.animationStrength / 100;
-            html.style.setProperty('--animation-duration', `${animationScale}s`);
+            // 側邊欄文字顯示控制
+            if (settings.sideNavTextVisible) {
+                document.body.classList.remove('side-nav-text-hidden');
+            } else {
+                document.body.classList.add('side-nav-text-hidden');
+            }
+
+            // 動畫強度 (0=關閉, 1=低, 2=強)
+            const particlesContainer = document.querySelector('.particles');
             
-            // 調整所有動畫速度
-            document.querySelectorAll('*').forEach(el => {
-                const computedStyle = window.getComputedStyle(el);
-                const animationDuration = computedStyle.animationDuration;
-                if (animationDuration && animationDuration !== '0s') {
-                    const duration = parseFloat(animationDuration);
-                    el.style.animationDuration = `${duration * animationScale}s`;
+            if (settings.animationStrength === 0) {
+                // 關閉所有動畫
+                document.body.classList.add('no-animations');
+                document.body.classList.remove('low-animations');
+                
+                // 隱藏所有粒子
+                if (particlesContainer) {
+                    particlesContainer.style.display = 'none';
                 }
-            });
+            } else if (settings.animationStrength === 1) {
+                // 低強度
+                document.body.classList.remove('no-animations');
+                document.body.classList.add('low-animations');
+                
+                // 顯示粒子但減半
+                if (particlesContainer) {
+                    particlesContainer.style.display = 'block';
+                    const particles = particlesContainer.querySelectorAll('.particle');
+                    particles.forEach((particle, index) => {
+                        particle.style.display = index % 2 === 0 ? 'block' : 'none';
+                    });
+                }
+            } else {
+                // 強 (2) - 預設狀態
+                document.body.classList.remove('no-animations');
+                document.body.classList.remove('low-animations');
+                
+                // 顯示所有粒子
+                if (particlesContainer) {
+                    particlesContainer.style.display = 'block';
+                    const particles = particlesContainer.querySelectorAll('.particle');
+                    particles.forEach(particle => {
+                        particle.style.display = 'block';
+                    });
+                }
+            }
 
             // 聲音開關 (預留,可在其他功能中使用)
             window.soundEnabled = settings.soundEnabled;
@@ -466,18 +615,32 @@ const Navigation = {
             });
         }
 
-        // 動畫強度
+        // 動畫強度 - 3段式滑桿
         const animationSlider = document.getElementById('animationStrength');
         const animationValue = document.getElementById('animationValue');
         if (animationSlider && animationValue) {
+            const labels = ['關', '低', '強'];
             animationSlider.value = settings.animationStrength;
-            animationValue.textContent = settings.animationStrength + '%';
+            animationValue.textContent = labels[settings.animationStrength];
+            
             animationSlider.addEventListener('input', (e) => {
                 const value = parseInt(e.target.value);
-                animationValue.textContent = value + '%';
+                animationValue.textContent = labels[value];
                 settings.animationStrength = value;
                 saveSettings(settings);
                 applySettings(settings);
+            });
+            
+            // 點擊標記跳轉到對應檔位
+            document.querySelectorAll('.slider-marks span').forEach(mark => {
+                mark.addEventListener('click', () => {
+                    const value = parseInt(mark.getAttribute('data-value'));
+                    animationSlider.value = value;
+                    animationValue.textContent = labels[value];
+                    settings.animationStrength = value;
+                    saveSettings(settings);
+                    applySettings(settings);
+                });
             });
         }
 
@@ -488,6 +651,18 @@ const Navigation = {
             soundToggle.addEventListener('click', () => {
                 settings.soundEnabled = !settings.soundEnabled;
                 soundToggle.classList.toggle('active', settings.soundEnabled);
+                saveSettings(settings);
+                applySettings(settings);
+            });
+        }
+
+        // 側邊欄文字顯示切換
+        const sideNavTextToggle = document.getElementById('sideNavTextVisible');
+        if (sideNavTextToggle) {
+            sideNavTextToggle.classList.toggle('active', settings.sideNavTextVisible);
+            sideNavTextToggle.addEventListener('click', () => {
+                settings.sideNavTextVisible = !settings.sideNavTextVisible;
+                sideNavTextToggle.classList.toggle('active', settings.sideNavTextVisible);
                 saveSettings(settings);
                 applySettings(settings);
             });

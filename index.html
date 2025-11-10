@@ -26,27 +26,30 @@
         }
 
         [data-theme="light"] .profile-card {
-            background: rgba(255, 255, 255, 0.85);
-            border: 2px solid rgba(0, 153, 204, 0.3);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            background: rgba(255, 255, 255, 0.65);
+            border: 2px solid rgba(0, 153, 204, 0.2);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
         }
 
         [data-theme="light"] .profile-name {
-            color: var(--primary-magenta);
+            color: #cc0066;
+            text-shadow: none;
         }
 
         [data-theme="light"] .profile-title {
-            color: var(--primary-cyan);
+            color: #0099cc;
+            text-shadow: none;
         }
 
         [data-theme="light"] .stat-item {
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(0, 153, 204, 0.2);
+            background: rgba(255, 255, 255, 0.45);
+            border: 1px solid rgba(0, 153, 204, 0.15);
         }
 
         [data-theme="light"] .stat-item:hover {
-            background: rgba(0, 153, 204, 0.1);
-            border-color: var(--primary-cyan);
+            background: rgba(0, 153, 204, 0.05);
+            border-color: rgba(0, 153, 204, 0.4);
+            box-shadow: none;
         }
 
         [data-theme="light"] .stat-label {
@@ -54,14 +57,14 @@
         }
 
         [data-theme="light"] .contact-link {
-            background: rgba(0, 153, 204, 0.1);
-            border: 1px solid var(--primary-cyan);
-            color: var(--primary-cyan);
+            background: rgba(0, 153, 204, 0.04);
+            border: 1px solid rgba(0, 153, 204, 0.3);
+            color: #0099cc;
         }
 
         [data-theme="light"] .contact-link:hover {
-            background: rgba(0, 153, 204, 0.2);
-            box-shadow: 0 0 20px rgba(0, 153, 204, 0.4);
+            background: rgba(0, 153, 204, 0.1);
+            box-shadow: none;
         }
 
         [data-theme="light"] .project-description {
@@ -69,7 +72,25 @@
         }
 
         [data-theme="light"] .section-subtitle {
-            color: var(--primary-magenta);
+            color: #cc0066;
+            text-shadow: none;
+        }
+
+        /* 淺色模式光暈效果弱化 - 保留漸層 */
+        [data-theme="light"] .hero-subtitle {
+            text-shadow: none;
+        }
+
+        [data-theme="light"] .hero-content .first-name {
+            text-shadow: none;
+        }
+
+        [data-theme="light"] .hero-content .last-name {
+            text-shadow: none;
+        }
+
+        [data-theme="light"] .section-title {
+            text-shadow: none;
         }
         
         /* Hero Section */
@@ -207,14 +228,21 @@
             position: relative;
             overflow: hidden;
             z-index: 1; /* 設置較低的 z-index,確保不會覆蓋按鈕 */
-            pointer-events: none; /* 卡片背景不攔截點擊 */
+            pointer-events: auto; /* 允許整個卡片接收滑鼠事件 */
+            transition: transform var(--transition-normal);
         }
 
-        /* 確保卡片內的可互動元素可以點擊 */
-        .profile-card .avatar,
-        .profile-card .contact-link,
-        .profile-card .stat-item {
-            pointer-events: auto;
+        /* 卡片 hover 效果 */
+        .profile-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* 頭像 hover 效果 - 僅在直接觸碰頭像時觸發 */
+        .avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 
+                var(--neon-glow) var(--primary-cyan),
+                var(--neon-glow) var(--primary-magenta);
         }
 
         .profile-card::before {
@@ -281,13 +309,6 @@
         @keyframes avatarFloat {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
-        }
-
-        .avatar:hover {
-            transform: scale(1.05);
-            box-shadow: 
-                var(--neon-glow) var(--primary-cyan),
-                var(--neon-glow) var(--primary-magenta);
         }
 
         .profile-name {
@@ -753,7 +774,7 @@
                 <div class="nav-section">
                     <h3 class="nav-section-title">更多連結</h3>
                     <li>
-                        <a href="https://www.youtube.com/@AmanoShizukikun" target="_blank" rel="noopener noreferrer" class="social-link">
+                        <a href="https://www.youtube.com/@Amano_Shizuki_Kun" target="_blank" rel="noopener noreferrer" class="social-link">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
                                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                             </svg>
@@ -817,6 +838,14 @@
 
             <div class="setting-item">
                 <div class="setting-label">
+                    <span>側邊欄文字顯示</span>
+                    <span class="setting-description">是否持續顯示側邊欄文字標題</span>
+                </div>
+                <div class="toggle-switch active" id="sideNavTextVisible"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
                     <span>主題模式</span>
                     <span class="setting-description">切換深色/淺色模式</span>
                 </div>
@@ -838,8 +867,13 @@
                     <span class="setting-description">調整頁面動畫效果強度</span>
                 </div>
                 <div class="slider-control">
-                    <div class="slider-value" id="animationValue">100%</div>
-                    <input type="range" class="slider-range" id="animationStrength" min="0" max="100" value="100" step="10">
+                    <div class="slider-value" id="animationValue">強</div>
+                    <input type="range" class="slider-range" id="animationStrength" min="0" max="2" value="2" step="1">
+                    <div class="slider-marks">
+                        <span data-value="0">關</span>
+                        <span data-value="1">低</span>
+                        <span data-value="2">強</span>
+                    </div>
                 </div>
             </div>
         </div>

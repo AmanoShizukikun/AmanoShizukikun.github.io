@@ -20,24 +20,35 @@ header {
     right: 0;
     z-index: 1000;
     margin: 0;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.4s ease,
+                position 0.3s ease;
 }
 
 /* 淺色模式 Header */
 [data-theme="light"] header {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 240, 245, 0.95));
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(240, 240, 245, 0.96));
     box-shadow: 
-        0 3px 15px rgba(0, 153, 204, 0.2),
-        0 0 50px rgba(0, 153, 204, 0.05);
+        0 2px 8px rgba(0, 0, 0, 0.02),
+        0 1px 3px rgba(0, 0, 0, 0.01);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.4s ease,
+                position 0.3s ease;
 }
 
 [data-theme="light"] header a {
     color: #0099cc !important;
-    text-shadow: 0 0 8px rgba(0, 153, 204, 0.3);
+    text-shadow: none;
 }
 
 [data-theme="light"] header a:hover {
     color: #cc0066 !important;
-    text-shadow: 0 0 15px rgba(204, 0, 102, 0.5);
+    text-shadow: none;
+}
+
+/* 淺色模式 Header 掃描動畫 */
+[data-theme="light"] header::before {
+    background: linear-gradient(90deg, transparent, rgba(0, 153, 204, 0.08), transparent);
 }
 
 header::before {
@@ -140,6 +151,8 @@ header > a:hover::after {
     align-items: center;
     justify-content: center;
     position: relative;
+    width: 44px;
+    height: 44px;
 }
 
 .settings-toggle::before {
@@ -151,32 +164,42 @@ header > a:hover::after {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    transition: all var(--transition-normal);
+    transition: filter var(--transition-normal);
     filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.6));
 }
 
 /* 淺色模式設定按鈕 */
 [data-theme="light"] .settings-toggle::before {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230099cc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E");
-    filter: drop-shadow(0 0 8px rgba(0, 153, 204, 0.4));
+    filter: none;
 }
 
 .settings-toggle:hover::before {
     filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.8));
-    transform: rotate(90deg);
 }
 
 [data-theme="light"] .settings-toggle:hover::before {
-    filter: drop-shadow(0 0 12px rgba(0, 153, 204, 0.6));
+    filter: none;
 }
 
 .settings-toggle.active::before {
-    animation: spinSmooth 2s linear infinite;
+    animation: spinSmooth 2s linear infinite !important;
 }
 
 @keyframes spinSmooth {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+}
+
+/* 快速逆時針關閉動畫 (單次) */
+@keyframes spinReverse {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(-180deg); }
+}
+
+/* 在關閉時加入 .closing 類別觸發快速逆時針旋轉，使用 forwards 保持結尾狀態，避免被 :hover 或其他屬性覆蓋 */
+.settings-toggle.closing::before {
+    animation: spinReverse 0.32s cubic-bezier(.22,.9,.36,1) 1 forwards;
 }
 
 /* 漢堡選單按鈕 - 所有裝置都顯示 */
@@ -188,6 +211,10 @@ header > a:hover::after {
     border: none;
     cursor: pointer;
     padding: 0.5rem;
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
 }
 
 .menu-toggle span {
@@ -231,6 +258,12 @@ header > a:hover::after {
     pointer-events: none; /* 默認不攔截點擊 */
 }
 
+/* 淺色模式遮罩 - 更透明不遮擋 header */
+[data-theme="light"] .nav-overlay {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(3px);
+}
+
 .nav-overlay.active {
     opacity: 1;
     pointer-events: auto; /* 激活時才攔截點擊 */
@@ -258,17 +291,20 @@ header > a:hover::after {
 
 /* 淺色模式 Settings Panel */
 [data-theme="light"] .settings-panel {
-    background: rgba(255, 255, 255, 0.98);
-    border-left: 2px solid var(--primary-magenta);
-    box-shadow: -5px 0 30px rgba(204, 0, 102, 0.2);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(20px);
+    border-left: 2px solid rgba(204, 0, 102, 0.4);
+    box-shadow: -3px 0 10px rgba(0, 0, 0, 0.06);
 }
 
 [data-theme="light"] .settings-title {
-    color: var(--primary-magenta);
+    color: #cc0066;
+    text-shadow: none;
 }
 
 [data-theme="light"] .settings-section-title {
-    color: var(--primary-cyan);
+    color: #0099cc;
+    text-shadow: none;
 }
 
 [data-theme="light"] .setting-label {
@@ -280,13 +316,14 @@ header > a:hover::after {
 }
 
 [data-theme="light"] .setting-item {
-    background: rgba(0, 153, 204, 0.05);
-    border: 1px solid rgba(0, 153, 204, 0.2);
+    background: rgba(0, 153, 204, 0.02);
+    border: 1px solid rgba(0, 153, 204, 0.15);
 }
 
 [data-theme="light"] .setting-item:hover {
-    background: rgba(0, 153, 204, 0.1);
-    border-color: var(--primary-cyan);
+    background: rgba(0, 153, 204, 0.05);
+    border-color: rgba(0, 153, 204, 0.4);
+    box-shadow: none;
 }
 
 .settings-panel.active {
@@ -405,12 +442,34 @@ header > a:hover::after {
     box-shadow: 0 0 10px var(--primary-cyan);
 }
 
+/* 淺色模式 Toggle Switch */
+[data-theme="light"] .toggle-switch {
+    background: rgba(200, 200, 200, 0.2);
+    border: 2px solid rgba(0, 153, 204, 0.25);
+}
+
+[data-theme="light"] .toggle-switch::before {
+    background: rgba(153, 153, 153, 0.7);
+}
+
+[data-theme="light"] .toggle-switch.active {
+    background: linear-gradient(135deg, rgba(0, 153, 204, 0.12), rgba(204, 0, 102, 0.12));
+    border-color: rgba(0, 153, 204, 0.5);
+    box-shadow: none;
+}
+
+[data-theme="light"] .toggle-switch.active::before {
+    background: rgba(0, 153, 204, 0.8);
+    box-shadow: none;
+}
+
 /* Slider Range */
 .slider-control {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     flex: 1;
+    position: relative;
 }
 
 .slider-value {
@@ -418,6 +477,26 @@ header > a:hover::after {
     color: var(--primary-cyan);
     font-size: 0.9rem;
     text-align: right;
+}
+
+.slider-marks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.25rem;
+    padding: 0 8px;
+}
+
+.slider-marks span {
+    font-size: 0.75rem;
+    color: rgba(0, 212, 255, 0.6);
+    font-family: var(--font-display);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.slider-marks span:hover {
+    color: var(--primary-cyan);
+    text-shadow: 0 0 8px var(--primary-cyan);
 }
 
 .slider-range {
@@ -463,6 +542,42 @@ header > a:hover::after {
     box-shadow: 0 0 15px var(--primary-cyan);
 }
 
+/* 淺色模式 Slider Range */
+[data-theme="light"] .slider-value {
+    color: rgba(0, 153, 204, 0.9);
+}
+
+[data-theme="light"] .slider-marks span {
+    color: rgba(0, 153, 204, 0.4);
+}
+
+[data-theme="light"] .slider-marks span:hover {
+    color: #0099cc;
+    text-shadow: none;
+}
+
+[data-theme="light"] .slider-range {
+    background: rgba(0, 153, 204, 0.1);
+}
+
+[data-theme="light"] .slider-range::-webkit-slider-thumb {
+    background: rgba(0, 153, 204, 0.85);
+    box-shadow: none;
+}
+
+[data-theme="light"] .slider-range::-webkit-slider-thumb:hover {
+    box-shadow: none;
+}
+
+[data-theme="light"] .slider-range::-moz-range-thumb {
+    background: rgba(0, 153, 204, 0.85);
+    box-shadow: none;
+}
+
+[data-theme="light"] .slider-range::-moz-range-thumb:hover {
+    box-shadow: none;
+}
+
 /* Select Dropdown */
 .select-control {
     position: relative;
@@ -491,6 +606,39 @@ header > a:hover::after {
     box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
 }
 
+.select-control select:focus {
+    border-color: var(--primary-magenta);
+    box-shadow: 0 0 15px rgba(255, 0, 128, 0.4);
+}
+
+.select-control select option {
+    background: rgba(10, 10, 15, 0.98);
+    color: rgba(255, 255, 255, 0.9);
+    padding: 0.5rem;
+}
+
+/* 淺色模式 Select Dropdown */
+[data-theme="light"] .select-control select {
+    background: rgba(0, 153, 204, 0.05);
+    border: 1px solid rgba(0, 153, 204, 0.3);
+    color: rgba(0, 153, 204, 0.9);
+}
+
+[data-theme="light"] .select-control select:hover {
+    background: rgba(0, 153, 204, 0.08);
+    box-shadow: none;
+}
+
+[data-theme="light"] .select-control select:focus {
+    border-color: rgba(204, 0, 102, 0.5);
+    box-shadow: none;
+}
+
+[data-theme="light"] .select-control select option {
+    background: rgba(255, 255, 255, 0.95);
+    color: rgba(51, 51, 51, 0.95);
+}
+
 .select-control::after {
     content: '▼';
     position: absolute;
@@ -500,6 +648,12 @@ header > a:hover::after {
     color: var(--primary-cyan);
     font-size: 0.7rem;
     pointer-events: none;
+    transition: color var(--transition-normal);
+}
+
+/* 淺色模式下拉箭頭 */
+[data-theme="light"] .select-control::after {
+    color: #0099cc;
 }
 
 .select-control select option {
@@ -534,9 +688,10 @@ header > a:hover::after {
 
 /* 淺色模式導航 */
 [data-theme="light"] .nav-links {
-    background: rgba(255, 255, 255, 0.98);
-    border-left: 2px solid var(--primary-cyan);
-    box-shadow: -5px 0 30px rgba(0, 153, 204, 0.2);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(20px);
+    border-left: 2px solid rgba(0, 212, 255, 0.4);
+    box-shadow: -3px 0 10px rgba(0, 0, 0, 0.06);
 }
 
 .nav-links.active {
@@ -568,6 +723,21 @@ header > a:hover::after {
     font-family: 'Rajdhani', sans-serif;
     font-weight: 600;
     text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-links a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.3), transparent);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.5) inset;
+    animation: none;
+    transition: left 0s;
 }
 
 .nav-links a:hover {
@@ -578,23 +748,45 @@ header > a:hover::after {
     box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
 }
 
+.nav-links a:hover::before {
+    animation: scanlineHover 0.6s ease-in-out;
+}
+
 /* 淺色模式連結 */
 [data-theme="light"] .nav-links a {
-    background: rgba(0, 153, 204, 0.05);
-    border: 1px solid rgba(0, 153, 204, 0.2);
+    background: rgba(0, 153, 204, 0.03);
+    border: 1px solid rgba(0, 153, 204, 0.15);
     color: #0099cc !important;
 }
 
 [data-theme="light"] .nav-links a:hover {
-    background: rgba(0, 153, 204, 0.1);
-    border-color: var(--primary-cyan);
+    background: rgba(0, 153, 204, 0.08);
+    border-color: rgba(0, 153, 204, 0.4);
     transform: translateX(-5px);
-    color: #1a1a1a !important;
+    color: #cc0066 !important;
+    box-shadow: none;
 }
 
 .nav-links a.active {
     background: rgba(0, 212, 255, 0.15);
     border: 2px solid var(--primary-cyan);
+}
+
+@keyframes scanlineHover {
+    0% {
+        left: -100%;
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        left: 100%;
+        opacity: 0;
+    }
 }
 
 /* 導航選單標題 */
@@ -620,12 +812,13 @@ header > a:hover::after {
 }
 
 [data-theme="light"] .nav-title {
-    color: var(--primary-cyan);
+    color: #0099cc;
+    text-shadow: none;
 }
 
 .nav-title::before {
     content: '◆';
-    color: var(--primary-magenta);
+    color: #cc0066;
 }
 
 /* 導航分類 */
@@ -635,7 +828,7 @@ header > a:hover::after {
 
 .nav-section-title {
     font-family: var(--font-display);
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: var(--primary-magenta);
     margin-bottom: 0.8rem;
     padding-left: 0.5rem;
@@ -648,7 +841,9 @@ header > a:hover::after {
 }
 
 [data-theme="light"] .nav-section-title {
-    color: var(--primary-magenta);
+    color: #cc0066;
+    text-shadow: none;
+    opacity: 1;
 }
 
 .nav-section-title::after {
@@ -716,6 +911,7 @@ header > a:hover::after {
     border: 1px solid var(--primary-cyan);
 }
 
+/* 預設狀態：文字顯示開啟 - hover 和 active 時顯示 */
 .side-nav a:hover::after,
 .side-nav a.active::after {
     opacity: 1;
@@ -729,23 +925,34 @@ header > a:hover::after {
     box-shadow: var(--neon-glow) var(--primary-cyan);
 }
 
+/* 側邊欄文字隱藏模式 - 強制隱藏所有文字 */
+body.side-nav-text-hidden .side-nav a::after {
+    opacity: 0 !important;
+}
+
+/* 隱藏模式下 - 只在 hover 時顯示 (移除 active 狀態的自動顯示) */
+body.side-nav-text-hidden .side-nav a:hover::after {
+    opacity: 1 !important;
+    right: 30px !important;
+}
+
 /* 淺色模式 Side Navigation */
 [data-theme="light"] .side-nav a {
-    border-color: rgba(0, 153, 204, 0.5);
+    border-color: rgba(0, 153, 204, 0.3);
 }
 
 [data-theme="light"] .side-nav a::after {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.85);
     color: var(--primary-cyan);
-    border: 1px solid var(--primary-cyan);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 212, 255, 0.4);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 [data-theme="light"] .side-nav a.active,
 [data-theme="light"] .side-nav a:hover {
     background: var(--primary-cyan);
     border-color: var(--primary-cyan);
-    box-shadow: 0 0 15px rgba(0, 153, 204, 0.4);
+    box-shadow: none;
 }
 
 /* ============================================
@@ -844,16 +1051,14 @@ header > a:hover::after {
 
 /* 淺色模式 Cards */
 [data-theme="light"] .card {
-    background: rgba(255, 255, 255, 0.85);
-    border: 2px solid rgba(0, 153, 204, 0.3);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.65);
+    border: 2px solid rgba(0, 153, 204, 0.25);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 [data-theme="light"] .card:hover {
-    border-color: var(--primary-magenta);
-    box-shadow: 
-        0 20px 40px rgba(0, 0, 0, 0.12),
-        0 0 20px rgba(0, 153, 204, 0.3);
+    border-color: rgba(204, 0, 102, 0.5);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
 }
 
 /* 項目連結包裝 */
@@ -919,6 +1124,11 @@ header > a:hover::after {
     color: var(--primary-cyan);
     margin-bottom: 1rem;
     text-shadow: var(--neon-glow) var(--primary-cyan);
+}
+
+[data-theme="light"] .project-title {
+    color: #0099cc;
+    text-shadow: none;
 }
 
 .project-description {

@@ -399,8 +399,104 @@
             }
 
             .markdown-content h2 {
-                font-size: 1.2rem;
+                font-size: 1.3rem;
             }
+        }
+
+        /* ============================================
+           淺色模式樣式
+           ============================================ */
+        [data-theme="light"] .project-hero::before {
+            background: radial-gradient(circle at 50% 50%, rgba(0, 153, 204, 0.12), transparent 70%);
+        }
+
+        [data-theme="light"] .project-hero-title {
+            color: #cc0066;
+            text-shadow: none;
+        }
+
+        [data-theme="light"] .project-hero-subtitle {
+            color: rgba(26, 26, 26, 0.8);
+        }
+
+        [data-theme="light"] .project-meta-item {
+            color: #0099cc;
+            background: rgba(0, 153, 204, 0.03);
+            border-color: rgba(0, 153, 204, 0.15);
+        }
+
+        [data-theme="light"] .tab {
+            background: rgba(255, 255, 255, 0.5);
+            color: rgba(26, 26, 26, 0.8);
+            border-color: rgba(0, 153, 204, 0.15);
+        }
+
+        [data-theme="light"] .tab:hover {
+            background: rgba(0, 153, 204, 0.05);
+            color: #0099cc;
+        }
+
+        [data-theme="light"] .tab.active {
+            background: rgba(0, 153, 204, 0.08);
+            color: #0099cc;
+            border-color: rgba(0, 153, 204, 0.4);
+        }
+
+        [data-theme="light"] .markdown-content {
+            color: rgba(26, 26, 26, 0.9);
+        }
+
+        [data-theme="light"] .markdown-content h1,
+        [data-theme="light"] .markdown-content h2,
+        [data-theme="light"] .markdown-content h3 {
+            color: #0099cc;
+        }
+
+        [data-theme="light"] .markdown-content a {
+            color: #0099cc;
+        }
+
+        [data-theme="light"] .markdown-content a:hover {
+            color: #cc0066;
+            border-bottom-color: #cc0066;
+        }
+
+        [data-theme="light"] .markdown-content code {
+            background: rgba(0, 153, 204, 0.05);
+            color: #cc0066;
+        }
+
+        [data-theme="light"] .markdown-content pre {
+            background: rgba(26, 26, 26, 0.92);
+        }
+
+        [data-theme="light"] .markdown-content blockquote {
+            border-left-color: rgba(0, 153, 204, 0.5);
+            background: rgba(0, 153, 204, 0.03);
+            color: rgba(26, 26, 26, 0.85);
+        }
+
+        [data-theme="light"] .markdown-content table th {
+            background: rgba(0, 153, 204, 0.08);
+            color: #0099cc;
+            border-color: rgba(0, 153, 204, 0.15);
+        }
+
+        [data-theme="light"] .markdown-content table td {
+            border-color: rgba(0, 153, 204, 0.1);
+        }
+
+        [data-theme="light"] .markdown-content table tr:hover {
+            background: rgba(0, 153, 204, 0.03);
+        }
+
+        [data-theme="light"] .copy-button {
+            background: rgba(0, 153, 204, 0.05);
+            color: #0099cc;
+        }
+
+        [data-theme="light"] .copy-button:hover {
+            background: rgba(0, 153, 204, 0.1);
         }
     </style>
 </head>

@@ -110,6 +110,16 @@
         .profile-card {
             position: relative;
             padding: 1.5rem;
+            transition: transform var(--transition-normal);
+        }
+
+        .profile-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* 頭像 hover 效果 - 僅在直接觸碰頭像時觸發 */
+        .profile-avatar:hover img {
+            transform: scale(1.05);
         }
 
         .profile-avatar {
@@ -131,6 +141,7 @@
             object-fit: cover;
             position: relative;
             z-index: 2;
+            transition: transform var(--transition-normal);
         }
 
         .profile-avatar::before {
@@ -508,6 +519,118 @@
                 padding-left: 1rem;
             }
         }
+
+        /* ============================================
+           淺色模式樣式
+           ============================================ */
+        [data-theme="light"] .profile-card {
+            background: rgba(255, 255, 255, 0.65);
+            border: 2px solid rgba(0, 153, 204, 0.2);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="light"] .profile-avatar {
+            background: linear-gradient(135deg, rgba(0, 153, 204, 0.1), rgba(204, 0, 102, 0.1));
+            border-color: rgba(0, 153, 204, 0.4);
+        }
+
+        [data-theme="light"] .info-item {
+            border-bottom-color: rgba(0, 153, 204, 0.2);
+        }
+
+        [data-theme="light"] .info-label {
+            color: #0099cc;
+        }
+
+        [data-theme="light"] .info-value {
+            color: rgba(26, 26, 26, 0.9);
+        }
+
+        [data-theme="light"] .section-title {
+            color: #cc0066;
+            text-shadow: none;
+        }
+
+        [data-theme="light"] .text-block {
+            color: rgba(26, 26, 26, 0.85);
+        }
+
+        [data-theme="light"] .text-block::before {
+            color: #0099cc;
+        }
+
+        [data-theme="light"] .feature-card {
+            background: rgba(255, 255, 255, 0.65);
+            border-color: rgba(0, 153, 204, 0.2);
+        }
+
+        [data-theme="light"] .feature-card:hover {
+            border-color: rgba(0, 153, 204, 0.5);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="light"] .feature-title {
+            color: #0099cc;
+            text-shadow: none;
+        }
+
+        [data-theme="light"] .feature-description {
+            color: rgba(26, 26, 26, 0.8);
+        }
+
+        [data-theme="light"] .skill-category {
+            background: rgba(255, 255, 255, 0.5);
+            border-color: rgba(0, 153, 204, 0.15);
+        }
+
+        [data-theme="light"] .category-title {
+            color: #0099cc;
+            text-shadow: none;
+        }
+
+        [data-theme="light"] .skill-name {
+            color: rgba(26, 26, 26, 0.9);
+        }
+
+        [data-theme="light"] .skill-bar {
+            background: rgba(0, 153, 204, 0.08);
+        }
+
+        [data-theme="light"] .skill-fill {
+            background: linear-gradient(90deg, rgba(0, 153, 204, 0.8), rgba(204, 0, 102, 0.8));
+            box-shadow: none;
+        }
+
+        [data-theme="light"] .timeline-item {
+            background: rgba(255, 255, 255, 0.6);
+            border-color: rgba(0, 153, 204, 0.2);
+        }
+
+        [data-theme="light"] .timeline-item:hover {
+            border-color: rgba(0, 153, 204, 0.5);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="light"] .timeline-year {
+            background: linear-gradient(135deg, rgba(0, 153, 204, 0.08), rgba(204, 0, 102, 0.08));
+            color: #0099cc;
+        }
+
+        [data-theme="light"] .timeline-title {
+            color: #cc0066;
+            text-shadow: none;
+        }
+
+        [data-theme="light"] .timeline-description {
+            color: rgba(26, 26, 26, 0.8);
+        }
+
+        [data-theme="light"] .status-badge {
+            background: rgba(0, 153, 204, 0.05);
+            border-color: rgba(0, 153, 204, 0.3);
+            color: #0099cc;
+            box-shadow: none;
+        }
     </style>
 </head>
 <body>
@@ -558,6 +681,14 @@
 
             <div class="setting-item">
                 <div class="setting-label">
+                    <span>側邊欄文字顯示</span>
+                    <span class="setting-description">是否持續顯示側邊欄文字標題</span>
+                </div>
+                <div class="toggle-switch active" id="sideNavTextVisible"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
                     <span>主題模式</span>
                     <span class="setting-description">切換深色/淺色模式</span>
                 </div>
@@ -579,8 +710,13 @@
                     <span class="setting-description">調整頁面動畫效果強度</span>
                 </div>
                 <div class="slider-control">
-                    <div class="slider-value" id="animationValue">100%</div>
-                    <input type="range" class="slider-range" id="animationStrength" min="0" max="100" value="100" step="10">
+                    <div class="slider-value" id="animationValue">強</div>
+                    <input type="range" class="slider-range" id="animationStrength" min="0" max="2" value="2" step="1">
+                    <div class="slider-marks">
+                        <span data-value="0">關</span>
+                        <span data-value="1">低</span>
+                        <span data-value="2">強</span>
+                    </div>
                 </div>
             </div>
         </div>
