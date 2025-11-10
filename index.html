@@ -47,6 +47,7 @@
         }
 
         .hero-greeting {
+            margin-top: 7.5rem;
             font-family: 'Rajdhani', sans-serif;
             font-size: clamp(1.2rem, 2vw, 1.5rem);
             color: var(--primary-cyan);
@@ -121,14 +122,11 @@
             opacity: 0;
             animation: fadeInUp 1s ease 1s forwards;
             position: relative;
-            z-index: 500; /* 提高到 500,確保高於導航遮罩 (999) 之下的所有元素 */
         }
 
-        /* 確保按鈕有正確的 z-index 和可點擊性 */
         .hero-cta .btn {
             position: relative;
-            z-index: 500;
-            pointer-events: auto; /* 確保可以點擊 */
+            pointer-events: auto;
             cursor: pointer;
         }
 
@@ -151,7 +149,7 @@
         .profile-card {
             padding: 2.5rem;
             margin-bottom: -9.2rem;
-            margin-top: 2rem; /* 增加頂部間距,避免與按鈕重疊 */
+            margin-top: -3.5rem; /* 增加頂部間距,避免與按鈕重疊 */
             position: relative;
             overflow: hidden;
             z-index: 1; /* 設置較低的 z-index,確保不會覆蓋按鈕 */
@@ -457,6 +455,7 @@
             .hero-greeting {
                 font-size: 1rem;
                 letter-spacing: 2px;
+                margin-top: 0; /* 手機版移除頂部間距 */
             }
 
             .hero-content h1 {
@@ -596,6 +595,7 @@
 
             .hero-greeting {
                 font-size: 0.9rem;
+                margin-top: 0; /* 超小螢幕也移除頂部間距 */
             }
 
             .hero-subtitle {
