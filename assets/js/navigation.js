@@ -292,8 +292,9 @@ const Navigation = {
                 
                 // 打開面板時，暫時固定 header
                 if (header) {
+                    const headerHeight = parseInt(localStorage.getItem('headerHeight')) || 60;
                     header.style.position = 'fixed';
-                    document.body.style.paddingTop = header.offsetHeight + 'px';
+                    document.body.style.paddingTop = headerHeight + 'px';
                 }
             } else {
                 // 關閉面板：先移除 active（停止常轉動畫），再觸發一次快速逆時針關閉動畫
@@ -327,15 +328,16 @@ const Navigation = {
                 
                 // 面板關閉時，恢復 header 到用戶設定的狀態
                 const headerFixed = localStorage.getItem('headerFixed') !== 'false';
+                const headerHeight = parseInt(localStorage.getItem('headerHeight')) || 60;
                 if (header) {
                     // 添加過渡效果
-                    header.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease, position 0.3s ease';
+                    header.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease, position 0.3s ease, height 0.3s ease, padding 0.3s ease';
                     
                     if (headerFixed) {
                         header.style.position = 'fixed';
                         header.style.transform = 'translateY(0)';
                         header.style.opacity = '1';
-                        document.body.style.paddingTop = header.offsetHeight + 'px';
+                        document.body.style.paddingTop = headerHeight + 'px';
                     } else {
                         header.style.position = 'relative';
                         header.style.transform = 'translateY(0)';
@@ -394,6 +396,7 @@ const Navigation = {
         const loadSettings = () => {
             return {
                 headerFixed: localStorage.getItem('headerFixed') !== 'false',
+                headerHeight: parseInt(localStorage.getItem('headerHeight')) || 60,
                 sideNavTextVisible: localStorage.getItem('sideNavTextVisible') !== 'false',
                 theme: localStorage.getItem('theme') || 'dark',
                 animationStrength: parseInt(localStorage.getItem('animationStrength')) || 2, // 0=關, 1=低, 2=強
@@ -404,6 +407,7 @@ const Navigation = {
         // 儲存設定到 localStorage
         const saveSettings = (settings) => {
             localStorage.setItem('headerFixed', settings.headerFixed);
+            localStorage.setItem('headerHeight', settings.headerHeight);
             localStorage.setItem('sideNavTextVisible', settings.sideNavTextVisible);
             localStorage.setItem('theme', settings.theme);
             localStorage.setItem('animationStrength', settings.animationStrength);
@@ -415,16 +419,23 @@ const Navigation = {
             const header = document.querySelector('header');
             const html = document.documentElement;
 
+            // Header 高度設定
+            if (header) {
+                const headerHeight = settings.headerHeight + 'px';
+                header.style.height = headerHeight;
+                html.style.setProperty('--header-height', headerHeight);
+            }
+
             // Header 固定 - 可選擇跳過
             if (header && !skipHeaderFixed) {
                 // 添加過渡效果
-                header.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease, position 0.3s ease';
+                header.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease, position 0.3s ease, height 0.3s ease, padding 0.3s ease';
                 
                 if (settings.headerFixed) {
                     header.style.position = 'fixed';
                     header.style.transform = 'translateY(0)';
                     header.style.opacity = '1';
-                    document.body.style.paddingTop = header.offsetHeight + 'px';
+                    document.body.style.paddingTop = settings.headerHeight + 'px';
                 } else {
                     header.style.position = 'relative';
                     header.style.transform = 'translateY(0)';
@@ -632,16 +643,20 @@ const Navigation = {
             });
             
             // 點擊標記跳轉到對應檔位
-            document.querySelectorAll('.slider-marks span').forEach(mark => {
-                mark.addEventListener('click', () => {
-                    const value = parseInt(mark.getAttribute('data-value'));
-                    animationSlider.value = value;
-                    animationValue.textContent = labels[value];
-                    settings.animationStrength = value;
-                    saveSettings(settings);
-                    applySettings(settings);
+            const animationContainer = animationSlider.closest('.slider-control');
+            if (animationContainer) {
+                const animationMarks = animationContainer.querySelectorAll('.slider-marks span');
+                animationMarks.forEach(mark => {
+                    mark.addEventListener('click', () => {
+                        const value = parseInt(mark.getAttribute('data-value'));
+                        animationSlider.value = value;
+                        animationValue.textContent = labels[value];
+                        settings.animationStrength = value;
+                        saveSettings(settings);
+                        applySettings(settings);
+                    });
                 });
-            });
+            }
         }
 
         // 聲音開關
@@ -654,6 +669,58 @@ const Navigation = {
                 saveSettings(settings);
                 applySettings(settings);
             });
+        }
+
+        // Header 高度調整
+        const headerHeightSlider = document.getElementById('headerHeight');
+        const headerHeightValue = document.getElementById('headerHeightValue');
+        if (headerHeightSlider && headerHeightValue) {
+            headerHeightSlider.value = settings.headerHeight;
+            headerHeightValue.textContent = settings.headerHeight + 'px';
+            
+            headerHeightSlider.addEventListener('input', (e) => {
+                const value = parseInt(e.target.value);
+                headerHeightValue.textContent = value + 'px';
+                settings.headerHeight = value;
+                saveSettings(settings);
+                
+                // 只更新 header 高度，不調用完整的 applySettings
+                const header = document.querySelector('header');
+                if (header) {
+                    header.style.height = value + 'px';
+                    document.documentElement.style.setProperty('--header-height', value + 'px');
+                    
+                    if (settings.headerFixed) {
+                        document.body.style.paddingTop = value + 'px';
+                    }
+                }
+            });
+            
+            // 點擊標記跳轉到對應檔位
+            const headerHeightContainer = headerHeightSlider.closest('.slider-control');
+            if (headerHeightContainer) {
+                const headerHeightMarks = headerHeightContainer.querySelectorAll('.slider-marks span');
+                headerHeightMarks.forEach(mark => {
+                    mark.addEventListener('click', () => {
+                        const value = parseInt(mark.getAttribute('data-value'));
+                        headerHeightSlider.value = value;
+                        headerHeightValue.textContent = value + 'px';
+                        settings.headerHeight = value;
+                        saveSettings(settings);
+                        
+                        // 只更新 header 高度，不調用完整的 applySettings
+                        const header = document.querySelector('header');
+                        if (header) {
+                            header.style.height = value + 'px';
+                            document.documentElement.style.setProperty('--header-height', value + 'px');
+                            
+                            if (settings.headerFixed) {
+                                document.body.style.paddingTop = value + 'px';
+                            }
+                        }
+                    });
+                });
+            }
         }
 
         // 側邊欄文字顯示切換
@@ -755,6 +822,64 @@ const Navigation = {
     },
 
     /**
+     * 初始化導航搜尋功能
+     */
+    initNavSearch() {
+        const searchInput = document.getElementById('navSearch');
+        const searchBtn = document.querySelector('.search-btn');
+        const navLinks = document.querySelector('.nav-links');
+
+        if (!searchInput || !navLinks) return;
+
+        // 搜尋頁面連結
+        const performSearch = () => {
+            const query = searchInput.value.toLowerCase().trim();
+            
+            if (!query) {
+                // 如果搜尋框為空，顯示所有連結
+                navLinks.querySelectorAll('li a, .social-link').forEach(link => {
+                    link.parentElement.style.display = '';
+                });
+                return;
+            }
+
+            navLinks.querySelectorAll('li a, .social-link').forEach(link => {
+                const text = link.textContent.toLowerCase();
+                const href = link.href.toLowerCase();
+                
+                if (text.includes(query) || href.includes(query)) {
+                    link.parentElement.style.display = '';
+                } else {
+                    link.parentElement.style.display = 'none';
+                }
+            });
+        };
+
+        // 輸入時搜尋
+        searchInput.addEventListener('input', Core.debounce(performSearch, 200));
+
+        // 按下 Enter 鍵搜尋
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performSearch();
+            }
+        });
+
+        // 搜尋按鈕點擊
+        if (searchBtn) {
+            searchBtn.addEventListener('click', performSearch);
+        }
+
+        // 清空搜尋框時恢復全部連結
+        searchInput.addEventListener('focus', () => {
+            if (searchInput.value === '') {
+                performSearch();
+            }
+        });
+    },
+
+    /**
      * 初始化所有導航功能
      */
     init() {
@@ -765,6 +890,7 @@ const Navigation = {
         this.initSettingsPanel();
         this.initBackToTop();
         this.generateBreadcrumb();
+        this.initNavSearch(); // 初始化搜尋功能
     }
 };
 

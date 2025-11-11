@@ -316,7 +316,6 @@ body.no-animations *::after {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpolygon points='2,7 8,7 5,3' fill='%2300d4ff'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: center;
-    /* 增大箭頭圖示尺寸 */
     background-size: 16px 16px;
     border-radius: 6px;
     margin: 2px 0;
@@ -330,7 +329,6 @@ body.no-animations *::after {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpolygon points='2,3 8,3 5,7' fill='%23ff00c8'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: center;
-    /* 增大箭頭圖示尺寸 */
     background-size: 16px 16px;
     border-radius: 6px;
     margin: 2px 0;
