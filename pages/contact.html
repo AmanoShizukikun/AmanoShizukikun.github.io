@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="聯絡天野靜樹 - 讓我們一起創造未來科技">
+    <meta name="keywords" content="天野靜樹,聯絡方式,社交媒體,合作邀約">
+    <title>聯絡我 - 天野靜樹 | AMANO SHIZUKI</title>
+    <link rel="icon" href="../assets/images/logo.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/core.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link rel="stylesheet" href="../assets/css/animations.css">
+    <style>
+        /* ============================================
+           主要內容區域 - 分頁滾動
+           ============================================ */
+        .page-content {
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            z-index: 1;
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+        }
+
+        html, body {
+            scroll-behavior: smooth;
+        }
+
+        /* ============================================
+           Hero 區域 - 全屏第一頁
+           ============================================ */
+        .hero-section {
+            text-align: center;
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem 2rem 2rem;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 100px;
+            background: linear-gradient(to bottom, transparent, var(--primary-cyan));
+            animation: scanlineDown 2s ease-in-out infinite;
+        }
+
+        .glitch-title {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 900;
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+            background: linear-gradient(45deg, var(--primary-cyan), var(--primary-magenta));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeInUp 1s ease;
+            letter-spacing: 2px;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            color: rgba(255, 255, 255, 0.7);
+            font-family: var(--font-body);
+            letter-spacing: 0.3em;
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--primary-cyan);
+            color: var(--primary-cyan);
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            letter-spacing: 0.2em;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-badge::before {
+            content: '●';
+            margin-right: 0.5rem;
+            animation: blink 1s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.3; }
+        }
+
+        /* ============================================
+           聯絡方式卡片網格 - 全屏第三頁
+           ============================================ */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            min-height: 100vh;
+            width: 100%;
+            margin: 0;
+            align-content: center;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+        }
+
+        .contact-card {
+            position: relative;
+            padding: 2.5rem;
+            background: rgba(13, 17, 23, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .contact-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-cyan), var(--primary-magenta));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+            transform-origin: left;
+        }
+
+        .contact-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .contact-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary-cyan);
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.3);
+        }
+
+        .contact-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .contact-title {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            color: var(--primary-magenta);
+            margin-bottom: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+        }
+
+        .contact-info {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .contact-link {
+            display: inline-block;
+            color: var(--primary-cyan);
+            text-decoration: none;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+            padding-bottom: 2px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .contact-link:hover {
+            border-color: var(--primary-cyan);
+            color: var(--primary-magenta);
+        }
+
+        /* ============================================
+           聯絡表單區域 - 全屏第二頁
+           ============================================ */
+        .main-container {
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+        }
+
+        .contact-form-section {
+            position: relative;
+            padding: 3rem;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.08), rgba(204, 0, 102, 0.08));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 16px;
+            animation: fadeInUp 1s ease 0.4s both;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.1);
+        }
+
+        .contact-form-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-cyan), transparent);
+            opacity: 0.5;
+        }
+
+        .form-title {
+            font-family: var(--font-display);
+            font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+            color: var(--primary-cyan);
+            margin-bottom: 2.5rem;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 2px;
+            position: relative;
+        }
+
+        .form-title::after {
+            content: '';
+            position: absolute;
+            bottom: -1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--primary-magenta), transparent);
+        }
+
+        .form-group {
+            margin-bottom: 1.8rem;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--accent-cyan);
+            margin-bottom: 0.7rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            font-family: var(--font-display);
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 0.9rem 1.1rem;
+            background: rgba(0, 20, 40, 0.4);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 0.95rem;
+            font-family: var(--font-body);
+            transition: all var(--transition-normal);
+            position: relative;
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-cyan);
+            background: rgba(0, 212, 255, 0.05);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2), inset 0 0 15px rgba(0, 212, 255, 0.05);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: var(--font-body);
+        }
+
+        .form-button {
+            width: 100%;
+            padding: 1.2rem 2rem;
+            background: rgba(0, 212, 255, 0.08);
+            border: 1px solid var(--primary-cyan);
+            border-radius: 6px;
+            color: var(--primary-cyan);
+            font-size: 0.95rem;
+            font-weight: 700;
+            font-family: var(--font-display);
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+            z-index: 5;
+            margin-top: 1.5rem;
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+
+        .form-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .form-button:hover {
+            background: rgba(0, 212, 255, 0.15);
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.4), inset 0 0 25px rgba(0, 212, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .form-button:hover::before {
+            left: 100%;
+        }
+
+        .form-button:active {
+            transform: translateY(0);
+        }
+
+        /* ============================================
+           社群媒體連結區
+           ============================================ */
+        .social-section {
+            margin-top: 4rem;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .social-title {
+            font-family: var(--font-display);
+            font-size: clamp(1.3rem, 3vw, 1.8rem);
+            color: var(--primary-magenta);
+            margin-bottom: 2rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .social-item {
+            transition: all 0.3s ease;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.8rem 1.4rem;
+            background: rgba(0, 212, 255, 0.08);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 6px;
+            color: var(--primary-cyan);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: var(--font-display);
+            letter-spacing: 0.5px;
+        }
+
+        .social-link:hover {
+            background: rgba(0, 212, 255, 0.15);
+            border-color: var(--primary-cyan);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .social-icon {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ============================================
+           響應式設計
+           ============================================ */
+        @media (max-width: 768px) {
+            .page-content {
+                padding: 0;
+            }
+
+            .hero-section {
+                padding: 2rem 1rem 1rem;
+                min-height: auto;
+            }
+
+            .glitch-title {
+                font-size: clamp(1.8rem, 6vw, 3rem);
+                margin-bottom: 0.8rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+                gap: 1.5rem;
+                margin-bottom: 2rem;
+            }
+
+            .contact-card {
+                padding: 2rem;
+            }
+
+            .main-container {
+                padding: 1rem;
+            }
+
+            .contact-form-section {
+                padding: 2rem;
+                border-radius: 12px;
+            }
+
+            .form-title {
+                font-size: 1.4rem;
+                margin-bottom: 1.8rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.4rem;
+            }
+
+            .form-label {
+                font-size: 0.9rem;
+                margin-bottom: 0.6rem;
+            }
+
+            .form-input,
+            .form-textarea {
+                padding: 0.8rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .form-textarea {
+                min-height: 120px;
+            }
+
+            .form-button {
+                padding: 1rem 1.5rem;
+                font-size: 0.9rem;
+                margin-top: 1rem;
+            }
+
+            .social-section {
+                padding: 1.5rem;
+                margin-top: 2rem;
+            }
+
+            .social-links {
+                gap: 1rem;
+            }
+
+            .social-link {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* ============================================
+           淺色模式樣式
+           ============================================ */
+        [data-theme="light"] .contact-card {
+            background: rgba(255, 255, 255, 0.6);
+            border-color: rgba(0, 153, 204, 0.3);
+        }
+
+        [data-theme="light"] .contact-card:hover {
+            border-color: rgba(0, 153, 204, 0.6);
+            box-shadow: 0 10px 40px rgba(0, 153, 204, 0.2);
+        }
+
+        [data-theme="light"] .contact-title {
+            color: #cc0066;
+        }
+
+        [data-theme="light"] .contact-info {
+            color: rgba(26, 26, 26, 0.85);
+        }
+
+        [data-theme="light"] .contact-link {
+            color: #0099cc;
+        }
+
+        [data-theme="light"] .contact-link:hover {
+            color: #cc0066;
+        }
+
+        [data-theme="light"] .contact-form-section {
+            background: rgba(255, 255, 255, 0.6);
+            border-color: rgba(0, 153, 204, 0.3);
+        }
+
+        [data-theme="light"] .form-title {
+            color: #0099cc;
+        }
+
+        [data-theme="light"] .form-label {
+            color: #0099cc;
+        }
+
+        [data-theme="light"] .form-input,
+        [data-theme="light"] .form-textarea {
+            background: rgba(255, 255, 255, 0.4);
+            border-color: rgba(0, 153, 204, 0.3);
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .form-input:focus,
+        [data-theme="light"] .form-textarea:focus {
+            border-color: rgba(0, 153, 204, 0.6);
+            background: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 15px rgba(0, 153, 204, 0.15);
+        }
+
+        [data-theme="light"] .form-button {
+            background: rgba(0, 153, 204, 0.08);
+            border-color: #0099cc;
+            color: #0099cc;
+        }
+
+        [data-theme="light"] .form-button:hover {
+            background: rgba(0, 153, 204, 0.2);
+            box-shadow: 0 0 25px rgba(0, 153, 204, 0.2);
+        }
+
+        [data-theme="light"] .social-title {
+            color: #cc0066;
+        }
+
+        [data-theme="light"] .social-link {
+            background: rgba(0, 153, 204, 0.08);
+            border-color: rgba(0, 153, 204, 0.3);
+            color: #0099cc;
+        }
+
+        [data-theme="light"] .social-link:hover {
+            background: rgba(0, 153, 204, 0.2);
+            border-color: #0099cc;
+        }
+
+        /* ============================================
+           關鍵幀動畫
+           ============================================ */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scanlineDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(100px);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景系統 -->
+    <div class="cyber-bg"></div>
+    <div class="grid-overlay"></div>
+    <div class="particles" id="particles"></div>
+
+    <header>
+        <a href="../index.html">
+            <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
+        </a>
+        <div class="nav-container">
+            <ul class="nav-links">
+                <div class="nav-header">
+                    <h2 class="nav-title">選單導航</h2>
+                </div>
+                
+                <div class="search-box">
+                    <input type="text" id="navSearch" class="search-input" placeholder="搜尋頁面...">
+                    <button class="search-btn" aria-label="Search">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="nav-section">
+                    <h3 class="nav-section-title">主要頁面</h3>
+                    <li><a href="about.html">◆ ABOUT</a></li>
+                    <li><a href="experience.html">◆ EXPERIENCE</a></li>
+                    <li><a href="skills.html">◆ SKILLS</a></li>
+                    <li><a href="contact.html" class="active">◆ CONTACT</a></li>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-section-title">特別內容</h3>
+                    <li><a href="../projects/game-center/index.html">◆ GAME CENTER</a></li>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-section-title">更多連結</h3>
+                    <li>
+                        <a href="https://www.youtube.com/@Amano_Shizuki_Kun" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
+                            YouTube
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/AmanoShizukikun" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                            GitHub
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://discord.gg/jac8eAFzjz" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                            </svg>
+                            Discord
+                        </a>
+                    </li>
+                    <li>
+                        <a href="mailto:3b017128@gm.student.ncut.edu.tw" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            Email
+                        </a>
+                    </li>
+                </div>
+            </ul>
+        </div>
+        <div class="header-actions">
+            <button class="settings-toggle" aria-label="Settings"></button>
+            <button class="menu-toggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel">
+        <div class="settings-header">
+            <h2 class="settings-title">系統設定</h2>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="settings-section-title">顯示設定</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>固定導航欄</span>
+                    <span class="setting-description">保持導航欄在頂部固定</span>
+                </div>
+                <div class="toggle-switch" id="headerFixed"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>導航欄高度</span>
+                    <span class="setting-description">調整頂部導航欄的高度</span>
+                </div>
+                <div class="slider-control">
+                    <div class="slider-value" id="headerHeightValue">75px</div>
+                    <input type="range" class="slider-range" id="headerHeight" min="50" max="100" value="75" step="5">
+                    <div class="slider-marks">
+                        <span data-value="50">小</span>
+                        <span data-value="75">中</span>
+                        <span data-value="100">大</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>側邊欄文字顯示</span>
+                    <span class="setting-description">是否持續顯示側邊欄文字標題</span>
+                </div>
+                <div class="toggle-switch active" id="sideNavTextVisible"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>主題模式</span>
+                    <span class="setting-description">切換深色/淺色模式</span>
+                </div>
+                <div class="select-control">
+                    <select id="themeMode">
+                        <option value="dark">深色模式</option>
+                        <option value="light">淺色模式</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="settings-section-title">效能設定</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>動畫強度</span>
+                    <span class="setting-description">調整頁面動畫效果強度</span>
+                </div>
+                <div class="slider-control">
+                    <div class="slider-value" id="animationValue">強</div>
+                    <input type="range" class="slider-range" id="animationStrength" min="0" max="2" value="2" step="1">
+                    <div class="slider-marks">
+                        <span data-value="0">關</span>
+                        <span data-value="1">低</span>
+                        <span data-value="2">強</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item fps-monitor">
+                <div class="setting-label">
+                    <span>幀數監控</span>
+                    <span class="setting-description">即時顯示頁面渲染幀率</span>
+                </div>
+                <div class="fps-display">
+                    <span class="fps-value" id="fpsValue">000</span>
+                    <span class="fps-unit">FPS</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="settings-section-title">音效設定</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>音效開關</span>
+                    <span class="setting-description">啟用/關閉互動音效</span>
+                </div>
+                <div class="toggle-switch active" id="soundEnabled"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要內容 -->
+    <main class="page-content">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h1 class="glitch-title">聯絡我</h1>
+            <p class="hero-subtitle">讓我們一起創造未來科技</p>
+            <div class="status-badge">隨時準備回應</div>
+        </section>
+
+        <!-- 聯絡表單 -->
+        <div class="main-container">
+            <section class="contact-form-section">
+                <h2 class="form-title">傳送訊息</h2>
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label class="form-label" for="name">姓名 *</label>
+                        <input type="text" class="form-input" id="name" name="name" required placeholder="請輸入您的姓名">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="email">電子郵件 *</label>
+                        <input type="email" class="form-input" id="email" name="email" required placeholder="your.email@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="subject">主題 *</label>
+                        <input type="text" class="form-input" id="subject" name="subject" required placeholder="請簡述您的訊息主題">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="message">訊息內容 *</label>
+                        <textarea class="form-textarea" id="message" name="message" required placeholder="請輸入您想說的話..."></textarea>
+                    </div>
+
+                    <button type="submit" class="form-button">發送訊息</button>
+                </form>
+            </section>
+        </div>
+            
+        <!-- 聯絡方式卡片 -->
+        <div class="contact-grid">
+            <div class="contact-card">
+                <span class="contact-icon">📧</span>
+                <h3 class="contact-title">電子郵件</h3>
+                <p class="contact-info">透過郵件聯絡我，我會盡快回覆</p>
+                <a href="mailto:3b017128@gm.student.ncut.edu.tw" class="contact-link">
+                    3b017128@gm.student.ncut.edu.tw
+                </a>
+            </div>
+
+            <div class="contact-card">
+                <span class="contact-icon">💬</span>
+                <h3 class="contact-title">Discord</h3>
+                <p class="contact-info">加入我的 Discord 伺服器進行即時交流</p>
+                <a href="https://discord.gg/jac8eAFzjz" target="_blank" rel="noopener noreferrer" class="contact-link">
+                    加入伺服器
+                </a>
+            </div>
+
+            <div class="contact-card">
+                <span class="contact-icon">🎬</span>
+                <h3 class="contact-title">YouTube</h3>
+                <p class="contact-info">訂閱我的頻道獲取最新內容</p>
+                <a href="https://www.youtube.com/@Amano_Shizuki_Kun" target="_blank" rel="noopener noreferrer" class="contact-link">
+                    訂閱頻道
+                </a>
+            </div>
+
+            <div class="contact-card">
+                <span class="contact-icon">💻</span>
+                <h3 class="contact-title">GitHub</h3>
+                <p class="contact-info">查看我的開源專案和程式碼</p>
+                <a href="https://github.com/AmanoShizukikun" target="_blank" rel="noopener noreferrer" class="contact-link">
+                    訪問 GitHub
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- 腳本 -->
+    <script src="../assets/js/core.js"></script>
+    <script src="../assets/js/navigation.js"></script>
+    <script src="../assets/js/animations.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化核心系統
+            Core.initBackground();
+            Navigation.init();
+            Animations.init();
+
+            // 觸發頁面進場動畫
+            Animations.triggerPageEntrance();
+
+            // 添加卡片懸浮動畫
+            const contactCards = document.querySelectorAll('.contact-card');
+            contactCards.forEach((card, index) => {
+                card.style.animation = `fadeInUp 0.6s ease ${0.1 * (index + 1)}s both`;
+            });
+
+            // 社群連結動畫
+            const socialLinks = document.querySelectorAll('.social-link');
+            socialLinks.forEach((link, index) => {
+                link.style.animation = `fadeInUp 0.6s ease ${0.15 * (index + 1)}s both`;
+            });
+
+            // 表單提交處理
+            const contactForm = document.getElementById('contactForm');
+            if (contactForm) {
+                contactForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const formData = {
+                        name: document.getElementById('name').value,
+                        email: document.getElementById('email').value,
+                        subject: document.getElementById('subject').value,
+                        message: document.getElementById('message').value
+                    };
+
+                    // 驗證表單
+                    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+                        alert('請填寫所有必填欄位');
+                        return;
+                    }
+
+                    // 構建 mailto 連結
+                    const mailtoLink = `mailto:3b017128@gm.student.ncut.edu.tw?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(`姓名: ${formData.name}\n電子郵件: ${formData.email}\n\n訊息內容:\n${formData.message}`)}`;
+                    
+                    // 顯示加載狀態
+                    const submitButton = contactForm.querySelector('.form-button');
+                    const originalText = submitButton.textContent;
+                    submitButton.textContent = '正在準備...';
+                    submitButton.disabled = true;
+
+                    // 打開郵件客戶端
+                    setTimeout(() => {
+                        window.location.href = mailtoLink;
+                        submitButton.textContent = originalText;
+                        submitButton.disabled = false;
+                        
+                        // 重置表單
+                        contactForm.reset();
+                    }, 500);
+                });
+
+                // 表單輸入焦點動畫
+                const formInputs = contactForm.querySelectorAll('.form-input, .form-textarea');
+                formInputs.forEach(input => {
+                    input.addEventListener('focus', () => {
+                        input.parentElement.style.opacity = '1';
+                    });
+                });
+            }
+
+            // 添加故障效果到標題
+            const heroTitle = document.querySelector('.glitch-title');
+            if (heroTitle) {
+                setInterval(() => {
+                    if (Math.random() > 0.93) {
+                        Animations.glitchEffect(heroTitle, 150);
+                    }
+                }, 4000);
+            }
+
+            // 卡片脈衝動畫
+            const statusBadge = document.querySelector('.status-badge');
+            if (statusBadge) {
+                Animations.pulseElement(statusBadge, 2000);
+            }
+
+            // 社群連結 hover 動畫
+            socialLinks.forEach(link => {
+                link.addEventListener('mouseenter', () => {
+                    link.style.transform = 'translateY(-3px)';
+                });
+                link.addEventListener('mouseleave', () => {
+                    link.style.transform = 'translateY(0)';
+                });
+            });
+        });
+
+        // 定義 fadeInUp 動畫如果還未定義
+        if (!window.fadeInUpDefined) {
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            window.fadeInUpDefined = true;
+        }
+    </script>
+</body>
+</html>

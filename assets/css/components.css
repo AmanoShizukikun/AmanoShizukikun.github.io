@@ -672,6 +672,97 @@ header > a:hover::after {
     padding: 0.5rem;
 }
 
+/* ============================================
+   FPS 監控顯示
+   ============================================ */
+.fps-display {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    font-family: var(--font-display);
+    padding: 0.35rem 0.7rem;
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid var(--primary-cyan);
+    border-radius: 4px;
+    min-width: 70px;
+    justify-content: center;
+}
+
+.fps-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary-cyan);
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+    transition: color var(--transition-fast);
+    width: 3.5ch; /* 固定寬度為 3.5 個字元寬度 */
+    text-align: center;
+    display: inline-block;
+    font-variant-numeric: tabular-nums; /* 使用等寬數字 */
+}
+
+/* FPS 顏色指示器 */
+.fps-value.fps-excellent {
+    color: #00ff88;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+}
+
+.fps-value.fps-good {
+    color: var(--primary-cyan);
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+}
+
+.fps-value.fps-moderate {
+    color: #ffaa00;
+    text-shadow: 0 0 10px rgba(255, 170, 0, 0.6);
+}
+
+.fps-value.fps-poor {
+    color: #ff4444;
+    text-shadow: 0 0 10px rgba(255, 68, 68, 0.6);
+}
+
+.fps-unit {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* 淺色模式 FPS 監控 */
+[data-theme="light"] .fps-display {
+    background: rgba(0, 153, 204, 0.08);
+    border-color: rgba(0, 153, 204, 0.3);
+}
+
+[data-theme="light"] .fps-value {
+    color: #0099cc;
+    text-shadow: none;
+}
+
+[data-theme="light"] .fps-value.fps-excellent {
+    color: #00aa66;
+    text-shadow: none;
+}
+
+[data-theme="light"] .fps-value.fps-good {
+    color: #0099cc;
+    text-shadow: none;
+}
+
+[data-theme="light"] .fps-value.fps-moderate {
+    color: #cc8800;
+    text-shadow: none;
+}
+
+[data-theme="light"] .fps-value.fps-poor {
+    color: #cc3333;
+    text-shadow: none;
+}
+
+[data-theme="light"] .fps-unit {
+    color: rgba(26, 26, 26, 0.5);
+}
+
 /* 導航連結 - 側邊欄樣式 (所有裝置) */
 .nav-links {
     position: fixed;
@@ -1481,7 +1572,7 @@ body.side-nav-text-hidden .side-nav a:hover::after {
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(0, 212, 255, 0.3);
     border-radius: 6px;
-    margin: -2.5rem 0 1.5rem 0;
+    margin: 0 0 1.5rem 0;
     transition: all var(--transition-normal);
 }
 

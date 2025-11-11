@@ -394,13 +394,19 @@ const Navigation = {
     initSettings() {
         // 從 localStorage 載入設定
         const loadSettings = () => {
+            // 安全地解析 animationStrength，確保它是 0, 1 或 2
+            let animationStrength = parseInt(localStorage.getItem('animationStrength'));
+            if (isNaN(animationStrength) || animationStrength < 0 || animationStrength > 2) {
+                animationStrength = 2; // 預設為強
+            }
+            
             return {
                 headerFixed: localStorage.getItem('headerFixed') !== 'false',
-                headerHeight: parseInt(localStorage.getItem('headerHeight')) || 60,
+                headerHeight: parseInt(localStorage.getItem('headerHeight')) || 75, // 預設 75px
                 sideNavTextVisible: localStorage.getItem('sideNavTextVisible') !== 'false',
                 theme: localStorage.getItem('theme') || 'dark',
-                animationStrength: parseInt(localStorage.getItem('animationStrength')) || 2, // 0=關, 1=低, 2=強
-                soundEnabled: localStorage.getItem('soundEnabled') !== 'false'
+                animationStrength: animationStrength, // 0=關, 1=低, 2=強
+                soundEnabled: localStorage.getItem('soundEnabled') === 'true' // 預設關閉音效
             };
         };
 
@@ -631,9 +637,12 @@ const Navigation = {
         const animationValue = document.getElementById('animationValue');
         if (animationSlider && animationValue) {
             const labels = ['關', '低', '強'];
+            
+            // 使用已載入的 settings 中的值，而不是重新讀取 localStorage
             animationSlider.value = settings.animationStrength;
             animationValue.textContent = labels[settings.animationStrength];
             
+            // 添加事件監聽器
             animationSlider.addEventListener('input', (e) => {
                 const value = parseInt(e.target.value);
                 animationValue.textContent = labels[value];
@@ -880,6 +889,51 @@ const Navigation = {
     },
 
     /**
+     * 初始化 FPS 監控
+     * 即時監控並顯示頁面幀率
+     */
+    initFPSMonitor() {
+        const fpsValueElement = document.getElementById('fpsValue');
+        if (!fpsValueElement) return;
+
+        let lastTime = performance.now();
+        let frameCount = 0;
+        let fps = 60;
+
+        const updateFPS = (currentTime) => {
+            frameCount++;
+            
+            // 每秒更新一次 FPS 顯示
+            if (currentTime >= lastTime + 1000) {
+                fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+                frameCount = 0;
+                lastTime = currentTime;
+
+                // 更新顯示 - 固定為 3 位數格式
+                fpsValueElement.textContent = fps.toString().padStart(3, '0');
+
+                // 根據 FPS 設置顏色類別
+                fpsValueElement.classList.remove('fps-excellent', 'fps-good', 'fps-moderate', 'fps-poor');
+                
+                if (fps >= 55) {
+                    fpsValueElement.classList.add('fps-excellent');
+                } else if (fps >= 45) {
+                    fpsValueElement.classList.add('fps-good');
+                } else if (fps >= 30) {
+                    fpsValueElement.classList.add('fps-moderate');
+                } else {
+                    fpsValueElement.classList.add('fps-poor');
+                }
+            }
+
+            requestAnimationFrame(updateFPS);
+        };
+
+        // 啟動 FPS 監控
+        requestAnimationFrame(updateFPS);
+    },
+
+    /**
      * 初始化所有導航功能
      */
     init() {
@@ -891,6 +945,7 @@ const Navigation = {
         this.initBackToTop();
         this.generateBreadcrumb();
         this.initNavSearch(); // 初始化搜尋功能
+        this.initFPSMonitor(); // 初始化 FPS 監控
     }
 };
 

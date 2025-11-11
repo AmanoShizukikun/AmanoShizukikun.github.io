@@ -512,10 +512,11 @@ body.no-animations *::after {
         --spacing-md: 1.5rem;
         --spacing-lg: 2.5rem;
         --spacing-xl: 3.5rem;
+        --header-height: 50px; /* 手機版 header 高度 */
     }
 
     body {
-        padding-top: 60px; /* Header height compensation */
+        padding-top: 50px; /* Header height compensation */
     }
 
     .container {
