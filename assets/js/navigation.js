@@ -122,7 +122,18 @@ const Navigation = {
 
         // 切換選單
         const toggleMenu = (show) => {
+            const header = document.querySelector('header');
+            const headerFixed = localStorage.getItem('headerFixed') !== 'false';
+            
             if (show) {
+                // 開啟選單時，如果 header 不固定，需要暫時固定它以確保選單正確定位
+                if (!headerFixed && header) {
+                    const headerHeight = parseInt(localStorage.getItem('headerHeight')) || 75;
+                    header.style.position = 'fixed';
+                    header.style.top = '0';
+                    document.body.style.paddingTop = headerHeight + 'px';
+                }
+                
                 navLinks.classList.add('active');
                 menuToggle.classList.add('active');
                 overlay.classList.add('active');
@@ -135,6 +146,12 @@ const Navigation = {
                 if (!settingsPanel || !settingsPanel.classList.contains('active')) {
                     overlay.classList.remove('active');
                     document.body.style.overflow = ''; // 恢復滾動
+                    
+                    // 關閉選單時，恢復 header 到用戶設定的狀態
+                    if (!headerFixed && header) {
+                        header.style.position = 'relative';
+                        document.body.style.paddingTop = '0';
+                    }
                 }
             }
         };
@@ -628,7 +645,10 @@ const Navigation = {
             themeSelect.addEventListener('change', (e) => {
                 settings.theme = e.target.value;
                 saveSettings(settings);
-                applySettings(settings);
+                // 設定面板打開時跳過 header 固定狀態應用
+                const settingsPanel = document.querySelector('.settings-panel');
+                const skipHeaderFixed = settingsPanel && settingsPanel.classList.contains('active');
+                applySettings(settings, skipHeaderFixed);
             });
         }
 
@@ -648,7 +668,10 @@ const Navigation = {
                 animationValue.textContent = labels[value];
                 settings.animationStrength = value;
                 saveSettings(settings);
-                applySettings(settings);
+                // 設定面板打開時跳過 header 固定狀態應用
+                const settingsPanel = document.querySelector('.settings-panel');
+                const skipHeaderFixed = settingsPanel && settingsPanel.classList.contains('active');
+                applySettings(settings, skipHeaderFixed);
             });
             
             // 點擊標記跳轉到對應檔位
@@ -662,7 +685,10 @@ const Navigation = {
                         animationValue.textContent = labels[value];
                         settings.animationStrength = value;
                         saveSettings(settings);
-                        applySettings(settings);
+                        // 設定面板打開時跳過 header 固定狀態應用
+                        const settingsPanel = document.querySelector('.settings-panel');
+                        const skipHeaderFixed = settingsPanel && settingsPanel.classList.contains('active');
+                        applySettings(settings, skipHeaderFixed);
                     });
                 });
             }
@@ -676,7 +702,10 @@ const Navigation = {
                 settings.soundEnabled = !settings.soundEnabled;
                 soundToggle.classList.toggle('active', settings.soundEnabled);
                 saveSettings(settings);
-                applySettings(settings);
+                // 設定面板打開時跳過 header 固定狀態應用
+                const settingsPanel = document.querySelector('.settings-panel');
+                const skipHeaderFixed = settingsPanel && settingsPanel.classList.contains('active');
+                applySettings(settings, skipHeaderFixed);
             });
         }
 
@@ -740,7 +769,10 @@ const Navigation = {
                 settings.sideNavTextVisible = !settings.sideNavTextVisible;
                 sideNavTextToggle.classList.toggle('active', settings.sideNavTextVisible);
                 saveSettings(settings);
-                applySettings(settings);
+                // 設定面板打開時跳過 header 固定狀態應用
+                const settingsPanel = document.querySelector('.settings-panel');
+                const skipHeaderFixed = settingsPanel && settingsPanel.classList.contains('active');
+                applySettings(settings, skipHeaderFixed);
             });
         }
     },
