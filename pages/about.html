@@ -54,7 +54,7 @@
             width: 2px;
             height: 100px;
             background: linear-gradient(to bottom, transparent, var(--primary-cyan));
-            animation: scanlineDown 2s ease-in-out infinite;
+            display: none;
         }
 
         .glitch-title {
@@ -84,6 +84,21 @@
             font-size: 0.9rem;
             letter-spacing: 0.2em;
             animation: pulse 2s ease-in-out infinite;
+            position: relative;
+            margin-top: 1rem;
+            margin-bottom: 6rem;
+        }
+
+        .status-badge::after {
+            content: '';
+            position: absolute;
+            bottom: -160px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 70px;
+            background: linear-gradient(to bottom, transparent, var(--primary-cyan));
+            animation: scanlineDown 2s ease-in-out infinite;
         }
 
         .status-badge::before {
@@ -95,6 +110,11 @@
         @keyframes blink {
             0%, 50%, 100% { opacity: 1; }
             25%, 75% { opacity: 0.3; }
+        }
+
+        @keyframes scanlineDown {
+            0% { transform: translateY(-50%); }
+            100% { transform: translateY(50%); }
         }
 
         /* ============================================
@@ -840,17 +860,16 @@
                         <span class="info-value">天野靜樹</span>
                     </li>
                     <li class="info-item">
+                        <span class="info-label">MAJOR</span>
+                        <span class="info-value">資訊工程專業</span>
+                    </li>
+                    <li class="info-item">
                         <span class="info-label">POSITION</span>
-                        <span class="info-value">N/A</span>
+                        <span class="info-value">學生</span>
                     </li>
                     <li class="info-item">
                         <span class="info-label">MOTTO</span>
                         <span class="info-value">今天的事能拖就拖，明天的事明天再說。</span>
-                    </li>
-                </ul>
-                    <li class="info-item">
-                        <span class="info-label">MAJOR</span>
-                        <span class="info-value">資訊工程</span>
                     </li>
                     <li class="info-item">
                         <span class="info-label">STATUS</span>

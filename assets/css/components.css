@@ -4,7 +4,8 @@
 header {
     background: linear-gradient(135deg, rgba(0, 0, 0, 0.85), rgba(26, 26, 46, 0.85));
     backdrop-filter: blur(20px);
-    padding: 15px 0;
+    padding: 0;
+    height: var(--header-height);
     font-size: 28px;
     font-weight: 900;
     display: flex;
@@ -389,7 +390,8 @@ header > a:hover::after {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem;
+    height: var(--setting-item-height);
+    padding: 0 1rem;
     margin-bottom: 0.8rem;
     background: rgba(0, 212, 255, 0.05);
     border: 1px solid rgba(0, 212, 255, 0.2);

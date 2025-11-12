@@ -12,73 +12,1398 @@
     <link rel="stylesheet" href="../../assets/css/animations.css">
     
     <style>
-        /* Game Center 主要容器 */
-        .game-center-container {
-            max-width: 100%;
-            padding: 120px 40px 60px;
-            position: relative;
-            z-index: 1;
+        /* ========== 整版進入動畫 ========== */
+        .page-entrance-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 8888;
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity 1.5s cubic-bezier(0.76, 0, 0.24, 1) 0.3s;
+            background: radial-gradient(ellipse at center, rgba(0, 255, 255, 0.08) 0%, transparent 70%);
         }
 
-        /* Hero Section */
-        .gc-hero {
-            text-align: center;
-            padding: 60px 0 40px;
+        .page-entrance-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 進場CG背景 */
+        .entrance-cg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0a1a2e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* 矩陣數字雨背景 */
+        .entrance-matrix {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.15;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #00ffff;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .matrix-column {
+            position: absolute;
+            top: -100%;
+            white-space: nowrap;
+            animation: matrixFall linear infinite;
+            font-size: 16px; /* 增加字體大小 */
+        }
+
+        @keyframes matrixFall {
+            0% { top: -100%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        /* 六邊形網格背景 */
+        .entrance-hexagons {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            animation: hexagonsAppear 1.5s ease-out forwards;
+        }
+
+        @keyframes hexagonsAppear {
+            0% { opacity: 0; transform: scale(1.5); }
+            50% { opacity: 0.5; }
+            100% { opacity: 0.3; transform: scale(1); }
+        }
+
+        .hexagon {
+            position: absolute;
+            width: 120px;
+            height: 104px; /* 正六角形高度 = width * √3 / 2 */
+            background: rgba(0, 255, 255, 0.15);
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%);
+            animation: hexagonPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes hexagonPulse {
+            0%, 100% { 
+                border-color: rgba(0, 255, 255, 0.4); 
+                background: rgba(0, 255, 255, 0.1);
+                box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.2);
+            }
+            50% { 
+                border-color: rgba(255, 0, 255, 0.5); 
+                background: rgba(255, 0, 255, 0.15);
+                box-shadow: inset 0 0 15px rgba(255, 0, 255, 0.3);
+            }
+        }
+
+        /* 掃描線效果 */
+        .entrance-scanlines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 255, 0.03) 0px,
+                transparent 2px,
+                transparent 4px
+            );
+            animation: scanlineMove 8s linear infinite;
+            opacity: 0.5;
+        }
+
+        @keyframes scanlineMove {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+
+        /* 雷達掃描效果 */
+        .entrance-radar {
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            animation: radarExpand 2.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            filter: drop-shadow(0 0 40px rgba(0, 255, 255, 0.6));
+        }
+
+        .entrance-radar::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200px;
+            height: 200px;
+            margin-left: -100px;
+            margin-top: -100px;
+            border: 3px solid rgba(0, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: radarRing1 2.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .entrance-radar::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300px;
+            height: 300px;
+            margin-left: -150px;
+            margin-top: -150px;
+            border: 2px solid rgba(0, 255, 255, 0.25);
+            border-radius: 50%;
+            animation: radarRing2 2.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+        }
+
+        @keyframes radarExpand {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+            20% {
+                opacity: 1;
+            }
+            80% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        @keyframes radarRing1 {
+            0% {
+                width: 0;
+                height: 0;
+                margin-left: 0;
+                margin-top: 0;
+                opacity: 1;
+            }
+            100% {
+                width: 800px;
+                height: 800px;
+                margin-left: -400px;
+                margin-top: -400px;
+                opacity: 0;
+            }
+        }
+
+        @keyframes radarRing2 {
+            0% {
+                width: 0;
+                height: 0;
+                margin-left: 0;
+                margin-top: 0;
+                opacity: 1;
+            }
+            100% {
+                width: 1000px;
+                height: 1000px;
+                margin-left: -500px;
+                margin-top: -500px;
+                opacity: 0;
+            }
+        }
+
+        /* 進場動畫層 */
+        .entrance-layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .entrance-layer-1 {
+            background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.2) 50%, transparent 100%);
+            animation: entranceSweep 1.2s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+        }
+
+        .entrance-layer-2 {
+            background: radial-gradient(ellipse at center, rgba(255, 0, 255, 0.25) 0%, transparent 70%);
+            animation: entrancePulse 1.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        .entrance-layer-3 {
+            background: linear-gradient(45deg, transparent 40%, rgba(0, 255, 255, 0.15) 50%, transparent 60%);
+            animation: entranceDiagonal 1.6s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+        }
+
+        @keyframes entranceSweep {
+            0% {
+                transform: translateX(-100%);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        @keyframes entrancePulse {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            40% {
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        @keyframes entranceDiagonal {
+            0% {
+                transform: translate(-100%, -100%) rotate(-45deg);
+                opacity: 0.4;
+            }
+            100% {
+                transform: translate(100%, 100%) rotate(-45deg);
+                opacity: 0;
+            }
+        }
+
+        /* 粒子爆發效果 */
+        .entrance-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .entrance-particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(0, 255, 255, 0.8);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+            animation: particleBurst 1.5s ease-out forwards;
+        }
+
+        @keyframes particleBurst {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* 進場文字特效 */
+        .entrance-text {
             position: relative;
+            z-index: 10;
+            text-align: center;
+            opacity: 0;
+            animation: entranceTextFade 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards;
+        }
+
+        @keyframes entranceTextFade {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translateY(50px) rotateX(90deg);
+                filter: blur(20px);
+            }
+            50% {
+                filter: blur(5px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0) rotateX(0deg);
+                filter: blur(0);
+            }
+        }
+
+        .entrance-title {
+            font-size: 4rem;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            background: linear-gradient(135deg, #00ffff, #ff00ff, #00ffff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            margin-bottom: 10px;
+            animation: entranceGlow 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+                       gradientShift 3s ease infinite;
+            position: relative;
+        }
+
+        .entrance-title::before {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #00ffff, #ff00ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0.3;
+            filter: blur(10px);
+            animation: glitchShift 0.3s infinite;
+        }
+
+        @keyframes entranceGlow {
+            0% {
+                text-shadow: none;
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            50% {
+                text-shadow: 0 0 60px rgba(0, 255, 255, 0.8),
+                            0 0 100px rgba(255, 0, 255, 0.5);
+                opacity: 0.7;
+            }
+            100% {
+                text-shadow: 0 0 30px rgba(0, 255, 255, 0.5), 
+                            0 0 60px rgba(255, 0, 255, 0.3),
+                            0 0 90px rgba(0, 255, 255, 0.2);
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes glitchShift {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(-2px, 2px); }
+            66% { transform: translate(2px, -2px); }
+        }
+
+        .entrance-subtitle {
+            font-size: 1.4rem;
+            color: rgba(0, 255, 255, 0.8);
+            font-family: 'Rajdhani', sans-serif;
+            letter-spacing: 0.3em;
+            animation: entranceSubtitle 1.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards;
+            opacity: 0;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        @keyframes entranceSubtitle {
+            0% {
+                opacity: 0;
+                transform: translateY(30px) scale(0.8);
+                letter-spacing: 1em;
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                letter-spacing: 0.3em;
+            }
+        }
+
+        /* 進度條 */
+        .entrance-progress {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 3px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            opacity: 0;
+            animation: progressAppear 0.5s ease-out 0.5s forwards;
+        }
+
+        @keyframes progressAppear {
+            to { opacity: 1; }
+        }
+
+        .entrance-progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            animation: progressFill 2.5s ease-out forwards;
+        }
+
+        @keyframes progressFill {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 768px) {
+            .entrance-title {
+                font-size: 2.5rem;
+                letter-spacing: 0.2em;
+            }
+            .entrance-subtitle {
+                font-size: 1rem;
+            }
+            .entrance-radar {
+                width: 300px;
+                height: 300px;
+            }
+        }
+
+        /* ========== 淺色模式進場動畫 ========== */
+        [data-theme="light"] .page-entrance-overlay {
+            background: radial-gradient(ellipse at center, rgba(0, 150, 200, 0.1) 0%, transparent 70%);
+        }
+
+        [data-theme="light"] .entrance-cg {
+            background: linear-gradient(135deg, #f0f5ff 0%, #e8f0ff 50%, #f5f8ff 100%);
+        }
+
+        /* 淺色模式 - 矩陣數字雨 */
+        [data-theme="light"] .entrance-matrix {
+            color: #0088cc;
+            opacity: 0.1;
+        }
+
+        /* 淺色模式 - 六邊形網格 */
+        [data-theme="light"] .hexagon {
+            background: rgba(0, 170, 255, 0.25);
+            border: 1px solid rgba(0, 170, 255, 0.25);
+        }
+
+        /* 淺色模式 - 掃描線 */
+        [data-theme="light"] .entrance-scanlines {
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 120, 180, 0.02) 0px,
+                transparent 2px,
+                transparent 4px
+            );
+            opacity: 0.4;
+        }
+
+        /* 淺色模式 - 雷達掃描 */
+        [data-theme="light"] .entrance-radar {
+            filter: drop-shadow(0 0 40px rgba(0, 120, 180, 0.5));
+        }
+
+        [data-theme="light"] .entrance-radar::before {
+            border-color: rgba(0, 120, 180, 0.4);
+            box-shadow: 0 0 20px rgba(0, 120, 180, 0.3);
+        }
+
+        [data-theme="light"] .entrance-radar::after {
+            border-color: rgba(0, 120, 180, 0.25);
+            box-shadow: 0 0 15px rgba(0, 120, 180, 0.2);
+        }
+
+        /* 淺色模式 - 動畫層 */
+        [data-theme="light"] .entrance-layer-1 {
+            background: linear-gradient(90deg, transparent 0%, rgba(0, 120, 180, 0.15) 50%, transparent 100%);
+        }
+
+        [data-theme="light"] .entrance-layer-2 {
+            background: radial-gradient(ellipse at center, rgba(100, 50, 200, 0.2) 0%, transparent 70%);
+        }
+
+        [data-theme="light"] .entrance-layer-3 {
+            background: linear-gradient(45deg, transparent 40%, rgba(0, 120, 180, 0.12) 50%, transparent 60%);
+        }
+
+        /* 淺色模式 - 粒子效果 */
+        [data-theme="light"] .entrance-particle {
+            background: rgba(0, 120, 180, 0.8);
+            box-shadow: 0 0 10px rgba(0, 120, 180, 0.6);
+        }
+
+        /* 淺色模式 - 標題文字 */
+        [data-theme="light"] .entrance-title {
+            background: linear-gradient(135deg, #0088cc, #6644cc, #0088cc);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: none;
+        }
+
+        [data-theme="light"] .entrance-title::before {
+            background: linear-gradient(135deg, #0088cc, #6644cc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 淺色模式 - 副標題 */
+        [data-theme="light"] .entrance-subtitle {
+            color: rgba(0, 120, 180, 0.9);
+            text-shadow: 0 0 15px rgba(0, 120, 180, 0.3);
+        }
+
+        /* 淺色模式 - 進度條 */
+        [data-theme="light"] .entrance-progress {
+            background: rgba(0, 120, 180, 0.15);
+        }
+
+        [data-theme="light"] .entrance-progress-bar {
+            background: linear-gradient(90deg, #0088cc, #6644cc);
+            box-shadow: 0 0 10px rgba(0, 136, 204, 0.5);
+        }
+
+        /* ========== 主容器佈局 ========== */
+        .game-center-wrapper {
+            display: flex;
+            min-height: calc(100vh - 80px);
+            position: relative;
+            z-index: 1;
+            margin-top: 80px; /* 為 fixed header 留空間 */
+        }
+
+        /* 確保 header 按鈕在最上層且可點擊 */
+        header {
+            z-index: 1000 !important;
+        }
+
+        header .header-actions {
+            z-index: 1001;
+            position: relative;
+        }
+
+        header .menu-toggle,
+        header .settings-toggle {
+            z-index: 1002;
+            position: relative;
+            pointer-events: auto;
+        }
+
+        /* 左側導覽欄 */
+        .gc-sidebar {
+            width: 300px;
+            height: calc(100vh - 80px);
+            position: fixed;
+            left: 0;
+            top: 80px;
+            background: linear-gradient(180deg, rgba(10, 10, 20, 0.9), rgba(20, 5, 40, 0.9));
+            border-right: 2px solid rgba(0, 255, 255, 0.2);
+            padding: 40px 30px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            animation: sidebarSlideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both;
+            flex-shrink: 0;
+            transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        padding 0.3s ease;
+            /* 移除 top 和 height 的 transition,讓它立即跟隨 header */
+            z-index: 900; /* 確保不會覆蓋 header (header z-index: 1000) */
+        }
+
+        @keyframes sidebarSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .gc-sidebar.collapsed {
+            width: 70px;
+            padding: 40px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        [data-theme="light"] .gc-sidebar {
+            background: linear-gradient(180deg, rgba(240, 245, 252, 0.95), rgba(235, 240, 248, 0.95));
+            border-right-color: rgba(0, 150, 150, 0.2);
+        }
+
+        /* 摺疊按鈕 - 與菜單項目一致的樣式 */
+        .gc-sidebar-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            padding: 10px;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            border-radius: 4px;
+            width: 44px;
+            height: 44px;
+            text-align: center;
+            margin: 0 auto 8px auto;
+            flex-direction: column;
+        }
+
+        .gc-sidebar:not(.collapsed) .gc-sidebar-toggle {
+            width: 100%;
+            justify-content: flex-start;
+            gap: 15px;
+            margin-bottom: 8px;
+            flex-direction: row;
+        }
+
+        .gc-sidebar-toggle::before {
+            content: attr(data-icon);
+            display: inline-flex;
+            width: 24px;
+            height: 24px;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .gc-sidebar-toggle span {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            width: 0;
+        }
+
+        .gc-sidebar:not(.collapsed) .gc-sidebar-toggle span {
+            opacity: 1;
+            width: auto;
+            overflow: visible;
+        }
+
+        .gc-sidebar.collapsed .gc-sidebar-toggle span {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        .gc-sidebar-toggle:hover {
+            color: var(--accent-cyan);
+            border-left-color: transparent;
+            background: rgba(0, 255, 255, 0.1);
+            transform: scale(1.1);
+            border-radius: 8px;
+        }
+
+        .gc-sidebar:not(.collapsed) .gc-sidebar-toggle:hover {
+            border-left-color: var(--accent-cyan);
+            transform: translateX(5px);
+        }
+
+        .gc-sidebar.collapsed .gc-sidebar-toggle:hover {
+            transform: scale(1.1);
+            border-left-color: transparent;
+            padding: 12px;
+        }
+
+        [data-theme="light"] .gc-sidebar-toggle {
+            color: #666;
+        }
+
+        [data-theme="light"] .gc-sidebar-toggle:hover {
+            color: #009999;
+            border-left-color: #009999;
+            background: rgba(0, 150, 150, 0.1);
+        }
+
+        /* 遊戲中心返回按鈕 */
+        .gc-sidebar-back-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            padding: 10px;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            border-radius: 4px;
+            width: 44px;
+            height: 44px;
+            text-align: center;
+            margin: 0 auto 8px auto;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gc-sidebar:not(.collapsed) .gc-sidebar-back-btn {
+            width: 100%;
+            justify-content: flex-start;
+            gap: 15px;
+            margin-bottom: 8px;
+            flex-direction: row;
+        }
+
+        .gc-sidebar-back-btn::before {
+            content: attr(data-icon);
+            display: inline-flex;
+            width: 24px;
+            height: 24px;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .gc-sidebar-back-btn span {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            width: 0;
+        }
+
+        .gc-sidebar:not(.collapsed) .gc-sidebar-back-btn span {
+            opacity: 1;
+            width: auto;
+            overflow: visible;
+        }
+
+        .gc-sidebar.collapsed .gc-sidebar-back-btn span {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        .gc-sidebar-back-btn:hover {
+            color: var(--accent-cyan);
+            border-left-color: transparent;
+            background: rgba(0, 255, 255, 0.1);
+            transform: scale(1.1);
+            border-radius: 8px;
+        }
+
+        .gc-sidebar:not(.collapsed) .gc-sidebar-back-btn:hover {
+            border-left-color: var(--accent-cyan);
+            transform: translateX(5px);
+        }
+
+        .gc-sidebar.collapsed .gc-sidebar-back-btn:hover {
+            transform: scale(1.1);
+            border-left-color: transparent;
+            padding: 12px;
+        }
+
+        [data-theme="light"] .gc-sidebar-back-btn {
+            color: #666;
+        }
+
+        [data-theme="light"] .gc-sidebar-back-btn:hover {
+            color: #009999;
+            border-left-color: #009999;
+            background: rgba(0, 150, 150, 0.1);
+        }
+
+        .gc-sidebar-title {
+            display: none;
+        }
+
+        .gc-sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .gc-sidebar-item {
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .gc-sidebar-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            padding: 10px;
+            width: 44px;
+            height: 44px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            flex-direction: column;
+            margin: 0 auto;
+        }
+
+        [data-theme="light"] .gc-sidebar-link {
+            color: #666;
+        }
+
+        .gc-sidebar-link::before {
+            content: attr(data-icon);
+            display: inline-flex;
+            width: 24px;
+            height: 24px;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .gc-sidebar-link span {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            margin: 0;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .gc-sidebar:not(.collapsed) .gc-sidebar-link {
+            width: 100%;
+            justify-content: flex-start;
+            gap: 15px;
+            margin: 0;
+            flex-direction: row;
+        }
+
+        .gc-sidebar:not(.collapsed) .gc-sidebar-link span {
+            opacity: 1;
+            width: auto;
+            overflow: visible;
+            margin: 0;
+        }
+
+        .gc-sidebar.collapsed .gc-sidebar-link span {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        .gc-sidebar.collapsed .gc-sidebar-link {
+            justify-content: center;
+            gap: 0;
+            padding: 10px;
+            width: 44px;
+            height: 44px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .gc-sidebar-link:hover {
+            color: var(--accent-cyan);
+            border-left-color: transparent;
+            background: rgba(0, 255, 255, 0.1);
+            transform: scale(1.1);
+            border-radius: 8px;
+        }
+
+        .gc-sidebar:not(.collapsed) .gc-sidebar-link:hover {
+            border-left-color: var(--accent-cyan);
+            transform: translateX(5px);
+        }
+
+        .gc-sidebar.collapsed .gc-sidebar-link:hover {
+            transform: scale(1.1);
+            border-left-color: transparent;
+            padding: 12px;
+        }
+
+        [data-theme="light"] .gc-sidebar-link:hover {
+            color: #009999;
+            border-left-color: #009999;
+            background: rgba(0, 150, 150, 0.1);
+        }
+
+        /* 移除 active 狀態的持續高亮效果 - 點擊後不再持續亮著 */
+
+        /* OSD 多功能顯示面板 */
+        .fps-osd {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid var(--accent-cyan);
+            border-radius: 12px;
+            padding: 0;
+            font-family: 'Orbitron', monospace;
+            z-index: 9999;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+            display: none;
+            animation: osdSlideIn 0.3s ease-out;
+            width: 280px;
+            height: auto;
+            min-width: 150px;
+            min-height: 80px;
+            max-width: 600px;
+            max-height: 80vh;
+            resize: both;
+            overflow: hidden;
+            cursor: move;
+            container-type: size;
+        }
+
+        @keyframes osdSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fps-osd.active {
+            display: block;
+        }
+
+        .fps-osd.dragging {
+            cursor: grabbing;
+            user-select: none;
+        }
+
+        .fps-osd.resizing {
+            transition: none;
+        }
+
+        /* OSD 標題區 */
+        .osd-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: clamp(8px, 3cqw, 20px);
+            padding-bottom: clamp(5px, 2cqw, 10px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            cursor: move;
+            user-select: none;
+        }
+
+        .osd-header:active {
+            cursor: grabbing;
+        }
+
+        .osd-title {
+            font-size: clamp(0.6rem, 3cqw, 0.9rem);
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .osd-mode-switcher {
+            display: flex;
+            gap: clamp(3px, 1cqw, 5px);
+            flex-shrink: 0;
+        }
+
+        .osd-mode-btn {
+            width: clamp(6px, 2cqw, 8px);
+            height: clamp(6px, 2cqw, 8px);
+            border-radius: 50%;
+            background: rgba(0, 255, 255, 0.3);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .osd-mode-btn.active {
+            background: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        }
+
+        .osd-mode-btn:hover {
+            background: rgba(0, 255, 255, 0.6);
+            transform: scale(1.2);
+        }
+
+        /* OSD 內容區 */
+        .osd-content {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(6px, 2cqw, 12px);
+            padding: clamp(8px, 3cqw, 20px);
+            padding-top: clamp(6px, 2cqw, 15px);
+        }
+
+        .osd-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: clamp(4px, 2cqw, 8px);
+        }
+
+        .osd-label {
+            font-size: clamp(0.5rem, 2.5cqw, 0.75rem);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            white-space: nowrap;
+        }
+
+        .osd-value {
+            font-size: clamp(0.7rem, 4cqw, 1.2rem);
+            font-weight: 700;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            white-space: nowrap;
+        }
+
+        .osd-value.large {
+            font-size: clamp(1.2rem, 6cqw, 2.5rem);
+            line-height: 1;
+        }
+
+        .osd-unit {
+            font-size: clamp(0.5rem, 3cqw, 0.9rem);
+            color: var(--accent-cyan);
+            margin-left: clamp(2px, 0.5cqw, 5px);
+            opacity: 0.7;
+        }
+
+        .osd-icon {
+            font-size: clamp(0.7rem, 3cqw, 1rem);
+            margin-right: clamp(3px, 1cqw, 5px);
+        }
+
+        /* OSD 進度條 */
+        .osd-progress {
+            width: 100%;
+            height: clamp(3px, 1cqw, 4px);
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: clamp(2px, 0.5cqw, 2px);
+            overflow: hidden;
+            margin-top: clamp(2px, 1cqw, 5px);
+        }
+
+        .osd-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+            border-radius: clamp(2px, 0.5cqw, 2px);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+        }
+
+        /* OSD 圖示 */
+        .osd-icon {
+            font-size: clamp(0.7rem, 3cqw, 1rem);
+            margin-right: clamp(4px, 2cqw, 8px);
+            opacity: 0.8;
+        }
+
+        /* 淺色主題適配 */
+        [data-theme="light"] .fps-osd {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #009999;
+            box-shadow: 0 0 30px rgba(0, 150, 150, 0.4);
+        }
+
+        [data-theme="light"] .osd-header {
+            border-bottom-color: rgba(0, 150, 150, 0.3);
+        }
+
+        [data-theme="light"] .osd-title,
+        [data-theme="light"] .osd-value {
+            color: #009999;
+            text-shadow: 0 0 15px rgba(0, 150, 150, 0.4);
+        }
+
+        [data-theme="light"] .osd-mode-btn {
+            background: rgba(0, 150, 150, 0.3);
+        }
+
+        [data-theme="light"] .osd-mode-btn.active {
+            background: #009999;
+            box-shadow: 0 0 10px rgba(0, 150, 150, 0.8);
+        }
+
+        [data-theme="light"] .osd-progress {
+            background: rgba(0, 150, 150, 0.2);
+        }
+
+        [data-theme="light"] .osd-progress-bar {
+            background: linear-gradient(90deg, #009999, #990099);
+        }
+
+        [data-theme="light"] .osd-unit {
+            color: #009999;
+        }
+
+        /* 主內容區域 */
+        .game-center-container {
+            flex: 1;
+            padding: 0px 40px 40px 40px; /* 減少上方 padding */
+            overflow-y: visible;
+            overflow-x: hidden;
+            position: relative;
+            z-index: 1;
+            margin-left: 300px; /* 為固定的側邊欄留出空間 */
+            transition: margin-left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Hero Section - 焦點遊戲 */
+        .gc-hero {
+            height: 450px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px;
+            margin-bottom: 50px;
+            position: relative;
+            overflow: hidden;
+            animation: heroSlideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s forwards;
+            opacity: 0;
+        }
+
+        @keyframes heroSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        [data-theme="light"] .gc-hero {
+            background: linear-gradient(135deg, rgba(0, 150, 150, 0.08), rgba(150, 0, 150, 0.08));
+            border-color: rgba(0, 150, 150, 0.3);
         }
 
         .gc-hero::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 300px;
-            height: 300px;
+            top: -50%;
+            right: -50%;
+            width: 500px;
+            height: 500px;
             background: radial-gradient(circle, rgba(0, 255, 255, 0.2) 0%, transparent 70%);
-            filter: blur(60px);
-            animation: pulse 3s ease-in-out infinite;
+            filter: blur(80px);
+            animation: heroPulse 4s ease-in-out infinite;
         }
 
-        .gc-logo {
-            font-size: 4rem;
+        @keyframes heroPulse {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-30px, -30px) scale(1.1); }
+        }
+
+        .gc-hero-content {
+            flex: 1;
+            z-index: 2;
+            padding-right: 40px;
+        }
+
+        .gc-hero-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--accent-cyan);
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        [data-theme="light"] .gc-hero-label {
+            color: #009999;
+        }
+
+        .gc-hero-title {
+            font-size: 3rem;
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
-            background: linear-gradient(135deg, #00ffff, #ff00ff, #ffff00);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--text-primary);
+            margin-bottom: 15px;
             text-transform: uppercase;
-            letter-spacing: 0.2em;
-            margin-bottom: 1rem;
-            position: relative;
-            z-index: 1;
-            animation: logoGlow 3s ease-in-out infinite;
-        }
-
-        @keyframes logoGlow {
-            0%, 100% { filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5)); }
-            50% { filter: drop-shadow(0 0 40px rgba(255, 0, 255, 0.8)); }
-        }
-
-        .gc-subtitle {
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-            font-family: 'Rajdhani', sans-serif;
             letter-spacing: 0.1em;
         }
 
-        /* 淺色模式 Hero */
-        [data-theme="light"] .gc-subtitle {
+        [data-theme="light"] .gc-hero-title {
+            color: #222;
+        }
+
+        .gc-hero-desc {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        [data-theme="light"] .gc-hero-desc {
             color: #666;
+        }
+
+        .gc-hero-image {
+            width: 350px;
+            height: 350px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 6rem;
+            opacity: 0.4;
+            z-index: 2;
+            overflow: hidden;
+            position: relative;
+        }
+
+        [data-theme="light"] .gc-hero-image {
+            background: linear-gradient(135deg, #e8f4f8, #d0e8f0);
+        }
+
+        .gc-hero-image::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: heroShimmer 3s infinite;
+        }
+
+        @keyframes heroShimmer {
+            0% { transform: translateX(-100%) translateY(-100%); }
+            100% { transform: translateX(100%) translateY(100%); }
+        }
+
+        /* 輪播控制 */
+        .gc-hero-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .gc-carousel-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0, 255, 255, 0.2);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            color: #00ffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', monospace;
+            font-weight: 600;
+        }
+
+        .gc-carousel-btn:hover {
+            background: rgba(0, 255, 255, 0.4);
+            border-color: rgba(0, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        .gc-carousel-btn:active {
+            transform: scale(0.95);
+        }
+
+        [data-theme="light"] .gc-carousel-btn {
+            background: rgba(0, 150, 150, 0.2);
+            border-color: rgba(0, 150, 150, 0.5);
+            color: #0099aa;
+        }
+
+        [data-theme="light"] .gc-carousel-btn:hover {
+            background: rgba(0, 150, 150, 0.4);
+            border-color: rgba(0, 150, 150, 0.8);
+            box-shadow: 0 0 15px rgba(0, 150, 150, 0.5);
+        }
+
+        .gc-carousel-dots {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .gc-carousel-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(0, 255, 255, 0.3);
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .gc-carousel-dot:hover {
+            background: rgba(0, 255, 255, 0.6);
+            transform: scale(1.2);
+        }
+
+        .gc-carousel-dot.active {
+            background: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+            width: 12px;
+            height: 12px;
+        }
+
+        [data-theme="light"] .gc-carousel-dot {
+            background: rgba(0, 150, 150, 0.3);
+            border-color: rgba(0, 150, 150, 0.5);
+        }
+
+        [data-theme="light"] .gc-carousel-dot:hover {
+            background: rgba(0, 150, 150, 0.6);
+        }
+
+        [data-theme="light"] .gc-carousel-dot.active {
+            background: #0099aa;
+            box-shadow: 0 0 10px rgba(0, 150, 150, 0.8);
         }
 
         /* 統計面板 */
         .gc-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 20px;
-            margin: 40px 0;
+            margin-bottom: 50px;
         }
 
         .gc-stat-card {
@@ -90,12 +1415,30 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            animation: statCardSlideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            opacity: 0;
+        }
+
+        @keyframes statCardSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         [data-theme="light"] .gc-stat-card {
             background: rgba(0, 150, 150, 0.05);
             border-color: rgba(0, 150, 150, 0.3);
         }
+
+        .gc-stat-card:nth-child(1) { animation-delay: 0.6s; }
+        .gc-stat-card:nth-child(2) { animation-delay: 0.65s; }
+        .gc-stat-card:nth-child(3) { animation-delay: 0.7s; }
+        .gc-stat-card:nth-child(4) { animation-delay: 0.75s; }
 
         .gc-stat-card::before {
             content: '';
@@ -144,7 +1487,7 @@
 
         /* 遊戲庫區域 */
         .gc-library-section {
-            margin-top: 60px;
+            margin-top: 0;
         }
 
         .gc-section-header {
@@ -154,6 +1497,19 @@
             margin-bottom: 30px;
             padding-bottom: 15px;
             border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+            animation: sectionHeaderSlideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.55s forwards;
+            opacity: 0;
+        }
+
+        @keyframes sectionHeaderSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         [data-theme="light"] .gc-section-header {
@@ -161,7 +1517,7 @@
         }
 
         .gc-section-title {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
             color: var(--accent-cyan);
@@ -193,7 +1549,24 @@
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            animation: filterBtnSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            opacity: 0;
         }
+
+        @keyframes filterBtnSlideIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .gc-filter-btn:nth-child(1) { animation-delay: 0.55s; }
+        .gc-filter-btn:nth-child(2) { animation-delay: 0.60s; }
+        .gc-filter-btn:nth-child(3) { animation-delay: 0.65s; }
 
         [data-theme="light"] .gc-filter-btn {
             background: rgba(0, 150, 150, 0.1);
@@ -227,8 +1600,8 @@
         /* 遊戲卡片網格 */
         .gc-games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
             margin-top: 30px;
         }
 
@@ -242,7 +1615,7 @@
             transition: all 0.4s ease;
             position: relative;
             opacity: 0;
-            animation: fadeInUp 0.6s ease forwards;
+            animation: gameCardFadeIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
         [data-theme="light"] .gc-game-card {
@@ -250,23 +1623,23 @@
             border-color: rgba(0, 150, 150, 0.3);
         }
 
-        @keyframes fadeInUp {
-            from {
+        @keyframes gameCardFadeIn {
+            0% {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(30px) scale(0.95);
             }
-            to {
+            100% {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
         }
 
-        .gc-game-card:nth-child(1) { animation-delay: 0.1s; }
-        .gc-game-card:nth-child(2) { animation-delay: 0.2s; }
-        .gc-game-card:nth-child(3) { animation-delay: 0.3s; }
-        .gc-game-card:nth-child(4) { animation-delay: 0.4s; }
-        .gc-game-card:nth-child(5) { animation-delay: 0.5s; }
-        .gc-game-card:nth-child(6) { animation-delay: 0.6s; }
+        .gc-game-card:nth-child(1) { animation-delay: 0.7s; }
+        .gc-game-card:nth-child(2) { animation-delay: 0.75s; }
+        .gc-game-card:nth-child(3) { animation-delay: 0.8s; }
+        .gc-game-card:nth-child(4) { animation-delay: 0.85s; }
+        .gc-game-card:nth-child(5) { animation-delay: 0.9s; }
+        .gc-game-card:nth-child(6) { animation-delay: 0.95s; }
 
         .gc-game-card:hover {
             transform: translateY(-10px) scale(1.02);
@@ -282,7 +1655,7 @@
         /* 遊戲封面 */
         .gc-game-cover {
             width: 100%;
-            height: 200px;
+            height: 180px;
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             display: flex;
             align-items: center;
@@ -321,12 +1694,13 @@
         }
 
         .gc-game-title {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
             color: var(--text-primary);
             margin-bottom: 8px;
             text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         [data-theme="light"] .gc-game-title {
@@ -334,7 +1708,7 @@
         }
 
         .gc-game-desc {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-secondary);
             margin-bottom: 15px;
             line-height: 1.5;
@@ -464,19 +1838,81 @@
         }
 
         /* 響應式設計 */
-        @media (max-width: 768px) {
-            .game-center-container {
-                padding: 100px 20px 40px;
+        @media (max-width: 1200px) {
+            .gc-sidebar {
+                width: 250px;
             }
 
-            .gc-logo {
+            .gc-sidebar.collapsed {
+                width: 90px;
+            }
+
+            .gc-hero {
+                flex-direction: column;
+                text-align: center;
+                height: auto;
+            }
+
+            .gc-hero-content {
+                padding-right: 0;
+                margin-bottom: 30px;
+            }
+
+            .gc-hero-title {
                 font-size: 2.5rem;
             }
 
-            .gc-section-header {
+            .gc-hero-image {
+                width: 300px;
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-center-wrapper {
                 flex-direction: column;
-                align-items: flex-start;
-                gap: 20px;
+                min-height: auto;
+            }
+
+            .gc-sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                top: 0;
+                border-right: none;
+                border-bottom: 2px solid rgba(0, 255, 255, 0.2);
+                padding: 20px;
+                max-height: none;
+                overflow-y: visible;
+            }
+
+            .gc-sidebar.collapsed {
+                width: 100%;
+                padding: 20px;
+            }
+
+            .gc-sidebar-toggle {
+                display: none;
+            }
+
+            .game-center-container {
+                padding: 30px 20px;
+            }
+
+            .gc-hero {
+                height: auto;
+                flex-direction: column;
+                padding: 30px 20px;
+            }
+
+            .gc-hero-title {
+                font-size: 2rem;
+            }
+
+            .gc-hero-image {
+                width: 200px;
+                height: 200px;
+                font-size: 3rem;
             }
 
             .gc-games-grid {
@@ -486,14 +1922,101 @@
             .gc-stats {
                 grid-template-columns: repeat(2, 1fr);
             }
+
+            .gc-section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gc-sidebar {
+                padding: 15px;
+            }
+
+            .gc-hero {
+                padding: 20px 15px;
+            }
+
+            .gc-hero-title {
+                font-size: 1.5rem;
+            }
+
+            .gc-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .gc-games-grid {
+                gap: 15px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- 立即應用主題,避免閃爍 -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+
+    <!-- 立即檢查是否跳過進入動畫 -->
+    <script>
+        (function() {
+            const skipAnimation = sessionStorage.getItem('skipEntranceAnimation');
+            if (skipAnimation === 'true') {
+                // 在 DOM 載入前就添加樣式
+                const style = document.createElement('style');
+                style.textContent = '.page-entrance-overlay { display: none !important; }';
+                document.head.appendChild(style);
+                sessionStorage.removeItem('skipEntranceAnimation');
+            }
+        })();
+    </script>
+
     <!-- 背景系統 -->
     <div class="cyber-bg"></div>
     <div class="grid-overlay"></div>
     <div class="particles" id="particles"></div>
+
+    <!-- STEAM BIG PICTURE 風格進入動畫 - 增強版 -->
+    <div class="page-entrance-overlay" id="entranceOverlay">
+        <div class="entrance-cg">
+            <!-- 矩陣數字雨 -->
+            <div class="entrance-matrix" id="entranceMatrix"></div>
+            
+            <!-- 六邊形網格 -->
+            <div class="entrance-hexagons" id="entranceHexagons"></div>
+            
+            <!-- 掃描線 -->
+            <div class="entrance-scanlines"></div>
+            
+            <!-- 雷達掃描 -->
+            <div class="entrance-radar"></div>
+            
+            <!-- 原始動畫層 -->
+            <div class="entrance-layer entrance-layer-1"></div>
+            <div class="entrance-layer entrance-layer-2"></div>
+            <div class="entrance-layer entrance-layer-3"></div>
+            
+            <!-- 粒子爆發 -->
+            <div class="entrance-particles" id="entranceParticles"></div>
+            
+            <div class="entrance-text">
+                <div class="entrance-title" data-text="Game Center">Game Center</div>
+                <div class="entrance-subtitle">━━ CYBER NEXUS ━━</div>
+            </div>
+            
+            <!-- 進度條 -->
+            <div class="entrance-progress">
+                <div class="entrance-progress-bar"></div>
+            </div>
+        </div>
+    </div>
 
     <header>
         <a href="../../index.html">
@@ -619,6 +2142,14 @@
 
             <div class="setting-item">
                 <div class="setting-label">
+                    <span>顯示左側導覽欄</span>
+                    <span class="setting-description">顯示或隱藏遊戲中心左側導覽欄</span>
+                </div>
+                <div class="toggle-switch active" id="showSidebar"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
                     <span>主題模式</span>
                     <span class="setting-description">切換深色/淺色模式</span>
                 </div>
@@ -675,52 +2206,101 @@
         </div>
     </div>
 
-    <!-- 主要內容 -->
-    <main class="game-center-container">
-        <!-- Hero Section -->
-        <div class="gc-hero">
-            <h1 class="gc-logo">Game Center</h1>
-            <p class="gc-subtitle">/ CYBER GAMING NEXUS /</p>
-        </div>
-
-        <!-- 統計面板 -->
-        <div class="gc-stats">
-            <div class="gc-stat-card">
-                <div class="gc-stat-value" data-target="5">0</div>
-                <div class="gc-stat-label">總遊戲數</div>
+    <!-- 主容器 -->
+    <div class="game-center-wrapper">
+        <!-- OSD 多功能顯示面板 -->
+        <div class="fps-osd" id="fpsOSD">
+            <div class="osd-header">
+                <div class="osd-title" id="osdTitle">FPS</div>
+                <div class="osd-mode-switcher">
+                    <button class="osd-mode-btn active" data-mode="performance" title="FPS模式"></button>
+                    <button class="osd-mode-btn" data-mode="game" title="時間模式"></button>
+                    <button class="osd-mode-btn" data-mode="simple" title="完整模式"></button>
+                </div>
             </div>
-            <div class="gc-stat-card">
-                <div class="gc-stat-value" data-target="2">0</div>
-                <div class="gc-stat-label">可遊玩</div>
-            </div>
-            <div class="gc-stat-card">
-                <div class="gc-stat-value" data-target="3">0</div>
-                <div class="gc-stat-label">開發中</div>
-            </div>
-            <div class="gc-stat-card">
-                <div class="gc-stat-value" data-target="12">0</div>
-                <div class="gc-stat-label">總遊戲時數</div>
+            <div class="osd-content" id="osdContent">
+                <!-- 內容將由 JavaScript 動態生成 -->
             </div>
         </div>
 
-        <!-- 遊戲庫 -->
-        <div class="gc-library-section">
-            <div class="gc-section-header">
-                <h2 class="gc-section-title">遊戲庫</h2>
-                <div class="gc-filter-group">
-                    <button class="gc-filter-btn active" data-filter="all">全部</button>
-                    <button class="gc-filter-btn" data-filter="available">可遊玩</button>
-                    <button class="gc-filter-btn" data-filter="development">開發中</button>
-                    <button class="gc-filter-btn" data-filter="action">動作</button>
-                    <button class="gc-filter-btn" data-filter="puzzle">益智</button>
+        <!-- 左側導覽欄 -->
+        <aside class="gc-sidebar" id="gcSidebar">
+            <ul class="gc-sidebar-menu">
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="sidebarToggle" data-icon="◀" title="摺疊側邊欄">
+                        <span>摺疊</span>
+                    </a>
+                </li>
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="gcBackBtn" data-icon="🏠" title="返回遊戲中心">
+                        <span>遊戲中心</span>
+                    </a>
+                </li>
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="fpsOSDToggle" data-icon="📊" title="顯示幀數">
+                        <span>幀數顯示</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 主內容區域 -->
+        <main class="game-center-container">
+            <!-- 焦點遊戲 Hero -->
+            <div class="gc-hero" id="heroCard">
+                <div class="gc-hero-content">
+                    <div class="gc-hero-label">焦點推薦</div>
+                    <h1 class="gc-hero-title" id="heroTitle">Cyber Tetris</h1>
+                    <p class="gc-hero-desc" id="heroDesc">經典俄羅斯方塊的賽博龐克版本，挑戰你的反應速度！</p>
+                    <button class="gc-play-btn" id="heroPlayBtn">立即遊玩</button>
+                </div>
+                <div class="gc-hero-image" id="heroImage">🎮</div>
+                
+                <!-- 輪播控制按鈕 -->
+                <div class="gc-hero-controls">
+                    <div class="gc-carousel-dots" id="carouselDots">
+                        <!-- 指示點將由 JavaScript 動態生成 -->
+                    </div>
                 </div>
             </div>
 
-            <div class="gc-games-grid" id="gamesGrid">
-                <!-- 遊戲卡片將由 JavaScript 動態生成 -->
+            <!-- 統計面板 -->
+            <div class="gc-stats">
+                <div class="gc-stat-card">
+                    <div class="gc-stat-value" data-target="6">0</div>
+                    <div class="gc-stat-label">總遊戲數</div>
+                </div>
+                <div class="gc-stat-card">
+                    <div class="gc-stat-value" data-target="3">0</div>
+                    <div class="gc-stat-label">可遊玩</div>
+                </div>
+                <div class="gc-stat-card">
+                    <div class="gc-stat-value" data-target="3">0</div>
+                    <div class="gc-stat-label">開發中</div>
+                </div>
+                <div class="gc-stat-card">
+                    <div class="gc-stat-value" data-target="12">0</div>
+                    <div class="gc-stat-label">遊玩時數</div>
+                </div>
             </div>
-        </div>
-    </main>
+
+            <!-- 遊戲庫 -->
+            <div class="gc-library-section">
+                <div class="gc-section-header">
+                    <h2 class="gc-section-title">遊戲庫</h2>
+                    <div class="gc-filter-group">
+                        <button class="gc-filter-btn active" data-filter="all">全部</button>
+                        <button class="gc-filter-btn" data-filter="available">可遊玩</button>
+                        <button class="gc-filter-btn" data-filter="puzzle">益智</button>
+                    </div>
+                </div>
+
+                <div class="gc-games-grid" id="gamesGrid">
+                    <!-- 遊戲卡片將由 JavaScript 動態生成 -->
+                </div>
+            </div>
+        </main>
+    </div>
 
     <!-- Scripts -->
     <script src="../../assets/js/core.js"></script>
@@ -747,6 +2327,15 @@
                 status: 'available',
                 icon: '🐍',
                 url: 'games/snake/index.html'
+            },
+            {
+                id: 'code-breaker',
+                title: 'Code Breaker',
+                description: '限時破解隨機代碼序列，挑戰你的反應與記憶力！',
+                category: 'puzzle',
+                status: 'available',
+                icon: '💻',
+                url: 'games/code-breaker/index.html'
             },
             {
                 id: 'breakout',
@@ -777,18 +2366,707 @@
             }
         ];
 
+        // 整版進入動畫控制 - 增強版
+        function playEntranceAnimation() {
+            const overlay = document.getElementById('entranceOverlay');
+            if (!overlay) return;
+
+            // 檢查是否跳過進入動畫
+            const skipAnimation = sessionStorage.getItem('skipEntranceAnimation');
+            if (skipAnimation === 'true') {
+                // 立即隱藏進入動畫，不顯示
+                overlay.classList.add('hidden');
+                sessionStorage.removeItem('skipEntranceAnimation');
+                return;
+            }
+
+            // 生成矩陣數字雨
+            createMatrixRain();
+            
+            // 生成六邊形網格
+            createHexagons();
+            
+            // 生成粒子爆發
+            createParticleBurst();
+
+            // 3秒後隱藏進入動畫
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+            }, 3000);
+        }
+
+        // 創建矩陣數字雨效果
+        function createMatrixRain() {
+            const matrixContainer = document.getElementById('entranceMatrix');
+            if (!matrixContainer) return;
+
+            const chars = '01';
+            const columns = Math.floor(window.innerWidth / 40); // 從 20 改為 40，減少數量
+
+            for (let i = 0; i < columns; i++) {
+                const column = document.createElement('div');
+                column.className = 'matrix-column';
+                column.style.left = `${i * 40}px`; // 從 20 改為 40，增加間距
+                column.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                column.style.animationDelay = `${Math.random() * 2}s`;
+                
+                let text = '';
+                const length = Math.floor(Math.random() * 20) + 10;
+                for (let j = 0; j < length; j++) {
+                    text += chars[Math.floor(Math.random() * chars.length)] + '<br>';
+                }
+                column.innerHTML = text;
+                
+                matrixContainer.appendChild(column);
+            }
+        }
+
+        // 創建六邊形網格 - 蜂巢狀緊密排列(無間隙)
+        function createHexagons() {
+            const hexContainer = document.getElementById('entranceHexagons');
+            if (!hexContainer) return;
+
+            const hexWidth = 120;
+            const hexHeight = 104; // √3 * width / 2 ≈ 104
+            
+            // 蜂巢排列關鍵公式:
+            // 水平間距 = width * 3/4 (每個六角形向右移動 3/4 寬度)
+            // 垂直間距 = height (每行向下移動一個完整高度)
+            // 偶數列向下偏移 height/2
+            
+            const horizontalSpacing = hexWidth * 0.75; // 90px
+            const verticalSpacing = hexHeight; // 104px
+
+            const hexRows = Math.ceil(window.innerHeight / verticalSpacing) + 2;
+            const hexCols = Math.ceil(window.innerWidth / horizontalSpacing) + 3; // +3 確保覆蓋左右兩側
+
+            for (let row = 0; row < hexRows; row++) {
+                for (let col = 0; col < hexCols; col++) {
+                    const hex = document.createElement('div');
+                    hex.className = 'hexagon';
+                    
+                    // 偶數列向下偏移半個高度
+                    const offsetY = (col % 2) * (hexHeight / 2);
+                    const left = col * horizontalSpacing - 30; // 向左偏移 30px 填補左側縫隙
+                    const top = row * verticalSpacing + offsetY - hexHeight; // -hexHeight 讓頂部對齊
+                    
+                    hex.style.left = `${left}px`;
+                    hex.style.top = `${top}px`;
+                    hex.style.animationDelay = `${Math.random() * 3}s`;
+                    
+                    hexContainer.appendChild(hex);
+                }
+            }
+        }
+
+        // 創建粒子爆發效果
+        function createParticleBurst() {
+            const particlesContainer = document.getElementById('entranceParticles');
+            if (!particlesContainer) return;
+
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'entrance-particle';
+                
+                const angle = (Math.PI * 2 * i) / particleCount;
+                const distance = 200 + Math.random() * 300;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                particle.style.left = `${centerX}px`;
+                particle.style.top = `${centerY}px`;
+                particle.style.setProperty('--tx', `${tx}px`);
+                particle.style.setProperty('--ty', `${ty}px`);
+                particle.style.animationDelay = `${Math.random() * 0.5}s`;
+                
+                // 隨機顏色
+                if (Math.random() > 0.5) {
+                    particle.style.background = 'rgba(255, 0, 255, 0.8)';
+                    particle.style.boxShadow = '0 0 10px rgba(255, 0, 255, 0.6)';
+                }
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // 側邊欄摺疊功能
+        function initSidebarToggle() {
+            const sidebar = document.getElementById('gcSidebar');
+            const toggleBtn = document.getElementById('sidebarToggle');
+            const mainContainer = document.querySelector('.game-center-container');
+            let isCollapsed = false;
+
+            // 從 localStorage 恢復狀態
+            const savedState = localStorage.getItem('gcSidebarCollapsed');
+            if (savedState === 'true') {
+                isCollapsed = true;
+                sidebar.classList.add('collapsed');
+                toggleBtn.dataset.icon = '▶';
+                toggleBtn.querySelector('span').textContent = '展開';
+                if (mainContainer) mainContainer.style.marginLeft = '70px';
+            }
+
+            toggleBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                isCollapsed = !isCollapsed;
+                
+                if (isCollapsed) {
+                    sidebar.classList.add('collapsed');
+                    toggleBtn.dataset.icon = '▶';
+                    toggleBtn.querySelector('span').textContent = '展開';
+                    if (mainContainer) mainContainer.style.marginLeft = '70px';
+                } else {
+                    sidebar.classList.remove('collapsed');
+                    toggleBtn.dataset.icon = '◀';
+                    toggleBtn.querySelector('span').textContent = '摺疊';
+                    if (mainContainer) mainContainer.style.marginLeft = '300px';
+                }
+
+                // 保存狀態到 localStorage
+                localStorage.setItem('gcSidebarCollapsed', isCollapsed);
+            });
+        }
+
+        // 初始化遊戲中心返回按鈕
+        function initGameCenterBackBtn() {
+            const backBtn = document.getElementById('gcBackBtn');
+            if (!backBtn) return;
+
+            backBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // 設置標誌，防止播放進入動畫
+                sessionStorage.setItem('skipEntranceAnimation', 'true');
+                
+                // 快速返回到當前頁面（遊戲中心首頁）
+                window.location.href = window.location.pathname;
+            });
+        }
+
+        // 初始化 FPS OSD 切換按鈕
+        function initFPSOSDToggle() {
+            const toggleBtn = document.getElementById('fpsOSDToggle');
+            const fpsOSD = document.getElementById('fpsOSD');
+            
+            if (!toggleBtn || !fpsOSD) return;
+
+            // 從 localStorage 讀取狀態
+            const savedState = localStorage.getItem('fpsOSDVisible');
+            const savedMode = localStorage.getItem('osdMode') || 'performance';
+            const savedPosition = JSON.parse(localStorage.getItem('osdPosition') || '{"top": "90px", "right": "20px", "left": "auto", "bottom": "auto"}');
+            const savedSize = JSON.parse(localStorage.getItem('osdSize') || '{"width": "auto", "height": "auto"}');
+            const isVisible = savedState === 'true';
+            
+            // 恢復位置和大小
+            if (savedPosition.top !== 'auto') fpsOSD.style.top = savedPosition.top;
+            if (savedPosition.right !== 'auto') fpsOSD.style.right = savedPosition.right;
+            if (savedPosition.left !== 'auto') fpsOSD.style.left = savedPosition.left;
+            if (savedPosition.bottom !== 'auto') fpsOSD.style.bottom = savedPosition.bottom;
+            if (savedSize.width !== 'auto') fpsOSD.style.width = savedSize.width;
+            if (savedSize.height !== 'auto') fpsOSD.style.height = savedSize.height;
+            
+            if (isVisible) {
+                fpsOSD.classList.add('active');
+            }
+
+            // 初始化 OSD 模式
+            initOSDModes(savedMode);
+
+            // 初始化拖動功能
+            initOSDDragging(fpsOSD);
+
+            // 初始化調整大小功能
+            initOSDResizing(fpsOSD);
+
+            // 點擊切換
+            toggleBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                const willBeVisible = !fpsOSD.classList.contains('active');
+                
+                if (willBeVisible) {
+                    fpsOSD.classList.add('active');
+                    startOSDMonitoring();
+                } else {
+                    fpsOSD.classList.remove('active');
+                    stopOSDMonitoring();
+                }
+                
+                // 保存狀態到 localStorage
+                localStorage.setItem('fpsOSDVisible', willBeVisible);
+            });
+
+            // 如果初始狀態是顯示，啟動 OSD 監控
+            if (isVisible) {
+                startOSDMonitoring();
+            }
+        }
+
+        // 初始化 OSD 拖動功能
+        function initOSDDragging(osd) {
+            const header = osd.querySelector('.osd-header');
+            let isDragging = false;
+            let currentX;
+            let currentY;
+            let initialX;
+            let initialY;
+
+            header.addEventListener('mousedown', (e) => {
+                // 只在 header 區域且不是按鈕時才能拖動
+                if (e.target.closest('.osd-mode-switcher')) return;
+                
+                isDragging = true;
+                osd.classList.add('dragging');
+                
+                // 獲取當前位置
+                const rect = osd.getBoundingClientRect();
+                initialX = e.clientX - rect.left;
+                initialY = e.clientY - rect.top;
+                
+                // 移除 right/bottom 定位，改用 left/top
+                osd.style.right = 'auto';
+                osd.style.bottom = 'auto';
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                e.preventDefault();
+                
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+                
+                // 限制在視窗範圍內
+                const maxX = window.innerWidth - osd.offsetWidth;
+                const maxY = window.innerHeight - osd.offsetHeight;
+                
+                currentX = Math.max(0, Math.min(currentX, maxX));
+                currentY = Math.max(0, Math.min(currentY, maxY));
+                
+                osd.style.left = currentX + 'px';
+                osd.style.top = currentY + 'px';
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    osd.classList.remove('dragging');
+                    
+                    // 保存位置
+                    saveOSDPosition(osd);
+                }
+            });
+        }
+
+        // 初始化 OSD 調整大小功能
+        function initOSDResizing(osd) {
+            // 使用 ResizeObserver 監聽大小變化
+            const resizeObserver = new ResizeObserver(() => {
+                // 保存新的大小
+                saveOSDSize(osd);
+            });
+            
+            resizeObserver.observe(osd);
+            
+            // 當開始調整大小時添加 class
+            let isResizing = false;
+            osd.addEventListener('mousedown', (e) => {
+                // 檢查是否點擊在右下角（resize handle 區域）
+                const rect = osd.getBoundingClientRect();
+                const offsetX = rect.right - e.clientX;
+                const offsetY = rect.bottom - e.clientY;
+                
+                if (offsetX < 20 && offsetY < 20) {
+                    isResizing = true;
+                    osd.classList.add('resizing');
+                }
+            });
+            
+            document.addEventListener('mouseup', () => {
+                if (isResizing) {
+                    isResizing = false;
+                    osd.classList.remove('resizing');
+                }
+            });
+        }
+
+        // 保存 OSD 位置
+        function saveOSDPosition(osd) {
+            const position = {
+                top: osd.style.top || 'auto',
+                right: osd.style.right || 'auto',
+                left: osd.style.left || 'auto',
+                bottom: osd.style.bottom || 'auto'
+            };
+            localStorage.setItem('osdPosition', JSON.stringify(position));
+        }
+
+        // 保存 OSD 大小
+        function saveOSDSize(osd) {
+            const size = {
+                width: osd.style.width || 'auto',
+                height: osd.style.height || 'auto'
+            };
+            localStorage.setItem('osdSize', JSON.stringify(size));
+        }
+
+        // OSD 模式初始化
+        function initOSDModes(initialMode) {
+            const modeBtns = document.querySelectorAll('.osd-mode-btn');
+            const osdTitle = document.getElementById('osdTitle');
+            
+            // 設定初始模式
+            osdState.currentMode = initialMode;
+            
+            modeBtns.forEach(btn => {
+                if (btn.dataset.mode === initialMode) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+                
+                btn.addEventListener('click', () => {
+                    // 更新按鈕狀態
+                    modeBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // 切換模式
+                    osdState.currentMode = btn.dataset.mode;
+                    localStorage.setItem('osdMode', btn.dataset.mode);
+                    
+                    // 更新標題
+                    const titles = {
+                        performance: 'FPS',
+                        game: '時間',
+                        simple: '完整顯示'
+                    };
+                    osdTitle.textContent = titles[btn.dataset.mode];
+                    
+                    // 更新顯示內容
+                    updateOSDContent();
+                });
+            });
+            
+            // 初始化標題
+            const titles = {
+                performance: 'FPS',
+                game: '時間',
+                simple: '完整顯示'
+            };
+            osdTitle.textContent = titles[initialMode];
+        }
+
+        // OSD 狀態管理
+        let osdState = {
+            currentMode: 'performance',
+            lastTime: performance.now(),
+            frames: 0,
+            fps: 0,
+            sessionStart: Date.now(),
+            animationId: null,
+            cpuUsage: 0,
+            memoryUsage: 0
+        };
+
+        // 更新 OSD 內容
+        function updateOSDContent() {
+            const content = document.getElementById('osdContent');
+            if (!content) return;
+            
+            const mode = osdState.currentMode;
+            
+            if (mode === 'performance') {
+                // FPS 模式：只顯示 FPS
+                content.innerHTML = `
+                    <div class="osd-item">
+                        <div>
+                            <span class="osd-icon">📊</span>
+                            <span class="osd-label">FPS</span>
+                        </div>
+                        <div>
+                            <span class="osd-value large" id="osdFPS">000</span>
+                            <span class="osd-unit">FPS</span>
+                        </div>
+                    </div>
+                `;
+            } else if (mode === 'game') {
+                // 時間模式：只顯示即時時鐘
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                
+                content.innerHTML = `
+                    <div class="osd-item">
+                        <div>
+                            <span class="osd-icon">🕐</span>
+                            <span class="osd-label">時間</span>
+                        </div>
+                        <span class="osd-value" id="osdTime">${timeStr}</span>
+                    </div>
+                `;
+            } else if (mode === 'simple') {
+                // 完整模式：FPS + 記憶體 + 遊玩時間 + 即時時鐘
+                const sessionTime = Math.floor((Date.now() - osdState.sessionStart) / 1000);
+                const minutes = Math.floor(sessionTime / 60);
+                const seconds = sessionTime % 60;
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                
+                content.innerHTML = `
+                    <div class="osd-item">
+                        <div>
+                            <span class="osd-icon">📊</span>
+                            <span class="osd-label">FPS</span>
+                        </div>
+                        <div>
+                            <span class="osd-value large" id="osdFPSFull">000</span>
+                            <span class="osd-unit">FPS</span>
+                        </div>
+                    </div>
+                    <div class="osd-item">
+                        <span class="osd-label">記憶體</span>
+                        <span class="osd-value" id="osdMemory">--</span>
+                    </div>
+                    <div class="osd-progress">
+                        <div class="osd-progress-bar" id="osdMemoryBar" style="width: 0%"></div>
+                    </div>
+                    <div class="osd-item">
+                        <div>
+                            <span class="osd-icon">⏱️</span>
+                            <span class="osd-label">遊玩時間</span>
+                        </div>
+                        <span class="osd-value" id="osdPlayTime">${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}</span>
+                    </div>
+                    <div class="osd-item">
+                        <div>
+                            <span class="osd-icon">🕐</span>
+                            <span class="osd-label">時間</span>
+                        </div>
+                        <span class="osd-value" id="osdTimeFull">${timeStr}</span>
+                    </div>
+                `;
+            }
+        }
+
+        // OSD 監控更新
+        function updateOSDMonitoring() {
+            const now = performance.now();
+            osdState.frames++;
+            
+            // 每秒更新一次
+            if (now >= osdState.lastTime + 1000) {
+                osdState.fps = Math.round((osdState.frames * 1000) / (now - osdState.lastTime));
+                osdState.frames = 0;
+                osdState.lastTime = now;
+                
+                // 更新顯示
+                updateOSDValues();
+            }
+            
+            osdState.animationId = requestAnimationFrame(updateOSDMonitoring);
+        }
+
+        // 更新 OSD 數值
+        function updateOSDValues() {
+            const mode = osdState.currentMode;
+            
+            if (mode === 'performance') {
+                // FPS 模式：只更新 FPS
+                const fpsEl = document.getElementById('osdFPS');
+                if (fpsEl) {
+                    fpsEl.textContent = osdState.fps.toString().padStart(3, '0');
+                }
+                
+            } else if (mode === 'game') {
+                // 時間模式：只更新即時時鐘
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const timeEl = document.getElementById('osdTime');
+                if (timeEl) {
+                    timeEl.textContent = timeStr;
+                }
+                
+            } else if (mode === 'simple') {
+                // 完整模式：更新所有項目
+                
+                // 更新 FPS
+                const fpsFull = document.getElementById('osdFPSFull');
+                if (fpsFull) {
+                    fpsFull.textContent = osdState.fps.toString().padStart(3, '0');
+                }
+                
+                // 更新記憶體
+                if (performance.memory) {
+                    const usedMB = (performance.memory.usedJSHeapSize / 1048576).toFixed(1);
+                    const totalMB = (performance.memory.jsHeapSizeLimit / 1048576).toFixed(1);
+                    const memoryEl = document.getElementById('osdMemory');
+                    const memoryBar = document.getElementById('osdMemoryBar');
+                    
+                    if (memoryEl) {
+                        memoryEl.innerHTML = `${usedMB}<span class="osd-unit">MB</span> / ${totalMB}<span class="osd-unit">MB</span>`;
+                    }
+                    
+                    if (memoryBar) {
+                        const percentage = (performance.memory.usedJSHeapSize / performance.memory.jsHeapSizeLimit) * 100;
+                        memoryBar.style.width = percentage + '%';
+                    }
+                } else {
+                    const memoryEl = document.getElementById('osdMemory');
+                    if (memoryEl) {
+                        memoryEl.textContent = 'N/A';
+                    }
+                }
+                
+                // 更新遊玩時間
+                const sessionTime = Math.floor((Date.now() - osdState.sessionStart) / 1000);
+                const minutes = Math.floor(sessionTime / 60);
+                const seconds = sessionTime % 60;
+                const playTimeEl = document.getElementById('osdPlayTime');
+                if (playTimeEl) {
+                    playTimeEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }
+                
+                // 更新即時時鐘
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const timeFull = document.getElementById('osdTimeFull');
+                if (timeFull) {
+                    timeFull.textContent = timeStr;
+                }
+            }
+        }
+
+        function startOSDMonitoring() {
+            if (osdState.animationId) return; // 已經在運行
+            osdState.lastTime = performance.now();
+            osdState.frames = 0;
+            updateOSDContent();
+            updateOSDMonitoring();
+        }
+
+        function stopOSDMonitoring() {
+            if (osdState.animationId) {
+                cancelAnimationFrame(osdState.animationId);
+                osdState.animationId = null;
+            }
+        }
+
+        // 側邊欄滾動自適應 - 直接跟隨 header 的位置
+        function initSidebarScrollAdaptive() {
+            const sidebar = document.getElementById('gcSidebar');
+            const header = document.querySelector('header');
+            if (!sidebar || !header) return;
+
+            // 使用 MutationObserver 監聽 header 的 transform 變化
+            const observer = new MutationObserver(() => {
+                const headerRect = header.getBoundingClientRect();
+                const headerBottom = headerRect.bottom;
+                
+                // 側邊欄的 top 直接跟隨 header 的底部位置
+                if (headerBottom <= 0) {
+                    sidebar.style.top = '0';
+                    sidebar.style.height = '100vh';
+                } else {
+                    sidebar.style.top = headerBottom + 'px';
+                    sidebar.style.height = `calc(100vh - ${headerBottom}px)`;
+                }
+            });
+
+            // 監聽 header 的 style 變化
+            observer.observe(header, {
+                attributes: true,
+                attributeFilter: ['style', 'class']
+            });
+
+            // 滾動時也更新
+            let ticking = false;
+            function updateSidebar() {
+                const headerRect = header.getBoundingClientRect();
+                const headerBottom = headerRect.bottom;
+                
+                if (headerBottom <= 0) {
+                    sidebar.style.top = '0';
+                    sidebar.style.height = '100vh';
+                } else {
+                    sidebar.style.top = headerBottom + 'px';
+                    sidebar.style.height = `calc(100vh - ${headerBottom}px)`;
+                }
+                
+                ticking = false;
+            }
+
+            function requestTick() {
+                if (!ticking) {
+                    requestAnimationFrame(updateSidebar);
+                    ticking = true;
+                }
+            }
+
+            window.addEventListener('scroll', requestTick, { passive: true });
+            
+            // 初始化
+            updateSidebar();
+        }
+
+        // 初始化左側欄顯示/隱藏功能
+        function initSidebarVisibilityToggle() {
+            const toggle = document.getElementById('showSidebar');
+            const sidebar = document.getElementById('gcSidebar');
+            const mainContainer = document.querySelector('.game-center-container');
+            
+            if (!toggle || !sidebar || !mainContainer) return;
+
+            // 從 localStorage 讀取狀態
+            const savedState = localStorage.getItem('gcSidebarVisible');
+            const isVisible = savedState !== 'false'; // 默認顯示
+            
+            if (!isVisible) {
+                toggle.classList.remove('active');
+                sidebar.style.display = 'none';
+                mainContainer.style.marginLeft = '0';
+            }
+
+            // 點擊切換
+            toggle.addEventListener('click', () => {
+                const willBeVisible = !toggle.classList.contains('active');
+                
+                if (willBeVisible) {
+                    toggle.classList.add('active');
+                    sidebar.style.display = 'block';
+                    
+                    // 檢查是否摺疊狀態
+                    const isCollapsed = sidebar.classList.contains('collapsed');
+                    mainContainer.style.marginLeft = isCollapsed ? '70px' : '300px';
+                } else {
+                    toggle.classList.remove('active');
+                    sidebar.style.display = 'none';
+                    mainContainer.style.marginLeft = '0';
+                }
+                
+                // 保存狀態到 localStorage
+                localStorage.setItem('gcSidebarVisible', willBeVisible);
+            });
+        }
+
         // 渲染遊戲卡片
         function renderGames(filter = 'all') {
             const gamesGrid = document.getElementById('gamesGrid');
             gamesGrid.innerHTML = '';
 
-            const filteredGames = games.filter(game => {
-                if (filter === 'all') return true;
-                if (filter === 'available' || filter === 'development') {
-                    return game.status === filter;
+            let filteredGames = games;
+            
+            if (filter !== 'all') {
+                if (filter === 'available') {
+                    filteredGames = games.filter(g => g.status === 'available');
+                } else if (filter === 'development') {
+                    filteredGames = games.filter(g => g.status === 'development');
+                } else {
+                    filteredGames = games.filter(g => g.category === filter);
                 }
-                return game.category === filter;
-            });
+            }
 
             if (filteredGames.length === 0) {
                 gamesGrid.innerHTML = `
@@ -803,7 +3081,7 @@
             filteredGames.forEach((game, index) => {
                 const card = document.createElement('div');
                 card.className = 'gc-game-card';
-                card.style.animationDelay = `${index * 0.1}s`;
+                card.style.animationDelay = `${0.7 + index * 0.05}s`;
                 
                 const comingSoonTag = game.status === 'development' 
                     ? '<div class="gc-coming-soon">Coming Soon</div>' 
@@ -835,7 +3113,88 @@
             });
         }
 
-        // 篩選功能
+        // 更新Hero卡片
+        function updateHeroCard(gameId) {
+            const game = games.find(g => g.id === gameId);
+            if (!game) return;
+
+            document.getElementById('heroTitle').textContent = game.title;
+            document.getElementById('heroDesc').textContent = game.description;
+            document.getElementById('heroImage').textContent = game.icon;
+            
+            const playBtn = document.getElementById('heroPlayBtn');
+            if (game.status === 'available') {
+                playBtn.disabled = false;
+                playBtn.style.opacity = '1';
+                playBtn.style.cursor = 'pointer';
+                playBtn.onclick = () => window.location.href = game.url;
+            } else {
+                playBtn.disabled = true;
+                playBtn.style.opacity = '0.5';
+                playBtn.style.cursor = 'not-allowed';
+                playBtn.textContent = '開發中';
+            }
+        }
+
+        // 輪播功能
+        let carouselState = {
+            currentIndex: 0,
+            autoplayInterval: null,
+            autoplayDelay: 5000, // 5秒自動切換
+            isPlaying: true
+        };
+
+        function initCarousel() {
+            const dotsContainer = document.getElementById('carouselDots');
+            
+            // 生成指示點
+            games.forEach((game, index) => {
+                const dot = document.createElement('button');
+                dot.className = `gc-carousel-dot${index === 0 ? ' active' : ''}`;
+                dot.addEventListener('click', () => goToSlide(index));
+                dotsContainer.appendChild(dot);
+            });
+
+            // 啟動自動輪播
+            startAutoplay();
+
+            // 暫停/恢復自動輪播
+            const heroCard = document.getElementById('heroCard');
+            heroCard.addEventListener('mouseenter', pauseAutoplay);
+            heroCard.addEventListener('mouseleave', startAutoplay);
+        }
+
+        function updateCarouselDots() {
+            document.querySelectorAll('.gc-carousel-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index === carouselState.currentIndex);
+            });
+        }
+
+        function goToSlide(index) {
+            carouselState.currentIndex = index;
+            updateHeroCard(games[index].id);
+            updateCarouselDots();
+            // 重置自動輪播計時器
+            if (carouselState.isPlaying) {
+                clearInterval(carouselState.autoplayInterval);
+                startAutoplay();
+            }
+        }
+
+        function startAutoplay() {
+            if (!carouselState.isPlaying) return;
+            
+            carouselState.autoplayInterval = setInterval(() => {
+                carouselState.currentIndex = (carouselState.currentIndex + 1) % games.length;
+                goToSlide(carouselState.currentIndex);
+            }, carouselState.autoplayDelay);
+        }
+
+        function pauseAutoplay() {
+            clearInterval(carouselState.autoplayInterval);
+        }
+
+        // 篩選功能 - Header篩選
         document.querySelectorAll('.gc-filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.gc-filter-btn').forEach(b => b.classList.remove('active'));
@@ -844,12 +3203,33 @@
             });
         });
 
+        // 篩選功能 - Sidebar篩選
+        document.querySelectorAll('.gc-sidebar-link[data-filter]').forEach(link => {
+            link.addEventListener('click', () => {
+                document.querySelectorAll('.gc-sidebar-link[data-filter]').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                const filter = link.dataset.filter;
+                
+                // 同步更新header篩選按鈕
+                document.querySelectorAll('.gc-filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if ((filter === 'all' && btn.dataset.filter === 'all') ||
+                        (filter !== 'all' && btn.dataset.filter === filter)) {
+                        btn.classList.add('active');
+                    }
+                });
+                
+                renderGames(filter);
+            });
+        });
+
         // 統計數字動畫
         function animateStats() {
             document.querySelectorAll('.gc-stat-value').forEach(stat => {
                 const target = parseInt(stat.dataset.target);
                 let current = 0;
-                const increment = target / 50;
+                const increment = Math.max(target / 50, 1);
+                
                 const timer = setInterval(() => {
                     current += increment;
                     if (current >= target) {
@@ -864,20 +3244,111 @@
 
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('Game Center - DOMContentLoaded');
+            
+            // 初始化側邊欄摺疊
+            initSidebarToggle();
+
+            // 初始化遊戲中心返回按鈕
+            initGameCenterBackBtn();
+
+            // 初始化 FPS OSD 切換
+            initFPSOSDToggle();
+
+            // 初始化側邊欄滾動自適應
+            initSidebarScrollAdaptive();
+
             // 初始化核心功能
-            Core.initBackground();
-            Navigation.init();
+            if (typeof Core !== 'undefined') {
+                Core.initBackground();
+            }
+            
+            // 延遲初始化導航功能，確保 DOM 完全準備好
+            setTimeout(() => {
+                if (typeof Navigation !== 'undefined') {
+                    console.log('Initializing Navigation...');
+                    
+                    // 檢查元素是否存在
+                    const menuToggle = document.querySelector('.menu-toggle');
+                    const navLinks = document.querySelector('.nav-links');
+                    const settingsToggle = document.querySelector('.settings-toggle');
+                    const settingsPanel = document.querySelector('.settings-panel');
+                    
+                    console.log('Elements found:', {
+                        menuToggle: !!menuToggle,
+                        navLinks: !!navLinks,
+                        settingsToggle: !!settingsToggle,
+                        settingsPanel: !!settingsPanel
+                    });
+                    
+                    // 初始化移動端菜單
+                    try {
+                        Navigation.initMobileMenu();
+                        console.log('Mobile menu initialized');
+                    } catch (e) {
+                        console.error('Error initializing mobile menu:', e);
+                    }
+                    
+                    // 初始化設定面板
+                    try {
+                        Navigation.initSettingsPanel();
+                        console.log('Settings panel initialized');
+                    } catch (e) {
+                        console.error('Error initializing settings panel:', e);
+                    }
+                    
+                    // 初始化設定功能
+                    try {
+                        Navigation.initSettings();
+                        console.log('Settings initialized');
+                    } catch (e) {
+                        console.error('Error initializing settings:', e);
+                    }
+                    
+                    // 設置 header 高度變數
+                    try {
+                        Navigation.setHeaderHeightVariable();
+                        console.log('Header height variable set');
+                    } catch (e) {
+                        console.error('Error setting header height:', e);
+                    }
+                    
+                    // 初始化 FPS 監控
+                    try {
+                        Navigation.initFPSMonitor();
+                        console.log('FPS monitor initialized');
+                    } catch (e) {
+                        console.error('Error initializing FPS monitor:', e);
+                    }
+                    
+                    // 初始化左側欄顯示/隱藏設定
+                    try {
+                        initSidebarVisibilityToggle();
+                        console.log('Sidebar visibility toggle initialized');
+                    } catch (e) {
+                        console.error('Error initializing sidebar visibility toggle:', e);
+                    }
+                }
+            }, 100);
+            
+            // 播放進入動畫
+            playEntranceAnimation();
             
             // 渲染遊戲
             renderGames();
+            
+            // 初始化輪播功能
+            initCarousel();
             
             // 動畫統計數字
             setTimeout(animateStats, 500);
 
             // 觸發進場動畫
-            setTimeout(() => {
-                Animations.triggerPageEntrance();
-            }, 100);
+            if (typeof Animations !== 'undefined') {
+                setTimeout(() => {
+                    Animations.triggerPageEntrance();
+                }, 100);
+            }
         });
     </script>
 </body>
