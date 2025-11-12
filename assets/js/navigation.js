@@ -619,6 +619,13 @@ const Navigation = {
 
             // 聲音開關 (預留,可在其他功能中使用)
             window.soundEnabled = settings.soundEnabled;
+            
+            // 觸發 sidebar 位置更新 (如果存在)
+            if (window.updateSidebarPositionCallback) {
+                requestAnimationFrame(() => {
+                    window.updateSidebarPositionCallback();
+                });
+            }
         };
 
         // 初始化設定值
