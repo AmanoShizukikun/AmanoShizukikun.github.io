@@ -1193,6 +1193,14 @@
             z-index: 1;
             margin-left: 300px; /* 為固定的側邊欄留出空間 */
             transition: margin-left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            width: calc(100% - 300px); /* 確保內容寬度正確 */
+            box-sizing: border-box;
+        }
+
+        /* 當側邊欄收合時調整主內容區域 */
+        .gc-sidebar.collapsed ~ .game-center-container {
+            margin-left: 70px;
+            width: calc(100% - 70px);
         }
 
         /* Hero Section - 焦點遊戲 */
@@ -3103,6 +3111,40 @@
             }
         }
 
+        // 全局的主內容區域邊距更新函數
+        function updateGameCenterLayout() {
+            const sidebar = document.getElementById('gcSidebar');
+            const mainContainer = document.querySelector('.game-center-container');
+            
+            if (!sidebar || !mainContainer) return;
+            
+            const isMobileView = window.innerWidth <= 768;
+            const isVisible = sidebar.style.display !== 'none';
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            
+            if (!isVisible) {
+                // 側邊欄隱藏時
+                mainContainer.style.marginLeft = '0';
+                mainContainer.style.width = '100%';
+            } else {
+                // 側邊欄顯示時
+                if (isMobileView) {
+                    // 手機版：始終是 70px
+                    mainContainer.style.marginLeft = '70px';
+                    mainContainer.style.width = 'calc(100% - 70px)';
+                } else {
+                    // 桌面版：根據摺疊狀態
+                    if (isCollapsed) {
+                        mainContainer.style.marginLeft = '70px';
+                        mainContainer.style.width = 'calc(100% - 70px)';
+                    } else {
+                        mainContainer.style.marginLeft = '300px';
+                        mainContainer.style.width = 'calc(100% - 300px)';
+                    }
+                }
+            }
+        }
+
         // 側邊欄摺疊功能
         function initSidebarToggle() {
             const sidebar = document.getElementById('gcSidebar');
@@ -3120,13 +3162,12 @@
                 sidebar.classList.add('collapsed');
                 toggleBtn.dataset.icon = '▶';
                 toggleBtn.querySelector('span').textContent = '展開';
-                
-                // 只在桌面版時改變 marginLeft
-                if (!isMobileView() && mainContainer) {
-                    mainContainer.style.marginLeft = '70px';
-                }
             }
 
+            // 初始化時更新主內容區域
+            updateGameCenterLayout();
+
+            // 點擊摺疊按鈕
             toggleBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 isCollapsed = !isCollapsed;
@@ -3135,24 +3176,27 @@
                     sidebar.classList.add('collapsed');
                     toggleBtn.dataset.icon = '▶';
                     toggleBtn.querySelector('span').textContent = '展開';
-                    
-                    // 只在桌面版時改變 marginLeft
-                    if (!isMobileView() && mainContainer) {
-                        mainContainer.style.marginLeft = '70px';
-                    }
                 } else {
                     sidebar.classList.remove('collapsed');
                     toggleBtn.dataset.icon = '◀';
                     toggleBtn.querySelector('span').textContent = '摺疊';
-                    
-                    // 只在桌面版時改變 marginLeft
-                    if (!isMobileView() && mainContainer) {
-                        mainContainer.style.marginLeft = '300px';
-                    }
                 }
+
+                // 更新主內容區域
+                updateGameCenterLayout();
 
                 // 保存狀態到 localStorage
                 localStorage.setItem('gcSidebarCollapsed', isCollapsed);
+            });
+
+            // 監聽視窗大小變化
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                // 使用 debounce 避免過於頻繁地觸發
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    updateGameCenterLayout();
+                }, 10);
             });
         }
 
@@ -3745,9 +3789,6 @@
             
             if (!toggle || !sidebar || !mainContainer) return;
 
-            // 檢查是否為手機版（768px以下）
-            const isMobileView = () => window.innerWidth <= 768;
-
             // 從 localStorage 讀取狀態
             const savedState = localStorage.getItem('gcSidebarVisible');
             const isVisible = savedState !== 'false'; // 默認顯示
@@ -3755,22 +3796,13 @@
             if (!isVisible) {
                 toggle.classList.remove('active');
                 sidebar.style.display = 'none';
-                mainContainer.style.marginLeft = '0'; // 隱藏時不設置邊距
             } else {
-                // 初始化時側邊欄顯示，設置相應邊距
                 toggle.classList.add('active');
                 sidebar.style.display = 'block';
-                
-                // 根據是否為手機版和摺疊狀態設置 marginLeft
-                const isCollapsed = sidebar.classList.contains('collapsed');
-                if (isMobileView()) {
-                    // 手機版：側邊欄顯示時，也需要設置左邊距
-                    mainContainer.style.marginLeft = isCollapsed ? '70px' : '70px';
-                } else {
-                    // 桌面版：根據摺疊狀態設置
-                    mainContainer.style.marginLeft = isCollapsed ? '70px' : '300px';
-                }
             }
+
+            // 初始化時更新佈局
+            updateGameCenterLayout();
 
             // 點擊切換
             toggle.addEventListener('click', () => {
@@ -3779,19 +3811,19 @@
                 if (willBeVisible) {
                     toggle.classList.add('active');
                     sidebar.style.display = 'block';
-                    
-                    // 側邊欄顯示時設置邊距
-                    const isCollapsed = sidebar.classList.contains('collapsed');
-                    mainContainer.style.marginLeft = isCollapsed ? '70px' : '70px';
                 } else {
                     toggle.classList.remove('active');
                     sidebar.style.display = 'none';
-                    mainContainer.style.marginLeft = '0'; // 隱藏時不設置邊距
                 }
+                
+                // 更新佈局
+                updateGameCenterLayout();
                 
                 // 保存狀態到 localStorage
                 localStorage.setItem('gcSidebarVisible', willBeVisible);
             });
+
+            // 不需要在這裡再添加 resize 監聽，因為 initSidebarToggle 已經處理了
         }
 
         // 初始化側邊欄內的關閉按鈕
@@ -3808,12 +3840,14 @@
                 
                 // 隱藏側邊欄
                 sidebar.style.display = 'none';
-                mainContainer.style.marginLeft = '0';
                 
                 // 同步更新設定中的開關狀態
                 if (settingToggle) {
                     settingToggle.classList.remove('active');
                 }
+                
+                // 更新佈局
+                updateGameCenterLayout();
                 
                 // 保存狀態到 localStorage
                 localStorage.setItem('gcSidebarVisible', 'false');
