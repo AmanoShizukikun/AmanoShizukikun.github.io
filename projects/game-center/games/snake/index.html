@@ -1,0 +1,2506 @@
+<!-- 貪吃蛇遊戲 -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="賽博貪食蛇 - 經典遊戲的未來版本">
+    <title>Cyber Snake - 天野靜樹</title>
+    <link rel="icon" href="../../../../assets/images/logo.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../../../assets/css/core.css">
+    <link rel="stylesheet" href="../../../../assets/css/components.css">
+    <link rel="stylesheet" href="../../../../assets/css/animations.css">
+    
+    <style>
+        /* ========== 遊戲容器整體布局 ========== */
+        body {
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .game-center-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ========== 左側導覽欄 ========== */
+        .gc-sidebar {
+            width: 300px;
+            height: calc(100vh - var(--header-height, 75px));
+            position: fixed;
+            left: 0;
+            top: var(--header-height, 75px);
+            background: linear-gradient(180deg, rgba(10, 10, 20, 0.9), rgba(20, 5, 40, 0.9));
+            border-right: 2px solid rgba(0, 255, 255, 0.2);
+            padding: 40px 30px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            animation: sidebarSlideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both;
+            flex-shrink: 0;
+            transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        padding 0.3s ease,
+                        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        top 0.01s ease-out,
+                        height 0.01s ease-out;
+            z-index: 900;
+        }
+
+        @keyframes sidebarSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .gc-sidebar.collapsed {
+            width: 70px;
+            padding: 40px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .gc-sidebar.hidden {
+            transform: translateX(-100%);
+            width: 0;
+            padding: 0;
+            border: none;
+        }
+
+        [data-theme="light"] .gc-sidebar {
+            background: linear-gradient(180deg, rgba(240, 245, 252, 0.95), rgba(235, 240, 248, 0.95));
+            border-right-color: rgba(0, 150, 150, 0.2);
+        }
+
+        .gc-sidebar-title {
+            display: none;
+        }
+
+        .gc-sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .gc-sidebar-item {
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .gc-sidebar-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            padding: 10px;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            border-radius: 4px;
+            width: 44px;
+            height: 44px;
+            text-align: center;
+            margin: 0 auto 8px auto;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+        }
+
+        [data-theme="light"] .gc-sidebar-link {
+            color: #666;
+        }
+
+        .gc-sidebar-link::before {
+            content: attr(data-icon);
+            display: inline-flex;
+            width: 24px;
+            height: 24px;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .gc-sidebar-link span {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            width: 0;
+        }
+
+        .gc-sidebar:not(.collapsed) .gc-sidebar-link {
+            width: 100%;
+            justify-content: flex-start;
+            gap: 15px;
+            margin-bottom: 8px;
+            flex-direction: row;
+        }
+
+        .gc-sidebar:not(.collapsed) .gc-sidebar-link span {
+            opacity: 1;
+            width: auto;
+            overflow: visible;
+        }
+
+        .gc-sidebar.collapsed .gc-sidebar-link span {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        .gc-sidebar.collapsed .gc-sidebar-link {
+            width: 44px;
+            height: 44px;
+            margin: 0 auto 8px auto;
+            padding: 10px;
+        }
+
+        .gc-sidebar-link:hover {
+            color: var(--accent-cyan);
+            border-left-color: transparent;
+            background: rgba(0, 255, 255, 0.1);
+            transform: scale(1.1);
+            border-radius: 8px;
+        }
+
+        .gc-sidebar:not(.collapsed) .gc-sidebar-link:hover {
+            border-left-color: var(--accent-cyan);
+            transform: translateX(5px);
+        }
+
+        .gc-sidebar.collapsed .gc-sidebar-link:hover {
+            transform: scale(1.1);
+            border-left-color: transparent;
+            padding: 12px;
+        }
+
+        [data-theme="light"] .gc-sidebar-link:hover {
+            color: #009999;
+            border-left-color: #009999;
+            background: rgba(0, 150, 150, 0.1);
+        }
+
+
+        /* 關閉左側欄按鈕的特殊樣式 */
+        #hideSidebarBtn {
+            margin-top: auto; /* 推到底部 */
+        }
+
+        #hideSidebarBtn:hover {
+            color: #ff0055 !important;
+            border-left-color: #ff0055 !important;
+            background: rgba(255, 0, 85, 0.1) !important;
+        }
+
+        [data-theme="light"] #hideSidebarBtn:hover {
+            color: #cc0044 !important;
+            border-left-color: #cc0044 !important;
+            background: rgba(204, 0, 68, 0.1) !important;
+        }
+
+        /* OSD 多功能顯示面板 */
+        .fps-osd {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid var(--accent-cyan);
+            border-radius: 12px;
+            padding: 0;
+            font-family: 'Orbitron', monospace;
+            z-index: 9999;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+            display: none;
+            animation: osdSlideIn 0.3s ease-out;
+            width: 280px;
+            height: auto;
+            min-width: 150px;
+            min-height: 80px;
+            max-width: 600px;
+            max-height: 80vh;
+            resize: both;
+            overflow: hidden;
+            cursor: move;
+            container-type: size;
+        }
+
+        @keyframes osdSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fps-osd.active {
+            display: block;
+        }
+
+        .fps-osd.dragging {
+            cursor: grabbing;
+            user-select: none;
+        }
+
+        .fps-osd.resizing {
+            transition: none;
+        }
+
+        /* OSD 標題區 */
+        .osd-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: clamp(8px, 3cqw, 20px);
+            padding-bottom: clamp(5px, 2cqw, 10px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            cursor: move;
+            user-select: none;
+        }
+
+        .osd-header:active {
+            cursor: grabbing;
+        }
+
+        .osd-title {
+            font-size: clamp(0.6rem, 3cqw, 0.9rem);
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .osd-mode-switcher {
+            display: flex;
+            gap: clamp(3px, 1cqw, 5px);
+            flex-shrink: 0;
+        }
+
+        .osd-mode-btn {
+            width: clamp(6px, 2cqw, 8px);
+            height: clamp(6px, 2cqw, 8px);
+            border-radius: 50%;
+            background: rgba(0, 255, 255, 0.3);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .osd-mode-btn.active {
+            background: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        }
+
+        .osd-mode-btn:hover {
+            background: rgba(0, 255, 255, 0.6);
+            transform: scale(1.2);
+        }
+
+        /* OSD 內容區 */
+        .osd-content {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(6px, 2cqw, 12px);
+            padding: clamp(8px, 3cqw, 20px);
+            padding-top: clamp(6px, 2cqw, 15px);
+        }
+
+        .osd-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: clamp(4px, 2cqw, 8px);
+        }
+
+        .osd-label {
+            font-size: clamp(0.5rem, 2.5cqw, 0.75rem);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            white-space: nowrap;
+        }
+
+        .osd-value {
+            font-size: clamp(0.7rem, 4cqw, 1.2rem);
+            font-weight: 700;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            white-space: nowrap;
+        }
+
+        .osd-value.large {
+            font-size: clamp(1.2rem, 6cqw, 2.5rem);
+            line-height: 1;
+        }
+
+        .osd-unit {
+            font-size: clamp(0.5rem, 3cqw, 0.9rem);
+            color: var(--accent-cyan);
+            margin-left: clamp(2px, 0.5cqw, 5px);
+            opacity: 0.7;
+        }
+
+        .osd-icon {
+            font-size: clamp(0.7rem, 3cqw, 1rem);
+            margin-right: clamp(3px, 1cqw, 5px);
+        }
+
+        /* OSD 進度條 */
+        .osd-progress {
+            width: 100%;
+            height: clamp(3px, 1cqw, 4px);
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: clamp(2px, 0.5cqw, 2px);
+            overflow: hidden;
+            margin-top: clamp(2px, 1cqw, 5px);
+        }
+
+        .osd-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+            border-radius: clamp(2px, 0.5cqw, 2px);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+        }
+
+        /* OSD 圖示 */
+        .osd-icon {
+            font-size: clamp(0.7rem, 3cqw, 1rem);
+            margin-right: clamp(4px, 2cqw, 8px);
+            opacity: 0.8;
+        }
+
+        /* 淺色主題適配 */
+        [data-theme="light"] .fps-osd {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #009999;
+            box-shadow: 0 0 30px rgba(0, 150, 150, 0.4);
+        }
+
+        [data-theme="light"] .osd-header {
+            border-bottom-color: rgba(0, 150, 150, 0.3);
+        }
+
+        [data-theme="light"] .osd-title,
+        [data-theme="light"] .osd-value {
+            color: #009999;
+            text-shadow: 0 0 15px rgba(0, 150, 150, 0.4);
+        }
+
+        [data-theme="light"] .osd-mode-btn {
+            background: rgba(0, 150, 150, 0.3);
+        }
+
+        [data-theme="light"] .osd-mode-btn.active {
+            background: #009999;
+            box-shadow: 0 0 10px rgba(0, 150, 150, 0.8);
+        }
+
+        [data-theme="light"] .osd-progress {
+            background: rgba(0, 150, 150, 0.2);
+        }
+
+        [data-theme="light"] .osd-progress-bar {
+            background: linear-gradient(90deg, #009999, #990099);
+        }
+
+        [data-theme="light"] .osd-unit {
+            color: #009999;
+        }
+
+        /* ========== 主遊戲容器 ========== */
+        .game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-left: 300px;
+            margin-top: var(--header-height, 75px);
+            height: calc(100vh - var(--header-height, 75px));
+            transition: margin-left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .gc-sidebar.collapsed ~ .game-container {
+            margin-left: 70px;
+        }
+
+        .gc-sidebar.hidden ~ .game-container {
+            margin-left: 0 !important;
+        }
+
+        /* ========== 標題頁面 ========== */
+        .title-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(0, 200, 255, 0.08) 0%, transparent 50%),
+                linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(10, 10, 30, 0.98) 100%);
+            z-index: 10;
+            animation: fadeIn 0.5s ease;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .title-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        [data-theme="light"] .title-screen {
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 150, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(0, 200, 255, 0.06) 0%, transparent 50%),
+                linear-gradient(180deg, rgba(245, 248, 252, 0.98) 0%, rgba(230, 240, 250, 0.99) 100%);
+        }
+
+        [data-theme="light"] .title-screen::before {
+            background-image: 
+                linear-gradient(rgba(0, 100, 200, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 100, 200, 0.04) 1px, transparent 1px);
+        }
+
+        .title-screen.hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .game-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(3rem, 6vw, 5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #00ffff 0%, #00ccff 50%, #0099ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5)) 
+                    drop-shadow(0 0 40px rgba(0, 255, 255, 0.3));
+            margin-bottom: 10px;
+            animation: logoGlow 3s ease-in-out infinite;
+            text-align: center;
+            letter-spacing: 0.1em;
+            position: relative;
+            z-index: 1;
+        }
+
+        [data-theme="light"] .game-logo {
+            background: linear-gradient(135deg, #0088cc 0%, #0066aa 50%, #004488 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 15px rgba(0, 100, 200, 0.4)) 
+                    drop-shadow(0 0 30px rgba(0, 100, 200, 0.2));
+        }
+
+        @keyframes logoGlow {
+            0%, 100% { 
+                filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5)) 
+                        drop-shadow(0 0 40px rgba(0, 255, 255, 0.3));
+                transform: translateY(0);
+            }
+            50% { 
+                filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.7)) 
+                        drop-shadow(0 0 60px rgba(0, 255, 255, 0.5))
+                        drop-shadow(0 0 80px rgba(0, 255, 255, 0.3));
+                transform: translateY(-5px);
+            }
+        }
+
+        .game-subtitle {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+            color: var(--primary);
+            margin-bottom: 60px;
+            opacity: 0.9;
+            text-align: center;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .game-subtitle::before,
+        .game-subtitle::after {
+            content: '━━━';
+            margin: 0 15px;
+            opacity: 0.5;
+        }
+
+        .title-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            width: 100%;
+            max-width: 450px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .title-btn {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.08), rgba(0, 200, 255, 0.12));
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            color: var(--primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            padding: 18px 35px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        [data-theme="light"] .title-btn {
+            background: linear-gradient(135deg, rgba(0, 100, 200, 0.08), rgba(0, 150, 255, 0.12));
+            border-color: rgba(0, 100, 200, 0.4);
+        }
+
+        .title-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .title-btn::after {
+            content: '▶';
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: all 0.4s ease;
+            font-size: 0.9em;
+        }
+
+        .title-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 200, 255, 0.25));
+            border-color: rgba(0, 255, 255, 0.8);
+            box-shadow: 0 8px 25px rgba(0, 255, 255, 0.3),
+                        inset 0 0 20px rgba(0, 255, 255, 0.1);
+            transform: translateX(8px);
+            letter-spacing: 0.15em;
+        }
+
+        [data-theme="light"] .title-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 100, 200, 0.15), rgba(0, 150, 255, 0.25));
+            border-color: rgba(0, 100, 200, 0.8);
+            box-shadow: 0 8px 25px rgba(0, 100, 200, 0.3),
+                        inset 0 0 20px rgba(0, 100, 200, 0.1);
+        }
+
+        .title-btn:hover::before {
+            left: 100%;
+        }
+
+        .title-btn:hover::after {
+            opacity: 1;
+            right: 20px;
+        }
+
+        .title-btn:active {
+            transform: translateX(4px) scale(0.98);
+        }
+
+        .title-btn span {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .title-btn span::before {
+            content: attr(data-icon);
+            font-size: 1.2em;
+        }
+
+        /* ========== 難度選擇面板 ========== */
+        .difficulty-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, rgba(0, 10, 20, 0.98), rgba(10, 20, 40, 0.98));
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 40px;
+            width: 90%;
+            max-width: 550px;
+            z-index: 20;
+            display: none;
+            animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-sizing: border-box;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                        0 0 40px rgba(0, 255, 255, 0.2),
+                        inset 0 0 30px rgba(0, 255, 255, 0.05);
+        }
+
+        [data-theme="light"] .difficulty-panel {
+            background: linear-gradient(135deg, rgba(250, 252, 255, 0.98), rgba(240, 245, 252, 0.98));
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15),
+                        0 0 40px rgba(0, 100, 200, 0.15),
+                        inset 0 0 30px rgba(0, 100, 200, 0.03);
+        }
+
+        .difficulty-panel.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .difficulty-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 35px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .difficulty-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
+
+        .difficulty-options {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .difficulty-btn {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.05), rgba(0, 200, 255, 0.08));
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            padding: 20px 25px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .difficulty-btn::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        [data-theme="light"] .difficulty-btn {
+            background: linear-gradient(135deg, rgba(0, 100, 200, 0.05), rgba(0, 150, 255, 0.08));
+            border-color: rgba(0, 100, 200, 0.3);
+        }
+
+        .difficulty-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 200, 255, 0.20));
+            border-color: rgba(0, 255, 255, 0.6);
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(0, 255, 255, 0.3),
+                        inset 0 0 15px rgba(0, 255, 255, 0.1);
+        }
+
+        .difficulty-btn:hover::before {
+            opacity: 1;
+        }
+
+        [data-theme="light"] .difficulty-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 100, 200, 0.15), rgba(0, 150, 255, 0.20));
+            border-color: rgba(0, 100, 200, 0.6);
+            box-shadow: 0 5px 20px rgba(0, 100, 200, 0.3),
+                        inset 0 0 15px rgba(0, 100, 200, 0.1);
+        }
+
+        .difficulty-btn > span:first-child {
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .difficulty-btn[data-difficulty="easy"] > span:first-child::before {
+            content: '★';
+            color: #4ade80;
+        }
+
+        .difficulty-btn[data-difficulty="normal"] > span:first-child::before {
+            content: '★★';
+            color: #fbbf24;
+        }
+
+        .difficulty-btn[data-difficulty="hard"] > span:first-child::before {
+            content: '★★★';
+            color: #fb923c;
+        }
+
+        .difficulty-btn[data-difficulty="insane"] > span:first-child::before {
+            content: '★★★★';
+            color: #ef4444;
+        }
+
+        .difficulty-desc {
+            font-size: 1rem;
+            opacity: 0.75;
+            font-weight: 500;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, rgba(255, 100, 100, 0.08), rgba(255, 80, 80, 0.12));
+            border: 2px solid rgba(255, 100, 100, 0.4);
+            border-radius: 8px;
+            color: rgba(255, 100, 100, 0.9);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 100, 100, 0.15), rgba(255, 80, 80, 0.20));
+            border-color: rgba(255, 100, 100, 0.8);
+            box-shadow: 0 4px 15px rgba(255, 100, 100, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .back-btn:active {
+            transform: translateY(0);
+        }
+
+        /* ========== 遊戲說明面板 ========== */
+        .instructions-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, rgba(0, 10, 20, 0.98), rgba(10, 20, 40, 0.98));
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 40px;
+            width: 90%;
+            max-width: 650px;
+            z-index: 20;
+            display: none;
+            animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-sizing: border-box;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                        0 0 40px rgba(0, 255, 255, 0.2),
+                        inset 0 0 30px rgba(0, 255, 255, 0.05);
+        }
+
+        [data-theme="light"] .instructions-panel {
+            background: linear-gradient(135deg, rgba(250, 252, 255, 0.98), rgba(240, 245, 252, 0.98));
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15),
+                        0 0 40px rgba(0, 100, 200, 0.15),
+                        inset 0 0 30px rgba(0, 100, 200, 0.03);
+        }
+
+        .instructions-panel.active {
+            display: block;
+        }
+
+        .instructions-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 35px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .instructions-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
+
+        .instructions-content {
+            color: var(--text-primary);
+            line-height: 1.9;
+            margin-bottom: 30px;
+        }
+
+        .instruction-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 18px;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.06), rgba(0, 200, 255, 0.08));
+            border-left: 4px solid var(--primary);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .instruction-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(0, 255, 255, 0.15), transparent);
+            transition: width 0.3s ease;
+        }
+
+        .instruction-item:hover {
+            transform: translateX(8px);
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.10), rgba(0, 200, 255, 0.12));
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.2);
+        }
+
+        .instruction-item:hover::before {
+            width: 100%;
+        }
+
+        [data-theme="light"] .instruction-item {
+            background: linear-gradient(135deg, rgba(0, 100, 200, 0.06), rgba(0, 150, 255, 0.08));
+        }
+
+        [data-theme="light"] .instruction-item:hover {
+            background: linear-gradient(135deg, rgba(0, 100, 200, 0.10), rgba(0, 150, 255, 0.12));
+            box-shadow: 0 4px 15px rgba(0, 100, 200, 0.2);
+        }
+
+        .instruction-icon {
+            font-size: 1.8rem;
+            margin-right: 18px;
+            min-width: 35px;
+            text-align: center;
+            filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.5));
+            position: relative;
+            z-index: 1;
+        }
+
+        .instruction-text {
+            flex: 1;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+
+        .instruction-highlight {
+            color: var(--primary);
+            font-weight: 700;
+            padding: 2px 6px;
+            background: rgba(0, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+
+        [data-theme="light"] .instruction-highlight {
+            background: rgba(0, 100, 200, 0.15);
+        }
+
+        /* ========== 遊戲主體 ========== */
+        .game-main {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .game-main.active {
+            display: flex;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        [data-theme="light"] .game-header {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .game-info {
+            display: flex;
+            gap: 30px;
+        }
+
+        .info-item {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-label {
+            opacity: 0.7;
+        }
+
+        .info-value {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: var(--primary);
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .game-btn {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+        }
+
+        [data-theme="light"] .game-btn {
+            background: rgba(0, 100, 200, 0.1);
+        }
+
+        .game-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        [data-theme="light"] .game-btn:hover {
+            background: rgba(0, 100, 200, 0.2);
+            box-shadow: 0 0 10px rgba(0, 100, 200, 0.3);
+        }
+
+        .game-canvas-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            min-height: 0;
+            padding: 10px;
+        }
+
+        #gameCanvas {
+            border: 3px solid var(--primary);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.8);
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        [data-theme="light"] #gameCanvas {
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 30px rgba(0, 100, 200, 0.2);
+        }
+
+        /* ========== 遊戲結束面板 ========== */
+        .game-over-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            padding: 40px;
+            min-width: 400px;
+            text-align: center;
+            z-index: 15;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        [data-theme="light"] .game-over-panel {
+            background: rgba(255, 255, 255, 0.98);
+        }
+
+        .game-over-panel.active {
+            display: block;
+        }
+
+        .game-over-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            color: #ff3366;
+            text-shadow: 0 0 20px #ff3366;
+            margin-bottom: 20px;
+        }
+
+        .final-score {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: 30px;
+        }
+
+        .final-score span {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .game-over-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        /* ========== 響應式設計 ========== */
+        /* ========== 響應式設計 ========== */
+        @media (max-width: 768px) {
+            .gc-sidebar {
+                width: 70px;
+                padding: 40px 10px;
+            }
+
+            .gc-sidebar-link span {
+                display: none;
+            }
+
+            .game-container {
+                margin-left: 70px !important;
+            }
+
+            .title-screen {
+                padding: 10px;
+            }
+
+            .game-logo {
+                font-size: 2.5rem;
+                margin-bottom: 15px;
+            }
+
+            .game-subtitle {
+                font-size: 1rem;
+                margin-bottom: 30px;
+            }
+
+            .title-menu {
+                max-width: 300px;
+                gap: 15px;
+            }
+
+            .title-btn {
+                font-size: 1rem;
+                padding: 12px 25px;
+            }
+
+            .difficulty-panel {
+                width: 95%;
+                max-width: none;
+                padding: 20px;
+            }
+
+            .difficulty-title {
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+            }
+
+            .difficulty-btn {
+                font-size: 1rem;
+                padding: 12px;
+            }
+
+            .game-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .info-item {
+                min-width: 100%;
+            }
+        }
+
+        /* 極小螢幕優化 */
+        @media (max-width: 480px) {
+            .game-logo {
+                font-size: 2rem;
+            }
+
+            .title-menu {
+                max-width: 250px;
+            }
+
+            .difficulty-panel {
+                padding: 15px;
+            }
+
+            .difficulty-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 立即應用主題 -->
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+
+    <!-- 背景系統 -->
+    <div class="cyber-bg"></div>
+    <div class="grid-overlay"></div>
+    <div class="particles" id="particles"></div>
+
+    <header>
+        <a href="../../../../index.html">
+            <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
+        </a>
+        <div class="nav-container">
+            <ul class="nav-links">
+                <div class="nav-header">
+                    <h2 class="nav-title">選單導航</h2>
+                </div>
+                
+                <div class="search-box">
+                    <input type="text" id="navSearch" class="search-input" placeholder="搜尋頁面...">
+                    <button class="search-btn" aria-label="Search">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="nav-section">
+                    <h3 class="nav-section-title">主要頁面</h3>
+                    <li><a href="../../../../pages/about.html">◆ ABOUT</a></li>
+                    <li><a href="../../../../pages/experience.html">◆ EXPERIENCE</a></li>
+                    <li><a href="../../../../pages/skills.html">◆ SKILLS</a></li>
+                    <li><a href="../../../../pages/contact.html">◆ CONTACT</a></li>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-section-title">特別內容</h3>
+                    <li><a href="../../index.html">◆ GAME CENTER</a></li>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-section-title">更多連結</h3>
+                    <li>
+                        <a href="https://www.youtube.com/@Amano_Shizuki_Kun" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
+                            YouTube
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/AmanoShizukikun" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                            GitHub
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://discord.gg/jac8eAFzjz" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                            </svg>
+                            Discord
+                        </a>
+                    </li>
+                    <li>
+                        <a href="mailto:3b017128@gm.student.ncut.edu.tw" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            Email
+                        </a>
+                    </li>
+                </div>
+            </ul>
+        </div>
+        <div class="header-actions">
+            <button class="settings-toggle" aria-label="Settings"></button>
+            <button class="menu-toggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel">
+        <div class="settings-header">
+            <h2 class="settings-title">系統設定</h2>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="settings-section-title">顯示設定</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>固定導航欄</span>
+                    <span class="setting-description">保持導航欄在頂部固定</span>
+                </div>
+                <div class="toggle-switch" id="headerFixed"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>導航欄高度</span>
+                    <span class="setting-description">調整頂部導航欄的高度</span>
+                </div>
+                <div class="slider-control">
+                    <div class="slider-value" id="headerHeightValue">75px</div>
+                    <input type="range" class="slider-range" id="headerHeight" min="50" max="100" value="75" step="5">
+                    <div class="slider-marks">
+                        <span data-value="50">小</span>
+                        <span data-value="75">中</span>
+                        <span data-value="100">大</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>側邊欄文字顯示</span>
+                    <span class="setting-description">是否持續顯示側邊欄文字標題</span>
+                </div>
+                <div class="toggle-switch active" id="sideNavTextVisible"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>顯示左側導覽欄</span>
+                    <span class="setting-description">顯示或隱藏遊戲中心左側導覽欄</span>
+                </div>
+                <div class="toggle-switch active" id="showSidebar"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>主題模式</span>
+                    <span class="setting-description">切換深色/淺色模式</span>
+                </div>
+                <div class="select-control">
+                    <select id="themeMode">
+                        <option value="dark">深色模式</option>
+                        <option value="light">淺色模式</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="settings-section-title">效能設定</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>動畫強度</span>
+                    <span class="setting-description">調整頁面動畫效果強度</span>
+                </div>
+                <div class="slider-control">
+                    <div class="slider-value" id="animationValue">強</div>
+                    <input type="range" class="slider-range" id="animationStrength" min="0" max="2" value="2" step="1">
+                    <div class="slider-marks">
+                        <span data-value="0">關</span>
+                        <span data-value="1">低</span>
+                        <span data-value="2">強</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item fps-monitor">
+                <div class="setting-label">
+                    <span>幀數監控</span>
+                    <span class="setting-description">即時顯示頁面渲染幀率</span>
+                </div>
+                <div class="fps-display">
+                    <span class="fps-value" id="fpsValue">000</span>
+                    <span class="fps-unit">FPS</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="settings-section-title">音效設定</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>音效開關</span>
+                    <span class="setting-description">啟用/關閉互動音效</span>
+                </div>
+                <div class="toggle-switch active" id="soundEnabled"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="game-center-wrapper">
+        <!-- OSD 多功能顯示面板 -->
+        <div class="fps-osd" id="fpsOSD">
+            <div class="osd-header">
+                <div class="osd-title" id="osdTitle">FPS</div>
+                <div class="osd-mode-switcher">
+                    <button class="osd-mode-btn active" data-mode="performance" title="FPS模式"></button>
+                    <button class="osd-mode-btn" data-mode="game" title="遊戲模式"></button>
+                    <button class="osd-mode-btn" data-mode="simple" title="完整模式"></button>
+                </div>
+            </div>
+            <div class="osd-content" id="osdContent">
+                <!-- 內容將由 JavaScript 動態生成 -->
+            </div>
+        </div>
+
+        <!-- 左側導覽欄 -->
+        <aside class="gc-sidebar" id="gcSidebar">
+            <ul class="gc-sidebar-menu">
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="sidebarToggle" data-icon="◀" title="側邊欄摺疊">
+                        <span>摺疊</span>
+                    </a>
+                </li>
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="gcBackBtn" data-icon="🏠" title="返回遊戲中心">
+                        <span>遊戲中心</span>
+                    </a>
+                </li>
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="fpsOSDToggle" data-icon="📊" title="顯示幀數">
+                        <span>幀數顯示</span>
+                    </a>
+                </li>
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="hideSidebarBtn" data-icon="✕" title="關閉左側欄">
+                        <span>關閉左側欄</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 遊戲容器 -->
+        <div class="game-container">
+            <!-- 標題頁面 -->
+            <div class="title-screen" id="titleScreen">
+                <h1 class="game-logo">CYBER SNAKE</h1>
+                <p class="game-subtitle">賽博貪食蛇 v1.0</p>
+                <div class="title-menu">
+                    <button class="title-btn" id="startBtn">
+                        <span>🎮 開始遊戲</span>
+                    </button>
+                    <button class="title-btn" id="instructionsBtn">
+                        <span>📖 遊戲說明</span>
+                    </button>
+                    <button class="title-btn" id="backToGCBtn">
+                        <span>🏪 返回遊戲中心</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 難度選擇面板 -->
+            <div class="difficulty-panel" id="difficultyPanel">
+                <h2 class="difficulty-title">選擇難度</h2>
+                <div class="difficulty-options">
+                    <button class="difficulty-btn" data-difficulty="easy">
+                        <span>簡單</span>
+                        <span class="difficulty-desc">速度較慢,適合新手</span>
+                    </button>
+                    <button class="difficulty-btn" data-difficulty="normal">
+                        <span>普通</span>
+                        <span class="difficulty-desc">平衡的挑戰</span>
+                    </button>
+                    <button class="difficulty-btn" data-difficulty="hard">
+                        <span>困難</span>
+                        <span class="difficulty-desc">速度極快,考驗反應</span>
+                    </button>
+                    <button class="difficulty-btn" data-difficulty="insane">
+                        <span>瘋狂</span>
+                        <span class="difficulty-desc">光速移動,極限挑戰</span>
+                    </button>
+                </div>
+                <button class="back-btn" id="difficultyBackBtn">返回</button>
+            </div>
+
+            <!-- 遊戲說明面板 -->
+            <div class="instructions-panel" id="instructionsPanel">
+                <h2 class="instructions-title">遊戲說明</h2>
+                <div class="instructions-content">
+                    <div class="instruction-item">
+                        <span class="instruction-icon">🎮</span>
+                        <span class="instruction-text">使用 <span class="instruction-highlight">方向鍵</span> 或 <span class="instruction-highlight">WASD</span> 控制蛇的移動方向</span>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="instruction-icon">🍎</span>
+                        <span class="instruction-text">吃到食物可以 <span class="instruction-highlight">增加分數</span> 和 <span class="instruction-highlight">蛇的長度</span></span>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="instruction-icon">⚠️</span>
+                        <span class="instruction-text">避免撞到 <span class="instruction-highlight">牆壁</span> 或 <span class="instruction-highlight">蛇的身體</span>,否則遊戲結束</span>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="instruction-icon">⏸️</span>
+                        <span class="instruction-text">按下 <span class="instruction-highlight">空白鍵</span> 可以暫停或繼續遊戲</span>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="instruction-icon">🎯</span>
+                        <span class="instruction-text">挑戰自己,創造 <span class="instruction-highlight">最高分數紀錄</span>!</span>
+                    </div>
+                </div>
+                <button class="back-btn" id="instructionsBackBtn">返回</button>
+            </div>
+
+            <!-- 遊戲主體 -->
+            <div class="game-main" id="gameMain">
+                <div class="game-header">
+                    <div class="game-info">
+                        <div class="info-item">
+                            <span class="info-label">分數:</span>
+                            <span class="info-value" id="scoreDisplay">0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">最高分:</span>
+                            <span class="info-value" id="highScoreDisplay">0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">長度:</span>
+                            <span class="info-value" id="lengthDisplay">3</span>
+                        </div>
+                    </div>
+                    <div class="game-controls">
+                        <button class="game-btn" id="pauseBtn">暫停</button>
+                        <button class="game-btn" id="exitBtn">退出</button>
+                    </div>
+                </div>
+                <div class="game-canvas-wrapper">
+                    <canvas id="gameCanvas"></canvas>
+                    
+                    <!-- 遊戲結束面板 -->
+                    <div class="game-over-panel" id="gameOverPanel">
+                        <h2 class="game-over-title">GAME OVER</h2>
+                        <p class="final-score">最終分數: <span id="finalScore">0</span></p>
+                        <div class="game-over-buttons">
+                            <button class="title-btn" id="restartBtn">
+                                <span>重新開始</span>
+                            </button>
+                            <button class="title-btn" id="menuBtn">
+                                <span>返回選單</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../../../../assets/js/core.js"></script>
+    <script src="../../../../assets/js/navigation.js"></script>
+    <script src="../../../../assets/js/animations.js"></script>
+
+    <script>
+        // ========== 遊戲核心邏輯 ==========
+        const SnakeGame = {
+            canvas: null,
+            ctx: null,
+            gridSize: 20,
+            tileCount: 30,
+            snake: [],
+            food: {},
+            direction: { x: 1, y: 0 },
+            nextDirection: { x: 1, y: 0 },
+            score: 0,
+            highScore: 0,
+            gameLoop: null,
+            isPaused: false,
+            isGameOver: false,
+            difficulty: 'normal',
+            speeds: {
+                easy: 200,
+                normal: 150,
+                hard: 100,
+                insane: 50
+            },
+
+            init() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.canvas.width = this.gridSize * this.tileCount;
+                this.canvas.height = this.gridSize * this.tileCount;
+                
+                // 載入最高分
+                this.highScore = parseInt(localStorage.getItem('snakeHighScore') || '0');
+                document.getElementById('highScoreDisplay').textContent = this.highScore;
+                
+                // 鍵盤控制
+                document.addEventListener('keydown', (e) => this.handleKeyPress(e));
+                
+                this.reset();
+            },
+
+            reset() {
+                this.snake = [
+                    { x: 15, y: 15 },
+                    { x: 14, y: 15 },
+                    { x: 13, y: 15 }
+                ];
+                this.direction = { x: 1, y: 0 };
+                this.nextDirection = { x: 1, y: 0 };
+                this.score = 0;
+                this.isPaused = false;
+                this.isGameOver = false;
+                this.spawnFood();
+                this.updateUI();
+            },
+
+            start(difficulty) {
+                this.difficulty = difficulty;
+                // 更新 OSD 顯示
+                if (window.updateOSDGameInfo) {
+                    window.updateOSDGameInfo(this.score, difficulty.toUpperCase());
+                }
+                this.reset();
+                this.gameLoop = setInterval(() => this.update(), this.speeds[difficulty]);
+            },
+
+            stop() {
+                if (this.gameLoop) {
+                    clearInterval(this.gameLoop);
+                    this.gameLoop = null;
+                }
+            },
+
+            update() {
+                if (this.isPaused || this.isGameOver) return;
+
+                // 更新方向
+                this.direction = { ...this.nextDirection };
+
+                // 計算新頭部位置
+                const head = {
+                    x: this.snake[0].x + this.direction.x,
+                    y: this.snake[0].y + this.direction.y
+                };
+
+                // 檢查碰撞
+                if (this.checkCollision(head)) {
+                    this.gameOver();
+                    return;
+                }
+
+                // 添加新頭部
+                this.snake.unshift(head);
+
+                // 檢查是否吃到食物
+                if (head.x === this.food.x && head.y === this.food.y) {
+                    this.score += 10;
+                    this.spawnFood();
+                    
+                    // 更新最高分
+                    if (this.score > this.highScore) {
+                        this.highScore = this.score;
+                        localStorage.setItem('snakeHighScore', this.highScore.toString());
+                    }
+                    
+                    this.updateUI();
+                } else {
+                    // 移除尾部
+                    this.snake.pop();
+                }
+
+                this.draw();
+            },
+
+            draw() {
+                // 清空畫布
+                const theme = document.documentElement.getAttribute('data-theme');
+                this.ctx.fillStyle = theme === 'light' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.8)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // 繪製網格
+                this.ctx.strokeStyle = theme === 'light' ? 'rgba(0, 100, 200, 0.1)' : 'rgba(0, 255, 255, 0.1)';
+                this.ctx.lineWidth = 1;
+                for (let i = 0; i <= this.tileCount; i++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(i * this.gridSize, 0);
+                    this.ctx.lineTo(i * this.gridSize, this.canvas.height);
+                    this.ctx.stroke();
+                    
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, i * this.gridSize);
+                    this.ctx.lineTo(this.canvas.width, i * this.gridSize);
+                    this.ctx.stroke();
+                }
+
+                // 繪製蛇身
+                this.snake.forEach((segment, index) => {
+                    if (index === 0) {
+                        // 蛇頭
+                        this.ctx.fillStyle = theme === 'light' ? '#0066cc' : '#00ffff';
+                        this.ctx.shadowBlur = 15;
+                        this.ctx.shadowColor = theme === 'light' ? '#0066cc' : '#00ffff';
+                    } else {
+                        // 蛇身
+                        const alpha = 1 - (index / this.snake.length) * 0.5;
+                        this.ctx.fillStyle = theme === 'light' 
+                            ? `rgba(0, 100, 200, ${alpha})` 
+                            : `rgba(0, 255, 255, ${alpha})`;
+                        this.ctx.shadowBlur = 10;
+                    }
+                    
+                    this.ctx.fillRect(
+                        segment.x * this.gridSize + 1,
+                        segment.y * this.gridSize + 1,
+                        this.gridSize - 2,
+                        this.gridSize - 2
+                    );
+                });
+
+                this.ctx.shadowBlur = 0;
+
+                // 繪製食物
+                this.ctx.fillStyle = theme === 'light' ? '#ff3366' : '#ff00ff';
+                this.ctx.shadowBlur = 20;
+                this.ctx.shadowColor = theme === 'light' ? '#ff3366' : '#ff00ff';
+                this.ctx.beginPath();
+                this.ctx.arc(
+                    this.food.x * this.gridSize + this.gridSize / 2,
+                    this.food.y * this.gridSize + this.gridSize / 2,
+                    this.gridSize / 2 - 2,
+                    0,
+                    Math.PI * 2
+                );
+                this.ctx.fill();
+                this.ctx.shadowBlur = 0;
+            },
+
+            spawnFood() {
+                do {
+                    this.food = {
+                        x: Math.floor(Math.random() * this.tileCount),
+                        y: Math.floor(Math.random() * this.tileCount)
+                    };
+                } while (this.snake.some(segment => segment.x === this.food.x && segment.y === this.food.y));
+            },
+
+            checkCollision(head) {
+                // 檢查牆壁碰撞
+                if (head.x < 0 || head.x >= this.tileCount || head.y < 0 || head.y >= this.tileCount) {
+                    return true;
+                }
+
+                // 檢查自身碰撞
+                return this.snake.some(segment => segment.x === head.x && segment.y === head.y);
+            },
+
+            handleKeyPress(e) {
+                if (this.isGameOver) return;
+
+                switch (e.key) {
+                    case 'ArrowUp':
+                    case 'w':
+                    case 'W':
+                        if (this.direction.y === 0) {
+                            this.nextDirection = { x: 0, y: -1 };
+                        }
+                        e.preventDefault();
+                        break;
+                    case 'ArrowDown':
+                    case 's':
+                    case 'S':
+                        if (this.direction.y === 0) {
+                            this.nextDirection = { x: 0, y: 1 };
+                        }
+                        e.preventDefault();
+                        break;
+                    case 'ArrowLeft':
+                    case 'a':
+                    case 'A':
+                        if (this.direction.x === 0) {
+                            this.nextDirection = { x: -1, y: 0 };
+                        }
+                        e.preventDefault();
+                        break;
+                    case 'ArrowRight':
+                    case 'd':
+                    case 'D':
+                        if (this.direction.x === 0) {
+                            this.nextDirection = { x: 1, y: 0 };
+                        }
+                        e.preventDefault();
+                        break;
+                    case ' ':
+                        this.togglePause();
+                        e.preventDefault();
+                        break;
+                }
+            },
+
+            togglePause() {
+                this.isPaused = !this.isPaused;
+                document.getElementById('pauseBtn').textContent = this.isPaused ? '繼續' : '暫停';
+            },
+
+            updateUI() {
+                document.getElementById('scoreDisplay').textContent = this.score;
+                document.getElementById('highScoreDisplay').textContent = this.highScore;
+                document.getElementById('lengthDisplay').textContent = this.snake.length;
+                
+                // 更新 OSD 顯示
+                if (window.updateOSDGameInfo) {
+                    window.updateOSDGameInfo(this.score, this.difficulty ? this.difficulty.toUpperCase() : '-');
+                }
+            },
+
+            gameOver() {
+                this.isGameOver = true;
+                this.stop();
+                document.getElementById('finalScore').textContent = this.score;
+                document.getElementById('gameOverPanel').classList.add('active');
+            }
+        };
+
+        // ========== UI 控制 ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化核心系統
+            if (typeof Core !== 'undefined') Core.initBackground();
+            if (typeof Navigation !== 'undefined') Navigation.init();
+
+            // 初始化遊戲
+            SnakeGame.init();
+
+            // 載入設定狀態
+            const showSidebar = localStorage.getItem('showSidebar') !== 'false';
+            const sidebar = document.getElementById('gcSidebar');
+            const gameContainer = document.querySelector('.game-container');
+            
+            if (!showSidebar) {
+                sidebar.style.display = 'none';
+                gameContainer.style.marginLeft = '0';
+            } else {
+                sidebar.style.display = '';
+                // 恢復摺疊狀態 - 在隱藏狀態之後檢查摺疊
+                const savedCollapsedState = localStorage.getItem('gcSidebarCollapsed') === 'true';
+                if (savedCollapsedState) {
+                    sidebar.classList.add('collapsed');
+                    const toggleBtn = document.getElementById('sidebarToggle');
+                    toggleBtn.setAttribute('data-icon', '▶');
+                    toggleBtn.querySelector('span').textContent = '展開';
+                    gameContainer.style.marginLeft = '70px';
+                } else {
+                    sidebar.classList.remove('collapsed');
+                    const toggleBtn = document.getElementById('sidebarToggle');
+                    toggleBtn.setAttribute('data-icon', '◀');
+                    toggleBtn.querySelector('span').textContent = '摺疊';
+                    gameContainer.style.marginLeft = '300px';
+                }
+            }
+
+            // ========== 全域側邊欄控制 - 與系統設定同步 ==========
+            // 監聽全域的側邊欄顯示/隱藏事件
+            function syncSidebarState() {
+                const isHidden = sidebar.style.display === 'none';
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                
+                if (isHidden) {
+                    gameContainer.style.marginLeft = '0';
+                } else if (isCollapsed) {
+                    gameContainer.style.marginLeft = '70px';
+                } else {
+                    gameContainer.style.marginLeft = '300px';
+                }
+            }
+
+            // 響應式視窗調整
+            function updateLayoutOnResize() {
+                const isMobile = window.innerWidth <= 768;
+                
+                if (isMobile) {
+                    // 手機版強制收合側邊欄
+                    if (!sidebar.classList.contains('collapsed')) {
+                        sidebar.classList.add('collapsed');
+                        const toggleBtn = document.getElementById('sidebarToggle');
+                        toggleBtn.setAttribute('data-icon', '▶');
+                        toggleBtn.querySelector('span').textContent = '展開';
+                    }
+                    gameContainer.style.marginLeft = '70px';
+                } else {
+                    // 桌面版根據實際狀態調整
+                    syncSidebarState();
+                }
+            }
+
+            // 初始調整
+            updateLayoutOnResize();
+
+            // 監聽視窗大小變化
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    updateLayoutOnResize();
+                }, 100);
+            });
+
+            // 監聽來自系統設定面板的事件
+            window.addEventListener('sidebarToggle', (e) => {
+                const isVisible = e.detail.visible;
+                if (isVisible) {
+                    sidebar.style.display = '';
+                } else {
+                    sidebar.style.display = 'none';
+                }
+                syncSidebarState();
+            });
+
+            // 監聽 localStorage 變化 (從系統設定面板或其他標籤頁)
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'showSidebar') {
+                    const newValue = e.newValue !== 'false';
+                    if (newValue) {
+                        sidebar.style.display = '';
+                    } else {
+                        sidebar.style.display = 'none';
+                    }
+                    syncSidebarState();
+                }
+            });
+
+            // 標題頁面按鈕
+            document.getElementById('startBtn').addEventListener('click', () => {
+                document.getElementById('difficultyPanel').classList.add('active');
+            });
+
+            document.getElementById('instructionsBtn').addEventListener('click', () => {
+                document.getElementById('instructionsPanel').classList.add('active');
+            });
+
+            document.getElementById('backToGCBtn').addEventListener('click', () => {
+                window.location.href = '../../index.html';
+            });
+
+            // 難度選擇
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const difficulty = btn.dataset.difficulty;
+                    document.getElementById('difficultyPanel').classList.remove('active');
+                    document.getElementById('titleScreen').classList.add('hidden');
+                    document.getElementById('gameMain').classList.add('active');
+                    SnakeGame.start(difficulty);
+                });
+            });
+
+            document.getElementById('difficultyBackBtn').addEventListener('click', () => {
+                document.getElementById('difficultyPanel').classList.remove('active');
+            });
+
+            document.getElementById('instructionsBackBtn').addEventListener('click', () => {
+                document.getElementById('instructionsPanel').classList.remove('active');
+            });
+
+            // 遊戲控制按鈕
+            document.getElementById('pauseBtn').addEventListener('click', () => {
+                SnakeGame.togglePause();
+            });
+
+            document.getElementById('exitBtn').addEventListener('click', () => {
+                if (confirm('確定要退出遊戲嗎?')) {
+                    SnakeGame.stop();
+                    document.getElementById('gameMain').classList.remove('active');
+                    document.getElementById('titleScreen').classList.remove('hidden');
+                    document.getElementById('gameOverPanel').classList.remove('active');
+                }
+            });
+
+            // 遊戲結束按鈕
+            document.getElementById('restartBtn').addEventListener('click', () => {
+                document.getElementById('gameOverPanel').classList.remove('active');
+                SnakeGame.start(SnakeGame.difficulty);
+            });
+
+            document.getElementById('menuBtn').addEventListener('click', () => {
+                document.getElementById('gameOverPanel').classList.remove('active');
+                document.getElementById('gameMain').classList.remove('active');
+                document.getElementById('titleScreen').classList.remove('hidden');
+            });
+
+            // 側邊欄摺疊控制
+            document.getElementById('sidebarToggle').addEventListener('click', (e) => {
+                e.preventDefault();
+                sidebar.classList.toggle('collapsed');
+                const icon = document.getElementById('sidebarToggle');
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                icon.setAttribute('data-icon', isCollapsed ? '▶' : '◀');
+                icon.querySelector('span').textContent = isCollapsed ? '展開' : '摺疊';
+                // 保存摺疊狀態到 localStorage
+                localStorage.setItem('gcSidebarCollapsed', isCollapsed);
+                syncSidebarState();
+            });
+
+            document.getElementById('gcBackBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                // 設置標誌，防止播放進入動畫
+                sessionStorage.setItem('skipEntranceAnimation', 'true');
+                window.location.href = '../../index.html';
+            });
+
+            // 側邊欄隱藏控制 - 與系統設定同步
+            document.getElementById('hideSidebarBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                sidebar.style.display = 'none';
+                const isHidden = true;
+                
+                // 同步更新系統設定面板中的 toggle
+                const settingToggle = document.getElementById('showSidebar');
+                if (settingToggle) {
+                    settingToggle.classList.remove('active');
+                }
+                
+                // 保存狀態到 localStorage - 統一使用 showSidebar key
+                localStorage.setItem('showSidebar', 'false');
+                
+                // 觸發全局事件通知其他頁面
+                const event = new CustomEvent('sidebarToggle', { detail: { visible: false } });
+                window.dispatchEvent(event);
+                
+                syncSidebarState();
+            });
+
+            // ========== OSD 控制系統 ==========
+            const fpsOSD = document.getElementById('fpsOSD');
+            
+            // 從 localStorage 恢復 OSD 狀態
+            const savedOSDVisible = localStorage.getItem('fpsOSDVisible');
+            const savedOSDMode = localStorage.getItem('osdMode') || 'performance';
+            const savedOSDPosition = JSON.parse(localStorage.getItem('osdPosition') || '{"top": "90px", "right": "20px", "left": "auto", "bottom": "auto"}');
+            const savedOSDSize = JSON.parse(localStorage.getItem('osdSize') || '{"width": "280px", "height": "auto"}');
+            
+            // 恢復 OSD 位置和大小
+            if (savedOSDPosition.top !== 'auto') fpsOSD.style.top = savedOSDPosition.top;
+            if (savedOSDPosition.right !== 'auto') fpsOSD.style.right = savedOSDPosition.right;
+            if (savedOSDPosition.left !== 'auto') fpsOSD.style.left = savedOSDPosition.left;
+            if (savedOSDPosition.bottom !== 'auto') fpsOSD.style.bottom = savedOSDPosition.bottom;
+            if (savedOSDSize.width !== 'auto') fpsOSD.style.width = savedOSDSize.width;
+            if (savedOSDSize.height !== 'auto') fpsOSD.style.height = savedOSDSize.height;
+            
+            // 恢復顯示狀態
+            if (savedOSDVisible === 'true') {
+                fpsOSD.classList.add('active');
+            }
+            
+            // OSD 切換按鈕
+            document.getElementById('fpsOSDToggle').addEventListener('click', (e) => {
+                e.preventDefault();
+                fpsOSD.classList.toggle('active');
+                const isActive = fpsOSD.classList.contains('active');
+                localStorage.setItem('fpsOSDVisible', isActive);
+                
+                // 如果顯示 OSD，啟動監控；隱藏則停止
+                if (isActive) {
+                    startOSDMonitoring();
+                } else {
+                    stopOSDMonitoring();
+                }
+            });
+
+            // OSD 狀態管理
+            let osdState = {
+                currentMode: savedOSDMode,
+                lastTime: performance.now(),
+                frames: 0,
+                fps: 0,
+                sessionStart: Date.now(),
+                animationId: null,
+                gameScore: 0,
+                gameDifficulty: '-'
+            };
+
+            // 初始化 OSD 模式
+            function initOSDModes(initialMode) {
+                const modeBtns = document.querySelectorAll('.osd-mode-btn');
+                const osdTitle = document.getElementById('osdTitle');
+                
+                // 設定初始模式
+                osdState.currentMode = initialMode;
+                
+                modeBtns.forEach(btn => {
+                    if (btn.dataset.mode === initialMode) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                    
+                    btn.addEventListener('click', () => {
+                        // 更新按鈕狀態
+                        modeBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        
+                        // 切換模式
+                        osdState.currentMode = btn.dataset.mode;
+                        localStorage.setItem('osdMode', btn.dataset.mode);
+                        
+                        // 更新標題
+                        const titles = {
+                            performance: 'FPS',
+                            game: '遊戲資訊',
+                            simple: '完整顯示'
+                        };
+                        osdTitle.textContent = titles[btn.dataset.mode];
+                        
+                        // 更新顯示內容
+                        updateOSDContent();
+                    });
+                });
+                
+                // 初始化標題
+                const titles = {
+                    performance: 'FPS',
+                    game: '遊戲資訊',
+                    simple: '完整顯示'
+                };
+                osdTitle.textContent = titles[initialMode];
+            }
+
+            // 更新 OSD 內容
+            function updateOSDContent() {
+                const content = document.getElementById('osdContent');
+                if (!content) return;
+                
+                const mode = osdState.currentMode;
+                
+                if (mode === 'performance') {
+                    // FPS 模式：只顯示 FPS
+                    content.innerHTML = `
+                        <div class="osd-item">
+                            <div>
+                                <span class="osd-icon">📊</span>
+                                <span class="osd-label">FPS</span>
+                            </div>
+                            <div>
+                                <span class="osd-value large" id="osdFPS">000</span>
+                                <span class="osd-unit">FPS</span>
+                            </div>
+                        </div>
+                    `;
+                } else if (mode === 'game') {
+                    // 遊戲模式：顯示遊戲相關資訊
+                    content.innerHTML = `
+                        <div class="osd-item">
+                            <span class="osd-label">分數</span>
+                            <span class="osd-value" id="osdScore">0</span>
+                        </div>
+                        <div class="osd-item">
+                            <span class="osd-label">難度</span>
+                            <span class="osd-value" id="osdDifficulty">-</span>
+                        </div>
+                    `;
+                } else if (mode === 'simple') {
+                    // 完整模式：FPS + 遊戲資訊 + 遊玩時間
+                    const sessionTime = Math.floor((Date.now() - osdState.sessionStart) / 1000);
+                    const minutes = Math.floor(sessionTime / 60);
+                    const seconds = sessionTime % 60;
+                    
+                    content.innerHTML = `
+                        <div class="osd-item">
+                            <div>
+                                <span class="osd-icon">📊</span>
+                                <span class="osd-label">FPS</span>
+                            </div>
+                            <div>
+                                <span class="osd-value large" id="osdFPSFull">000</span>
+                                <span class="osd-unit">FPS</span>
+                            </div>
+                        </div>
+                        <div class="osd-item">
+                            <span class="osd-label">分數</span>
+                            <span class="osd-value" id="osdScoreFull">0</span>
+                        </div>
+                        <div class="osd-item">
+                            <span class="osd-label">難度</span>
+                            <span class="osd-value" id="osdDifficultyFull">-</span>
+                        </div>
+                        <div class="osd-item">
+                            <div>
+                                <span class="osd-icon">⏱️</span>
+                                <span class="osd-label">遊玩時間</span>
+                            </div>
+                            <span class="osd-value" id="osdPlayTime">${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}</span>
+                        </div>
+                    `;
+                }
+            }
+
+            // OSD 監控更新
+            function updateOSDMonitoring() {
+                const now = performance.now();
+                osdState.frames++;
+                
+                // 每秒更新一次
+                if (now >= osdState.lastTime + 1000) {
+                    osdState.fps = Math.round((osdState.frames * 1000) / (now - osdState.lastTime));
+                    osdState.frames = 0;
+                    osdState.lastTime = now;
+                    
+                    // 更新顯示
+                    updateOSDValues();
+                }
+                
+                osdState.animationId = requestAnimationFrame(updateOSDMonitoring);
+            }
+
+            // 更新 OSD 數值
+            function updateOSDValues() {
+                const mode = osdState.currentMode;
+                
+                if (mode === 'performance') {
+                    // FPS 模式：只更新 FPS
+                    const fpsEl = document.getElementById('osdFPS');
+                    if (fpsEl) {
+                        fpsEl.textContent = osdState.fps.toString().padStart(3, '0');
+                    }
+                    
+                } else if (mode === 'game') {
+                    // 遊戲模式：更新遊戲資訊
+                    const scoreEl = document.getElementById('osdScore');
+                    const difficultyEl = document.getElementById('osdDifficulty');
+                    
+                    if (scoreEl) scoreEl.textContent = osdState.gameScore;
+                    if (difficultyEl) difficultyEl.textContent = osdState.gameDifficulty;
+                    
+                } else if (mode === 'simple') {
+                    // 完整模式：更新所有項目
+                    
+                    // 更新 FPS
+                    const fpsFull = document.getElementById('osdFPSFull');
+                    if (fpsFull) {
+                        fpsFull.textContent = osdState.fps.toString().padStart(3, '0');
+                    }
+                    
+                    // 更新遊戲資訊
+                    const scoreFull = document.getElementById('osdScoreFull');
+                    const difficultyFull = document.getElementById('osdDifficultyFull');
+                    
+                    if (scoreFull) scoreFull.textContent = osdState.gameScore;
+                    if (difficultyFull) difficultyFull.textContent = osdState.gameDifficulty;
+                    
+                    // 更新遊玩時間
+                    const sessionTime = Math.floor((Date.now() - osdState.sessionStart) / 1000);
+                    const minutes = Math.floor(sessionTime / 60);
+                    const seconds = sessionTime % 60;
+                    const playTimeEl = document.getElementById('osdPlayTime');
+                    if (playTimeEl) {
+                        playTimeEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                }
+                
+                // 同步更新設定面板中的 FPS 顯示
+                const fpsValue = document.getElementById('fpsValue');
+                if (fpsValue) {
+                    fpsValue.textContent = osdState.fps.toString().padStart(3, '0');
+                }
+            }
+
+            // 啟動 OSD 監控
+            function startOSDMonitoring() {
+                if (osdState.animationId) return; // 已經在運行
+                osdState.lastTime = performance.now();
+                osdState.frames = 0;
+                updateOSDContent();
+                updateOSDMonitoring();
+            }
+
+            // 停止 OSD 監控
+            function stopOSDMonitoring() {
+                if (osdState.animationId) {
+                    cancelAnimationFrame(osdState.animationId);
+                    osdState.animationId = null;
+                }
+            }
+
+            // 初始化 OSD 模式
+            initOSDModes(savedOSDMode);
+            
+            // 初始化 OSD 拖曳功能
+            initOSDDragging(fpsOSD);
+            
+            // 初始化 OSD 調整大小功能
+            initOSDResizing(fpsOSD);
+            
+            // 如果 OSD 是顯示狀態，啟動監控
+            if (savedOSDVisible === 'true') {
+                startOSDMonitoring();
+            }
+
+            // OSD 拖曳功能
+            function initOSDDragging(osd) {
+                const header = osd.querySelector('.osd-header');
+                let isDragging = false;
+                let currentX;
+                let currentY;
+                let initialX;
+                let initialY;
+
+                // 滑鼠事件
+                header.addEventListener('mousedown', (e) => {
+                    // 只在 header 區域且不是按鈕時才能拖動
+                    if (e.target.closest('.osd-mode-switcher')) return;
+                    
+                    startDragging(e.clientX, e.clientY);
+                });
+
+                // 觸控事件
+                header.addEventListener('touchstart', (e) => {
+                    // 只在 header 區域且不是按鈕時才能拖動
+                    if (e.target.closest('.osd-mode-switcher')) return;
+                    
+                    const touch = e.touches[0];
+                    startDragging(touch.clientX, touch.clientY);
+                    e.preventDefault(); // 防止滾動
+                });
+
+                function startDragging(clientX, clientY) {
+                    isDragging = true;
+                    osd.classList.add('dragging');
+                    
+                    // 獲取當前位置
+                    const rect = osd.getBoundingClientRect();
+                    initialX = clientX - rect.left;
+                    initialY = clientY - rect.top;
+                    
+                    // 移除 right/bottom 定位，改用 left/top
+                    osd.style.right = 'auto';
+                    osd.style.bottom = 'auto';
+                }
+
+                // 滑鼠移動
+                document.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    
+                    e.preventDefault();
+                    updatePosition(e.clientX, e.clientY);
+                });
+
+                // 觸控移動
+                document.addEventListener('touchmove', (e) => {
+                    if (!isDragging) return;
+                    
+                    const touch = e.touches[0];
+                    updatePosition(touch.clientX, touch.clientY);
+                    e.preventDefault();
+                }, { passive: false });
+
+                function updatePosition(clientX, clientY) {
+                    currentX = clientX - initialX;
+                    currentY = clientY - initialY;
+                    
+                    // 限制在視窗範圍內
+                    const maxX = window.innerWidth - osd.offsetWidth;
+                    const maxY = window.innerHeight - osd.offsetHeight;
+                    
+                    currentX = Math.max(0, Math.min(currentX, maxX));
+                    currentY = Math.max(0, Math.min(currentY, maxY));
+                    
+                    osd.style.left = currentX + 'px';
+                    osd.style.top = currentY + 'px';
+                }
+
+                // 滑鼠放開
+                document.addEventListener('mouseup', () => {
+                    if (isDragging) {
+                        endDragging();
+                    }
+                });
+
+                // 觸控結束
+                document.addEventListener('touchend', () => {
+                    if (isDragging) {
+                        endDragging();
+                    }
+                });
+
+                function endDragging() {
+                    isDragging = false;
+                    osd.classList.remove('dragging');
+                    
+                    // 保存位置
+                    saveOSDPosition(osd);
+                }
+            }
+
+            // OSD 調整大小功能
+            function initOSDResizing(osd) {
+                // 使用 ResizeObserver 監聽大小變化
+                const resizeObserver = new ResizeObserver(() => {
+                    // 保存新的大小
+                    saveOSDSize(osd);
+                });
+                
+                resizeObserver.observe(osd);
+                
+                // 當開始調整大小時添加 class
+                let isResizing = false;
+                osd.addEventListener('mousedown', (e) => {
+                    // 檢查是否點擊在右下角（resize handle 區域）
+                    const rect = osd.getBoundingClientRect();
+                    const offsetX = rect.right - e.clientX;
+                    const offsetY = rect.bottom - e.clientY;
+                    
+                    if (offsetX < 20 && offsetY < 20) {
+                        isResizing = true;
+                        osd.classList.add('resizing');
+                    }
+                });
+                
+                document.addEventListener('mouseup', () => {
+                    if (isResizing) {
+                        isResizing = false;
+                        osd.classList.remove('resizing');
+                    }
+                });
+            }
+
+            // 保存 OSD 位置
+            function saveOSDPosition(osd) {
+                const position = {
+                    top: osd.style.top || 'auto',
+                    right: osd.style.right || 'auto',
+                    left: osd.style.left || 'auto',
+                    bottom: osd.style.bottom || 'auto'
+                };
+                localStorage.setItem('osdPosition', JSON.stringify(position));
+            }
+
+            // 保存 OSD 大小
+            function saveOSDSize(osd) {
+                const size = {
+                    width: osd.style.width || 'auto',
+                    height: osd.style.height || 'auto'
+                };
+                localStorage.setItem('osdSize', JSON.stringify(size));
+            }
+
+            // 暴露更新遊戲資訊的介面給遊戲邏輯使用
+            window.updateOSDGameInfo = function(score, difficulty) {
+                osdState.gameScore = score;
+                osdState.gameDifficulty = difficulty;
+            };
+        });
+    </script>
+</body>
+</html>

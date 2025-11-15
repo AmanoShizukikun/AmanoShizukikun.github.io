@@ -782,6 +782,23 @@ const Navigation = {
                 applySettings(settings, skipHeaderFixed);
             });
         }
+
+        // 遊戲中心左側欄顯示/隱藏切換 - 與遊戲頁面同步
+        const showSidebarToggle = document.getElementById('showSidebar');
+        if (showSidebarToggle) {
+            const isShowing = localStorage.getItem('showSidebar') !== 'false';
+            showSidebarToggle.classList.toggle('active', isShowing);
+            
+            showSidebarToggle.addEventListener('click', () => {
+                const willShow = !showSidebarToggle.classList.contains('active');
+                showSidebarToggle.classList.toggle('active', willShow);
+                localStorage.setItem('showSidebar', willShow);
+                
+                // 觸發自訂事件通知遊戲頁面
+                const event = new CustomEvent('sidebarToggle', { detail: { visible: willShow } });
+                window.dispatchEvent(event);
+            });
+        }
     },
 
     /**

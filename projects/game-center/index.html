@@ -1,9 +1,10 @@
+<!-- 遊戲中心 -->
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Game Center - 賽博龐克風格遊戲啟動中心">
+    <meta name="description" content="Game Center - 遊戲中心">
     <title>Game Center - 天野靜樹</title>
     <link rel="icon" href="../../assets/images/logo.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -613,6 +614,7 @@
             flex-shrink: 0;
             transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
                         padding 0.3s ease,
+                        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
                         top 0.01s ease-out,
                         height 0.01s ease-out;
             z-index: 900; /* 確保不會覆蓋 header (header z-index: 1000) */
@@ -635,6 +637,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+        }
+
+        .gc-sidebar.hidden {
+            transform: translateX(-100%);
+            width: 0;
+            padding: 0;
+            border: none;
         }
 
         [data-theme="light"] .gc-sidebar {
@@ -947,7 +956,6 @@
             background: rgba(0, 150, 150, 0.1);
         }
 
-        /* 移除 active 狀態的持續高亮效果 - 點擊後不再持續亮著 */
 
         /* 關閉左側欄按鈕的特殊樣式 */
         #hideSidebarBtn {
@@ -2933,9 +2941,9 @@
                 title: 'Cyber Tetris',
                 description: '經典俄羅斯方塊的賽博龐克版本，挑戰你的反應速度！',
                 category: 'puzzle',
-                status: 'available',
+                status: 'development',
                 icon: '🎮',
-                url: 'games/tetris/index.html'
+                url: '#'
             },
             {
                 id: 'snake',
@@ -2951,9 +2959,9 @@
                 title: 'Code Breaker',
                 description: '限時破解隨機代碼序列，挑戰你的反應與記憶力！',
                 category: 'puzzle',
-                status: 'available',
+                status: 'development',
                 icon: '💻',
-                url: 'games/code-breaker/index.html'
+                url: '#'
             },
             {
                 id: 'breakout',
@@ -3789,8 +3797,8 @@
             
             if (!toggle || !sidebar || !mainContainer) return;
 
-            // 從 localStorage 讀取狀態
-            const savedState = localStorage.getItem('gcSidebarVisible');
+            // 從 localStorage 讀取狀態 - 統一使用 showSidebar key
+            const savedState = localStorage.getItem('showSidebar');
             const isVisible = savedState !== 'false'; // 默認顯示
             
             if (!isVisible) {
@@ -3819,8 +3827,12 @@
                 // 更新佈局
                 updateGameCenterLayout();
                 
-                // 保存狀態到 localStorage
-                localStorage.setItem('gcSidebarVisible', willBeVisible);
+                // 保存狀態到 localStorage - 統一使用 showSidebar key
+                localStorage.setItem('showSidebar', willBeVisible);
+                
+                // 觸發全局事件通知遊戲頁面
+                const event = new CustomEvent('sidebarToggle', { detail: { visible: willBeVisible } });
+                window.dispatchEvent(event);
             });
 
             // 不需要在這裡再添加 resize 監聽，因為 initSidebarToggle 已經處理了
@@ -3849,8 +3861,12 @@
                 // 更新佈局
                 updateGameCenterLayout();
                 
-                // 保存狀態到 localStorage
-                localStorage.setItem('gcSidebarVisible', 'false');
+                // 保存狀態到 localStorage - 統一使用 showSidebar key
+                localStorage.setItem('showSidebar', 'false');
+                
+                // 觸發全局事件通知遊戲頁面
+                const event = new CustomEvent('sidebarToggle', { detail: { visible: false } });
+                window.dispatchEvent(event);
             });
         }
 
@@ -3892,7 +3908,7 @@
 
                 const playButton = game.status === 'available'
                     ? `<button class="gc-play-btn" onclick="window.location.href='${game.url}'">啟動</button>`
-                    : '<button class="gc-play-btn" disabled style="opacity: 0.5; cursor: not-allowed;">開發中</button>';
+                    : '<button class="gc-play-btn" disabled style="opacity: 0.5; cursor: not-allowed;">維護中</button>';
 
                 card.innerHTML = `
                     ${comingSoonTag}
@@ -3905,7 +3921,7 @@
                         <div class="gc-game-meta">
                             <div class="gc-game-status">
                                 <span class="gc-status-dot"></span>
-                                ${game.status === 'available' ? '可遊玩' : '開發中'}
+                                ${game.status === 'available' ? '可遊玩' : '維護中'}
                             </div>
                             ${playButton}
                         </div>
