@@ -572,6 +572,272 @@
             box-shadow: 0 0 10px rgba(0, 136, 204, 0.5);
         }
 
+        /* ========== 全版遊戲加載動畫 (NEW) ========== */
+        :root {
+            --loader-accent: var(--accent-cyan, #00ffff);
+            --loader-accent-2: var(--accent-magenta, #ff00ff);
+            --loader-bg: rgba(4, 4, 10, 0.85);
+        }
+
+        .game-loading-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99999; /* higher than other overlays */
+            display: none; /* toggled via JS */
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(6px);
+            pointer-events: auto;
+            opacity: 0;
+            transition: opacity 400ms cubic-bezier(0.2, 0.9, 0.2, 1);
+            background: var(--loader-bg);
+        }
+
+        .game-loading-overlay.visible {
+            display: flex;
+            opacity: 1;
+        }
+
+        .game-loading-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(180deg, rgba(0,0,0,0.0) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.0) 1px, transparent 1px),
+                radial-gradient(circle at 10% 20%, rgba(0,255,255,0.04), transparent 20%);
+            background-size: 24px 24px, 24px 24px, 600px 600px;
+            filter: hue-rotate(0deg) saturate(1.3);
+            opacity: 0.8;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .game-loading-center {
+            z-index: 3;
+            text-align: center;
+            color: var(--loader-accent);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            align-items: center;
+            justify-content: center;
+            width: min(720px, 90%);
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        /* Spinner / Logo */
+        .game-loader-spinner {
+            width: 160px;
+            height: 160px;
+            border-radius: 20px;
+            position: relative;
+            display: grid;
+            place-items: center;
+            transform-style: preserve-3d;
+        }
+
+        /* outer rings */
+        .game-loader-spinner .spinner-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            box-sizing: border-box;
+            pointer-events: none;
+            mix-blend-mode: screen;
+            filter: blur(6px);
+        }
+
+        .game-loader-spinner .spinner-ring.ring1 {
+            border: 3px solid rgba(0,255,255,0.15);
+            width: 140px;
+            height: 140px;
+            animation: ringSpin 6s linear infinite reverse;
+        }
+
+        .game-loader-spinner .spinner-ring.ring2 {
+            border: 2px dashed rgba(255,0,255,0.12);
+            width: 120px;
+            height: 120px;
+            animation: ringSpin 3.5s linear infinite;
+        }
+
+        .game-loader-spinner .spinner-ring.ring3 {
+            border: 2px solid rgba(0,255,255,0.25);
+            width: 100px;
+            height: 100px;
+            animation: ringSpin 4.2s linear infinite reverse;
+        }
+
+        /* 進度環 (conic) */
+        .game-loading-gauge {
+            position: absolute;
+            inset: 0;
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: conic-gradient(var(--loader-accent) 0%, var(--loader-accent-2) var(--loader-progress, 0%), rgba(255,255,255,0) 0%);
+            opacity: 0.25;
+            pointer-events: none;
+            filter: blur(6px);
+            z-index: 1;
+        }
+
+        .game-loader-inner {
+            width: 72%;
+            height: 72%;
+            border-radius: 12px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.72));
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            position: relative;
+            z-index: 6;
+            box-shadow: inset 0 2px 8px rgba(255,255,255,0.02), 0 6px 30px rgba(0,255,255,0.06);
+            transform: translateZ(20px);
+            overflow: hidden;
+        }
+
+        .game-loader-icon {
+            font-size: 3.8rem;
+            filter: drop-shadow(0 8px 22px rgba(0,255,255,0.3));
+            transform: translateZ(30px);
+            line-height: 1;
+        }
+
+        @keyframes ringSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .game-loading-title {
+            font-size: clamp(1.25rem, 2.2vw, 2rem);
+            letter-spacing: 0.18em;
+            color: var(--loader-accent);
+            text-transform: uppercase;
+            font-weight: 900;
+            text-shadow: 0 0 30px rgba(0,255,255,0.45);
+            margin-top: 6px;
+        }
+
+        .game-loading-subtitle {
+            color: rgba(255,255,255,0.75);
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            font-size: 0.9rem;
+        }
+
+        .game-loading-percent {
+            font-family: 'Orbitron', monospace;
+            font-weight: 800;
+            font-size: 1.4rem;
+            color: var(--loader-accent);
+            text-shadow: 0 0 20px rgba(0,255,255,0.35);
+        }
+
+        .game-loading-progress {
+            width: 100%;
+            height: 10px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 999px;
+            overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.6);
+        }
+
+        .game-loading-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--loader-accent), var(--loader-accent-2));
+            box-shadow: 0 0 12px rgba(0,255,255,0.6);
+            transition: width 300ms cubic-bezier(0.2, 0.9, 0.2, 1);
+        }
+
+        /* Animated indicator */
+        .game-loading-dots {
+            display: inline-flex;
+            gap: 6px;
+        }
+
+        .game-loading-dots span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            transform: translateY(0);
+            animation: dotFloat 1s ease-in-out infinite;
+        }
+
+        .game-loading-dots span:nth-child(2) { animation-delay: 0.12s; }
+        .game-loading-dots span:nth-child(3) { animation-delay: 0.24s; }
+
+        @keyframes dotFloat {
+            0% { transform: translateY(0); opacity: 0.6; }
+            50% { transform: translateY(-6px); opacity: 1; }
+            100% { transform: translateY(0); opacity: 0.6; }
+        }
+
+        /* 引擎火焰 / 燃燒格 */
+        .game-engine-thrust {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+            z-index: 5;
+        }
+
+        .game-engine-thrust .thrust-bar {
+            width: 10px;
+            height: 18px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.25), rgba(0,255,255,0.06));
+            border-radius: 3px;
+            transform-origin: bottom center;
+            animation: thrust 0.8s ease-in-out infinite;
+            opacity: 0.9;
+            box-shadow: 0 0 10px rgba(0,255,255,0.18);
+        }
+
+        .game-engine-thrust .thrust-bar:nth-child(2) { animation-delay: 0.1s; }
+        .game-engine-thrust .thrust-bar:nth-child(3) { animation-delay: 0.24s; }
+
+        @keyframes thrust {
+            0% { transform: scaleY(1); opacity: 0.8; }
+            50% { transform: scaleY(1.65); opacity: 1; }
+            100% { transform: scaleY(1); opacity: 0.8; }
+        }
+
+        /* Light theme adjustments */
+        [data-theme="light"] .game-loading-overlay {
+            --loader-bg: rgba(255,255,255,0.92);
+            --loader-accent: #0088cc;
+            --loader-accent-2: #6644cc;
+        }
+
+        [data-theme="light"] .game-loading-gauge {
+            opacity: 0.22;
+        }
+
+        [data-theme="light"] .game-loader-spinner .spinner-ring.ring1 {
+            border-color: rgba(0,136,204,0.12);
+        }
+
+        [data-theme="light"] .game-loader-spinner .spinner-ring.ring2 {
+            border-color: rgba(102,68,204,0.12);
+        }
+
+        [data-theme="light"] .game-loading-grid {
+            opacity: 0.33;
+            filter: hue-rotate(120deg) saturate(0.8);
+        }
+
+        [data-theme="light"] .game-loader-inner {
+            background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(0,0,0,0.02));
+            color: #08303a;
+        }
+
+
         /* ========== 主容器佈局 ========== */
         .game-center-wrapper {
             display: flex;
@@ -2640,6 +2906,36 @@
         </div>
     </div>
 
+    <!-- 全版遊戲加載動畫 / Full-screen Game Loading Overlay -->
+    <div class="game-loading-overlay" id="gameLoadingOverlay" aria-hidden="true" role="dialog" aria-label="遊戲載入中">
+        <div class="game-loading-grid"></div>
+        <div class="game-loading-center">
+            <div class="game-loader-spinner" aria-hidden="true">
+                <div class="spinner-ring ring1"></div>
+                <div class="spinner-ring ring2"></div>
+                <div class="spinner-ring ring3"></div>
+                <div class="game-loading-gauge" id="gameLoadingGauge" aria-hidden="true"></div>
+                <div class="game-loader-inner">
+                    <div class="game-loader-icon" id="gameLoaderIcon">▣</div>
+                    <div class="game-engine-thrust">
+                        <div class="thrust-bar"></div>
+                        <div class="thrust-bar"></div>
+                        <div class="thrust-bar"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="game-loading-title" id="gameLoadingTitle">載入遊戲</div>
+            <div class="game-loading-subtitle" id="gameLoadingSubtitle">請稍候，組裝遊戲世界中...</div>
+            <div class="game-loading-percent" id="gameLoadingPercent" aria-hidden="true">0%</div>
+            <div class="game-loading-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="載入進度">
+                <div class="game-loading-progress-bar" id="gameLoadingProgressBar"></div>
+            </div>
+            <div class="game-loading-dots" aria-hidden="true">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </div>
+
     <header>
         <a href="../../index.html">
             <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
@@ -2879,7 +3175,7 @@
                     <div class="gc-hero-label">焦點推薦</div>
                     <h1 class="gc-hero-title" id="heroTitle">Cyber Tetris</h1>
                     <p class="gc-hero-desc" id="heroDesc">經典俄羅斯方塊的賽博龐克版本，挑戰你的反應速度！</p>
-                    <button class="gc-play-btn" id="heroPlayBtn">立即遊玩</button>
+                    <button class="gc-play-btn" id="heroPlayBtn" data-icon="🎮">立即遊玩</button>
                 </div>
                 <div class="gc-hero-image" id="heroImage">🎮</div>
                 
@@ -2898,15 +3194,15 @@
                     <div class="gc-stat-label">總遊戲數</div>
                 </div>
                 <div class="gc-stat-card">
-                    <div class="gc-stat-value" data-target="3">0</div>
+                    <div class="gc-stat-value" data-target="1">0</div>
                     <div class="gc-stat-label">可遊玩</div>
                 </div>
                 <div class="gc-stat-card">
-                    <div class="gc-stat-value" data-target="3">0</div>
+                    <div class="gc-stat-value" data-target="5">0</div>
                     <div class="gc-stat-label">開發中</div>
                 </div>
                 <div class="gc-stat-card">
-                    <div class="gc-stat-value" data-target="12">0</div>
+                    <div class="gc-stat-value" data-target="0">0</div>
                     <div class="gc-stat-label">遊玩時數</div>
                 </div>
             </div>
@@ -3907,7 +4203,7 @@
                     : '';
 
                 const playButton = game.status === 'available'
-                    ? `<button class="gc-play-btn" onclick="window.location.href='${game.url}'">啟動</button>`
+                    ? `<button class="gc-play-btn" data-url="${game.url}" data-title="${game.title}" data-icon="${game.icon}">啟動</button>`
                     : '<button class="gc-play-btn" disabled style="opacity: 0.5; cursor: not-allowed;">維護中</button>';
 
                 card.innerHTML = `
@@ -3946,7 +4242,12 @@
                 playBtn.disabled = false;
                 playBtn.style.opacity = '1';
                 playBtn.style.cursor = 'pointer';
-                playBtn.onclick = () => window.location.href = game.url;
+                playBtn.textContent = '立即遊玩';
+                // prefer data-url to be used by the overlay script
+                playBtn.dataset.url = game.url;
+                playBtn.dataset.icon = game.icon;
+                // clear inline onclick to avoid circumventing overlay
+                playBtn.onclick = null;
             } else {
                 playBtn.disabled = true;
                 playBtn.style.opacity = '0.5';
@@ -3965,6 +4266,9 @@
 
         function initCarousel() {
             const dotsContainer = document.getElementById('carouselDots');
+            
+            // 設置初始 Hero 卡片
+            updateHeroCard(games[0].id);
             
             // 生成指示點
             games.forEach((game, index) => {
@@ -4060,6 +4364,32 @@
                 }, 30);
             });
         }
+
+        // 更新遊玩時數
+        function updatePlayTime() {
+            const playTimeStat = document.querySelector('.gc-stats .gc-stat-card:nth-child(4) .gc-stat-value');
+            if (!playTimeStat) return;
+
+            const totalMinutes = Math.floor((Date.now() - sessionStartTime) / 1000 / 60);
+
+            let displayValue, displayText;
+            if (totalMinutes >= 60) {
+                // 超過1小時，顯示小時
+                const hours = Math.floor(totalMinutes / 60);
+                displayValue = hours;
+                displayText = hours + '小時';
+            } else {
+                // 小於1小時，顯示分鐘
+                displayValue = totalMinutes;
+                displayText = totalMinutes + '分鐘';
+            }
+
+            playTimeStat.textContent = displayText;
+            playTimeStat.setAttribute('data-target', displayValue);
+        }
+
+        // 全局 session 開始時間
+        let sessionStartTime = Date.now();
 
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
@@ -4179,12 +4509,239 @@
             // 動畫統計數字
             setTimeout(animateStats, 500);
 
+            // 設置統計面板的動態數據
+            setTimeout(() => {
+                const totalGames = games.length;
+                const availableGames = games.filter(g => g.status === 'available').length;
+                const developmentGames = games.filter(g => g.status === 'development').length;
+                const initialTotalMinutes = Math.floor((Date.now() - sessionStartTime) / 1000 / 60);
+
+                let initialDisplayValue, initialDisplayText;
+                if (initialTotalMinutes >= 60) {
+                    const hours = Math.floor(initialTotalMinutes / 60);
+                    initialDisplayValue = hours;
+                    initialDisplayText = hours + '小時';
+                } else {
+                    initialDisplayValue = initialTotalMinutes;
+                    initialDisplayText = initialTotalMinutes + '分鐘';
+                }
+
+                // 更新 data-target 屬性
+                document.querySelector('.gc-stat-value[data-target="6"]').setAttribute('data-target', totalGames);
+                document.querySelector('.gc-stat-value[data-target="1"]').setAttribute('data-target', availableGames);
+                document.querySelector('.gc-stat-value[data-target="5"]').setAttribute('data-target', developmentGames);
+                const playTimeElement = document.querySelector('.gc-stats .gc-stat-card:nth-child(4) .gc-stat-value');
+                playTimeElement.setAttribute('data-target', initialDisplayValue);
+                playTimeElement.textContent = initialDisplayText;
+
+                // 重新動畫統計數字
+                animateStats();
+            }, 600);
+
+            // 每分鐘更新遊玩時數
+            setInterval(updatePlayTime, 60000); // 60秒 = 1分鐘
+
             // 觸發進場動畫
             if (typeof Animations !== 'undefined') {
                 setTimeout(() => {
                     Animations.triggerPageEntrance();
                 }, 100);
             }
+
+            /* ---------- Game Loading Overlay API ---------- */
+            const gameLoadingOverlay = document.getElementById('gameLoadingOverlay');
+            const gameLoadingTitle = document.getElementById('gameLoadingTitle');
+            const gameLoadingSubtitle = document.getElementById('gameLoadingSubtitle');
+            const gameLoadingPercent = document.getElementById('gameLoadingPercent');
+            const gameLoadingBar = document.getElementById('gameLoadingProgressBar');
+            const gameLoadingGauge = document.getElementById('gameLoadingGauge');
+            const gameLoaderIcon = document.getElementById('gameLoaderIcon');
+            const hudAssetCount = document.getElementById('hudAssetCount');
+            const hudETA = document.getElementById('hudETA');
+
+            let gameLoadingTimer = null;
+            const GameLoader = {
+                show({ title = '載入遊戲', subtitle = '請稍候，正在準備資源...', simulate = true, duration = 1800, icon = null } = {}) {
+                    if (!gameLoadingOverlay) return;
+                    gameLoadingTitle.textContent = title;
+                    gameLoadingSubtitle.textContent = subtitle;
+                    gameLoadingPercent.textContent = '0%';
+                    gameLoadingBar.style.width = '0%';
+                    gameLoadingBar.setAttribute('aria-valuenow', '0');
+                    gameLoadingOverlay.classList.add('visible');
+                    gameLoadingOverlay.setAttribute('aria-hidden', 'false');
+                    if (icon) GameLoader.setIcon(icon);
+
+                    if (simulate) {
+                        // simple progressive fill with tiny randomization for realism
+                        let percent = 0;
+                        const start = Date.now();
+                        clearInterval(gameLoadingTimer);
+                        gameLoadingTimer = setInterval(() => {
+                            const elapsed = Date.now() - start;
+                            // speed up towards 90% then wait
+                            const progress = Math.min(90, Math.floor((elapsed / duration) * 100));
+                            percent = Math.max(percent, progress);
+                            // small random increments
+                            percent += Math.floor(Math.random() * 4);
+                            if (percent >= 92) percent = 92;
+                            GameLoader.setPercent(percent);
+                        }, 120);
+                    }
+                },
+                setPercent(p) {
+                    if (!gameLoadingOverlay) return;
+                    const clamped = Math.min(100, Math.max(0, Math.round(p)));
+                    gameLoadingBar.style.width = clamped + '%';
+                    gameLoadingBar.setAttribute('aria-valuenow', '' + clamped);
+                    gameLoadingPercent.textContent = clamped + '%';
+                    if (gameLoadingGauge) {
+                        // set CSS variable --loader-progress on gauge
+                        const pct = clamped + '%';
+                        gameLoadingGauge.style.setProperty('--loader-progress', pct);
+                        // also change glow intensity
+                        gameLoadingGauge.style.opacity = 0.18 + (clamped / 1000);
+                    }
+                },
+                setIcon(icon) {
+                    if (!gameLoaderIcon) return;
+                    if (!icon) {
+                        gameLoaderIcon.textContent = '▣';
+                        return;
+                    }
+                    // if url-like, render image tag
+                    if (/^(https?:)?\/\//.test(icon)) {
+                        const img = document.createElement('img');
+                        img.src = icon;
+                        img.alt = 'Game icon';
+                        img.style.width = '64px';
+                        img.style.height = '64px';
+                        img.style.objectFit = 'cover';
+                        img.style.borderRadius = '8px';
+                        gameLoaderIcon.innerHTML = '';
+                        gameLoaderIcon.appendChild(img);
+                    } else {
+                        // emoji or text fallback
+                        gameLoaderIcon.textContent = icon;
+                    }
+                },
+                setHuds({ loaded = null, total = null, eta = null } = {}) {
+                    if (hudAssetCount && loaded !== null && total !== null) {
+                        hudAssetCount.textContent = `Assets: ${loaded} / ${total}`;
+                    }
+                    if (hudETA && eta !== null) {
+                        hudETA.textContent = `ETA: ${Math.round(eta)}s`;
+                    }
+                },
+                hide({ fade = true, wait = 150 } = {}) {
+                    if (!gameLoadingOverlay) return;
+                    clearInterval(gameLoadingTimer);
+                    // ensure 100%
+                    GameLoader.setPercent(100);
+                    setTimeout(() => {
+                        if (fade) {
+                            gameLoadingOverlay.classList.remove('visible');
+                        } else {
+                            gameLoadingOverlay.classList.remove('visible');
+                        }
+                        gameLoadingOverlay.setAttribute('aria-hidden', 'true');
+                        // reset gauge and HUD
+                        if (gameLoadingGauge) gameLoadingGauge.style.setProperty('--loader-progress', '0%');
+                        if (hudAssetCount) hudAssetCount.textContent = 'Assets: 0 / 0';
+                        if (hudETA) hudETA.textContent = 'ETA: --s';
+                        if (gameLoaderIcon) gameLoaderIcon.textContent = '▣';
+                    }, wait);
+                },
+                showAndNavigate(url, opts = {}) {
+                    GameLoader.show(opts || {});
+                    // simulate longer fill then navigate
+                    clearInterval(gameLoadingTimer);
+                    let percent = 92;
+                    gameLoadingTimer = setInterval(() => {
+                        percent += Math.ceil(Math.random() * 4);
+                        if (percent >= 99) percent = 99;
+                        GameLoader.setPercent(percent);
+                    }, 160);
+                    // HUD simulation
+                    const startTime = Date.now();
+                    const minDur = opts.minDuration || 900;
+                    const totalAssets = opts.totalAssets || null;
+                    let loadedAssets = 0;
+                    const hudInterval = setInterval(() => {
+                        // increment fake loaded assets until total or random
+                        if (totalAssets) {
+                            if (loadedAssets < totalAssets) loadedAssets += Math.max(1, Math.floor(totalAssets / 6));
+                            if (loadedAssets > totalAssets) loadedAssets = totalAssets;
+                            GameLoader.setHuds({ loaded: loadedAssets, total: totalAssets, eta: Math.max(1, Math.round((minDur - (Date.now() - startTime)) / 1000)) });
+                        } else {
+                            // estimate ETA decreasing
+                            const passed = Date.now() - startTime;
+                            const eta = Math.max(0, Math.round((minDur - passed) / 1000));
+                            GameLoader.setHuds({ loaded: null, total: null, eta });
+                        }
+                    }, 350);
+                    // ensure navigation after a minimum time
+                    setTimeout(() => {
+                        // finish to 100% then navigate
+                        clearInterval(gameLoadingTimer);
+                        clearInterval(hudInterval);
+                        GameLoader.setPercent(100);
+                        setTimeout(() => {
+                            if (url) window.location.href = url;
+                            else GameLoader.hide();
+                        }, 250);
+                    }, opts.minDuration || 900);
+                }
+            };
+
+            // Intercept all play buttons and links with class 'gc-play-btn'
+            document.addEventListener('click', (e) => {
+                const btn = e.target.closest('.gc-play-btn');
+                if (!btn) return;
+                // if disabled, ignore
+                if (btn.disabled || btn.getAttribute('aria-disabled') === 'true') return;
+                // try to resolve target URL
+                let url = btn.dataset.url || btn.getAttribute('data-url') || btn.dataset.href || btn.getAttribute('href') || null;
+                const icon = btn.dataset.icon || btn.getAttribute('data-icon') || null;
+                // fallback: try to read onclick contents to extract `window.location.href` string value
+                if (!url && btn.onclick && btn.onclick.toString) {
+                    const funcText = btn.onclick.toString();
+                    const m = funcText.match(/window\.location\.href\s*=\s*['"]([^'"]+)['"]/);
+                    if (m && m[1]) url = m[1];
+                }
+                // For anchor inside a <a href="..."><button ...></button></a>
+                if (!url) {
+                    const link = btn.closest('a');
+                    if (link && link.href) url = link.href;
+                }
+
+                // Prevent default navigation and show loader
+                    if (url) {
+                    e.preventDefault();
+                        GameLoader.showAndNavigate(url, { title: btn.dataset.title || '載入遊戲', subtitle: btn.dataset.subtitle || '請稍候 ...', icon: icon });
+                } else {
+                    // if no URL, still show an in-place loader if button was to render inline game engine
+                    e.preventDefault();
+                    GameLoader.show({ title: btn.dataset.title || '載入中…', subtitle: '請稍候，遊戲即將啟動...', icon });
+                    // auto-hide after a short time
+                    setTimeout(() => {
+                        GameLoader.hide();
+                    }, 1400);
+                }
+            });
+
+            // Allow external scripts/handlers to show the loader
+            window.GameLoader = GameLoader;
+
+            // Allow ESC to hide the loader as an emergency/cancel action
+            document.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Escape' || ev.key === 'Esc') {
+                    if (gameLoadingOverlay && gameLoadingOverlay.classList.contains('visible')) {
+                        GameLoader.hide({ fade: true, wait: 100 });
+                    }
+                }
+            });
+
         });
     </script>
 </body>

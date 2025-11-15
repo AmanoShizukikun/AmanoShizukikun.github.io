@@ -465,10 +465,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 50%, rgba(0, 200, 255, 0.08) 0%, transparent 50%),
-                linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(10, 10, 30, 0.98) 100%);
+            background: rgba(0, 0, 0, 0.3);
             z-index: 10;
             animation: fadeIn 0.5s ease;
             padding: 20px;
@@ -477,18 +474,7 @@
         }
 
         .title-screen::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: gridMove 20s linear infinite;
-            pointer-events: none;
+            display: none;
         }
 
         @keyframes gridMove {
@@ -497,16 +483,11 @@
         }
 
         [data-theme="light"] .title-screen {
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(0, 150, 255, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 50%, rgba(0, 200, 255, 0.06) 0%, transparent 50%),
-                linear-gradient(180deg, rgba(245, 248, 252, 0.98) 0%, rgba(230, 240, 250, 0.99) 100%);
+            background: rgba(255, 255, 255, 0.3);
         }
 
         [data-theme="light"] .title-screen::before {
-            background-image: 
-                linear-gradient(rgba(0, 100, 200, 0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 100, 200, 0.04) 1px, transparent 1px);
+            display: none;
         }
 
         .title-screen.hidden {
@@ -1164,70 +1145,233 @@
             justify-content: center;
         }
 
+        /* ========== 退出確認對話框 ========== */
+        .exit-confirm-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 30px;
+            min-width: 350px;
+            text-align: center;
+            z-index: 20;
+            display: none;
+            animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7),
+                        0 0 40px rgba(0, 255, 255, 0.3),
+                        inset 0 0 30px rgba(0, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] .exit-confirm-panel {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2),
+                        0 0 40px rgba(0, 100, 200, 0.2),
+                        inset 0 0 30px rgba(0, 100, 200, 0.05);
+        }
+
+        .exit-confirm-panel.active {
+            display: block;
+        }
+
+        .exit-confirm-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .exit-confirm-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .exit-confirm-message {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin: 0;
+            opacity: 0.8;
+        }
+
+        .exit-confirm-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .exit-confirm-btn {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 200, 255, 0.15));
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            color: var(--primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 12px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            min-width: 100px;
+        }
+
+        .exit-confirm-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 200, 255, 0.25));
+            border-color: rgba(0, 255, 255, 0.8);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        [data-theme="light"] .exit-confirm-btn {
+            background: linear-gradient(135deg, rgba(0, 100, 200, 0.1), rgba(0, 150, 255, 0.15));
+            border-color: rgba(0, 100, 200, 0.4);
+        }
+
+        [data-theme="light"] .exit-confirm-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 100, 200, 0.2), rgba(0, 150, 255, 0.25));
+            border-color: rgba(0, 100, 200, 0.8);
+            box-shadow: 0 5px 15px rgba(0, 100, 200, 0.3);
+        }
+
+        .cancel-btn {
+            background: linear-gradient(135deg, rgba(255, 100, 100, 0.1), rgba(255, 80, 80, 0.15));
+            border-color: rgba(255, 100, 100, 0.4);
+            color: rgba(255, 100, 100, 0.9);
+        }
+
+        .cancel-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 100, 100, 0.2), rgba(255, 80, 80, 0.25));
+            border-color: rgba(255, 100, 100, 0.8);
+            box-shadow: 0 5px 15px rgba(255, 100, 100, 0.3);
+        }
+
+        [data-theme="light"] .cancel-btn {
+            background: linear-gradient(135deg, rgba(204, 0, 68, 0.1), rgba(255, 80, 80, 0.15));
+            border-color: rgba(204, 0, 68, 0.4);
+            color: rgba(204, 0, 68, 0.9);
+        }
+
+        [data-theme="light"] .cancel-btn:hover {
+            background: linear-gradient(135deg, rgba(204, 0, 68, 0.2), rgba(255, 80, 80, 0.25));
+            border-color: rgba(204, 0, 68, 0.8);
+            box-shadow: 0 5px 15px rgba(204, 0, 68, 0.3);
+        }
+
         /* ========== 響應式設計 ========== */
         /* ========== 響應式設計 ========== */
         @media (max-width: 768px) {
-            .gc-sidebar {
-                width: 70px;
-                padding: 40px 10px;
-            }
+                    /* 側邊欄縮小寬度與 padding */
+                    .gc-sidebar {
+                        width: 70px;
+                        padding: 15px 10px;
+                        border-right: 2px solid rgba(0, 255, 255, 0.2);
+                    }
+                    [data-theme="light"] .gc-sidebar {
+                        border-right-color: rgba(0, 100, 200, 0.2);
+                    }
+                    .gc-sidebar.collapsed {
+                        width: 70px;
+                        padding: 15px 10px;
+                    }
+                    .gc-sidebar-menu {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 15px;
+                    }
+                    .gc-sidebar-link {
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 12px 8px;
+                        font-size: 0.85rem;
+                    }
+                    .gc-sidebar-link::before {
+                        font-size: 1.3rem;
+                        margin-right: 0;
+                        margin-bottom: 4px;
+                    }
+                    .gc-sidebar-link span {
+                        display: block;
+                        font-size: 0.65rem;
+                        text-align: center;
+                        opacity: 1;
+                        width: auto;
+                        white-space: nowrap;
+                        overflow: visible;
+                    }
 
-            .gc-sidebar-link span {
-                display: none;
-            }
+                    .gc-sidebar-link {
+                        overflow: visible;
+                    }
 
-            .game-container {
-                margin-left: 70px !important;
-            }
-
-            .title-screen {
-                padding: 10px;
-            }
-
-            .game-logo {
-                font-size: 2.5rem;
-                margin-bottom: 15px;
-            }
-
-            .game-subtitle {
-                font-size: 1rem;
-                margin-bottom: 30px;
-            }
-
-            .title-menu {
-                max-width: 300px;
-                gap: 15px;
-            }
-
-            .title-btn {
-                font-size: 1rem;
-                padding: 12px 25px;
-            }
-
-            .difficulty-panel {
-                width: 95%;
-                max-width: none;
-                padding: 20px;
-            }
-
-            .difficulty-title {
-                font-size: 1.5rem;
-                margin-bottom: 20px;
-            }
-
-            .difficulty-btn {
-                font-size: 1rem;
-                padding: 12px;
-            }
-
-            .game-info {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .info-item {
-                min-width: 100%;
-            }
+                    .gc-sidebar:not(.collapsed) .gc-sidebar-link {
+                        flex-direction: column;
+                        align-items: center;
+                    }
+                    .gc-sidebar.collapsed .gc-sidebar-link {
+                        flex-direction: column;
+                        align-items: center;
+                    }
+                    .gc-sidebar.collapsed .gc-sidebar-link span {
+                        opacity: 1;
+                        width: auto;
+                        display: block;
+                    }
+                    /* 隱藏展開/摺疊按鈕 */
+                    .gc-sidebar-toggle {
+                        display: none;
+                    }
+                    .game-container {
+                        margin-left: 70px !important;
+                    }
+                    .title-screen {
+                        padding: 10px;
+                    }
+                    .game-logo {
+                        font-size: 2.5rem;
+                        margin-bottom: 15px;
+                    }
+                    .game-subtitle {
+                        font-size: 1rem;
+                        margin-bottom: 30px;
+                    }
+                    .title-menu {
+                        max-width: 300px;
+                        gap: 15px;
+                    }
+                    .title-btn {
+                        font-size: 1rem;
+                        padding: 12px 25px;
+                    }
+                    .difficulty-panel {
+                        width: 95%;
+                        max-width: none;
+                        padding: 20px;
+                    }
+                    .difficulty-title {
+                        font-size: 1.5rem;
+                        margin-bottom: 20px;
+                    }
+                    .difficulty-btn {
+                        font-size: 1rem;
+                        padding: 12px;
+                    }
+                    .game-info {
+                        flex-direction: column;
+                        gap: 10px;
+                    }
+                    .info-item {
+                        min-width: 100%;
+                    }
         }
 
         /* 極小螢幕優化 */
@@ -1248,6 +1392,8 @@
                 font-size: 1.3rem;
             }
         }
+
+
     </style>
 </head>
 <body>
@@ -1604,6 +1750,18 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- 退出確認對話框 -->
+                    <div class="exit-confirm-panel" id="exitConfirmPanel">
+                        <div class="exit-confirm-content">
+                            <h3 class="exit-confirm-title">確定要退出遊戲嗎？</h3>
+                            <p class="exit-confirm-message">當前分數將不會保存</p>
+                            <div class="exit-confirm-buttons">
+                                <button class="exit-confirm-btn cancel-btn" id="exitCancelBtn">取消</button>
+                                <button class="exit-confirm-btn confirm-btn" id="exitConfirmBtn">確定退出</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1619,8 +1777,8 @@
         const SnakeGame = {
             canvas: null,
             ctx: null,
-            gridSize: 20,
-            tileCount: 30,
+            gridSize: 40,
+            tileCount: 15,
             snake: [],
             food: {},
             direction: { x: 1, y: 0 },
@@ -1656,9 +1814,9 @@
 
             reset() {
                 this.snake = [
-                    { x: 15, y: 15 },
-                    { x: 14, y: 15 },
-                    { x: 13, y: 15 }
+                    { x: 7, y: 7 },
+                    { x: 6, y: 7 },
+                    { x: 5, y: 7 }
                 ];
                 this.direction = { x: 1, y: 0 };
                 this.nextDirection = { x: 1, y: 0 };
@@ -1892,7 +2050,7 @@
             
             if (!showSidebar) {
                 sidebar.style.display = 'none';
-                gameContainer.style.marginLeft = '0';
+                applyGameContainerMarginHidden(true);
             } else {
                 sidebar.style.display = '';
                 // 恢復摺疊狀態 - 在隱藏狀態之後檢查摺疊
@@ -1902,46 +2060,52 @@
                     const toggleBtn = document.getElementById('sidebarToggle');
                     toggleBtn.setAttribute('data-icon', '▶');
                     toggleBtn.querySelector('span').textContent = '展開';
-                    gameContainer.style.marginLeft = '70px';
+                    applyGameContainerMarginHidden(false);
                 } else {
                     sidebar.classList.remove('collapsed');
                     const toggleBtn = document.getElementById('sidebarToggle');
                     toggleBtn.setAttribute('data-icon', '◀');
                     toggleBtn.querySelector('span').textContent = '摺疊';
-                    gameContainer.style.marginLeft = '300px';
+                    applyGameContainerMarginHidden(false);
                 }
             }
 
             // ========== 全域側邊欄控制 - 與系統設定同步 ==========
+            // 輔助：統一設定/還原 gameContainer 的 margin-left
+            function applyGameContainerMarginHidden(hidden) {
+                if (hidden) {
+                    // 使用 important 覆蓋 CSS 中的 !important 規則
+                    gameContainer.style.setProperty('margin-left', '0', 'important');
+                } else {
+                    // 移除 inline margin-left，讓 CSS 選擇器控制（collapsed / default）
+                    gameContainer.style.removeProperty('margin-left');
+                }
+            }
+
             // 監聽全域的側邊欄顯示/隱藏事件
             function syncSidebarState() {
                 const isHidden = sidebar.style.display === 'none';
                 const isCollapsed = sidebar.classList.contains('collapsed');
                 
                 if (isHidden) {
-                    gameContainer.style.marginLeft = '0';
-                } else if (isCollapsed) {
-                    gameContainer.style.marginLeft = '70px';
+                    applyGameContainerMarginHidden(true);
                 } else {
-                    gameContainer.style.marginLeft = '300px';
+                    // 讓 CSS 控制 collapsed / expanded 樣式
+                    applyGameContainerMarginHidden(false);
                 }
             }
 
             // 響應式視窗調整
             function updateLayoutOnResize() {
                 const isMobile = window.innerWidth <= 768;
-                
                 if (isMobile) {
-                    // 手機版強制收合側邊欄
-                    if (!sidebar.classList.contains('collapsed')) {
-                        sidebar.classList.add('collapsed');
-                        const toggleBtn = document.getElementById('sidebarToggle');
-                        toggleBtn.setAttribute('data-icon', '▶');
-                        toggleBtn.querySelector('span').textContent = '展開';
+                    // 手機版保持當前狀態，不強制展開
+                    if (sidebar.style.display === 'none' || sidebar.classList.contains('hidden')) {
+                        applyGameContainerMarginHidden(true);
+                    } else {
+                        applyGameContainerMarginHidden(false);
                     }
-                    gameContainer.style.marginLeft = '70px';
                 } else {
-                    // 桌面版根據實際狀態調整
                     syncSidebarState();
                 }
             }
@@ -2020,11 +2184,27 @@
             });
 
             document.getElementById('exitBtn').addEventListener('click', () => {
-                if (confirm('確定要退出遊戲嗎?')) {
-                    SnakeGame.stop();
-                    document.getElementById('gameMain').classList.remove('active');
-                    document.getElementById('titleScreen').classList.remove('hidden');
-                    document.getElementById('gameOverPanel').classList.remove('active');
+                document.getElementById('exitConfirmPanel').classList.add('active');
+            });
+
+            // 退出確認對話框按鈕
+            document.getElementById('exitConfirmBtn').addEventListener('click', () => {
+                document.getElementById('exitConfirmPanel').classList.remove('active');
+                SnakeGame.stop();
+                document.getElementById('gameMain').classList.remove('active');
+                document.getElementById('titleScreen').classList.remove('hidden');
+                document.getElementById('gameOverPanel').classList.remove('active');
+            });
+
+            document.getElementById('exitCancelBtn').addEventListener('click', () => {
+                document.getElementById('exitConfirmPanel').classList.remove('active');
+            });
+
+            // ESC鍵取消退出確認
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && document.getElementById('exitConfirmPanel').classList.contains('active')) {
+                    document.getElementById('exitConfirmPanel').classList.remove('active');
+                    e.preventDefault();
                 }
             });
 
