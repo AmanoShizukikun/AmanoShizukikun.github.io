@@ -20,7 +20,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 8888;
+            /* Ensure the entrance overlay sits above the header (header z-index is 20000 in this page) */
+            z-index: 21000;
             pointer-events: none;
             opacity: 1;
             transition: opacity 1.5s cubic-bezier(0.76, 0, 0.24, 1) 0.3s;
@@ -847,19 +848,20 @@
             margin-top: 80px; /* 為 fixed header 留空間 */
         }
 
-        /* 確保 header 按鈕在最上層且可點擊 */
+        /* 確保 header 按鈕在最上層且可點擊
+           調整為與全站 `components.css` 的 header 層級一致，避免遮罩 (.nav-overlay) 覆蓋 header */
         header {
-            z-index: 1000 !important;
+            z-index: 20000 !important;
         }
 
         header .header-actions {
-            z-index: 1001;
+            z-index: 20001;
             position: relative;
         }
 
         header .menu-toggle,
         header .settings-toggle {
-            z-index: 1002;
+            z-index: 20002;
             position: relative;
             pointer-events: auto;
         }
@@ -2967,6 +2969,7 @@
                 <div class="nav-section">
                     <h3 class="nav-section-title">特別內容</h3>
                     <li><a href="index.html" class="active">◆ GAME CENTER</a></li>
+                    <li><a href="../nagato-sakura-webos/nagato-sakura-webos.html">◆ WEB OS</a></li>
                 </div>
 
                 <div class="nav-section">
@@ -3232,7 +3235,7 @@
     <script>
         // 遊戲資料
         const games = [
-            {
+                {
                 id: 'tetris',
                 title: 'Cyber Tetris',
                 description: '經典俄羅斯方塊的賽博龐克版本，挑戰你的反應速度！',
@@ -3248,7 +3251,7 @@
                 category: 'action',
                 status: 'available',
                 icon: '🐍',
-                url: 'games/snake/index.html'
+                url: 'games/snake/snake.html'
             },
             {
                 id: 'code-breaker',

@@ -1440,7 +1440,8 @@
 
                 <div class="nav-section">
                     <h3 class="nav-section-title">特別內容</h3>
-                    <li><a href="../../index.html">◆ GAME CENTER</a></li>
+                    <li><a href="../../game-center.html">◆ GAME CENTER</a></li>
+                    <li><a href="../../../nagato-sakura-webos/nagato-sakura-webos.html">◆ WEB OS</a></li>
                 </div>
 
                 <div class="nav-section">
@@ -2156,7 +2157,8 @@
             });
 
             document.getElementById('backToGCBtn').addEventListener('click', () => {
-                window.location.href = '../../index.html';
+                sessionStorage.setItem('skipEntranceAnimation', 'true');
+                window.location.href = '../../game-center.html';
             });
 
             // 難度選擇
@@ -2237,7 +2239,7 @@
                 e.preventDefault();
                 // 設置標誌，防止播放進入動畫
                 sessionStorage.setItem('skipEntranceAnimation', 'true');
-                window.location.href = '../../index.html';
+                window.location.href = '../../game-center.html';
             });
 
             // 側邊欄隱藏控制 - 與系統設定同步

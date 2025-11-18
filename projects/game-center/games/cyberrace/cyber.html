@@ -1,0 +1,2895 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Cyber Racer - 3D 未來感賽車遊戲">
+    <title>Cyber Racer - 天野靜樹</title>
+    <!-- 引用您網站的資源，路徑已調整 -->
+    <link rel="icon" href="../../../../assets/images/logo.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../../../assets/css/core.css">
+    <link rel="stylesheet" href="../../../../assets/css/components.css">
+    <link rel="stylesheet" href="../../../../assets/css/animations.css">
+    
+    <style>
+        /* ========== 遊戲容器整體布局 ========== */
+        body {
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .game-center-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ========== 左側導覽欄 (複製自 snake.html) ========== */
+        .gc-sidebar {
+            width: 300px;
+            height: calc(100vh - var(--header-height, 75px));
+            position: fixed;
+            left: 0;
+            top: var(--header-height, 75px);
+            background: linear-gradient(180deg, rgba(10, 10, 20, 0.9), rgba(20, 5, 40, 0.9));
+            border-right: 2px solid rgba(0, 255, 255, 0.2);
+            padding: 40px 30px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            animation: sidebarSlideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both;
+            flex-shrink: 0;
+            transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        padding 0.3s ease,
+                        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        top 0.01s ease-out,
+                        height 0.01s ease-out;
+            z-index: 900;
+        }
+
+        @keyframes sidebarSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .gc-sidebar.collapsed {
+            width: 70px;
+            padding: 40px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .gc-sidebar.hidden {
+            transform: translateX(-100%);
+            width: 0;
+            padding: 0;
+            border: none;
+        }
+
+        [data-theme="light"] .gc-sidebar {
+            background: linear-gradient(180deg, rgba(240, 245, 252, 0.95), rgba(235, 240, 248, 0.95));
+            border-right-color: rgba(0, 150, 150, 0.2);
+        }
+
+        .gc-sidebar-title {
+            display: none;
+        }
+
+        .gc-sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .gc-sidebar-item {
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .gc-sidebar-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            padding: 10px;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            border-radius: 4px;
+            width: 44px;
+            height: 44px;
+            text-align: center;
+            margin: 0 auto 8px auto;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+        }
+
+        [data-theme="light"] .gc-sidebar-link {
+            color: #666;
+        }
+
+        .gc-sidebar-link::before {
+            content: attr(data-icon);
+            display: inline-flex;
+            width: 24px;
+            height: 24px;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .gc-sidebar-link span {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            width: 0;
+        }
+
+        .gc-sidebar:not(.collapsed) .gc-sidebar-link {
+            width: 100%;
+            justify-content: flex-start;
+            gap: 15px;
+            margin-bottom: 8px;
+            flex-direction: row;
+        }
+
+        .gc-sidebar:not(.collapsed) .gc-sidebar-link span {
+            opacity: 1;
+            width: auto;
+            overflow: visible;
+        }
+
+        .gc-sidebar.collapsed .gc-sidebar-link span {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        .gc-sidebar.collapsed .gc-sidebar-link {
+            width: 44px;
+            height: 44px;
+            margin: 0 auto 8px auto;
+            padding: 10px;
+        }
+
+        .gc-sidebar-link:hover {
+            color: var(--accent-cyan);
+            border-left-color: transparent;
+            background: rgba(0, 255, 255, 0.1);
+            transform: scale(1.1);
+            border-radius: 8px;
+        }
+
+        .gc-sidebar:not(.collapsed) .gc-sidebar-link:hover {
+            border-left-color: var(--accent-cyan);
+            transform: translateX(5px);
+        }
+
+        .gc-sidebar.collapsed .gc-sidebar-link:hover {
+            transform: scale(1.1);
+            border-left-color: transparent;
+            padding: 12px;
+        }
+
+        [data-theme="light"] .gc-sidebar-link:hover {
+            color: #009999;
+            border-left-color: #009999;
+            background: rgba(0, 150, 150, 0.1);
+        }
+
+
+        #hideSidebarBtn {
+            margin-top: auto;
+        }
+
+        #hideSidebarBtn:hover {
+            color: #ff0055 !important;
+            border-left-color: #ff0055 !important;
+            background: rgba(255, 0, 85, 0.1) !important;
+        }
+
+        [data-theme="light"] #hideSidebarBtn:hover {
+            color: #cc0044 !important;
+            border-left-color: #cc0044 !important;
+            background: rgba(204, 0, 68, 0.1) !important;
+        }
+
+        /* ========== OSD 面板 (複製自 snake.html) ========== */
+        .fps-osd {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid var(--accent-cyan);
+            border-radius: 12px;
+            padding: 0;
+            font-family: 'Orbitron', monospace;
+            z-index: 9999;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+            display: none;
+            animation: osdSlideIn 0.3s ease-out;
+            width: 280px;
+            height: auto;
+            min-width: 150px;
+            min-height: 80px;
+            max-width: 600px;
+            max-height: 80vh;
+            resize: both;
+            overflow: hidden;
+            cursor: move;
+            container-type: size;
+        }
+
+        @keyframes osdSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fps-osd.active {
+            display: block;
+        }
+
+        .fps-osd.dragging {
+            cursor: grabbing;
+            user-select: none;
+        }
+
+        .fps-osd.resizing {
+            transition: none;
+        }
+
+        .osd-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: clamp(8px, 3cqw, 20px);
+            padding-bottom: clamp(5px, 2cqw, 10px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            cursor: move;
+            user-select: none;
+        }
+
+        .osd-header:active {
+            cursor: grabbing;
+        }
+
+        .osd-title {
+            font-size: clamp(0.6rem, 3cqw, 0.9rem);
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .osd-mode-switcher {
+            display: flex;
+            gap: clamp(3px, 1cqw, 5px);
+            flex-shrink: 0;
+        }
+
+        .osd-mode-btn {
+            width: clamp(6px, 2cqw, 8px);
+            height: clamp(6px, 2cqw, 8px);
+            border-radius: 50%;
+            background: rgba(0, 255, 255, 0.3);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .osd-mode-btn.active {
+            background: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        }
+
+        .osd-mode-btn:hover {
+            background: rgba(0, 255, 255, 0.6);
+            transform: scale(1.2);
+        }
+
+        .osd-content {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(6px, 2cqw, 12px);
+            padding: clamp(8px, 3cqw, 20px);
+            padding-top: clamp(6px, 2cqw, 15px);
+        }
+
+        .osd-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: clamp(4px, 2cqw, 8px);
+        }
+
+        .osd-label {
+            font-size: clamp(0.5rem, 2.5cqw, 0.75rem);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            white-space: nowrap;
+        }
+
+        .osd-value {
+            font-size: clamp(0.7rem, 4cqw, 1.2rem);
+            font-weight: 700;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            white-space: nowrap;
+        }
+
+        .osd-value.large {
+            font-size: clamp(1.2rem, 6cqw, 2.5rem);
+            line-height: 1;
+        }
+
+        .osd-unit {
+            font-size: clamp(0.5rem, 3cqw, 0.9rem);
+            color: var(--accent-cyan);
+            margin-left: clamp(2px, 0.5cqw, 5px);
+            opacity: 0.7;
+        }
+
+        .osd-icon {
+            font-size: clamp(0.7rem, 3cqw, 1rem);
+            margin-right: clamp(3px, 1cqw, 5px);
+        }
+
+        .osd-progress {
+            width: 100%;
+            height: clamp(3px, 1cqw, 4px);
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: clamp(2px, 0.5cqw, 2px);
+            overflow: hidden;
+            margin-top: clamp(2px, 1cqw, 5px);
+        }
+
+        .osd-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+            border-radius: clamp(2px, 0.5cqw, 2px);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+        }
+
+        .osd-icon {
+            font-size: clamp(0.7rem, 3cqw, 1rem);
+            margin-right: clamp(4px, 2cqw, 8px);
+            opacity: 0.8;
+        }
+
+        [data-theme="light"] .fps-osd {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #009999;
+            box-shadow: 0 0 30px rgba(0, 150, 150, 0.4);
+        }
+
+        [data-theme="light"] .osd-header {
+            border-bottom-color: rgba(0, 150, 150, 0.3);
+        }
+
+        [data-theme="light"] .osd-title,
+        [data-theme="light"] .osd-value {
+            color: #009999;
+            text-shadow: 0 0 15px rgba(0, 150, 150, 0.4);
+        }
+
+        [data-theme="light"] .osd-mode-btn {
+            background: rgba(0, 150, 150, 0.3);
+        }
+
+        [data-theme="light"] .osd-mode-btn.active {
+            background: #009999;
+            box-shadow: 0 0 10px rgba(0, 150, 150, 0.8);
+        }
+
+        [data-theme="light"] .osd-progress {
+            background: rgba(0, 150, 150, 0.2);
+        }
+
+        [data-theme="light"] .osd-progress-bar {
+            background: linear-gradient(90deg, #009999, #990099);
+        }
+
+        [data-theme="light"] .osd-unit {
+            color: #009999;
+        }
+
+        /* ========== 主遊戲容器 ========== */
+        .game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-left: 300px;
+            margin-top: var(--header-height, 75px);
+            height: calc(100vh - var(--header-height, 75px));
+            transition: margin-left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+            position: relative;
+            /* 確保 three.js 畫布在最底層 */
+            z-index: 1; 
+        }
+
+        .gc-sidebar.collapsed ~ .game-container {
+            margin-left: 70px;
+        }
+
+        .gc-sidebar.hidden ~ .game-container {
+            margin-left: 0 !important;
+        }
+
+        /* ========== 標題頁面 ========== */
+        .title-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            /* 提高 z-index 確保在 3D 畫布之上 */
+            z-index: 10; 
+            animation: fadeIn 0.5s ease;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .title-screen::before {
+            display: none;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        [data-theme="light"] .title-screen {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        [data-theme="light"] .title-screen::before {
+            display: none;
+        }
+
+        .title-screen.hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .game-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(3rem, 6vw, 5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #00ffff 0%, #ff00ff 50%, #00ffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5)) 
+                    drop-shadow(0 0 40px rgba(255, 0, 255, 0.3));
+            margin-bottom: 10px;
+            animation: logoGlow 3s ease-in-out infinite;
+            text-align: center;
+            letter-spacing: 0.1em;
+            position: relative;
+            z-index: 1;
+        }
+
+        [data-theme="light"] .game-logo {
+            background: linear-gradient(135deg, #0088cc 0%, #cc0066 50%, #0088cc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 15px rgba(0, 100, 200, 0.4)) 
+                    drop-shadow(0 0 30px rgba(204, 0, 102, 0.2));
+        }
+
+        @keyframes logoGlow {
+            0%, 100% { 
+                filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5)) 
+                        drop-shadow(0 0 40px rgba(255, 0, 255, 0.3));
+                transform: translateY(0);
+            }
+            50% { 
+                filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.7)) 
+                        drop-shadow(0 0 60px rgba(255, 0, 255, 0.5))
+                        drop-shadow(0 0 80px rgba(0, 255, 255, 0.3));
+                transform: translateY(-5px);
+            }
+        }
+
+        .game-subtitle {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+            color: var(--primary-cyan);
+            margin-bottom: 60px;
+            opacity: 0.9;
+            text-align: center;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .game-subtitle::before,
+        .game-subtitle::after {
+            content: '━━━';
+            margin: 0 15px;
+            opacity: 0.5;
+        }
+
+        .title-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            width: 100%;
+            max-width: 450px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .title-btn {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.08), rgba(0, 200, 255, 0.12));
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            color: var(--primary-cyan);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            padding: 18px 35px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        [data-theme="light"] .title-btn {
+            background: linear-gradient(135deg, rgba(0, 100, 200, 0.08), rgba(0, 150, 255, 0.12));
+            border-color: rgba(0, 100, 200, 0.4);
+            color: var(--primary-cyan);
+        }
+
+        .title-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .title-btn::after {
+            content: '▶';
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: all 0.4s ease;
+            font-size: 0.9em;
+        }
+
+        .title-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 200, 255, 0.25));
+            border-color: rgba(0, 255, 255, 0.8);
+            box-shadow: 0 8px 25px rgba(0, 255, 255, 0.3),
+                        inset 0 0 20px rgba(0, 255, 255, 0.1);
+            transform: translateX(8px);
+            letter-spacing: 0.15em;
+        }
+
+        [data-theme="light"] .title-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 100, 200, 0.15), rgba(0, 150, 255, 0.25));
+            border-color: rgba(0, 100, 200, 0.8);
+            box-shadow: 0 8px 25px rgba(0, 100, 200, 0.3),
+                        inset 0 0 20px rgba(0, 100, 200, 0.1);
+        }
+
+        .title-btn:hover::before {
+            left: 100%;
+        }
+
+        .title-btn:hover::after {
+            opacity: 1;
+            right: 20px;
+        }
+
+        .title-btn:active {
+            transform: translateX(4px) scale(0.98);
+        }
+
+        .title-btn span {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .title-btn span::before {
+            content: attr(data-icon);
+            font-size: 1.2em;
+        }
+
+        /* ========== 難度選擇面板 ========== */
+        .difficulty-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, rgba(0, 10, 20, 0.98), rgba(10, 20, 40, 0.98));
+            border: 2px solid var(--primary-cyan);
+            border-radius: 15px;
+            padding: 40px;
+            width: 90%;
+            max-width: 550px;
+            z-index: 20;
+            display: none;
+            animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-sizing: border-box;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                        0 0 40px rgba(0, 255, 255, 0.2),
+                        inset 0 0 30px rgba(0, 255, 255, 0.05);
+        }
+
+        [data-theme="light"] .difficulty-panel {
+            background: linear-gradient(135deg, rgba(250, 252, 255, 0.98), rgba(240, 245, 252, 0.98));
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15),
+                        0 0 40px rgba(0, 100, 200, 0.15),
+                        inset 0 0 30px rgba(0, 100, 200, 0.03);
+            border-color: var(--primary-cyan);
+        }
+
+        .difficulty-panel.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .difficulty-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+            color: var(--primary-cyan);
+            text-align: center;
+            margin-bottom: 35px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .difficulty-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary-cyan), transparent);
+        }
+
+        .difficulty-options {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .difficulty-btn {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.05), rgba(0, 200, 255, 0.08));
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            padding: 20px 25px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .difficulty-btn::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--primary-cyan);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        [data-theme="light"] .difficulty-btn {
+            background: linear-gradient(135deg, rgba(0, 100, 200, 0.05), rgba(0, 150, 255, 0.08));
+            border-color: rgba(0, 100, 200, 0.3);
+        }
+
+        .difficulty-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 200, 255, 0.20));
+            border-color: rgba(0, 255, 255, 0.6);
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(0, 255, 255, 0.3),
+                        inset 0 0 15px rgba(0, 255, 255, 0.1);
+        }
+
+        .difficulty-btn:hover::before {
+            opacity: 1;
+        }
+
+        [data-theme="light"] .difficulty-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 100, 200, 0.15), rgba(0, 150, 255, 0.20));
+            border-color: rgba(0, 100, 200, 0.6);
+            box-shadow: 0 5px 20px rgba(0, 100, 200, 0.3),
+                        inset 0 0 15px rgba(0, 100, 200, 0.1);
+        }
+
+        .difficulty-btn > span:first-child {
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .difficulty-btn[data-difficulty="easy"] > span:first-child::before {
+            content: '★';
+            color: #4ade80;
+        }
+
+        .difficulty-btn[data-difficulty="normal"] > span:first-child::before {
+            content: '★★';
+            color: #fbbf24;
+        }
+
+        .difficulty-btn[data-difficulty="hard"] > span:first-child::before {
+            content: '★★★';
+            color: #ef4444;
+        }
+
+        .difficulty-desc {
+            font-size: 1rem;
+            opacity: 0.75;
+            font-weight: 500;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, rgba(255, 100, 100, 0.08), rgba(255, 80, 80, 0.12));
+            border: 2px solid rgba(255, 100, 100, 0.4);
+            border-radius: 8px;
+            color: rgba(255, 100, 100, 0.9);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 100, 100, 0.15), rgba(255, 80, 80, 0.20));
+            border-color: rgba(255, 100, 100, 0.8);
+            box-shadow: 0 4px 15px rgba(255, 100, 100, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .back-btn:active {
+            transform: translateY(0);
+        }
+
+        /* ========== 遊戲說明面板 ========== */
+        .instructions-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, rgba(0, 10, 20, 0.98), rgba(10, 20, 40, 0.98));
+            border: 2px solid var(--primary-cyan);
+            border-radius: 15px;
+            padding: 40px;
+            width: 90%;
+            max-width: 650px;
+            z-index: 20;
+            display: none;
+            animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-sizing: border-box;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                        0 0 40px rgba(0, 255, 255, 0.2),
+                        inset 0 0 30px rgba(0, 255, 255, 0.05);
+        }
+
+        [data-theme="light"] .instructions-panel {
+            background: linear-gradient(135deg, rgba(250, 252, 255, 0.98), rgba(240, 245, 252, 0.98));
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15),
+                        0 0 40px rgba(0, 100, 200, 0.15),
+                        inset 0 0 30px rgba(0, 100, 200, 0.03);
+            border-color: var(--primary-cyan);
+        }
+
+        .instructions-panel.active {
+            display: block;
+        }
+
+        .instructions-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+            color: var(--primary-cyan);
+            text-align: center;
+            margin-bottom: 35px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .instructions-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary-cyan), transparent);
+        }
+
+        .instructions-content {
+            color: var(--text-primary);
+            line-height: 1.9;
+            margin-bottom: 30px;
+        }
+
+        .instruction-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 18px;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.06), rgba(0, 200, 255, 0.08));
+            border-left: 4px solid var(--primary-cyan);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .instruction-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(0, 255, 255, 0.15), transparent);
+            transition: width 0.3s ease;
+        }
+
+        .instruction-item:hover {
+            transform: translateX(8px);
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.10), rgba(0, 200, 255, 0.12));
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.2);
+        }
+
+        .instruction-item:hover::before {
+            width: 100%;
+        }
+
+        [data-theme="light"] .instruction-item {
+            background: linear-gradient(135deg, rgba(0, 100, 200, 0.06), rgba(0, 150, 255, 0.08));
+            border-left-color: var(--primary-cyan);
+        }
+
+        [data-theme="light"] .instruction-item:hover {
+            background: linear-gradient(135deg, rgba(0, 100, 200, 0.10), rgba(0, 150, 255, 0.12));
+            box-shadow: 0 4px 15px rgba(0, 100, 200, 0.2);
+        }
+
+        .instruction-icon {
+            font-size: 1.8rem;
+            margin-right: 18px;
+            min-width: 35px;
+            text-align: center;
+            filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.5));
+            position: relative;
+            z-index: 1;
+        }
+
+        .instruction-text {
+            flex: 1;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+
+        .instruction-highlight {
+            color: var(--primary-cyan);
+            font-weight: 700;
+            padding: 2px 6px;
+            background: rgba(0, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+
+        [data-theme="light"] .instruction-highlight {
+            background: rgba(0, 100, 200, 0.15);
+            color: var(--primary-cyan);
+        }
+
+        /* ========== 遊戲主體 ========== */
+        .game-main {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            padding: 0; /* 3D 遊戲不需要 padding */
+            overflow: hidden;
+            min-height: 0;
+            position: relative; /* 確保子元素可以絕對定位 */
+        }
+
+        .game-main.active {
+            display: flex;
+        }
+
+        .game-header {
+            display: none; /* 隱藏舊的 header */
+        }
+
+        [data-theme="light"] .game-header {
+            display: none; /* 隱藏舊的 header */
+        }
+
+        .game-info {
+            display: flex;
+            gap: 30px;
+        }
+
+        .info-item {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-label {
+            opacity: 0.7;
+        }
+
+        .info-value {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: var(--primary-cyan);
+            min-width: 60px;
+            text-align: right;
+        }
+        
+        [data-theme="light"] .info-value {
+             color: var(--primary-cyan);
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .game-btn {
+            background: rgba(0, 20, 40, 0.7);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--primary-cyan);
+            color: var(--primary-cyan);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+        }
+
+        [data-theme="light"] .game-btn {
+            background: rgba(240, 245, 252, 0.7);
+            border-color: var(--primary-cyan);
+            color: var(--primary-cyan);
+        }
+
+        .game-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            color: #fff;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
+        }
+
+        [data-theme="light"] .game-btn:hover {
+            background: rgba(0, 150, 200, 0.2);
+            color: #000;
+        }
+
+        /* 3D 畫布容器 */
+        #game-canvas-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            min-height: 0;
+            width: 100%;
+            height: 100%;
+            /* 確保在最底層 */
+            z-index: 1; 
+        }
+
+        #game-canvas-container canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* NEW Futuristic HUD */
+        .game-hud {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            pointer-events: none; /* 允許點擊穿透 */
+            font-family: 'Orbitron', monospace;
+        }
+        
+        .hud-panel {
+            background: rgba(0, 20, 40, 0.7);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--primary-cyan);
+            border-radius: 10px;
+            padding: 15px 25px;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+        }
+        
+        [data-theme="light"] .hud-panel {
+            background: rgba(240, 245, 252, 0.7);
+            border-color: var(--primary-cyan);
+            box-shadow: 0 0 20px rgba(0, 150, 200, 0.2), inset 0 0 10px rgba(0, 150, 200, 0.1);
+        }
+
+        .hud-label {
+            font-size: 0.9rem;
+            color: var(--primary-cyan);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        
+        [data-theme="light"] .hud-label {
+            color: var(--primary-cyan);
+        }
+
+        .hud-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 0 10px #fff;
+        }
+        
+        [data-theme="light"] .hud-value {
+            color: var(--dark-bg);
+            text-shadow: none;
+        }
+
+        #hud-score {
+            color: var(--accent-cyan);
+            text-shadow: 0 0 15px var(--accent-cyan);
+        }
+        
+        #hud-speed {
+            font-size: 3rem;
+            color: var(--primary-magenta);
+            text-shadow: 0 0 20px var(--primary-magenta);
+        }
+        
+        [data-theme="light"] #hud-speed {
+             color: var(--primary-magenta);
+             text-shadow: none;
+        }
+        
+        #hud-speed-unit {
+            font-size: 1rem;
+            opacity: 0.7;
+            margin-left: 5px;
+        }
+
+        .hud-panel-right {
+            align-items: flex-end;
+        }
+        
+        /* New Game Controls Position */
+        .game-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+            display: flex;
+            gap: 10px;
+            pointer-events: auto; /* 確保按鈕可點擊 */
+        }
+
+        /* ========== 遊戲結束面板 ========== */
+        .game-over-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid var(--primary-cyan);
+            border-radius: 10px;
+            padding: 40px;
+            min-width: 400px;
+            text-align: center;
+            z-index: 15;
+            display: none;
+            animation: slideIn 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        [data-theme="light"] .game-over-panel {
+            background: rgba(255, 255, 255, 0.98);
+            border-color: var(--primary-cyan);
+        }
+
+        .game-over-panel.active {
+            display: block;
+        }
+
+        .game-over-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            color: #ff3366;
+            text-shadow: 0 0 20px #ff3366;
+            margin-bottom: 20px;
+        }
+
+        .final-score {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: 30px;
+        }
+
+        .final-score span {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--primary-cyan);
+            font-weight: 700;
+        }
+        
+        [data-theme="light"] .final-score span {
+            color: var(--primary-cyan);
+        }
+
+        .game-over-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        /* ========== 退出確認對話框 ========== */
+        .exit-confirm-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid var(--primary-cyan);
+            border-radius: 15px;
+            padding: 30px;
+            min-width: 350px;
+            text-align: center;
+            z-index: 20;
+            display: none;
+            animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7),
+                        0 0 40px rgba(0, 255, 255, 0.3),
+                        inset 0 0 30px rgba(0, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] .exit-confirm-panel {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2),
+                        0 0 40px rgba(0, 100, 200, 0.2),
+                        inset 0 0 30px rgba(0, 100, 200, 0.05);
+            border-color: var(--primary-cyan);
+        }
+
+        .exit-confirm-panel.active {
+            display: block;
+        }
+
+        .exit-confirm-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .exit-confirm-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: var(--primary-cyan);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .exit-confirm-message {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin: 0;
+            opacity: 0.8;
+        }
+
+        .exit-confirm-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .exit-confirm-btn {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 200, 255, 0.15));
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            color: var(--primary-cyan);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 12px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            min-width: 100px;
+        }
+
+        .exit-confirm-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 200, 255, 0.25));
+            border-color: rgba(0, 255, 255, 0.8);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        [data-theme="light"] .exit-confirm-btn {
+            background: linear-gradient(135deg, rgba(0, 100, 200, 0.1), rgba(0, 150, 255, 0.15));
+            border-color: rgba(0, 100, 200, 0.4);
+            color: var(--primary-cyan);
+        }
+
+        [data-theme="light"] .exit-confirm-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 100, 200, 0.2), rgba(0, 150, 255, 0.25));
+            border-color: rgba(0, 100, 200, 0.8);
+            box-shadow: 0 5px 15px rgba(0, 100, 200, 0.3);
+        }
+
+        .cancel-btn {
+            background: linear-gradient(135deg, rgba(255, 100, 100, 0.1), rgba(255, 80, 80, 0.15));
+            border-color: rgba(255, 100, 100, 0.4);
+            color: rgba(255, 100, 100, 0.9);
+        }
+
+        .cancel-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 100, 100, 0.2), rgba(255, 80, 80, 0.25));
+            border-color: rgba(255, 100, 100, 0.8);
+            box-shadow: 0 5px 15px rgba(255, 100, 100, 0.3);
+        }
+
+        [data-theme="light"] .cancel-btn {
+            background: linear-gradient(135deg, rgba(204, 0, 68, 0.1), rgba(255, 80, 80, 0.15));
+            border-color: rgba(204, 0, 68, 0.4);
+            color: rgba(204, 0, 68, 0.9);
+        }
+
+        [data-theme="light"] .cancel-btn:hover {
+            background: linear-gradient(135deg, rgba(204, 0, 68, 0.2), rgba(255, 80, 80, 0.25));
+            border-color: rgba(204, 0, 68, 0.8);
+            box-shadow: 0 5px 15px rgba(204, 0, 68, 0.3);
+        }
+
+        /* ========== 響應式設計 ========== */
+        @media (max-width: 768px) {
+            .gc-sidebar {
+                width: 70px;
+                padding: 15px 10px;
+                border-right: 2px solid rgba(0, 255, 255, 0.2);
+            }
+            [data-theme="light"] .gc-sidebar {
+                border-right-color: rgba(0, 100, 200, 0.2);
+            }
+            .gc-sidebar.collapsed {
+                width: 70px;
+                padding: 15px 10px;
+            }
+            .gc-sidebar-menu {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+            .gc-sidebar-link {
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 12px 8px;
+                font-size: 0.85rem;
+            }
+            .gc-sidebar-link::before {
+                font-size: 1.3rem;
+                margin-right: 0;
+                margin-bottom: 4px;
+            }
+            .gc-sidebar-link span {
+                display: block;
+                font-size: 0.65rem;
+                text-align: center;
+                opacity: 1;
+                width: auto;
+                white-space: nowrap;
+                overflow: visible;
+            }
+
+            .gc-sidebar-link {
+                overflow: visible;
+            }
+
+            .gc-sidebar:not(.collapsed) .gc-sidebar-link {
+                flex-direction: column;
+                align-items: center;
+            }
+            .gc-sidebar.collapsed .gc-sidebar-link {
+                flex-direction: column;
+                align-items: center;
+            }
+            .gc-sidebar.collapsed .gc-sidebar-link span {
+                opacity: 1;
+                width: auto;
+                display: block;
+            }
+            #sidebarToggle {
+                display: none;
+            }
+            .game-container {
+                margin-left: 70px !important;
+            }
+            .title-screen {
+                padding: 10px;
+            }
+            .game-logo {
+                font-size: 2.5rem;
+                margin-bottom: 15px;
+            }
+            .game-subtitle {
+                font-size: 1rem;
+                margin-bottom: 30px;
+            }
+            .title-menu {
+                max-width: 300px;
+                gap: 15px;
+            }
+            .title-btn {
+                font-size: 1rem;
+                padding: 12px 25px;
+            }
+            .difficulty-panel {
+                width: 95%;
+                max-width: none;
+                padding: 20px;
+            }
+            .difficulty-title {
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+            }
+            .difficulty-btn {
+                font-size: 1rem;
+                padding: 12px;
+            }
+            .game-header {
+                display: none; /* 隱藏舊的 header */
+            }
+            .game-info {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 15px;
+            }
+            .info-item {
+                font-size: 1rem;
+                gap: 5px;
+            }
+            .game-controls {
+                width: auto; /* 移除寬度 100% */
+                justify-content: flex-end; /* 保持在右上角 */
+                position: absolute;
+                top: 10px;
+                right: 10px;
+            }
+            .game-btn {
+                flex: 0 1 auto; /* 按鈕恢復自動寬度 */
+                text-align: center;
+                font-size: 0.9rem;
+                padding: 8px 15px;
+            }
+            
+            /* New HUD adjustments */
+            .game-hud {
+                bottom: 10px;
+                left: 10px;
+                right: 10px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .hud-panel {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 15px;
+                min-width: 0;
+            }
+            .hud-panel-right {
+                align-items: center;
+            }
+            .hud-label {
+                font-size: 0.8rem;
+                margin-bottom: 0;
+            }
+            .hud-value {
+                font-size: 1.5rem;
+            }
+            #hud-speed {
+                font-size: 2rem;
+            }
+
+            .game-over-panel {
+                width: 90%;
+                min-width: 0;
+                padding: 20px;
+            }
+            .game-over-title {
+                font-size: 2rem;
+            }
+            .final-score {
+                font-size: 1.2rem;
+            }
+            .final-score span {
+                font-size: 1.5rem;
+            }
+            .game-over-buttons {
+                flex-direction: column;
+            }
+            .exit-confirm-panel {
+                width: 90%;
+                min-width: 0;
+                padding: 20px;
+            }
+            .exit-confirm-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 立即應用主題 -->
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+
+    <!-- 載入 three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- 背景系統 -->
+    <div class="cyber-bg"></div>
+    <div class="grid-overlay"></div>
+    <div class="particles" id="particles"></div>
+
+    <!-- 頂部導覽列 (複製自 snake.html, 已調整路徑) -->
+    <header>
+        <a href="../../../../index.html">
+            <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
+        </a>
+        <div class="nav-container">
+            <ul class="nav-links">
+                <div class="nav-header">
+                    <h2 class="nav-title">選單導航</h2>
+                </div>
+                
+                <div class="search-box">
+                    <input type="text" id="navSearch" class="search-input" placeholder="搜尋頁面...">
+                    <button class="search-btn" aria-label="Search">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="nav-section">
+                    <h3 class="nav-section-title">主要頁面</h3>
+                    <li><a href="../../../../pages/about.html">◆ ABOUT</a></li>
+                    <li><a href="../../../../pages/experience.html">◆ EXPERIENCE</a></li>
+                    <li><a href="../../../../pages/skills.html">◆ SKILLS</a></li>
+                    <li><a href="../../../../pages/contact.html">◆ CONTACT</a></li>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-section-title">特別內容</h3>
+                    <li><a href="../../index.html">◆ GAME CENTER</a></li>
+                    <li><a href="../../../nagato-sakura-webos/nagato-sakura-webos.html">◆ WEB OS</a></li>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-section-title">更多連結</h3>
+                    <li>
+                        <a href="https://www.youtube.com/@Amano_Shizuki_Kun" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
+                            YouTube
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/AmanoShizukikun" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                            GitHub
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://discord.gg/jac8eAFzjz" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                            </svg>
+                            Discord
+                        </a>
+                    </li>
+                    <li>
+                        <a href="mailto:3b017128@gm.student.ncut.edu.tw" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            Email
+                        </a>
+                    </li>
+                </div>
+            </ul>
+        </div>
+        <div class="header-actions">
+            <button class="settings-toggle" aria-label="Settings"></button>
+            <button class="menu-toggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- 設定面板 (複製自 snake.html) -->
+    <div class="settings-panel">
+        <div class="settings-header">
+            <h2 class="settings-title">系統設定</h2>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="settings-section-title">顯示設定</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>固定導航欄</span>
+                    <span class="setting-description">保持導航欄在頂部固定</span>
+                </div>
+                <div class="toggle-switch" id="headerFixed"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>導航欄高度</span>
+                    <span class="setting-description">調整頂部導航欄的高度</span>
+                </div>
+                <div class="slider-control">
+                    <div class="slider-value" id="headerHeightValue">75px</div>
+                    <input type="range" class="slider-range" id="headerHeight" min="50" max="100" value="75" step="5">
+                    <div class="slider-marks">
+                        <span data-value="50">小</span>
+                        <span data-value="75">中</span>
+                        <span data-value="100">大</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>側邊欄文字顯示</span>
+                    <span class="setting-description">是否持續顯示側邊欄文字標題</span>
+                </div>
+                <div class="toggle-switch active" id="sideNavTextVisible"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>顯示左側導覽欄</span>
+                    <span class="setting-description">顯示或隱藏遊戲中心左側導覽欄</span>
+                </div>
+                <div class="toggle-switch active" id="showSidebar"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>主題模式</span>
+                    <span class="setting-description">切換深色/淺色模式</span>
+                </div>
+                <div class="select-control">
+                    <select id="themeMode">
+                        <option value="dark">深色模式</option>
+                        <option value="light">淺色模式</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="settings-section-title">效能設定</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>動畫強度</span>
+                    <span class="setting-description">調整頁面動畫效果強度</span>
+                </div>
+                <div class="slider-control">
+                    <div class="slider-value" id="animationValue">強</div>
+                    <input type="range" class="slider-range" id="animationStrength" min="0" max="2" value="2" step="1">
+                    <div class="slider-marks">
+                        <span data-value="0">關</span>
+                        <span data-value="1">低</span>
+                        <span data-value="2">強</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item fps-monitor">
+                <div class="setting-label">
+                    <span>幀數監控</span>
+                    <span class="setting-description">即時顯示頁面渲染幀率</span>
+                </div>
+                <div class="fps-display">
+                    <span class="fps-value" id="fpsValue">000</span>
+                    <span class="fps-unit">FPS</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="settings-section-title">音效設定</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>音效開關</span>
+                    <span class="setting-description">啟用/關閉互動音效</span>
+                </div>
+                <div class="toggle-switch active" id="soundEnabled"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="game-center-wrapper">
+        <!-- OSD 面板 (複製自 snake.html) -->
+        <div class="fps-osd" id="fpsOSD">
+            <div class="osd-header">
+                <div class="osd-title" id="osdTitle">FPS</div>
+                <div class="osd-mode-switcher">
+                    <button class="osd-mode-btn active" data-mode="performance" title="FPS模式"></button>
+                    <button class="osd-mode-btn" data-mode="game" title="遊戲模式"></button>
+                    <button class="osd-mode-btn" data-mode="simple" title="完整模式"></button>
+                </div>
+            </div>
+            <div class="osd-content" id="osdContent">
+                <!-- 內容將由 JavaScript 動態生成 -->
+            </div>
+        </div>
+
+        <!-- 左側導覽欄 (複製自 snake.html) -->
+        <aside class="gc-sidebar" id="gcSidebar">
+            <ul class="gc-sidebar-menu">
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="sidebarToggle" data-icon="◀" title="側邊欄摺疊">
+                        <span>摺疊</span>
+                    </a>
+                </li>
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="gcBackBtn" data-icon="🏠" title="返回遊戲中心">
+                        <span>遊戲中心</span>
+                    </a>
+                </li>
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="fpsOSDToggle" data-icon="📊" title="顯示幀數">
+                        <span>幀數顯示</span>
+                    </a>
+                </li>
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="hideSidebarBtn" data-icon="✕" title="關閉左側欄">
+                        <span>關閉左側欄</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 遊戲容器 -->
+        <div class="game-container">
+            <!-- 標題頁面 -->
+            <div class="title-screen" id="titleScreen">
+                <h1 class="game-logo">CYBER RACER</h1>
+                <p class="game-subtitle">3D 未來賽車</p>
+                <div class="title-menu">
+                    <button class="title-btn" id="startBtn">
+                        <span data-icon="🚀"> 開始遊戲</span>
+                    </button>
+                    <button class="title-btn" id="instructionsBtn">
+                        <span data-icon="📖"> 遊戲說明</span>
+                    </button>
+                    <button class="title-btn" id="backToGCBtn">
+                        <span data-icon="🏪"> 返回遊戲中心</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 難度選擇面板 -->
+            <div class="difficulty-panel" id="difficultyPanel">
+                <h2 class="difficulty-title">選擇賽道</h2>
+                <div class="difficulty-options">
+                    <button class="difficulty-btn" data-difficulty="easy">
+                        <span>★ 新手賽道</span>
+                        <span class="difficulty-desc">直線加速，障礙物稀疏</span>
+                    </button>
+                    <button class="difficulty-btn" data-difficulty="normal">
+                        <span>★★ 城市疾走</span>
+                        <span class="difficulty-desc">中等速度，障礙物較多</span>
+                    </button>
+                    <button class="difficulty-btn" data-difficulty="hard">
+                        <span>★★★ 駭客隧道</span>
+                        <span class="difficulty-desc">高速行駛，障礙物密集</span>
+                    </button>
+                </div>
+                <button class="back-btn" id="difficultyBackBtn">返回</button>
+            </div>
+
+            <!-- 遊戲說明面板 -->
+            <div class="instructions-panel" id="instructionsPanel">
+                <h2 class="instructions-title">駕駛說明</h2>
+                <div class="instructions-content">
+                    <div class="instruction-item">
+                        <span class="instruction-icon">⬆️</span>
+                        <span class="instruction-text">使用 <span class="instruction-highlight">W</span> 或 <span class="instruction-highlight">↑</span> 加速</span>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="instruction-icon">⬇️</span>
+                        <span class="instruction-text">使用 <span class="instruction-highlight">S</span> 或 <span class="instruction-highlight">↓</span> 剎車/倒車</span>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="instruction-icon">⬅️➡️</span>
+                        <span class="instruction-text">使用 <span class="instruction-highlight">A/D</span> 或 <span class="instruction-highlight">←/→</span> 轉向</span>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="instruction-icon">⚠️</span>
+                        <span class="instruction-text">避開賽道上的 <span class="instruction-highlight">紅色障礙物</span></span>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="instruction-icon">🎯</span>
+                        <span class="instruction-text">行駛得越遠，<span class="instruction-highlight">分數越高</span>！</span>
+                    </div>
+                </div>
+                <button class="back-btn" id="instructionsBackBtn">返回</button>
+            </div>
+
+            <!-- 遊戲主體 -->
+    <div class="game-main" id="gameMain">
+        
+        <!-- NEW HUD UI -->
+        <div class="game-controls">
+            <button class="game-btn" id="pauseBtn">暫停</button>
+            <button class="game-btn" id="exitBtn">退出</button>
+        </div>
+
+        <div class="game-hud">
+            <div class="hud-panel hud-panel-left">
+                <div>
+                    <div class="hud-label">最高分</div>
+                    <div class="hud-value" id="highScoreDisplay">0</div>
+                </div>
+                <div>
+                    <div class="hud-label">分數</div>
+                    <div class="hud-value" id="scoreDisplay">0</div>
+                </div>
+            </div>
+            <div class="hud-panel hud-panel-right">
+                <div class="hud-label">速度</div>
+                <div class="hud-value" id="speedDisplay">
+                    <span id="hud-speed">0</span>
+                    <span id="hud-speed-unit">KPH</span>
+                </div>
+            </div>
+            <div id="invulnerableIndicator" class="hud-panel" style="display:none; align-items:center;">
+                <div class="hud-label">狀態</div>
+                <div class="hud-value">免疫中</div>
+            </div>
+        </div>
+        
+        <!-- 3D 畫布容器 (original) -->
+        <div id="game-canvas-container"></div>
+            
+        <!-- 遊戲結束面板 (original) -->
+        <div class="game-over-panel" id="gameOverPanel">
+                    <h2 class="game-over-title">CRASHED</h2>
+                    <p class="final-score">最終分數: <span id="finalScore">0</span></p>
+                    <div class="game-over-buttons">
+                        <button class="title-btn" id="restartBtn">
+                            <span>重新啟動</span>
+                        </button>
+                        <button class="title-btn" id="menuBtn">
+                            <span>返回選單</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 退出確認對話框 -->
+                <div class="exit-confirm-panel" id="exitConfirmPanel">
+                    <div class="exit-confirm-content">
+                        <h3 class="exit-confirm-title">確定要退出嗎？</h3>
+                        <p class="exit-confirm-message">當前進度將不會保存</p>
+                        <div class="exit-confirm-buttons">
+                            <button class="exit-confirm-btn cancel-btn" id="exitCancelBtn">取消</button>
+                            <button class="exit-confirm-btn confirm-btn" id="exitConfirmBtn">確定退出</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 網站核心腳本 -->
+    <script src="../../../../assets/js/core.js"></script>
+    <script src="../../../../assets/js/navigation.js"></script>
+    <script src="../../../../assets/js/animations.js"></script>
+
+    <!-- 遊戲邏輯腳本 -->
+    <script>
+        // ========== 遊戲核心邏輯 (Three.js) ==========
+        const CyberRacerGame = {
+            // 3D 場景變數
+            scene: null,
+            camera: null,
+            renderer: null,
+            
+            // 遊戲物件
+            playerCar: null,
+            ground: null,
+            obstacles: [],
+            obstaclePool: [],
+            
+            // 遊戲狀態
+            gameState: 'menu', // 'menu', 'playing', 'paused', 'gameover'
+            keys: {},
+            score: 0,
+            highScore: 0,
+            gameLoopId: null,
+            
+            // 物理/移動
+            velocity: 0,
+            acceleration: 0.005,
+            maxSpeed: 0.5,
+            turnSpeed: 0.05,
+            friction: 0.98,
+
+            // 起始無敵／時間追蹤
+            invulnerable: false,
+            invulnerableTimer: 0,
+            lastFrameTime: null,
+            // 平滑的目標位置（用於相機 lookAt 插值）
+            cameraTarget: null,
+            
+            // 賽道生成
+            trackSegmentLength: 200,
+            trackWidth: 30,
+            nextObstacleZ: -50,
+            
+            // 難度設定
+            difficulty: 'normal',
+            speeds: { easy: 0.4, normal: 0.6, hard: 0.8 },
+            obstacleDensity: { easy: 0.2, normal: 0.4, hard: 0.7 },
+            
+            // DOM 元素
+            container: null,
+            scoreEl: null,
+            highScoreEl: null,
+            speedEl: null,
+
+            // 初始化 Three.js 場景
+            init(container) {
+                this.container = container;
+                
+                // 1. 創建場景
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0x05050f);
+                this.scene.fog = new THREE.Fog(0x05050f, 100, 300);
+
+                // 2. 創建渲染器
+                this.renderer = new THREE.WebGLRenderer({ antialias: true });
+                this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+                this.renderer.setPixelRatio(window.devicePixelRatio);
+                this.container.appendChild(this.renderer.domElement);
+
+                // 3. 創建相機 (第三人稱追焦)
+                this.camera = new THREE.PerspectiveCamera(75, this.container.clientWidth / this.container.clientHeight, 0.1, 1000);
+                
+                // 4. 創建光照
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+                this.scene.add(ambientLight);
+                
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(10, 20, 5);
+                this.scene.add(directionalLight);
+                
+                // 5. 創建玩家車輛
+                this.createPlayerCar();
+                
+                // 6. 創建地面/賽道
+                this.createGround();
+                
+                // 7. 創建障礙物
+                this.spawnInitialObstacles();
+
+                // 8. 綁定事件
+                this.bindEvents();
+                
+                // 9. 載入最高分
+                this.highScore = parseInt(localStorage.getItem('cyberRacerHighScore') || '0');
+                
+                // 10. 獲取 UI 元素
+                this.scoreEl = document.getElementById('scoreDisplay');
+                this.highScoreEl = document.getElementById('highScoreDisplay');
+                this.speedEl = document.getElementById('hud-speed');
+                this.highScoreEl.textContent = this.highScore;
+                // 初始化上一幀時間，用於 dt 計算
+                this.lastFrameTime = performance.now();
+                // 初始化 cameraTarget 為車輛前方位置
+                this.cameraTarget = new THREE.Vector3(this.playerCar.position.x, this.playerCar.position.y + 1, this.playerCar.position.z);
+            },
+            
+            createPlayerCar() {
+                // 使用組合體來製作車輛
+                const carBody = new THREE.Mesh(
+                    new THREE.BoxGeometry(2, 1, 4),
+                    new THREE.MeshStandardMaterial({ color: 0x00ffff, emissive: 0x00ffff, emissiveIntensity: 0.5 })
+                );
+                carBody.position.y = 0.5;
+
+                const cockpit = new THREE.Mesh(
+                    new THREE.BoxGeometry(1.5, 0.8, 1.5),
+                    new THREE.MeshStandardMaterial({ color: 0x111111, transparent: true, opacity: 0.8 })
+                );
+                cockpit.position.y = 1.0;
+                cockpit.position.z = -0.5;
+
+                const tailLight = new THREE.Mesh(
+                    new THREE.BoxGeometry(1.8, 0.2, 0.1),
+                    new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 1 })
+                );
+                tailLight.position.y = 0.6;
+                tailLight.position.z = -2.05;
+
+                this.playerCar = new THREE.Group();
+                this.playerCar.add(carBody);
+                this.playerCar.add(cockpit);
+                this.playerCar.add(tailLight);
+                
+                this.playerCar.position.set(0, 0, 0);
+                this.scene.add(this.playerCar);
+                
+                // 設置相機初始追焦位置：立即將相機放置在追焦偏移的目標位置，避免初始畫面看不到元素
+                const defaultRelativeCameraOffset = new THREE.Vector3(0, 3, 8);
+                const initialCameraOffset = defaultRelativeCameraOffset.clone().applyMatrix4(this.playerCar.matrixWorld);
+                this.camera.position.copy(initialCameraOffset);
+                // 初始化 cameraTarget
+                this.cameraTarget = new THREE.Vector3(this.playerCar.position.x, this.playerCar.position.y + 1, this.playerCar.position.z);
+                this.camera.lookAt(this.cameraTarget);
+            },
+            
+            createGround() {
+                // 賽道
+                const roadGeo = new THREE.PlaneGeometry(this.trackWidth, this.trackSegmentLength * 2);
+                const roadMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a });
+                this.ground = new THREE.Mesh(roadGeo, roadMat);
+                this.ground.rotation.x = -Math.PI / 2;
+                this.ground.position.z = -this.trackSegmentLength / 2;
+                this.scene.add(this.ground);
+
+                // 霓虹網格
+                const grid = new THREE.GridHelper(this.trackSegmentLength * 2, 40, 0x00ffff, 0x00ffff);
+                grid.material.opacity = 0.2;
+                grid.material.transparent = true;
+                grid.position.y = 0.01;
+                grid.position.z = -this.trackSegmentLength / 2;
+                this.scene.add(grid);
+                
+                // 賽道兩側的建築
+                this.createBuildings();
+            },
+            
+            createBuildings() {
+                const buildingMat = new THREE.MeshStandardMaterial({ color: 0x101020 });
+                const windowMat = new THREE.MeshStandardMaterial({ color: 0xff00ff, emissive: 0xff00ff, emissiveIntensity: 0.5 });
+                
+                for(let i = 0; i < 20; i++) {
+                    const h = Math.random() * 50 + 20;
+                    const w = Math.random() * 10 + 5;
+                    const d = Math.random() * 10 + 5;
+                    
+                    const building = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), buildingMat);
+                    building.position.z = -Math.random() * this.trackSegmentLength * 2;
+                    building.position.x = (Math.random() > 0.5 ? 1 : -1) * (this.trackWidth / 2 + Math.random() * 20 + 10);
+                    building.position.y = h / 2;
+                    this.scene.add(building);
+                    
+                    // 添加窗戶
+                    if (Math.random() > 0.5) {
+                        const window = new THREE.Mesh(new THREE.BoxGeometry(w * 0.8, h * 0.1, d * 0.8), windowMat);
+                        window.position.y = Math.random() * (h * 0.8) - (h * 0.4);
+                        building.add(window);
+                    }
+                }
+            },
+            
+            getObstacle() {
+                let obstacle;
+                if (this.obstaclePool.length > 0) {
+                    obstacle = this.obstaclePool.pop();
+                    obstacle.visible = true;
+                } else {
+                    const geo = new THREE.BoxGeometry(Math.random() * 3 + 1, Math.random() * 2 + 1, Math.random() * 2 + 1);
+                    const mat = new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 0.7 });
+                    obstacle = new THREE.Mesh(geo, mat);
+                }
+                
+                // 設置包圍盒 (Bounding Box) 用於碰撞偵測
+                obstacle.geometry.computeBoundingBox();
+                // obstacle.userData.bbox = new THREE.Box3().setFromObject(obstacle); // BUG: This creates bbox at (0,0,0) before position is set
+                obstacle.userData.bbox = new THREE.Box3(); // FIX: Create an empty box. It will be updated in checkCollisions.
+                
+                return obstacle;
+            },
+            
+            spawnObstacle() {
+                if (Math.random() > this.obstacleDensity[this.difficulty]) return;
+                
+                const obstacle = this.getObstacle();
+                obstacle.position.x = (Math.random() - 0.5) * (this.trackWidth - 4);
+                obstacle.position.y = (obstacle.geometry.parameters.height / 2) || 0.5;
+                // 確保障礙物生成在安全距離之外，避免生成在玩家附近
+                const spawnMin = this.playerCar.position.z - this.trackSegmentLength - 80; // 更遠
+                const spawnMax = this.playerCar.position.z - this.trackSegmentLength - 30; // 較近
+                obstacle.position.z = spawnMin + Math.random() * (spawnMax - spawnMin);
+                // 避免剛生成就與其他障礙物重疊
+                const safeDist = 6; // 至少距離
+                let tooClose = false;
+                for (const obs of this.obstacles) {
+                    const dx = obs.position.x - obstacle.position.x;
+                    const dz = obs.position.z - obstacle.position.z;
+                    const dist = Math.sqrt(dx * dx + dz * dz);
+                    if (dist < safeDist) {
+                        tooClose = true;
+                        break;
+                    }
+                }
+                if (tooClose) {
+                    // 若太接近，回收 obstacle 並不加入陣列
+                    this.recycleObstacle(obstacle);
+                    return;
+                }
+                
+                this.obstacles.push(obstacle);
+                this.scene.add(obstacle);
+            },
+            
+            spawnInitialObstacles() {
+                const count = 30;
+                const spread = this.trackSegmentLength * 2; // 將障礙散佈在更遠的範圍
+                for (let i = 0; i < count; i++) {
+                    const obstacle = this.getObstacle();
+                    obstacle.position.x = (Math.random() - 0.5) * (this.trackWidth - 4);
+                    obstacle.position.y = (obstacle.geometry.parameters.height / 2) || 0.5;
+                    const offset = this.trackSegmentLength + Math.random() * spread + 50; // 比較靠外
+                    obstacle.position.z = this.playerCar.position.z - offset;
+                    // 確保不與已存在的障礙物太近
+                    const safeDist = 6;
+                    let tooClose = false;
+                    for (const obs of this.obstacles) {
+                        const dx = obs.position.x - obstacle.position.x;
+                        const dz = obs.position.z - obstacle.position.z;
+                        const dist = Math.sqrt(dx * dx + dz * dz);
+                        if (dist < safeDist) {
+                            tooClose = true;
+                            break;
+                        }
+                    }
+                    if (tooClose) {
+                        this.recycleObstacle(obstacle);
+                        continue;
+                    }
+                    this.obstacles.push(obstacle);
+                    this.scene.add(obstacle);
+                }
+            },
+            
+            recycleObstacle(obstacle) {
+                obstacle.visible = false;
+                this.obstaclePool.push(obstacle);
+                this.scene.remove(obstacle);
+            },
+            
+            // 綁定鍵盤事件
+            bindEvents() {
+                window.addEventListener('keydown', (e) => {
+                    this.keys[e.key.toLowerCase()] = true;
+                    // 遊戲中按空白鍵暫停
+                    if (e.key === ' ' && this.gameState === 'playing') {
+                        e.preventDefault();
+                        this.togglePause();
+                    }
+                });
+                window.addEventListener('keyup', (e) => {
+                    this.keys[e.key.toLowerCase()] = false;
+                });
+                
+                window.addEventListener('resize', () => this.onWindowResize());
+            },
+            
+            onWindowResize() {
+                if (!this.renderer || !this.camera) return;
+                
+                const width = this.container.clientWidth;
+                const height = this.container.clientHeight;
+                
+                this.camera.aspect = width / height;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(width, height);
+            },
+            
+            // 開始遊戲
+            start(difficulty) {
+                this.difficulty = difficulty;
+                this.maxSpeed = this.speeds[this.difficulty];
+                this.resetGame();
+                // 因為在 init() 時畫布可能是隱藏的（display:none），開始遊戲時強制刷新畫布尺寸
+                this.onWindowResize();
+                // 在開始時給予玩家短暫的無敵時間以避免重生即被撞
+                this.invulnerable = true;
+                this.invulnerableTimer = 1200; // 毫秒
+                // 重置時間追蹤
+                this.lastFrameTime = performance.now();
+                this.gameState = 'playing';
+                this.animate();
+            },
+            
+            resetGame() {
+                this.score = 0;
+                this.velocity = 0;
+                this.playerCar.position.set(0, 0, 0);
+                this.playerCar.rotation.set(0, 0, 0);
+                
+                // 清理障礙物
+                this.obstacles.forEach(obs => this.scene.remove(obs));
+                this.obstacles = [];
+                this.obstaclePool = [];
+                this.spawnInitialObstacles();
+                
+                this.updateUI();
+                this.gameState = 'playing';
+            },
+            
+            togglePause() {
+                if (this.gameState === 'playing') {
+                    this.gameState = 'paused';
+                    document.getElementById('pauseBtn').textContent = '繼續';
+                    cancelAnimationFrame(this.gameLoopId);
+                } else if (this.gameState === 'paused') {
+                    this.gameState = 'playing';
+                    document.getElementById('pauseBtn').textContent = '暫停';
+                    this.animate();
+                }
+            },
+            
+            gameOver() {
+                this.gameState = 'gameover';
+                cancelAnimationFrame(this.gameLoopId);
+                
+                if (this.score > this.highScore) {
+                    this.highScore = this.score;
+                    localStorage.setItem('cyberRacerHighScore', this.highScore.toString());
+                }
+                
+                document.getElementById('finalScore').textContent = this.score;
+                document.getElementById('gameOverPanel').classList.add('active');
+            },
+            
+            // 遊戲主循環
+            animate() {
+                if (this.gameState !== 'playing') return;
+                
+                this.gameLoopId = requestAnimationFrame(() => this.animate());
+                // 計算時間差 (秒)，用於時間相關的邏輯，例如 invulnerable 計時
+                const now = performance.now();
+                const dt = this.lastFrameTime ? (now - this.lastFrameTime) / 1000 : (1 / 60);
+                this.lastFrameTime = now;
+                // 減少無敵計時
+                if (this.invulnerable) {
+                    this.invulnerableTimer -= dt * 1000;
+                    if (this.invulnerableTimer <= 0) {
+                        this.invulnerable = false;
+                        this.invulnerableTimer = 0;
+                    }
+                }
+                
+                this.handleInput();
+                this.updatePhysics();
+                this.updateWorld();
+                // 只有在非無敵且實際正在移動時才檢查碰撞，避免開場的誤判
+                if (!this.invulnerable && Math.abs(this.velocity) > 0.01) {
+                    this.checkCollisions();
+                }
+                this.updateCamera();
+                
+                this.renderer.render(this.scene, this.camera);
+                
+                this.updateUI();
+            },
+            
+            handleInput() {
+                // 加速
+                if (this.keys['w'] || this.keys['arrowup']) {
+                    this.velocity = Math.min(this.maxSpeed, this.velocity + this.acceleration);
+                }
+                // 剎車/倒車
+                if (this.keys['s'] || this.keys['arrowdown']) {
+                    this.velocity = Math.max(-this.maxSpeed * 0.5, this.velocity - this.acceleration * 2);
+                }
+                // 轉向 (只有在移動時才能轉向)
+                if (Math.abs(this.velocity) > 0.01) {
+                    const steer = (this.keys['a'] || this.keys['arrowleft']) ? 1 : (this.keys['d'] || this.keys['arrowright']) ? -1 : 0;
+                    this.playerCar.rotation.y += steer * this.turnSpeed * (this.velocity / this.maxSpeed);
+                }
+            },
+            
+            updatePhysics() {
+                // 應用摩擦力
+                this.velocity *= this.friction;
+                
+                // 更新車輛位置
+                this.playerCar.position.z -= Math.cos(this.playerCar.rotation.y) * this.velocity;
+                this.playerCar.position.x -= Math.sin(this.playerCar.rotation.y) * this.velocity;
+                
+                // 限制車輛在賽道內
+                this.playerCar.position.x = Math.max(-this.trackWidth / 2 + 1, Math.min(this.trackWidth / 2 - 1, this.playerCar.position.x));
+            },
+            
+            updateCamera() {
+                // 實現追焦相機
+                // 更接近主角的第三人稱相機，帶來近距離追焦感
+                const relativeCameraOffset = new THREE.Vector3(0, 3, 8);
+                const cameraOffset = relativeCameraOffset.clone().applyMatrix4(this.playerCar.matrixWorld);
+
+                // 平滑追焦（插值）
+                const lerpFactor = 0.12;
+                this.camera.position.lerp(cameraOffset, lerpFactor);
+                
+                const lookAtTarget = new THREE.Vector3(
+                    this.playerCar.position.x,
+                    this.playerCar.position.y + 1,
+                    this.playerCar.position.z
+                );
+                // 平滑視線目標
+                if (!this.cameraTarget) this.cameraTarget = new THREE.Vector3();
+                this.cameraTarget.lerp(lookAtTarget, 0.12);
+                this.camera.lookAt(this.cameraTarget);
+            },
+            
+            updateWorld() {
+                // 循環賽道
+                if (this.playerCar.position.z < this.ground.position.z + this.trackSegmentLength / 2) {
+                    this.ground.position.z -= this.trackSegmentLength;
+                    // 重新生成遠處的建築
+                    this.scene.children.filter(obj => obj.geometry && obj.geometry.type === 'BoxGeometry' && obj !== this.playerCar).forEach(building => {
+                        if (building.position.z > this.playerCar.position.z) {
+                             building.position.z = this.playerCar.position.z - this.trackSegmentLength - Math.random() * this.trackSegmentLength;
+                        }
+                    });
+                }
+                
+                // 回收和生成障礙物
+                for (let i = this.obstacles.length - 1; i >= 0; i--) {
+                    const obstacle = this.obstacles[i];
+                    if (obstacle.position.z > this.playerCar.position.z + 20) {
+                        this.recycleObstacle(obstacle);
+                        this.obstacles.splice(i, 1);
+                        this.spawnObstacle();
+                    }
+                }
+                
+                // 保持一定數量的障礙物
+                if (this.obstacles.length < 30) {
+                    this.spawnObstacle();
+                }
+            },
+            
+            checkCollisions() {
+                const carBBox = new THREE.Box3().setFromObject(this.playerCar);
+                
+                for (const obstacle of this.obstacles) {
+                    // 更新障礙物的包圍盒
+                    obstacle.userData.bbox.copy(obstacle.geometry.boundingBox).applyMatrix4(obstacle.matrixWorld);
+                    // 若與車的 z 距離過遠，跳過碰撞計算以節省資源與避免誤判
+                    const dz = Math.abs(obstacle.position.z - this.playerCar.position.z);
+                    if (dz > 70) continue;
+
+                    if (carBBox.intersectsBox(obstacle.userData.bbox)) {
+                        this.gameOver();
+                        return;
+                    }
+                }
+            },
+            
+            updateUI() {
+                this.score = Math.floor(Math.abs(this.playerCar.position.z));
+                this.scoreEl.textContent = this.score;
+                this.highScoreEl.textContent = Math.max(this.score, this.highScore);
+                this.speedEl.textContent = Math.floor(Math.abs(this.velocity * 200));
+                
+                // 更新 OSD
+                if (window.updateOSDGameInfo) {
+                    window.updateOSDGameInfo(this.score, this.difficulty ? this.difficulty.toUpperCase() : '-');
+                }
+                // 顯示起始無敵提示
+                const invEl = document.getElementById('invulnerableIndicator');
+                if (invEl) invEl.style.display = this.invulnerable ? '' : 'none';
+            },
+            
+            stopGame() {
+                if (this.gameLoopId) {
+                    cancelAnimationFrame(this.gameLoopId);
+                    this.gameLoopId = null;
+                }
+                this.gameState = 'menu';
+            }
+        };
+
+        // ========== UI 控制 (複製自 snake.html 並修改) ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化核心系統
+            if (typeof Core !== 'undefined') Core.initBackground();
+            if (typeof Navigation !== 'undefined') Navigation.init();
+
+            // 初始化遊戲
+            const gameContainer = document.getElementById('game-canvas-container');
+            CyberRacerGame.init(gameContainer);
+
+            // 載入設定狀態
+            const showSidebar = localStorage.getItem('showSidebar') !== 'false';
+            const sidebar = document.getElementById('gcSidebar');
+            const mainGameContainer = document.querySelector('.game-container');
+            
+            if (!showSidebar) {
+                sidebar.style.display = 'none';
+                applyGameContainerMarginHidden(true);
+            } else {
+                sidebar.style.display = '';
+                const savedCollapsedState = localStorage.getItem('gcSidebarCollapsed') === 'true';
+                if (savedCollapsedState) {
+                    sidebar.classList.add('collapsed');
+                    const toggleBtn = document.getElementById('sidebarToggle');
+                    toggleBtn.setAttribute('data-icon', '▶');
+                    toggleBtn.querySelector('span').textContent = '展開';
+                } else {
+                    sidebar.classList.remove('collapsed');
+                    const toggleBtn = document.getElementById('sidebarToggle');
+                    toggleBtn.setAttribute('data-icon', '◀');
+                    toggleBtn.querySelector('span').textContent = '摺疊';
+                }
+                applyGameContainerMarginHidden(false);
+            }
+
+            // ========== 全域側邊欄控制 ==========
+            function applyGameContainerMarginHidden(hidden) {
+                if (hidden) {
+                    mainGameContainer.style.setProperty('margin-left', '0', 'important');
+                } else {
+                    mainGameContainer.style.removeProperty('margin-left');
+                }
+            }
+
+            function syncSidebarState() {
+                const isHidden = sidebar.style.display === 'none';
+                if (isHidden) {
+                    applyGameContainerMarginHidden(true);
+                } else {
+                    applyGameContainerMarginHidden(false);
+                }
+            }
+
+            function updateLayoutOnResize() {
+                syncSidebarState();
+                CyberRacerGame.onWindowResize(); // 確保 3D 畫布也調整大小
+            }
+
+            updateLayoutOnResize();
+
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(updateLayoutOnResize, 100);
+            });
+
+            window.addEventListener('sidebarToggle', (e) => {
+                sidebar.style.display = e.detail.visible ? '' : 'none';
+                syncSidebarState();
+            });
+
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'showSidebar') {
+                    sidebar.style.display = (e.newValue !== 'false') ? '' : 'none';
+                    syncSidebarState();
+                }
+            });
+
+            // 標題頁面按鈕
+            document.getElementById('startBtn').addEventListener('click', () => {
+                document.getElementById('difficultyPanel').classList.add('active');
+            });
+
+            document.getElementById('instructionsBtn').addEventListener('click', () => {
+                document.getElementById('instructionsPanel').classList.add('active');
+            });
+
+            document.getElementById('backToGCBtn').addEventListener('click', () => {
+                window.location.href = '../../index.html';
+            });
+
+            // 難度選擇
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const difficulty = btn.dataset.difficulty;
+                    document.getElementById('difficultyPanel').classList.remove('active');
+                    document.getElementById('titleScreen').classList.add('hidden');
+                    document.getElementById('gameMain').classList.add('active');
+                    CyberRacerGame.start(difficulty);
+                });
+            });
+
+            document.getElementById('difficultyBackBtn').addEventListener('click', () => {
+                document.getElementById('difficultyPanel').classList.remove('active');
+            });
+
+            document.getElementById('instructionsBackBtn').addEventListener('click', () => {
+                document.getElementById('instructionsPanel').classList.remove('active');
+            });
+
+            // 遊戲控制按鈕
+            document.getElementById('pauseBtn').addEventListener('click', () => {
+                CyberRacerGame.togglePause();
+            });
+
+            document.getElementById('exitBtn').addEventListener('click', () => {
+                if (CyberRacerGame.gameState === 'playing') {
+                    CyberRacerGame.togglePause();
+                }
+                document.getElementById('exitConfirmPanel').classList.add('active');
+            });
+
+            // 退出確認
+            document.getElementById('exitConfirmBtn').addEventListener('click', () => {
+                document.getElementById('exitConfirmPanel').classList.remove('active');
+                CyberRacerGame.stopGame();
+                document.getElementById('gameMain').classList.remove('active');
+                document.getElementById('titleScreen').classList.remove('hidden');
+                document.getElementById('gameOverPanel').classList.remove('active');
+            });
+
+            document.getElementById('exitCancelBtn').addEventListener('click', () => {
+                document.getElementById('exitConfirmPanel').classList.remove('active');
+                // 如果遊戲之前是暫停的，恢復遊戲
+                if (CyberRacerGame.gameState === 'paused') {
+                    CyberRacerGame.togglePause();
+                }
+            });
+
+            // 遊戲結束按鈕
+            document.getElementById('restartBtn').addEventListener('click', () => {
+                document.getElementById('gameOverPanel').classList.remove('active');
+                CyberRacerGame.start(CyberRacerGame.difficulty);
+            });
+
+            document.getElementById('menuBtn').addEventListener('click', () => {
+                document.getElementById('gameOverPanel').classList.remove('active');
+                document.getElementById('gameMain').classList.remove('active');
+                document.getElementById('titleScreen').classList.remove('hidden');
+            });
+
+            // 側邊欄控制
+            document.getElementById('sidebarToggle').addEventListener('click', (e) => {
+                e.preventDefault();
+                sidebar.classList.toggle('collapsed');
+                const icon = document.getElementById('sidebarToggle');
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                icon.setAttribute('data-icon', isCollapsed ? '▶' : '◀');
+                icon.querySelector('span').textContent = isCollapsed ? '展開' : '摺疊';
+                localStorage.setItem('gcSidebarCollapsed', isCollapsed);
+                syncSidebarState();
+            });
+
+            document.getElementById('gcBackBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                sessionStorage.setItem('skipEntranceAnimation', 'true');
+                window.location.href = '../../index.html';
+            });
+
+            document.getElementById('hideSidebarBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                sidebar.style.display = 'none';
+                const settingToggle = document.getElementById('showSidebar');
+                if (settingToggle) {
+                    settingToggle.classList.remove('active');
+                }
+                localStorage.setItem('showSidebar', 'false');
+                window.dispatchEvent(new CustomEvent('sidebarToggle', { detail: { visible: false } }));
+                syncSidebarState();
+            });
+
+            // ========== OSD 控制系統 (複製自 snake.html) ==========
+            const fpsOSD = document.getElementById('fpsOSD');
+            const savedOSDVisible = localStorage.getItem('fpsOSDVisible');
+            const savedOSDMode = localStorage.getItem('osdMode') || 'performance';
+            const savedOSDPosition = JSON.parse(localStorage.getItem('osdPosition') || '{"top": "90px", "right": "20px", "left": "auto", "bottom": "auto"}');
+            const savedOSDSize = JSON.parse(localStorage.getItem('osdSize') || '{"width": "280px", "height": "auto"}');
+            
+            if (savedOSDPosition.top !== 'auto') fpsOSD.style.top = savedOSDPosition.top;
+            if (savedOSDPosition.right !== 'auto') fpsOSD.style.right = savedOSDPosition.right;
+            if (savedOSDPosition.left !== 'auto') fpsOSD.style.left = savedOSDPosition.left;
+            if (savedOSDPosition.bottom !== 'auto') fpsOSD.style.bottom = savedOSDPosition.bottom;
+            if (savedOSDSize.width !== 'auto') fpsOSD.style.width = savedOSDSize.width;
+            if (savedOSDSize.height !== 'auto') fpsOSD.style.height = savedOSDSize.height;
+            
+            if (savedOSDVisible === 'true') {
+                fpsOSD.classList.add('active');
+            }
+            
+            document.getElementById('fpsOSDToggle').addEventListener('click', (e) => {
+                e.preventDefault();
+                fpsOSD.classList.toggle('active');
+                const isActive = fpsOSD.classList.contains('active');
+                localStorage.setItem('fpsOSDVisible', isActive);
+                if (isActive) startOSDMonitoring();
+                else stopOSDMonitoring();
+            });
+
+            let osdState = {
+                currentMode: savedOSDMode,
+                lastTime: performance.now(),
+                frames: 0,
+                fps: 0,
+                sessionStart: Date.now(),
+                animationId: null,
+                gameScore: 0,
+                gameDifficulty: '-'
+            };
+
+            function initOSDModes(initialMode) {
+                const modeBtns = document.querySelectorAll('.osd-mode-btn');
+                const osdTitle = document.getElementById('osdTitle');
+                osdState.currentMode = initialMode;
+                
+                modeBtns.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.mode === initialMode);
+                    btn.addEventListener('click', () => {
+                        modeBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        osdState.currentMode = btn.dataset.mode;
+                        localStorage.setItem('osdMode', btn.dataset.mode);
+                        const titles = { performance: 'FPS', game: '遊戲資訊', simple: '完整顯示' };
+                        osdTitle.textContent = titles[btn.dataset.mode];
+                        updateOSDContent();
+                    });
+                });
+                
+                const titles = { performance: 'FPS', game: '遊戲資訊', simple: '完整顯示' };
+                osdTitle.textContent = titles[initialMode];
+            }
+
+            function updateOSDContent() {
+                const content = document.getElementById('osdContent');
+                if (!content) return;
+                const mode = osdState.currentMode;
+                
+                if (mode === 'performance') {
+                    content.innerHTML = `
+                        <div class="osd-item">
+                            <div><span class="osd-icon">📊</span><span class="osd-label">FPS</span></div>
+                            <div><span class="osd-value large" id="osdFPS">000</span><span class="osd-unit">FPS</span></div>
+                        </div>`;
+                } else if (mode === 'game') {
+                    content.innerHTML = `
+                        <div class="osd-item">
+                            <span class="osd-label">分數</span>
+                            <span class="osd-value" id="osdScore">${osdState.gameScore}</span>
+                        </div>
+                        <div class="osd-item">
+                            <span class="osd-label">難度</span>
+                            <span class="osd-value" id="osdDifficulty">${osdState.gameDifficulty}</span>
+                        </div>`;
+                } else if (mode === 'simple') {
+                    const sessionTime = Math.floor((Date.now() - osdState.sessionStart) / 1000);
+                    const minutes = Math.floor(sessionTime / 60);
+                    const seconds = sessionTime % 60;
+                    content.innerHTML = `
+                        <div class="osd-item">
+                            <div><span class="osd-icon">📊</span><span class="osd-label">FPS</span></div>
+                            <div><span class="osd-value large" id="osdFPSFull">000</span><span class="osd-unit">FPS</span></div>
+                        </div>
+                        <div class="osd-item">
+                            <span class="osd-label">分數</span>
+                            <span class="osd-value" id="osdScoreFull">${osdState.gameScore}</span>
+                        </div>
+                        <div class="osd-item">
+                            <span class="osd-label">難度</span>
+                            <span class="osd-value" id="osdDifficultyFull">${osdState.gameDifficulty}</span>
+                        </div>
+                        <div class="osd-item">
+                            <div><span class="osd-icon">⏱️</span><span class="osd-label">遊玩時間</span></div>
+                            <span class="osd-value" id="osdPlayTime">${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}</span>
+                        </div>`;
+                }
+            }
+
+            function updateOSDMonitoring() {
+                const now = performance.now();
+                osdState.frames++;
+                
+                if (now >= osdState.lastTime + 1000) {
+                    osdState.fps = Math.round((osdState.frames * 1000) / (now - osdState.lastTime));
+                    osdState.frames = 0;
+                    osdState.lastTime = now;
+                    updateOSDValues();
+                }
+                
+                osdState.animationId = requestAnimationFrame(updateOSDMonitoring);
+            }
+
+            function updateOSDValues() {
+                const mode = osdState.currentMode;
+                
+                if (mode === 'performance') {
+                    const fpsEl = document.getElementById('osdFPS');
+                    if (fpsEl) fpsEl.textContent = osdState.fps.toString().padStart(3, '0');
+                } else if (mode === 'game') {
+                    const scoreEl = document.getElementById('osdScore');
+                    const difficultyEl = document.getElementById('osdDifficulty');
+                    if (scoreEl) scoreEl.textContent = osdState.gameScore;
+                    if (difficultyEl) difficultyEl.textContent = osdState.gameDifficulty;
+                } else if (mode === 'simple') {
+                    const fpsFull = document.getElementById('osdFPSFull');
+                    if (fpsFull) fpsFull.textContent = osdState.fps.toString().padStart(3, '0');
+                    const scoreFull = document.getElementById('osdScoreFull');
+                    const difficultyFull = document.getElementById('osdDifficultyFull');
+                    if (scoreFull) scoreFull.textContent = osdState.gameScore;
+                    if (difficultyFull) difficultyFull.textContent = osdState.gameDifficulty;
+                    
+                    const sessionTime = Math.floor((Date.now() - osdState.sessionStart) / 1000);
+                    const minutes = Math.floor(sessionTime / 60);
+                    const seconds = sessionTime % 60;
+                    const playTimeEl = document.getElementById('osdPlayTime');
+                    if (playTimeEl) playTimeEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }
+                
+                const fpsValue = document.getElementById('fpsValue');
+                if (fpsValue) fpsValue.textContent = osdState.fps.toString().padStart(3, '0');
+            }
+
+            function startOSDMonitoring() {
+                if (osdState.animationId) return;
+                osdState.lastTime = performance.now();
+                osdState.frames = 0;
+                updateOSDContent();
+                updateOSDMonitoring();
+            }
+
+            function stopOSDMonitoring() {
+                if (osdState.animationId) {
+                    cancelAnimationFrame(osdState.animationId);
+                    osdState.animationId = null;
+                }
+            }
+
+            initOSDModes(savedOSDMode);
+            initOSDDragging(fpsOSD);
+            initOSDResizing(fpsOSD);
+            
+            if (savedOSDVisible === 'true') {
+                startOSDMonitoring();
+            }
+
+            function initOSDDragging(osd) {
+                const header = osd.querySelector('.osd-header');
+                let isDragging = false, currentX, currentY, initialX, initialY;
+                header.addEventListener('mousedown', dragStart);
+                header.addEventListener('touchstart', dragStart, { passive: false });
+                document.addEventListener('mouseup', dragEnd);
+                document.addEventListener('touchend', dragEnd);
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('touchmove', drag, { passive: false });
+
+                function dragStart(e) {
+                    if (e.target.closest('.osd-mode-switcher')) return;
+                    isDragging = true;
+                    osd.classList.add('dragging');
+                    const rect = osd.getBoundingClientRect();
+                    if (e.type === 'touchstart') {
+                        initialX = e.touches[0].clientX - rect.left;
+                        initialY = e.touches[0].clientY - rect.top;
+                    } else {
+                        initialX = e.clientX - rect.left;
+                        initialY = e.clientY - rect.top;
+                    }
+                    osd.style.right = 'auto';
+                    osd.style.bottom = 'auto';
+                    e.preventDefault();
+                }
+
+                function drag(e) {
+                    if (!isDragging) return;
+                    let clientX, clientY;
+                    if (e.type === 'touchmove') {
+                        clientX = e.touches[0].clientX;
+                        clientY = e.touches[0].clientY;
+                    } else {
+                        clientX = e.clientX;
+                        clientY = e.clientY;
+                    }
+                    currentX = clientX - initialX;
+                    currentY = clientY - initialY;
+                    const maxX = window.innerWidth - osd.offsetWidth;
+                    const maxY = window.innerHeight - osd.offsetHeight;
+                    currentX = Math.max(0, Math.min(currentX, maxX));
+                    currentY = Math.max(0, Math.min(currentY, maxY));
+                    osd.style.left = currentX + 'px';
+                    osd.style.top = currentY + 'px';
+                    e.preventDefault();
+                }
+
+                function dragEnd() {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    osd.classList.remove('dragging');
+                    saveOSDPosition(osd);
+                }
+            }
+
+            function initOSDResizing(osd) {
+                const resizeObserver = new ResizeObserver(() => saveOSDSize(osd));
+                resizeObserver.observe(osd);
+                let isResizing = false;
+                osd.addEventListener('mousedown', (e) => {
+                    const rect = osd.getBoundingClientRect();
+                    if (rect.right - e.clientX < 20 && rect.bottom - e.clientY < 20) {
+                        isResizing = true;
+                        osd.classList.add('resizing');
+                    }
+                });
+                document.addEventListener('mouseup', () => {
+                    if (isResizing) {
+                        isResizing = false;
+                        osd.classList.remove('resizing');
+                    }
+                });
+            }
+
+            function saveOSDPosition(osd) {
+                localStorage.setItem('osdPosition', JSON.stringify({
+                    top: osd.style.top || 'auto',
+                    right: osd.style.right || 'auto',
+                    left: osd.style.left || 'auto',
+                    bottom: osd.style.bottom || 'auto'
+                }));
+            }
+
+            function saveOSDSize(osd) {
+                localStorage.setItem('osdSize', JSON.stringify({
+                    width: osd.style.width || 'auto',
+                    height: osd.style.height || 'auto'
+                }));
+            }
+
+            window.updateOSDGameInfo = function(score, difficulty) {
+                osdState.gameScore = score;
+                osdState.gameDifficulty = difficulty;
+            };
+        });
+    </script>
+</body>
+</html>

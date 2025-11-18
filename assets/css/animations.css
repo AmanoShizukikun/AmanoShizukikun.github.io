@@ -9,7 +9,7 @@
         rgba(5, 5, 25, 0.95) 0%, 
         rgba(20, 5, 40, 0.95) 50%,
         rgba(5, 20, 40, 0.95) 100%);
-    z-index: 9999;
+    z-index: 99999; /* Higher than header so loader covers the full page including header */
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -139,6 +139,14 @@
 .loader-container.hidden {
     opacity: 0;
     visibility: hidden;
+    pointer-events: none;
+}
+
+/* Ensure any full-screen entrance overlay sits above headers and other UI chrome */
+.page-entrance-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999; /* high enough to be above header (defaults vary) */
     pointer-events: none;
 }
 

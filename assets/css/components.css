@@ -19,7 +19,8 @@ header {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 1000;
+    /* 提升 header 層級，確保位於主要模擬器與側欄之上 */
+    z-index: 20000;
     margin: 0;
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
                 opacity 0.4s ease,
@@ -258,7 +259,8 @@ header > a:hover::after {
     height: 100%;
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(5px);
-    z-index: 999;
+    /* 提升遮罩層級，確保遮罩覆蓋模擬器內容，但仍低於設定面板與 header */
+    z-index: 19998;
     opacity: 0;
     transition: opacity var(--transition-normal);
     pointer-events: none; /* 默認不攔截點擊 */
@@ -291,7 +293,8 @@ header > a:hover::after {
     padding: 2rem 1.5rem;
     overflow-y: auto;
     transition: right var(--transition-normal);
-    z-index: 1000;
+    /* 提升設定面板層級，使其在模擬器與視窗上方，但保持低於 header */
+    z-index: 19999;
     box-shadow: -5px 0 30px rgba(255, 0, 128, 0.3);
 }
 
@@ -780,7 +783,8 @@ header > a:hover::after {
     padding: 2rem 1.5rem;
     gap: 0;
     transition: right var(--transition-normal);
-    z-index: 1000;
+    /* 提升側邊選單層級，確保在模擬器內容與視窗上方 */
+    z-index: 19999;
     overflow-y: auto;
     
     display: flex;
