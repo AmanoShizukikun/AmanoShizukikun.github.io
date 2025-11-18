@@ -2714,6 +2714,13 @@
                 try {
                     // Skip if the background hasn't actually changed (avoids unnecessary fade)
                     if (bgValue === _lastBackgroundValue) return;
+                    // If document is not visible (e.g., tab background), avoid animation and set immediately
+                    if (typeof document !== 'undefined' && document.hidden) {
+                        el.style.background = bgValue;
+                        _lastBackgroundValue = bgValue;
+                        _lastBackgroundMode = 'image';
+                        return;
+                    }
                     // Prefer to only fade the background layer (desktop-bg) or the desktop element itself
                     const prevTransition = el.style.transition || '';
                     // Ensure opacity transition is available
@@ -2877,8 +2884,13 @@
                     if (videoEl) {
                         try { videoEl.style.opacity = '0'; setTimeout(() => { try { videoEl.pause(); videoEl.removeAttribute('src'); videoEl.load(); } catch(e){}; videoEl.style.display = 'none'; }, 300); } catch(e){}
                         try { if (_lastBackgroundVideoObjectUrl) { URL.revokeObjectURL(_lastBackgroundVideoObjectUrl); _lastBackgroundVideoObjectUrl = null; } } catch(e){}
-                        _lastBackgroundMode = null;
-                        _lastBackgroundValue = null;
+                        // Only clear the cached mode/value when we were previously using a video
+                        // so that unrelated changes (eg. changing brightness or taskbar/icon sizes)
+                        // don't cause the background to re-apply and trigger the fade animation.
+                        if (_lastBackgroundMode === 'video') {
+                            _lastBackgroundMode = null;
+                            _lastBackgroundValue = null;
+                        }
                     }
                 }
                 // Update background preview in personalization panel
@@ -3244,7 +3256,13 @@
                     const s = loadPersonalizationSettings() || DEFAULT_PERSONALIZATION;
                     s.taskbarIconSize = Number(e.target.value);
                     personalizationControls.taskbarIconSizeValue.textContent = s.taskbarIconSize + 'px';
+                    // Live preview only: apply settings but don't write to storage on every input event
                     applyPersonalizationSettings(s);
+                });
+                // Save final user preference on change (when slider released)
+                personalizationControls.taskbarIconSize.addEventListener('change', (e) => {
+                    const s = loadPersonalizationSettings() || DEFAULT_PERSONALIZATION;
+                    s.taskbarIconSize = Number(e.target.value);
                     savePersonalizationSettings(s);
                 });
             }
@@ -3255,12 +3273,12 @@
                         const val = Number(e.target.value);
                         s.backgroundBrightness = val;
                         if (personalizationControls.bgBrightnessValue) personalizationControls.bgBrightnessValue.textContent = val + '%';
-                        // apply overlay alpha for smoother updates
+                        // apply overlay alpha for smoother updates without invoking the full personalization flow
+                        // Since brightness changes should not re-apply or re-fade background, update only CSS vars to avoid heavy operations
                         document.documentElement.style.setProperty('--background-overlay', (1 - (val / 100)).toFixed(3));
-                        applyPersonalizationSettings(s);
-                        savePersonalizationSettings(s);
+                        // Do not call applyPersonalizationSettings or save on every input to avoid reflows and localStorage churn
                     });
-                    // On release/final change, update the filter so any other code relying on it remains compatible
+                    // On release/final change, update the filter and save so other code depending on the final value remains compatible
                     personalizationControls.bgBrightness.addEventListener('change', (e) => {
                         const s = loadPersonalizationSettings() || DEFAULT_PERSONALIZATION;
                         const val = Number(e.target.value);
@@ -3287,7 +3305,12 @@
                     const s = loadPersonalizationSettings() || DEFAULT_PERSONALIZATION;
                     s.fontScale = Number(e.target.value);
                     personalizationControls.fontScaleValue.textContent = s.fontScale + '%';
+                    // Live preview only; avoid saving on each slider move
                     applyPersonalizationSettings(s);
+                });
+                personalizationControls.fontScale.addEventListener('change', (e) => {
+                    const s = loadPersonalizationSettings() || DEFAULT_PERSONALIZATION;
+                    s.fontScale = Number(e.target.value);
                     savePersonalizationSettings(s);
                 });
             }
@@ -5290,18 +5313,8 @@
                     icon.classList.add('fa-solid');
                     bookmarkToggle.setAttribute('aria-pressed', 'true');
                 }
-                // Ensure the video element is hidden when not in 'video' mode
-                if (s.backgroundMode !== 'video') {
-                    const videoEl = document.getElementById('desktop-video');
-                    if (videoEl) {
-                        try { videoEl.style.opacity = '0'; setTimeout(() => { try { videoEl.pause(); videoEl.removeAttribute('src'); videoEl.load(); } catch(e){}; videoEl.style.display = 'none'; }, 300); } catch(e){}
-                        // revoke any object URL used previously
-                        try { if (_lastBackgroundVideoObjectUrl) { URL.revokeObjectURL(_lastBackgroundVideoObjectUrl); _lastBackgroundVideoObjectUrl = null; } } catch(e){}
-                        // Clear cached state so subsequent background changes apply properly
-                        _lastBackgroundMode = null;
-                        _lastBackgroundValue = null;
-                    }
-                } else {
+                // Not favorite -> show regular style
+                if (!isFavorite(url)) {
                     icon.classList.remove('fa-solid');
                     icon.classList.add('fa-regular');
                     bookmarkToggle.setAttribute('aria-pressed', 'false');
