@@ -48,10 +48,18 @@
             --taskbar-height: 50px;
             --taskbar-icon-size: 24px; /* New: icon size used by both font & image icons */
             --window-border-radius: 8px;
-            --z-taskbar: 1000;
-            --z-window: 100;
-            --z-start-menu: 1010;
-            --z-context-menu: 1020;
+            
+            /* Z-Index Hierarchy (Highest to Lowest) */
+            --z-header: 5000;
+            --z-taskbar: 4000;
+            --z-start-menu: 3900;
+            --z-widgets: 3800; /* Calendar & Widgets */
+            --z-window-active: 3000;
+            --z-snap-preview: 2000;
+            --z-window-base: 1000; /* Inactive windows start here */
+            
+            --z-window: var(--z-window-base); /* Legacy support */
+            --z-context-menu: 6000; /* Above everything */
             --z-loader: 9999;
             
             /* 新增：混合佈局尺寸 */
@@ -89,6 +97,23 @@
             /* 新增：為混合佈局修改 */
             display: flex;
             flex-direction: column;
+            /* 防止 navigation.js 中 toggleSettings 設定的 paddingTop 影響佈局 */
+            padding-top: 0 !important;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 20000; /* 確保 header 高於 nav-overlay (19998) */
+            flex-shrink: 0;
+        }
+
+        /* 針對此頁面的 nav-overlay 調整，確保低於 header */
+        .nav-overlay {
+            z-index: 19998;
+            top: var(--header-height, 60px); /* 從 header 下方開始 */
         }
 
         /* 1. 頂部導航欄 (use global header styles to match other pages) */
@@ -116,7 +141,7 @@
             width: 100%;
             /* height: 100vh; */
             flex-grow: 1; /* 填滿剩餘空間 */
-            /* padding-top: var(--header-height); 已改為使用 simulat or height 而非雙重 padding */
+            margin-top: var(--header-height, 60px); /* 為固定的 header 預留空間 */
             min-height: calc(100vh - var(--header-height, 60px));
         }
 
@@ -261,10 +286,11 @@
             transition: opacity 0.5s ease-out;
         }
         #boot-logo {
-            font-size: 8rem;
-            color: var(--primary-cyan);
+            width: 8rem;
+            height: 8rem;
             margin-bottom: 2rem;
             animation: pulse 2s infinite ease-in-out;
+            object-fit: contain;
         }
         #boot-spinner {
             width: 50px;
@@ -422,6 +448,631 @@
         [data-theme="light"] .taskbar-icon.active-app::after {
             box-shadow: none;
         }
+
+        /* ========== 淺色模式完整樣式 ========== */
+        [data-theme="light"] {
+            --dark-bg: #f5f5f7;
+            --darker-bg: #e8e8ec;
+            --mica-bg: rgba(255, 255, 255, 0.85);
+            --mica-bg-light: rgba(255, 255, 255, 0.9);
+            --mica-bg-dark: rgba(245, 245, 247, 0.92);
+            --text: #1a1a1a;
+            --card: rgba(0, 0, 0, 0.03);
+            --bd: rgba(0, 0, 0, 0.1);
+            --s3d: rgba(0, 0, 0, 0.15);
+            --mm: rgba(0, 160, 200, 0.12);
+        }
+
+        /* 頁面與桌面背景 */
+        [data-theme="light"] body {
+            background-color: #f5f5f7;
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] #desktop {
+            background: linear-gradient(135deg, #e8f4f8 0%, #d4e6ed 50%, #c8dce6 100%);
+        }
+
+        [data-theme="light"] #desktop-bg {
+            background: linear-gradient(135deg, #e8f4f8 0%, #d4e6ed 50%, #c8dce6 100%);
+        }
+
+        /* 側邊欄 */
+        [data-theme="light"] .cyber-sidebar {
+            background: rgba(255, 255, 255, 0.85);
+            border-left: 1px solid rgba(0, 0, 0, 0.1);
+            color: #333;
+        }
+
+        [data-theme="light"] .cyber-sidebar li:hover {
+            background: rgba(0, 160, 200, 0.1);
+            color: #000;
+        }
+
+        /* 任務欄 */
+        [data-theme="light"] #taskbar {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .taskbar-icon {
+            color: #333;
+        }
+
+        [data-theme="light"] .taskbar-icon:hover {
+            background: rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="light"] #taskbar-time {
+            color: #333;
+        }
+
+        [data-theme="light"] #taskbar-time:hover {
+            background: rgba(0, 0, 0, 0.06);
+        }
+
+        /* 開始功能表 */
+        [data-theme="light"] #start-menu {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        [data-theme="light"] .search-bar {
+            background: rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .search-bar input {
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .search-bar input::placeholder {
+            color: #888;
+        }
+
+        [data-theme="light"] .search-bar i {
+            color: #666;
+        }
+
+        [data-theme="light"] .start-section-title {
+            color: #555;
+        }
+
+        [data-theme="light"] .app-icon:hover {
+            background: rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="light"] .app-icon span {
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .recommended-item:hover {
+            background: rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="light"] .recommended-item i {
+            color: #555;
+        }
+
+        [data-theme="light"] .recommended-item-info {
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .recommended-item-info span {
+            color: #666;
+        }
+
+        [data-theme="light"] .start-menu-footer {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="light"] .power-button:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        /* 視窗 */
+        [data-theme="light"] .window {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        [data-theme="light"] .window.active {
+            border-color: rgba(0, 160, 200, 0.5);
+        }
+
+        [data-theme="light"] .window-header {
+            background: rgba(250, 250, 252, 0.95);
+        }
+
+        [data-theme="light"] .window-title {
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .window-control-btn {
+            color: #333;
+        }
+
+        [data-theme="light"] .window-control-btn:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .window-content {
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .snap-layouts {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+        }
+
+        [data-theme="light"] .snap-layout-option {
+            border-color: #888;
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        [data-theme="light"] .snap-layout-option:hover {
+            border-color: var(--primary-cyan);
+            background: rgba(0, 160, 200, 0.15);
+        }
+
+        /* 設定視窗 */
+        [data-theme="light"] .settings-sidebar {
+            border-right: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .settings-menu-item {
+            color: #333;
+        }
+
+        [data-theme="light"] .settings-menu-item:hover {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        [data-theme="light"] .settings-menu-item.active {
+            background: rgba(0, 160, 200, 0.1);
+        }
+
+        [data-theme="light"] .setting-section h3 {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+        }
+
+        [data-theme="light"] .setting-item {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        [data-theme="light"] .setting-item-label {
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .setting-item-label span {
+            color: #666;
+        }
+
+        /* 檔案總管 */
+        [data-theme="light"] .explorer-content {
+            background: #fafafa;
+        }
+
+        [data-theme="light"] .explorer-sidebar {
+            background: rgba(0, 0, 0, 0.02);
+            border-right: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .explorer-sidebar h4 {
+            color: #555;
+        }
+
+        [data-theme="light"] .explorer-item {
+            color: #333;
+        }
+
+        [data-theme="light"] .explorer-item:hover {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        [data-theme="light"] .explorer-item i {
+            color: #555;
+        }
+
+        [data-theme="light"] .folder-icon span {
+            color: #1a1a1a;
+        }
+
+        /* 瀏覽器 */
+        [data-theme="light"] .browser-toolbar {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="light"] .browser-toolbar input {
+            background: rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .browser-toolbar i {
+            color: #555;
+        }
+
+        [data-theme="light"] .favorites-bar {
+            background: rgba(0, 0, 0, 0.02);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="light"] .fav-item {
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            color: #333;
+        }
+
+        [data-theme="light"] .fav-item:hover {
+            background: rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="light"] .fav-item .title {
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] #win-edge > .tool > input.url {
+            background: rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] #win-edge > .tool > .a {
+            color: #333;
+        }
+
+        [data-theme="light"] #win-edge > .tool > .a:hover {
+            background-color: rgba(0, 0, 0, 0.06);
+        }
+
+        /* 日曆彈窗 */
+        [data-theme="light"] #calendar-flyout {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        [data-theme="light"] .calendar-header span {
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .calendar-nav button {
+            color: #333;
+        }
+
+        [data-theme="light"] .calendar-cell {
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .calendar-cell.day-name {
+            color: #666;
+        }
+
+        [data-theme="light"] .calendar-cell.other-month {
+            color: #aaa;
+        }
+
+        [data-theme="light"] .calendar-cell.today {
+            background: var(--primary-cyan);
+            color: #fff;
+        }
+
+        [data-theme="light"] .calendar-cell:not(.day-name):not(.today):hover {
+            background: rgba(0, 0, 0, 0.06);
+        }
+
+        /* 小工具面板 */
+        [data-theme="light"] #widgets-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 5px 0 30px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .widget {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="light"] .widget-header {
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .weather-controls input[type="text"] {
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .weather-controls button {
+            color: #333;
+        }
+
+        [data-theme="light"] .weather-info .desc {
+            color: #555;
+        }
+
+        [data-theme="light"] .weather-info .meta {
+            color: #666;
+        }
+
+        [data-theme="light"] .weather-forecast .forecast-item {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="light"] .weather-forecast .forecast-item .date {
+            color: #666;
+        }
+
+        [data-theme="light"] .news-item-info {
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .news-item-info span {
+            color: #666;
+        }
+
+        /* 右鍵選單 */
+        [data-theme="light"] #context-menu {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+        }
+
+        [data-theme="light"] .context-menu-item {
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .context-menu-item:hover {
+            background: rgba(0, 160, 200, 0.12);
+        }
+
+        [data-theme="light"] .context-menu-item i {
+            color: #555;
+        }
+
+        [data-theme="light"] .context-menu-separator {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] #start-context-menu {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+        }
+
+        /* 對話/聊天區域 */
+        [data-theme="light"] .nagato-messages {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        [data-theme="light"] .message.ai {
+            background: rgba(0, 0, 0, 0.05);
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .message.user {
+            background: var(--primary-cyan);
+            color: #fff;
+        }
+
+        [data-theme="light"] .message-suggestions .suggestion-btn {
+            background: rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #333;
+        }
+
+        [data-theme="light"] .message-suggestions .suggestion-btn:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .nagato-input-area {
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .nagato-input-area textarea {
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .nagato-input-area .clear-btn {
+            color: #555;
+        }
+
+        [data-theme="light"] .nagato-input-area .clear-btn:hover {
+            background: rgba(0, 0, 0, 0.06);
+            color: #1a1a1a;
+        }
+
+        /* 計算機 */
+        [data-theme="light"] #win-calc {
+            background: #fafafa;
+        }
+
+        [data-theme="light"] #calc-input {
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] #win-calc > .keyb > .b {
+            background: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.04));
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            color: #1a1a1a;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        }
+
+        [data-theme="light"] #win-calc > .keyb > .b:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+        }
+
+        [data-theme="light"] #win-calc > .keyb > .b.u {
+            background: linear-gradient(180deg, rgba(0,160,200,0.08), rgba(0,160,200,0.04));
+        }
+
+        /* 桌面圖示 - 只調整 hover 背景和文字陰影，圖示顏色保持與開始菜單一致 */
+        [data-theme="light"] .desktop-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        [data-theme="light"] .desktop-icon span {
+            color: #fff;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+        }
+
+        /* 滾動條 */
+        [data-theme="light"] ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        [data-theme="light"] ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="light"] ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 4px;
+        }
+
+        [data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        /* 關於頁面 */
+        [data-theme="light"] .about-item {
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="light"] .about-item-row {
+            color: #555;
+        }
+
+        [data-theme="light"] .btn {
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .btn:hover {
+            background: rgba(0, 0, 0, 0.06);
+        }
+
+        /* 更新頁面 */
+        [data-theme="light"] .update-item {
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        /* Snap 預覽 */
+        [data-theme="light"] #snap-preview {
+            background: rgba(0, 160, 200, 0.1);
+            border: 2px dashed rgba(0, 160, 200, 0.4);
+        }
+
+        /* 使用者頭像 */
+        [data-theme="light"] .user-profile img.avatar {
+            border: 2px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 切換開關 */
+        [data-theme="light"] .toggle-switch {
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        [data-theme="light"] .toggle-switch.active {
+            background: var(--primary-cyan);
+        }
+
+        /* 選擇控制項 */
+        [data-theme="light"] .select-control select {
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            color: #1a1a1a;
+        }
+
+        /* 滑桿控制項 */
+        [data-theme="light"] .slider-range {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .slider-value {
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .slider-marks span {
+            color: #666;
+        }
+
+        /* 輸入框 */
+        [data-theme="light"] input[type="color"] {
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+        }
+
+        [data-theme="light"] input[type="text"],
+        [data-theme="light"] input[type="url"],
+        [data-theme="light"] input[type="number"] {
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            color: #1a1a1a;
+        }
+
+        /* 設定面板 (主頁面側邊設定) */
+        [data-theme="light"] .settings-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-left: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .settings-panel h2 {
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .settings-section {
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="light"] .settings-section-title {
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .setting-label span:first-child {
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .setting-description {
+            color: #666;
+        }
+
+        /* FPS 監控 */
+        [data-theme="light"] .fps-display {
+            color: #1a1a1a;
+        }
+
+        /* 頁眉 */
+        [data-theme="light"] header {
+            background: rgba(255, 255, 255, 0.9);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] header a {
+            color: var(--primary-cyan);
+        }
+
+        [data-theme="light"] .nav-links a {
+            color: #333;
+        }
+
+        [data-theme="light"] .nav-links a:hover {
+            color: var(--primary-cyan);
+        }
+
+        /* ========== 淺色模式結束 ========== */
+
         #start-button {
             font-size: 1.5rem;
             color: var(--primary-cyan);
@@ -586,7 +1237,7 @@
         }
         .window.show { opacity: 1; visibility: visible; transform: scale(1); }
         /* Ensure active window stacks above other windows (calc for correct value) */
-        .window.active { z-index: calc(var(--z-window) + 10); border-color: rgba(0, 212, 255, 0.5); }
+        .window.active { z-index: var(--z-window-active) !important; border-color: rgba(0, 212, 255, 0.5); }
         .window.minimized { display: none; }
 
         .window-header {
@@ -622,7 +1273,7 @@
         /* Snap preview overlay used when dragging windows near edges */
         #snap-preview {
             position: absolute;
-            z-index: 1100; /* above windows but below start-menu overlays */
+            z-index: var(--z-snap-preview); /* above windows but below start-menu overlays */
             background: rgba(0, 212, 255, 0.12);
             border: 2px dashed rgba(0, 212, 255, 0.35);
             border-radius: var(--window-border-radius);
@@ -649,6 +1300,13 @@
 
         /* 6. 應用程式內容 */
         .settings-content { display: flex; height: 100%; }
+        /* 設定視窗主滾動條箭頭 - 只顯示單一按鈕 */
+        #window-settings .window-content::-webkit-scrollbar-button:vertical:start:increment,
+        #window-settings .window-content::-webkit-scrollbar-button:vertical:end:decrement,
+        #window-settings .settings-main::-webkit-scrollbar-button:vertical:start:increment,
+        #window-settings .settings-main::-webkit-scrollbar-button:vertical:end:decrement {
+            display: none;
+        }
         .settings-sidebar { width: 200px; flex-shrink: 0; border-right: 1px solid rgba(255, 255, 255, 0.1); padding: 10px 0; }
         .settings-menu-item { display: flex; align-items: center; padding: 12px 20px; cursor: pointer; font-size: 0.9rem; }
         .settings-menu-item:hover { background: rgba(255, 255, 255, 0.05); }
@@ -754,7 +1412,7 @@
             visibility: hidden;
             transform: translateY(20px);
             transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
-            z-index: var(--z-start-menu);
+            z-index: var(--z-widgets);
         }
         #calendar-flyout.show { opacity: 1; visibility: visible; transform: translateY(0); }
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -782,7 +1440,7 @@
             border-right: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 5px 0 30px rgba(0, 0, 0, 0.3);
             
-            z-index: var(--z-start-menu);
+            z-index: var(--z-widgets);
             padding: 20px;
             padding-top: 50px;
             overflow-y: auto;
@@ -1163,7 +1821,7 @@
 
             <!-- 1. 啟動加載器 -->
             <div id="boot-loader">
-                <i id="boot-logo" class="fa-brands fa-windows"></i>
+                <img id="boot-logo" src="../../assets/images/logo.png" alt="Logo">
                 <div id="boot-spinner"></div>
                 <div id="boot-status">系統啟動中...</div>
             </div>
@@ -1210,7 +1868,7 @@
                 <div class="taskbar-group center">
                     <!-- 開始按鈕 -->
                     <div class="taskbar-icon" id="start-button" title="開始">
-                        <i class="fa-brands fa-windows"></i>
+                        <img src="../../assets/images/logo.png" alt="開始" class="app-icon-img" loading="lazy">
                     </div>
                     <!-- 搜尋 -->
                     <div class="taskbar-icon" id="search-button" title="搜尋">
@@ -2207,7 +2865,7 @@
             
             let calendarDate = new Date();
             let activeWindow = null;
-            let highestZIndex = 100;
+            let highestZIndex = 1000;
 
             class Calculator {
                 constructor(inputSelector, keysContainerSelector) {
@@ -2758,7 +3416,10 @@
                 const deskEl = document.getElementById('desktop');
                 const desktopBgEl = document.getElementById('desktop-bg');
                 if (s.backgroundMode === 'default') {
-                    const bgDefault = 'radial-gradient(ellipse at bottom, #0a192f 0%, #05080f 100%)';
+                    // 根據主題選擇預設背景
+                    const bgDefaultDark = 'radial-gradient(ellipse at bottom, #0a192f 0%, #05080f 100%)';
+                    const bgDefaultLight = 'linear-gradient(135deg, #e8f4f8 0%, #d4e6ed 50%, #c8dce6 100%)';
+                    const bgDefault = s.theme === 'light' ? bgDefaultLight : bgDefaultDark;
                     if (desktopBgEl) {
                         if (_lastBackgroundMode !== 'default' || _lastBackgroundValue !== bgDefault) {
                             desktopBgEl.style.background = bgDefault;
@@ -3114,6 +3775,11 @@
                 personalizationControls.themeMode.addEventListener('change', (e) => {
                     const s = loadPersonalizationSettings() || DEFAULT_PERSONALIZATION;
                     s.theme = e.target.value;
+                    // 當主題改變且背景模式為 default 時，強制重新計算背景
+                    if (s.backgroundMode === 'default') {
+                        _lastBackgroundMode = null;
+                        _lastBackgroundValue = null;
+                    }
                     applyPersonalizationSettings(s);
                     savePersonalizationSettings(s);
                 });
@@ -3898,15 +4564,21 @@
                     return;
                 }
                 if (activeWindow === windowEl) return;
+                
+                // Demote previous active window to the top of inactive stack
                 if (activeWindow) {
                     activeWindow.classList.remove('active');
+                    highestZIndex++;
+                    activeWindow.style.zIndex = highestZIndex;
                 }
                 windows.forEach(w => w.classList.remove('active'));
                 
                 activeWindow = windowEl;
                 activeWindow.classList.add('active');
-                highestZIndex++;
-                activeWindow.style.zIndex = highestZIndex;
+                
+                // Promote new active window to the dedicated active layer (3000)
+                // This ensures it is above snap-preview (2000) but snap-preview is above inactive windows (1000+)
+                activeWindow.style.zIndex = 3000;
                 
                 updateTaskbarActive(activeWindow.dataset.app);
             }
@@ -4575,7 +5247,10 @@
             if (!snapPreview) {
                 snapPreview = document.createElement('div');
                 snapPreview.id = 'snap-preview';
-                desktop.appendChild(snapPreview);
+                // Append to simulator container (parent of desktop) to avoid being trapped in desktop's lower z-index stacking context
+                // Windows are also children of simulator container (or siblings of desktop), so this allows correct interleaving.
+                const container = document.querySelector('.simulator-container') || document.body;
+                container.appendChild(snapPreview);
             }
             function requestApply() {
                 if (!rafId) rafId = requestAnimationFrame(() => { rafId = null; applyActionState(); });
