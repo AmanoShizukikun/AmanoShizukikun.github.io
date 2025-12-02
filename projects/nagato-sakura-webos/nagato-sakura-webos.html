@@ -271,40 +271,344 @@
         }
 
         /* 1. 啟動加載器 */
+        /* ========== 現代化開機動畫系統 ========== */
         #boot-loader {
-            position: absolute; /* 修改 */
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: #000;
+            background: linear-gradient(135deg, #000000 0%, #0a0a1a 50%, #000510 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: var(--z-loader);
-            transition: opacity 0.5s ease-out;
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            overflow: hidden;
         }
-        #boot-logo {
-            width: 8rem;
-            height: 8rem;
-            margin-bottom: 2rem;
-            animation: pulse 2s infinite ease-in-out;
-            object-fit: contain;
+
+        #boot-loader.fade-out {
+            opacity: 0;
+            transform: scale(1.05);
         }
-        #boot-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            border-top-color: var(--primary-cyan);
+
+        /* 動態背景網格 */
+        .boot-grid-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* 粒子背景 */
+        .boot-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .boot-particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--primary-cyan);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            box-shadow: 0 0 10px var(--primary-cyan), 0 0 20px var(--primary-cyan);
+            animation: bootParticleFloat 8s infinite ease-in-out;
+            opacity: 0;
         }
-        #boot-status {
-            margin-top: 2rem;
+
+        @keyframes bootParticleFloat {
+            0%, 100% { 
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { 
+                transform: translateY(-100vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* 環形光暈背景 */
+        .boot-rings {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            pointer-events: none;
+        }
+
+        .boot-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            animation: ringPulse 4s infinite ease-out;
+        }
+
+        .boot-ring:nth-child(1) { width: 200px; height: 200px; animation-delay: 0s; }
+        .boot-ring:nth-child(2) { width: 300px; height: 300px; animation-delay: 0.5s; }
+        .boot-ring:nth-child(3) { width: 400px; height: 400px; animation-delay: 1s; }
+        .boot-ring:nth-child(4) { width: 500px; height: 500px; animation-delay: 1.5s; }
+
+        @keyframes ringPulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0;
+                border-color: rgba(0, 212, 255, 0.3);
+            }
+            50% {
+                opacity: 1;
+                border-color: rgba(0, 212, 255, 0.2);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 0;
+                border-color: rgba(0, 212, 255, 0);
+            }
+        }
+
+
+
+        /* 主要內容容器 */
+        .boot-content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Logo 容器 */
+        .boot-logo-container {
+            position: relative;
+            margin-bottom: 40px;
+            width: 180px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #boot-logo {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.5));
+            animation: logoFloat 3s ease-in-out infinite, logoGlow 2s ease-in-out infinite;
+            position: relative;
+            z-index: 2;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes logoGlow {
+            0%, 100% { filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.5)); }
+            50% { filter: drop-shadow(0 0 50px rgba(0, 212, 255, 0.8)) drop-shadow(0 0 80px rgba(255, 0, 128, 0.3)); }
+        }
+
+        /* Logo 周圍的旋轉環 - 外環 */
+        .boot-logo-ring {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: var(--primary-cyan);
+            border-right-color: rgba(0, 212, 255, 0.3);
+            box-sizing: border-box;
+            animation: logoRingSpinOuter 3s linear infinite;
+        }
+
+        /* Logo 周圍的旋轉環 - 內環 */
+        .boot-logo-ring::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-bottom-color: var(--primary-magenta);
+            border-left-color: rgba(255, 0, 128, 0.3);
+            box-sizing: border-box;
+            animation: logoRingSpinInner 2s linear infinite;
+        }
+
+        @keyframes logoRingSpinOuter {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes logoRingSpinInner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-360deg); }
+        }
+
+        /* 系統名稱 */
+        .boot-system-name {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 8px;
+            color: transparent;
+            background: linear-gradient(90deg, 
+                #00d4ff,
+                #66e0ff,
+                #ffffff,
+                #ffb6d9,
+                #ff69b4,
+                #d98cb3,
+                #a8a4ff,
+                #66b3ff,
+                #00d4ff
+            );
+            background-clip: text;
+            -webkit-background-clip: text;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            animation: textShimmer 4s ease-in-out infinite;
+            background-size: 150% auto;
+        }
+
+        @keyframes textShimmer {
+            0% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+            100% { background-position: 0% center; }
+        }
+
+        .boot-system-version {
             font-family: var(--font-body);
-            font-size: 1.2rem;
-            color: #aaa;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 4px;
+            margin-bottom: 50px;
+        }
+
+        /* 進度條容器 */
+        .boot-progress-container {
+            width: 350px;
+            margin-bottom: 30px;
+        }
+
+        .boot-progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .boot-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary-cyan), var(--primary-magenta));
+            border-radius: 2px;
+            transition: width 0.3s ease-out;
+            position: relative;
+            box-shadow: 0 0 10px var(--primary-cyan), 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .boot-progress-fill::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -3px;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary-cyan), 0 0 20px var(--primary-cyan);
+        }
+
+        .boot-progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .boot-progress-percent {
+            color: var(--primary-cyan);
+            font-family: var(--font-display);
+        }
+
+
+
+        /* 底部版權信息 */
+        .boot-footer {
+            position: absolute;
+            bottom: 30px;
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 2px;
+        }
+
+
+
+
+        /* 響應式調整 */
+        @media (max-width: 768px) {
+            .boot-system-name {
+                font-size: 1.5rem;
+                letter-spacing: 4px;
+            }
+            
+            .boot-progress-container {
+                width: 280px;
+            }
+            
+
+            
+            .boot-logo-container {
+                width: 150px;
+                height: 150px;
+            }
+            
+            #boot-logo {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .boot-rings {
+                width: 400px;
+                height: 400px;
+            }
+            
+            .boot-ring:nth-child(1) { width: 150px; height: 150px; }
+            .boot-ring:nth-child(2) { width: 220px; height: 220px; }
+            .boot-ring:nth-child(3) { width: 290px; height: 290px; }
+            .boot-ring:nth-child(4) { width: 360px; height: 360px; }
         }
 
         /* 2. 桌面 */
@@ -406,6 +710,50 @@
         .taskbar-icon:hover {
             background: rgba(255, 255, 255, 0.15);
         }
+        
+        /* 點擊反饋動畫 */
+        .taskbar-icon:active {
+            transform: scale(0.92);
+            background: rgba(255, 255, 255, 0.25);
+        }
+        
+        /* 漣漪效果容器 */
+        .taskbar-icon {
+            overflow: hidden;
+        }
+        
+        .taskbar-icon .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.4) 0%, transparent 70%);
+            transform: scale(0);
+            animation: ripple-effect 0.5s ease-out forwards;
+            pointer-events: none;
+        }
+        
+        @keyframes ripple-effect {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+        
+        /* 點擊彈跳效果 */
+        .taskbar-icon.click-bounce {
+            animation: click-bounce 0.3s ease-out;
+        }
+        
+        @keyframes click-bounce {
+            0% { transform: scale(1); }
+            30% { transform: scale(0.88); }
+            60% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
         /* Make sure FA icons and images match in size */
         .taskbar-icon i { font-size: var(--taskbar-icon-size); line-height: 1; display: inline-block; }
         .taskbar-icon img { width: var(--taskbar-icon-size); height: var(--taskbar-icon-size); display: inline-block; object-fit: contain; }
@@ -477,51 +825,79 @@
             background: linear-gradient(135deg, #e8f4f8 0%, #d4e6ed 50%, #c8dce6 100%);
         }
 
-        /* 側邊欄 */
+        /* 側邊欄 - 與設定面板風格保持一致 */
         [data-theme="light"] .cyber-sidebar {
-            background: rgba(255, 255, 255, 0.85);
-            border-left: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            border-left: 2px solid rgba(0, 153, 204, 0.3);
+            box-shadow: -3px 0 10px rgba(0, 0, 0, 0.06);
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] .cyber-sidebar h3 {
+            color: #0099cc;
+            border-bottom: 1px solid rgba(0, 153, 204, 0.3);
+        }
+
+        [data-theme="light"] .cyber-sidebar li {
             color: #333;
         }
 
         [data-theme="light"] .cyber-sidebar li:hover {
-            background: rgba(0, 160, 200, 0.1);
-            color: #000;
+            background: rgba(0, 153, 204, 0.08);
+            color: #0099cc;
         }
 
-        /* 任務欄 */
+        [data-theme="light"] .cyber-sidebar li i {
+            color: #0099cc;
+        }
+
+        /* 任務欄 - 與整體風格保持一致 */
         [data-theme="light"] #taskbar {
-            background: rgba(255, 255, 255, 0.88);
+            background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(20px) saturate(180%);
-            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            border-top: 1px solid rgba(0, 153, 204, 0.12);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04);
         }
 
         [data-theme="light"] .taskbar-icon {
-            color: #333;
+            color: #555;
         }
 
         [data-theme="light"] .taskbar-icon:hover {
-            background: rgba(0, 0, 0, 0.06);
+            background: rgba(0, 153, 204, 0.08);
+        }
+        
+        [data-theme="light"] .taskbar-icon:active {
+            background: rgba(0, 153, 204, 0.18);
+        }
+        
+        [data-theme="light"] .taskbar-icon .ripple {
+            background: radial-gradient(circle, rgba(0, 153, 204, 0.35) 0%, transparent 70%);
+        }
+
+        [data-theme="light"] #start-button {
+            color: #0099cc;
         }
 
         [data-theme="light"] #taskbar-time {
-            color: #333;
+            color: #1a1a1a;
         }
 
         [data-theme="light"] #taskbar-time:hover {
-            background: rgba(0, 0, 0, 0.06);
+            background: rgba(0, 153, 204, 0.08);
         }
 
-        /* 開始功能表 */
+        /* 開始功能表 - 與整體風格保持一致 */
         [data-theme="light"] #start-menu {
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 153, 204, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
         }
 
         [data-theme="light"] .search-bar {
-            background: rgba(0, 0, 0, 0.04);
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(0, 153, 204, 0.04);
+            border: 1px solid rgba(0, 153, 204, 0.15);
         }
 
         [data-theme="light"] .search-bar input {
@@ -533,15 +909,15 @@
         }
 
         [data-theme="light"] .search-bar i {
-            color: #666;
+            color: #0099cc;
         }
 
         [data-theme="light"] .start-section-title {
-            color: #555;
+            color: #0099cc;
         }
 
         [data-theme="light"] .app-icon:hover {
-            background: rgba(0, 0, 0, 0.06);
+            background: rgba(0, 153, 204, 0.08);
         }
 
         [data-theme="light"] .app-icon span {
@@ -549,11 +925,11 @@
         }
 
         [data-theme="light"] .recommended-item:hover {
-            background: rgba(0, 0, 0, 0.06);
+            background: rgba(0, 153, 204, 0.08);
         }
 
         [data-theme="light"] .recommended-item i {
-            color: #555;
+            color: #0099cc;
         }
 
         [data-theme="light"] .recommended-item-info {
@@ -565,26 +941,33 @@
         }
 
         [data-theme="light"] .start-menu-footer {
-            background: rgba(0, 0, 0, 0.03);
+            background: rgba(0, 153, 204, 0.03);
         }
 
         [data-theme="light"] .power-button:hover {
-            background: rgba(0, 0, 0, 0.08);
+            background: rgba(0, 153, 204, 0.1);
         }
 
-        /* 視窗 */
+        [data-theme="light"] .power-button i {
+            color: #0099cc;
+        }
+
+        /* 視窗 - 與整體風格保持一致 */
         [data-theme="light"] .window {
             background: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 153, 204, 0.15);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
         }
 
         [data-theme="light"] .window.active {
-            border-color: rgba(0, 160, 200, 0.5);
+            border-color: rgba(0, 153, 204, 0.4);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(0, 153, 204, 0.2);
         }
 
         [data-theme="light"] .window-header {
-            background: rgba(250, 250, 252, 0.95);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(250, 250, 252, 0.95));
         }
 
         [data-theme="light"] .window-title {
@@ -592,11 +975,16 @@
         }
 
         [data-theme="light"] .window-control-btn {
-            color: #333;
+            color: #555;
         }
 
         [data-theme="light"] .window-control-btn:hover {
             background: rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .window-control-btn.close:hover {
+            background: #e81123;
+            color: #fff;
         }
 
         [data-theme="light"] .window-content {
@@ -605,22 +993,22 @@
 
         [data-theme="light"] .snap-layouts {
             background: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(0, 153, 204, 0.2);
         }
 
         [data-theme="light"] .snap-layout-option {
-            border-color: #888;
-            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 153, 204, 0.3);
+            background: rgba(0, 0, 0, 0.02);
         }
 
         [data-theme="light"] .snap-layout-option:hover {
-            border-color: var(--primary-cyan);
-            background: rgba(0, 160, 200, 0.15);
+            border-color: #0099cc;
+            background: rgba(0, 153, 204, 0.12);
         }
 
-        /* 設定視窗 */
+        /* 設定視窗 (OS 內的設定應用) - 與整體風格保持一致 */
         [data-theme="light"] .settings-sidebar {
-            border-right: 1px solid rgba(0, 0, 0, 0.08);
+            border-right: 1px solid rgba(0, 153, 204, 0.15);
         }
 
         [data-theme="light"] .settings-menu-item {
@@ -628,19 +1016,25 @@
         }
 
         [data-theme="light"] .settings-menu-item:hover {
-            background: rgba(0, 0, 0, 0.04);
+            background: rgba(0, 153, 204, 0.06);
         }
 
         [data-theme="light"] .settings-menu-item.active {
-            background: rgba(0, 160, 200, 0.1);
+            background: rgba(0, 153, 204, 0.12);
+            color: #0099cc;
+        }
+
+        [data-theme="light"] .settings-menu-item i {
+            color: #0099cc;
         }
 
         [data-theme="light"] .setting-section h3 {
-            border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+            color: #0099cc;
+            border-bottom: 1px solid rgba(0, 153, 204, 0.2);
         }
 
         [data-theme="light"] .setting-item {
-            background: rgba(0, 0, 0, 0.02);
+            background: rgba(0, 153, 204, 0.02);
         }
 
         [data-theme="light"] .setting-item-label {
@@ -651,18 +1045,43 @@
             color: #666;
         }
 
-        /* 檔案總管 */
+        /* 設定子頁面 (如夜間光線設定) - 淺色模式 */
+        [data-theme="light"] .settings-subpage h3 {
+            color: #1a1a1a;
+        }
+
+        [data-theme="light"] #nightlight-back {
+            border-color: rgba(0, 153, 204, 0.2) !important;
+            color: #0099cc !important;
+        }
+
+        [data-theme="light"] #nightlight-back:hover {
+            background: rgba(0, 153, 204, 0.08) !important;
+        }
+
+        [data-theme="light"] #personalization_background_back,
+        [data-theme="light"] #personalization_font_back {
+            border-color: rgba(0, 153, 204, 0.2) !important;
+            color: #0099cc !important;
+        }
+
+        [data-theme="light"] #personalization_background_back:hover,
+        [data-theme="light"] #personalization_font_back:hover {
+            background: rgba(0, 153, 204, 0.08) !important;
+        }
+
+        /* 檔案總管 - 與整體風格保持一致 */
         [data-theme="light"] .explorer-content {
             background: #fafafa;
         }
 
         [data-theme="light"] .explorer-sidebar {
-            background: rgba(0, 0, 0, 0.02);
-            border-right: 1px solid rgba(0, 0, 0, 0.08);
+            background: rgba(0, 153, 204, 0.02);
+            border-right: 1px solid rgba(0, 153, 204, 0.12);
         }
 
         [data-theme="light"] .explorer-sidebar h4 {
-            color: #555;
+            color: #0099cc;
         }
 
         [data-theme="light"] .explorer-item {
@@ -670,45 +1089,45 @@
         }
 
         [data-theme="light"] .explorer-item:hover {
-            background: rgba(0, 0, 0, 0.04);
+            background: rgba(0, 153, 204, 0.08);
         }
 
         [data-theme="light"] .explorer-item i {
-            color: #555;
+            color: #0099cc;
         }
 
         [data-theme="light"] .folder-icon span {
             color: #1a1a1a;
         }
 
-        /* 瀏覽器 */
+        /* 瀏覽器 - 與整體風格保持一致 */
         [data-theme="light"] .browser-toolbar {
-            background: rgba(0, 0, 0, 0.03);
+            background: rgba(0, 153, 204, 0.03);
         }
 
         [data-theme="light"] .browser-toolbar input {
-            background: rgba(0, 0, 0, 0.04);
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 153, 204, 0.15);
             color: #1a1a1a;
         }
 
         [data-theme="light"] .browser-toolbar i {
-            color: #555;
+            color: #0099cc;
         }
 
         [data-theme="light"] .favorites-bar {
-            background: rgba(0, 0, 0, 0.02);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            background: rgba(0, 153, 204, 0.02);
+            border-bottom: 1px solid rgba(0, 153, 204, 0.1);
         }
 
         [data-theme="light"] .fav-item {
-            background: rgba(0, 0, 0, 0.03);
-            border: 1px solid rgba(0, 0, 0, 0.06);
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 153, 204, 0.1);
             color: #333;
         }
 
         [data-theme="light"] .fav-item:hover {
-            background: rgba(0, 0, 0, 0.06);
+            background: rgba(0, 153, 204, 0.08);
         }
 
         [data-theme="light"] .fav-item .title {
@@ -716,32 +1135,32 @@
         }
 
         [data-theme="light"] #win-edge > .tool > input.url {
-            background: rgba(0, 0, 0, 0.04);
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 153, 204, 0.15);
             color: #1a1a1a;
         }
 
         [data-theme="light"] #win-edge > .tool > .a {
-            color: #333;
+            color: #0099cc;
         }
 
         [data-theme="light"] #win-edge > .tool > .a:hover {
-            background-color: rgba(0, 0, 0, 0.06);
+            background-color: rgba(0, 153, 204, 0.08);
         }
 
-        /* 日曆彈窗 */
+        /* 日曆彈窗 - 與整體風格保持一致 */
         [data-theme="light"] #calendar-flyout {
             background: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 153, 204, 0.15);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
         }
 
         [data-theme="light"] .calendar-header span {
-            color: #1a1a1a;
+            color: #0099cc;
         }
 
         [data-theme="light"] .calendar-nav button {
-            color: #333;
+            color: #0099cc;
         }
 
         [data-theme="light"] .calendar-cell {
@@ -749,45 +1168,152 @@
         }
 
         [data-theme="light"] .calendar-cell.day-name {
-            color: #666;
+            color: #0099cc;
         }
 
         [data-theme="light"] .calendar-cell.other-month {
-            color: #aaa;
+            color: rgba(150, 150, 150, 0.5);
+        }
+
+        [data-theme="light"] .calendar-cell.other-month:hover {
+            background: rgba(0, 153, 204, 0.05);
         }
 
         [data-theme="light"] .calendar-cell.today {
-            background: var(--primary-cyan);
+            background: #0099cc;
             color: #fff;
         }
 
         [data-theme="light"] .calendar-cell:not(.day-name):not(.today):hover {
-            background: rgba(0, 0, 0, 0.06);
+            background: rgba(0, 153, 204, 0.1);
         }
 
-        /* 小工具面板 */
+        /* 小工具面板 - 與整體風格保持一致 */
         [data-theme="light"] #widgets-panel {
             background: rgba(255, 255, 255, 0.95);
-            border-right: 1px solid rgba(0, 0, 0, 0.1);
-            box-shadow: 5px 0 30px rgba(0, 0, 0, 0.1);
+            border-right: 1px solid rgba(0, 153, 204, 0.2);
+            box-shadow: 5px 0 30px rgba(0, 0, 0, 0.08);
         }
 
         [data-theme="light"] .widget {
-            background: rgba(0, 0, 0, 0.03);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.9));
+            border: 1px solid rgba(0, 153, 204, 0.2);
+        }
+        
+        [data-theme="light"] .widget::before {
+            background: linear-gradient(90deg, transparent, rgba(0, 153, 204, 0.4), transparent);
+        }
+        
+        [data-theme="light"] .widget::after {
+            background: linear-gradient(180deg, rgba(0, 153, 204, 0.2), transparent);
+        }
+        
+        [data-theme="light"] .widget:hover {
+            border-color: rgba(0, 153, 204, 0.4);
+            box-shadow: 0 4px 20px rgba(0, 153, 204, 0.15);
         }
 
         [data-theme="light"] .widget-header {
+            color: #0099cc;
+        }
+        
+        /* Light theme: 小工具面板標題列 */
+        [data-theme="light"] .widgets-panel-header {
+            background: rgba(0, 153, 204, 0.08);
+            border-bottom: 1px solid rgba(0, 153, 204, 0.15);
+        }
+        
+        [data-theme="light"] .widgets-panel-title {
+            color: #0088bb;
+        }
+        
+        [data-theme="light"] .widgets-panel-btn {
+            background: rgba(0, 153, 204, 0.1);
+            color: #555;
+        }
+        
+        [data-theme="light"] .widgets-panel-btn:hover {
+            background: rgba(0, 153, 204, 0.2);
+            color: #0088bb;
+        }
+        
+        /* Light theme: Metro 區域 */
+        [data-theme="light"] .metro-header {
             color: #1a1a1a;
+        }
+        
+        [data-theme="light"] .metro-tile {
+            background: linear-gradient(135deg, rgba(0, 153, 204, 0.2), rgba(0, 120, 180, 0.15));
+            border: 1px solid rgba(0, 153, 204, 0.2);
+        }
+        
+        [data-theme="light"] .metro-tile:hover {
+            box-shadow: 0 8px 25px rgba(0, 153, 204, 0.25);
+        }
+        
+        [data-theme="light"] .metro-tile-icon {
+            color: #333;
+            text-shadow: none;
+        }
+        
+        [data-theme="light"] .metro-tile-label {
+            color: rgba(0, 0, 0, 0.8);
+            text-shadow: none;
+        }
+        
+        [data-theme="light"] .metro-category-title {
+            color: rgba(0, 0, 0, 0.5);
+        }
+        
+        [data-theme="light"] .metro-tile.tile-cyan {
+            background: linear-gradient(135deg, rgba(0, 153, 204, 0.35), rgba(0, 130, 180, 0.25));
+        }
+        
+        [data-theme="light"] .metro-tile.tile-magenta {
+            background: linear-gradient(135deg, rgba(233, 30, 99, 0.35), rgba(200, 25, 80, 0.25));
+        }
+        
+        [data-theme="light"] .metro-tile.tile-green {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.35), rgba(60, 140, 65, 0.25));
+        }
+        
+        [data-theme="light"] .metro-tile.tile-purple {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(110, 70, 200, 0.25));
+        }
+        
+        [data-theme="light"] .metro-tile.tile-orange {
+            background: linear-gradient(135deg, rgba(255, 152, 0, 0.35), rgba(220, 130, 0, 0.25));
+        }
+        
+        [data-theme="light"] .metro-tile.tile-blue {
+            background: linear-gradient(135deg, rgba(33, 150, 243, 0.35), rgba(25, 118, 200, 0.25));
+        }
+        
+        [data-theme="light"] .metro-tile.tile-red {
+            background: linear-gradient(135deg, rgba(244, 67, 54, 0.35), rgba(200, 50, 40, 0.25));
         }
 
         [data-theme="light"] .weather-controls input[type="text"] {
-            background: rgba(0, 0, 0, 0.03);
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(0, 153, 204, 0.05);
+            border: 1px solid rgba(0, 153, 204, 0.2);
             color: #1a1a1a;
         }
 
         [data-theme="light"] .weather-controls button {
-            color: #333;
+            background: rgba(0, 153, 204, 0.08);
+            border: 1px solid rgba(0, 153, 204, 0.2);
+            color: #0099cc;
+        }
+        
+        [data-theme="light"] .weather-controls button:hover {
+            background: rgba(0, 153, 204, 0.15);
+        }
+
+        [data-theme="light"] .weather-info .temp {
+            background: linear-gradient(135deg, #1a1a1a, #0099cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         [data-theme="light"] .weather-info .desc {
@@ -795,15 +1321,42 @@
         }
 
         [data-theme="light"] .weather-info .meta {
-            color: #666;
+            color: rgba(0, 153, 204, 0.7);
+        }
+        
+        [data-theme="light"] .weather-visual #weather-icon {
+            color: #0099cc;
+            filter: drop-shadow(0 0 8px rgba(0, 153, 204, 0.3));
         }
 
         [data-theme="light"] .weather-forecast .forecast-item {
-            background: rgba(0, 0, 0, 0.03);
+            background: linear-gradient(135deg, rgba(0, 153, 204, 0.08), rgba(0, 153, 204, 0.02));
+            border: 1px solid rgba(0, 153, 204, 0.15);
+        }
+        
+        [data-theme="light"] .weather-forecast .forecast-item:hover {
+            border-color: rgba(0, 153, 204, 0.35);
         }
 
         [data-theme="light"] .weather-forecast .forecast-item .date {
-            color: #666;
+            color: rgba(0, 153, 204, 0.7);
+        }
+        
+        [data-theme="light"] .weather-forecast .forecast-item i {
+            color: #0099cc;
+        }
+        
+        [data-theme="light"] .news-item {
+            background: linear-gradient(135deg, rgba(0, 153, 204, 0.05), transparent);
+            border: 1px solid rgba(0, 153, 204, 0.1);
+        }
+        
+        [data-theme="light"] .news-item:hover {
+            border-color: rgba(0, 153, 204, 0.25);
+        }
+        
+        [data-theme="light"] .news-item img {
+            border-color: rgba(0, 153, 204, 0.2);
         }
 
         [data-theme="light"] .news-item-info {
@@ -811,14 +1364,88 @@
         }
 
         [data-theme="light"] .news-item-info span {
-            color: #666;
+            color: rgba(0, 153, 204, 0.7);
+        }
+        
+        /* Light theme: 效能監控小工具 */
+        [data-theme="light"] .perf-section {
+            background: linear-gradient(135deg, rgba(0, 153, 204, 0.05), transparent);
+            border: 1px solid rgba(0, 153, 204, 0.1);
+        }
+        
+        [data-theme="light"] .perf-section:hover {
+            border-color: rgba(0, 153, 204, 0.2);
+        }
+        
+        [data-theme="light"] .perf-label-title {
+            color: rgba(0, 153, 204, 0.8);
+        }
+        
+        [data-theme="light"] .perf-label-title i {
+            color: #0099cc;
+        }
+        
+        [data-theme="light"] .perf-label-value {
+            color: #1a1a1a;
+        }
+        
+        [data-theme="light"] .perf-bar {
+            background: rgba(0, 153, 204, 0.1);
+        }
+        
+        [data-theme="light"] .perf-stats {
+            border-top-color: rgba(0, 153, 204, 0.15);
+        }
+        
+        [data-theme="light"] .perf-stat-item {
+            background: linear-gradient(135deg, rgba(0, 153, 204, 0.05), transparent);
+            border: 1px solid rgba(0, 153, 204, 0.08);
+        }
+        
+        [data-theme="light"] .perf-stat-label {
+            color: rgba(0, 153, 204, 0.7);
+        }
+        
+        [data-theme="light"] .perf-stat-value {
+            color: #1a1a1a;
+        }
+        
+        /* Light theme: 小工具全螢幕模式 */
+        [data-theme="light"] #widgets-panel.fullscreen {
+            background: rgba(245, 250, 255, 0.98);
+        }
+        
+        [data-theme="light"] #widgets-panel.fullscreen .widgets-panel-header {
+            background: rgba(0, 153, 204, 0.1);
+            border-bottom: 1px solid rgba(0, 153, 204, 0.15);
+        }
+        
+        [data-theme="light"] #widgets-panel.fullscreen .widgets-content {
+            border-right: 1px solid rgba(0, 153, 204, 0.15);
+            background: transparent;
+        }
+        
+        [data-theme="light"] #widgets-panel.fullscreen .metro-area {
+            background: transparent;
+        }
+        
+        [data-theme="light"] #widgets-panel.fullscreen .metro-header {
+            color: #1a1a1a;
+        }
+        
+        [data-theme="light"] .widgets-content::-webkit-scrollbar-thumb {
+            background: rgba(0, 153, 204, 0.3);
+        }
+        
+        [data-theme="light"] .widgets-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 153, 204, 0.5);
         }
 
-        /* 右鍵選單 */
+        /* 右鍵選單 - 與整體風格保持一致 */
         [data-theme="light"] #context-menu {
             background: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(0, 0, 0, 0.12);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(0, 153, 204, 0.15);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         [data-theme="light"] .context-menu-item {
@@ -826,68 +1453,72 @@
         }
 
         [data-theme="light"] .context-menu-item:hover {
-            background: rgba(0, 160, 200, 0.12);
+            background: rgba(0, 153, 204, 0.1);
         }
 
         [data-theme="light"] .context-menu-item i {
-            color: #555;
+            color: #0099cc;
         }
 
         [data-theme="light"] .context-menu-separator {
-            background: rgba(0, 0, 0, 0.1);
+            background: rgba(0, 153, 204, 0.15);
         }
 
         [data-theme="light"] #start-context-menu {
             background: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(0, 0, 0, 0.12);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(0, 153, 204, 0.15);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
-        /* 對話/聊天區域 */
+        /* 對話/聊天區域 - 與整體風格保持一致 */
         [data-theme="light"] .nagato-messages {
-            background: rgba(0, 0, 0, 0.02);
+            background: rgba(0, 153, 204, 0.02);
         }
 
         [data-theme="light"] .message.ai {
-            background: rgba(0, 0, 0, 0.05);
+            background: rgba(0, 153, 204, 0.08);
             color: #1a1a1a;
         }
 
         [data-theme="light"] .message.user {
-            background: var(--primary-cyan);
+            background: #0099cc;
             color: #fff;
         }
 
         [data-theme="light"] .message-suggestions .suggestion-btn {
-            background: rgba(0, 0, 0, 0.04);
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(0, 153, 204, 0.05);
+            border: 1px solid rgba(0, 153, 204, 0.15);
             color: #333;
         }
 
         [data-theme="light"] .message-suggestions .suggestion-btn:hover {
-            background: rgba(0, 0, 0, 0.08);
+            background: rgba(0, 153, 204, 0.12);
         }
 
         [data-theme="light"] .nagato-input-area {
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            border-top: 1px solid rgba(0, 153, 204, 0.15);
         }
 
         [data-theme="light"] .nagato-input-area textarea {
-            background: rgba(0, 0, 0, 0.03);
-            border: 1px solid rgba(0, 0, 0, 0.15);
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 153, 204, 0.2);
             color: #1a1a1a;
+        }
+
+        [data-theme="light"] .nagato-input-area textarea:focus {
+            border-color: rgba(0, 153, 204, 0.5);
         }
 
         [data-theme="light"] .nagato-input-area .clear-btn {
-            color: #555;
+            color: #0099cc;
         }
 
         [data-theme="light"] .nagato-input-area .clear-btn:hover {
-            background: rgba(0, 0, 0, 0.06);
-            color: #1a1a1a;
+            background: rgba(0, 153, 204, 0.1);
+            color: #0099cc;
         }
 
-        /* 計算機 */
+        /* 計算機 - 與整體風格保持一致 */
         [data-theme="light"] #win-calc {
             background: #fafafa;
         }
@@ -898,17 +1529,19 @@
 
         [data-theme="light"] #win-calc > .keyb > .b {
             background: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.04));
-            border: 1px solid rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 153, 204, 0.1);
             color: #1a1a1a;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.06);
         }
 
         [data-theme="light"] #win-calc > .keyb > .b:hover {
-            box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+            box-shadow: 0 6px 12px rgba(0, 153, 204, 0.15);
+            border-color: rgba(0, 153, 204, 0.3);
         }
 
         [data-theme="light"] #win-calc > .keyb > .b.u {
-            background: linear-gradient(180deg, rgba(0,160,200,0.08), rgba(0,160,200,0.04));
+            background: linear-gradient(180deg, rgba(0,153,204,0.12), rgba(0,153,204,0.06));
+            color: #0099cc;
         }
 
         /* 桌面圖示 - 只調整 hover 背景和文字陰影，圖示顏色保持與開始菜單一致 */
@@ -921,29 +1554,29 @@
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
         }
 
-        /* 滾動條 */
+        /* 滾動條 - 與整體風格保持一致 */
         [data-theme="light"] ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
         }
 
         [data-theme="light"] ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.03);
+            background: rgba(0, 153, 204, 0.03);
         }
 
         [data-theme="light"] ::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.15);
+            background: rgba(0, 153, 204, 0.2);
             border-radius: 4px;
         }
 
         [data-theme="light"] ::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 0, 0, 0.25);
+            background: rgba(0, 153, 204, 0.35);
         }
 
-        /* 關於頁面 */
+        /* 關於頁面 - 與整體風格保持一致 */
         [data-theme="light"] .about-item {
-            background: rgba(0, 0, 0, 0.02);
-            border: 1px solid rgba(0, 0, 0, 0.06);
+            background: rgba(0, 153, 204, 0.02);
+            border: 1px solid rgba(0, 153, 204, 0.1);
         }
 
         [data-theme="light"] .about-item-row {
@@ -951,124 +1584,261 @@
         }
 
         [data-theme="light"] .btn {
-            background: rgba(0, 0, 0, 0.03);
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(0, 153, 204, 0.05);
+            border: 1px solid rgba(0, 153, 204, 0.2);
             color: #1a1a1a;
         }
 
         [data-theme="light"] .btn:hover {
-            background: rgba(0, 0, 0, 0.06);
+            background: rgba(0, 153, 204, 0.12);
+            border-color: rgba(0, 153, 204, 0.4);
         }
 
-        /* 更新頁面 */
+        /* 更新頁面 - 與整體風格保持一致 */
         [data-theme="light"] .update-item {
-            background: rgba(0, 0, 0, 0.02);
-            border: 1px solid rgba(0, 0, 0, 0.06);
+            background: rgba(0, 153, 204, 0.02);
+            border: 1px solid rgba(0, 153, 204, 0.1);
         }
 
-        /* Snap 預覽 */
+        /* Snap 預覽 - 與整體風格保持一致 */
         [data-theme="light"] #snap-preview {
-            background: rgba(0, 160, 200, 0.1);
-            border: 2px dashed rgba(0, 160, 200, 0.4);
+            background: rgba(0, 153, 204, 0.1);
+            border: 2px dashed rgba(0, 153, 204, 0.4);
         }
 
         /* 使用者頭像 */
         [data-theme="light"] .user-profile img.avatar {
-            border: 2px solid rgba(0, 0, 0, 0.08);
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(0, 153, 204, 0.15);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
         }
 
-        /* 切換開關 */
-        [data-theme="light"] .toggle-switch {
-            background: rgba(0, 0, 0, 0.15);
-        }
-
-        [data-theme="light"] .toggle-switch.active {
-            background: var(--primary-cyan);
-        }
-
-        /* 選擇控制項 */
+        /* 選擇控制項 - 與全域 components.css 保持一致 */
         [data-theme="light"] .select-control select {
-            background: rgba(0, 0, 0, 0.03);
-            border: 1px solid rgba(0, 0, 0, 0.12);
-            color: #1a1a1a;
+            background: rgba(0, 153, 204, 0.05);
+            border: 1px solid rgba(0, 153, 204, 0.3);
+            color: rgba(0, 153, 204, 0.9);
         }
 
-        /* 滑桿控制項 */
-        [data-theme="light"] .slider-range {
-            background: rgba(0, 0, 0, 0.1);
+        [data-theme="light"] .select-control select:hover {
+            background: rgba(0, 153, 204, 0.08);
+            box-shadow: none;
         }
 
+        [data-theme="light"] .select-control select:focus {
+            border-color: rgba(204, 0, 102, 0.5);
+            box-shadow: none;
+        }
+
+        [data-theme="light"] .select-control select option {
+            background: rgba(255, 255, 255, 0.95);
+            color: rgba(51, 51, 51, 0.95);
+        }
+
+        [data-theme="light"] .select-control::after {
+            color: #0099cc;
+        }
+
+        /* 滑桿控制項 - 與全域 components.css 保持一致 */
         [data-theme="light"] .slider-value {
-            color: #1a1a1a;
+            color: rgba(0, 153, 204, 0.9);
         }
 
         [data-theme="light"] .slider-marks span {
-            color: #666;
+            color: rgba(0, 153, 204, 0.4);
         }
 
-        /* 輸入框 */
+        [data-theme="light"] .slider-marks span:hover {
+            color: #0099cc;
+            text-shadow: none;
+        }
+
+        [data-theme="light"] .slider-range {
+            background: rgba(0, 153, 204, 0.1);
+        }
+
+        [data-theme="light"] .slider-range::-webkit-slider-thumb {
+            background: rgba(0, 153, 204, 0.85);
+            box-shadow: none;
+        }
+
+        [data-theme="light"] .slider-range::-webkit-slider-thumb:hover {
+            box-shadow: none;
+        }
+
+        [data-theme="light"] .slider-range::-moz-range-thumb {
+            background: rgba(0, 153, 204, 0.85);
+            box-shadow: none;
+        }
+
+        [data-theme="light"] .slider-range::-moz-range-thumb:hover {
+            box-shadow: none;
+        }
+
+        /* 輸入框 - 與整體風格保持一致 */
         [data-theme="light"] input[type="color"] {
             background: rgba(0, 0, 0, 0.03);
-            border: 1px solid rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(0, 153, 204, 0.2);
         }
 
         [data-theme="light"] input[type="text"],
         [data-theme="light"] input[type="url"],
         [data-theme="light"] input[type="number"] {
             background: rgba(0, 0, 0, 0.03);
-            border: 1px solid rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(0, 153, 204, 0.2);
             color: #1a1a1a;
         }
 
-        /* 設定面板 (主頁面側邊設定) */
+        [data-theme="light"] input[type="text"]:focus,
+        [data-theme="light"] input[type="url"]:focus,
+        [data-theme="light"] input[type="number"]:focus {
+            border-color: rgba(0, 153, 204, 0.5);
+            outline: none;
+        }
+
+        /* 設定面板 (主頁面側邊設定) - 與全域 components.css 保持一致 */
         [data-theme="light"] .settings-panel {
-            background: rgba(255, 255, 255, 0.95);
-            border-left: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            border-left: 2px solid rgba(204, 0, 102, 0.4);
+            box-shadow: -3px 0 10px rgba(0, 0, 0, 0.06);
         }
 
-        [data-theme="light"] .settings-panel h2 {
-            color: #1a1a1a;
-        }
-
-        [data-theme="light"] .settings-section {
-            background: rgba(0, 0, 0, 0.02);
-            border: 1px solid rgba(0, 0, 0, 0.06);
+        [data-theme="light"] .settings-title {
+            color: #cc0066;
+            text-shadow: none;
         }
 
         [data-theme="light"] .settings-section-title {
-            color: #1a1a1a;
+            color: #0099cc;
+            text-shadow: none;
         }
 
-        [data-theme="light"] .setting-label span:first-child {
+        [data-theme="light"] .setting-label {
             color: #1a1a1a;
         }
 
         [data-theme="light"] .setting-description {
-            color: #666;
+            color: #666666;
         }
 
-        /* FPS 監控 */
+        [data-theme="light"] .setting-item {
+            background: rgba(0, 153, 204, 0.02);
+            border: 1px solid rgba(0, 153, 204, 0.15);
+        }
+
+        [data-theme="light"] .setting-item:hover {
+            background: rgba(0, 153, 204, 0.05);
+            border-color: rgba(0, 153, 204, 0.4);
+            box-shadow: none;
+        }
+
+        /* 淺色模式 Toggle Switch - 與全域保持一致 */
+        [data-theme="light"] .toggle-switch {
+            background: rgba(200, 200, 200, 0.2);
+            border: 2px solid rgba(0, 153, 204, 0.25);
+        }
+
+        [data-theme="light"] .toggle-switch::before {
+            background: rgba(153, 153, 153, 0.7);
+        }
+
+        [data-theme="light"] .toggle-switch.active {
+            background: linear-gradient(135deg, rgba(0, 153, 204, 0.12), rgba(204, 0, 102, 0.12));
+            border-color: rgba(0, 153, 204, 0.5);
+            box-shadow: none;
+        }
+
+        [data-theme="light"] .toggle-switch.active::before {
+            background: rgba(0, 153, 204, 0.8);
+            box-shadow: none;
+        }
+
+        /* 淺色模式設定按鈕 - 與全域保持一致 */
+        [data-theme="light"] .settings-toggle::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230099cc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E");
+            filter: none;
+        }
+
+        [data-theme="light"] .settings-toggle:hover::before {
+            filter: none;
+        }
+
+        /* 淺色模式漢堡選單 - 與全域保持一致 */
+        [data-theme="light"] .menu-toggle span {
+            background: #0099cc;
+        }
+
+        /* 淺色模式遮罩 - 與全域保持一致 */
+        [data-theme="light"] .nav-overlay {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(3px);
+        }
+
+        /* FPS 監控 - 與全域 components.css 保持一致 */
         [data-theme="light"] .fps-display {
-            color: #1a1a1a;
+            background: rgba(0, 153, 204, 0.08);
+            border-color: rgba(0, 153, 204, 0.3);
         }
 
-        /* 頁眉 */
+        [data-theme="light"] .fps-value {
+            color: #0099cc;
+            text-shadow: none;
+        }
+
+        [data-theme="light"] .fps-value.fps-excellent {
+            color: #00aa66;
+            text-shadow: none;
+        }
+
+        [data-theme="light"] .fps-value.fps-good {
+            color: #0099cc;
+            text-shadow: none;
+        }
+
+        [data-theme="light"] .fps-value.fps-moderate {
+            color: #cc8800;
+            text-shadow: none;
+        }
+
+        [data-theme="light"] .fps-value.fps-poor {
+            color: #cc3333;
+            text-shadow: none;
+        }
+
+        [data-theme="light"] .fps-unit {
+            color: rgba(26, 26, 26, 0.5);
+        }
+
+        /* 頁眉 - 與全域 components.css 保持一致 */
         [data-theme="light"] header {
-            background: rgba(255, 255, 255, 0.9);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(240, 240, 245, 0.96));
+            box-shadow: 
+                0 8px 20px rgba(0, 153, 204, 0.08),
+                0 4px 12px rgba(204, 0, 102, 0.06),
+                inset 0 1px 0px rgba(0, 153, 204, 0.1);
         }
 
         [data-theme="light"] header a {
-            color: var(--primary-cyan);
+            color: #0099cc !important;
+            text-shadow: none;
+        }
+
+        [data-theme="light"] header a:hover {
+            color: #cc0066 !important;
+            text-shadow: none;
+        }
+
+        /* 淺色模式 Header 掃描動畫 */
+        [data-theme="light"] header::before {
+            background: linear-gradient(90deg, transparent, rgba(0, 153, 204, 0.03), transparent);
         }
 
         [data-theme="light"] .nav-links a {
-            color: #333;
+            color: #0099cc;
         }
 
         [data-theme="light"] .nav-links a:hover {
-            color: var(--primary-cyan);
+            color: #cc0066;
         }
 
         /* ========== 淺色模式結束 ========== */
@@ -1418,21 +2188,22 @@
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .calendar-header span { font-family: var(--font-body); font-size: 1.1rem; font-weight: 500; }
         .calendar-nav button { background: none; border: none; color: #f0f0f0; font-size: 1.2rem; cursor: pointer; padding: 5px; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-        .calendar-cell { text-align: center; padding: 8px; font-size: 0.85rem; border-radius: 50%; cursor: pointer; }
-        .calendar-cell.day-name { font-weight: 600; color: #aaa; font-size: 0.75rem; cursor: default; }
-        .calendar-cell.other-month { color: #666; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: auto repeat(6, 1fr); gap: 5px; }
+        .calendar-cell { text-align: center; padding: 8px; font-size: 0.85rem; border-radius: 50%; cursor: pointer; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
+        .calendar-cell.day-name { font-weight: 600; color: #aaa; font-size: 0.75rem; cursor: default; aspect-ratio: auto; }
+        .calendar-cell.other-month { color: rgba(150, 150, 150, 0.5); }
+        .calendar-cell.other-month:hover { background: rgba(255, 255, 255, 0.05); }
         .calendar-cell.today { background: var(--primary-cyan); color: #000; font-weight: 700; }
-        .calendar-cell:not(.day-name):not(.today):hover { background: rgba(255, 255, 255, 0.1); }
+        .calendar-cell:not(.day-name):not(.today):not(.other-month):hover { background: rgba(255, 255, 255, 0.1); }
 
 
         /* 8. 小工具面板 (Widgets) */
         #widgets-panel {
-            position: absolute; /* 修改 */
+            position: absolute;
             top: 0;
             left: 0;
             width: 360px;
-            height: 100%;
+            height: calc(100% - var(--taskbar-height));
             
             background: var(--mica-bg-dark);
             backdrop-filter: blur(var(--mica-blur)) saturate(180%);
@@ -1441,39 +2212,893 @@
             box-shadow: 5px 0 30px rgba(0, 0, 0, 0.3);
             
             z-index: var(--z-widgets);
-            padding: 20px;
-            padding-top: 50px;
-            overflow-y: auto;
+            padding: 0; /* 移除 padding，由子元素處理 */
+            padding-top: 50px; /* 僅標題列空間 */
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
             
             transform: translateX(-100%);
-            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                        width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, width;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
         #widgets-panel.show { transform: translateX(0); }
-        .widget { background: var(--mica-bg-light); border-radius: var(--window-border-radius); padding: 15px; margin-bottom: 20px; }
-        .widget-header { font-family: var(--font-body); font-size: 1.1rem; font-weight: 500; margin-bottom: 10px; }
-        .weather-widget { display: block; align-items: center; }
-        .weather-controls { display:flex; gap:8px; margin-bottom:10px; }
-        .weather-controls input[type="text"]{ flex:1; padding:8px 10px; border-radius:8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); color: #fff; outline:none; }
-        .weather-controls button{ background:transparent; border:none; color:var(--text); padding:6px 8px; border-radius:8px; cursor:pointer; }
-        .weather-controls button[disabled]{ opacity: 0.6; cursor:not-allowed; }
-        .weather-main{ display:flex; align-items:center; gap:12px; }
-        .weather-visual #weather-icon { font-size: 3.2rem; color: var(--primary-yellow); }
-        .weather-visual img{ width:56px; height:56px; object-fit:cover; border-radius:6px; }
-        .weather-info .temp { font-size: 2rem; font-weight: 700; }
-        .weather-info .desc { font-size: 0.9rem; color: #ccc; }
-        .weather-info .meta { font-size: 0.8rem; color: #aaa; margin-top:4px; }
-        .weather-forecast { display:flex; gap:8px; margin-top:12px; align-items:center; overflow-x:auto; }
-        .weather-forecast .forecast-item { background: rgba(255,255,255,0.02); padding:8px; border-radius:6px; min-width:90px; text-align:center; }
-        .weather-forecast .forecast-item .date{ font-size:0.8rem; color:#aaa; }
-        .weather-forecast .forecast-item .temp{ font-weight:700; }
-        .weather-info .temp { font-size: 2rem; font-weight: 700; }
-        .weather-info .desc { font-size: 0.9rem; color: #ccc; }
-        .news-item { display: flex; margin-bottom: 15px; }
-        .news-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; margin-right: 10px; }
-        .news-item-info { font-size: 0.85rem; }
-        .news-item-info span { font-size: 0.75rem; color: #aaa; }
-
-        /* ------------------------------------------------------------------ */
+        
+        /* 小工具面板標題列 */
+        .widgets-panel-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 360px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 10;
+            box-sizing: border-box;
+            transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1); /* 標題列寬度跟隨面板動畫 */
+        }
+        
+        .widgets-panel-title {
+            font-family: var(--font-body);
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--primary-cyan);
+        }
+        
+        .widgets-panel-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .widgets-panel-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #ccc;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .widgets-panel-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--primary-cyan);
+        }
+        
+        /* 全螢幕 Metro 模式 - 作為新桌面，z-index 高於桌面但低於所有視窗 */
+        #widgets-panel.fullscreen {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            z-index: calc(var(--z-window-base) - 1); /* 高於桌面，但低於所有視窗(1000+) */
+            padding: 0; /* 移除 padding，由子元素處理 */
+            padding-top: 50px; /* 只保留標題列空間 */
+            overflow: hidden;
+        }
+        
+        #widgets-panel.fullscreen .widgets-panel-header {
+            width: 100%; /* 全螢幕時標題列擴展 */
+            background: rgba(0, 0, 0, 0.4);
+            z-index: calc(var(--z-taskbar) + 1);
+        }
+        
+        /* 全螢幕模式下顯示收合按鈕 */
+        #widgets-panel.fullscreen #widgets-collapse-btn {
+            display: flex !important;
+        }
+        
+        /* 小工具內容區域 - 基礎樣式 */
+        .widgets-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 15px 20px 20px 20px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+        }
+        
+        .widgets-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .widgets-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .widgets-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+        
+        .widgets-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* 小工具內容區域 - 全螢幕模式 */
+        #widgets-panel.fullscreen .widgets-content {
+            width: 360px;
+            min-width: 360px;
+            max-width: 360px; /* 固定最大寬度 */
+            flex: 0 0 360px; /* 不擴展、不收縮、固定 360px */
+            padding: 15px 20px 20px 20px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-sizing: border-box;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        flex 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        padding 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.3s ease,
+                        border 0.3s ease;
+        }
+        
+        /* 全螢幕模式下小工具保持原有尺寸 */
+        #widgets-panel.fullscreen .widget {
+            /* 保持與非全螢幕時相同的尺寸和樣式 */
+            max-width: none;
+            width: auto;
+            flex-shrink: 0; /* 確保不被壓縮 */
+            transition: box-shadow 0.2s ease, opacity 0.2s ease, border 0.2s ease, height 0.3s ease; /* 移除 transform transition 避免退出動畫時變形 */
+        }
+        
+        /* 全螢幕收合狀態 - 隱藏小工具區域 */
+        #widgets-panel.fullscreen.collapsed .widgets-content {
+            width: 0;
+            min-width: 0;
+            max-width: 0;
+            flex: 0 0 0;
+            padding: 0;
+            opacity: 0;
+            overflow: hidden;
+            border-right: none;
+        }
+        
+        /* Metro 區域 */
+        .metro-area {
+            flex: 1;
+            padding: 20px 30px;
+            overflow-y: auto;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            position: absolute;
+            left: 360px;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            transition: none; /* 退出時立即隱藏，無動畫 */
+        }
+        
+        #widgets-panel.fullscreen .metro-area {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+            position: relative;
+            left: auto;
+            right: auto;
+            transition: opacity 0.3s ease 0.1s, visibility 0s linear 0s, flex 0.3s ease; /* 進入時延遲淡入 */
+        }
+        
+        /* 收合時 Metro 區域自動擴展填充空間 */
+        #widgets-panel.fullscreen.collapsed .metro-area {
+            flex: 1;
+            width: 100%;
+        }
+        
+        /* 收合按鈕圖示旋轉 */
+        #widgets-panel.fullscreen.collapsed #widgets-collapse-btn i {
+            transform: rotate(180deg);
+        }
+        
+        #widgets-collapse-btn i {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .metro-header {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .metro-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            max-width: 1200px;
+        }
+        
+        /* Metro 磚塊 */
+        .metro-tile {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(255, 0, 128, 0.1));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .metro-tile::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .metro-tile:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        }
+        
+        .metro-tile:hover::before {
+            opacity: 1;
+        }
+        
+        .metro-tile:active {
+            transform: scale(0.98);
+        }
+        
+        .metro-tile-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .metro-tile-icon img {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.3));
+        }
+        
+        .metro-tile-label {
+            font-family: var(--font-ui);
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            padding: 0 8px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* 不同大小的磚塊 */
+        .metro-tile.wide {
+            grid-column: span 2;
+            aspect-ratio: 2/1;
+        }
+        
+        .metro-tile.large {
+            grid-column: span 2;
+            grid-row: span 2;
+        }
+        
+        /* 不同顏色主題的磚塊 */
+        .metro-tile.tile-cyan {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.4), rgba(0, 180, 220, 0.3));
+        }
+        
+        .metro-tile.tile-magenta {
+            background: linear-gradient(135deg, rgba(255, 0, 128, 0.4), rgba(200, 0, 100, 0.3));
+        }
+        
+        .metro-tile.tile-green {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.4), rgba(60, 140, 65, 0.3));
+        }
+        
+        .metro-tile.tile-purple {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.4), rgba(110, 70, 200, 0.3));
+        }
+        
+        .metro-tile.tile-orange {
+            background: linear-gradient(135deg, rgba(255, 152, 0, 0.4), rgba(220, 130, 0, 0.3));
+        }
+        
+        .metro-tile.tile-blue {
+            background: linear-gradient(135deg, rgba(33, 150, 243, 0.4), rgba(25, 118, 200, 0.3));
+        }
+        
+        .metro-tile.tile-red {
+            background: linear-gradient(135deg, rgba(244, 67, 54, 0.4), rgba(200, 50, 40, 0.3));
+        }
+        
+        /* Metro 類別分隔 */
+        .metro-category {
+            margin-bottom: 30px;
+        }
+        
+        .metro-category-title {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .widget { 
+            background: linear-gradient(135deg, rgba(20, 25, 40, 0.9), rgba(30, 35, 50, 0.85));
+            border-radius: var(--window-border-radius); 
+            padding: 15px; 
+            margin-bottom: 15px; 
+            overflow: hidden;
+            cursor: grab;
+            user-select: none;
+            transition: box-shadow 0.2s ease, opacity 0.2s ease, border 0.2s ease, height 0.3s ease;
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            position: relative;
+            box-sizing: border-box;
+            flex-shrink: 0;
+            width: 320px; /* 固定寬度，防止容器變化時變形 */
+            min-width: 320px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        
+        /* 磁貼科技感光暈效果 */
+        .widget::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.5), transparent);
+            opacity: 0.6;
+        }
+        
+        .widget::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1px;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(0, 212, 255, 0.3), transparent);
+        }
+        
+        .widget:hover {
+            border-color: rgba(0, 212, 255, 0.4);
+            box-shadow: 
+                0 4px 20px rgba(0, 212, 255, 0.15),
+                inset 0 0 20px rgba(0, 212, 255, 0.03);
+        }
+        
+        /* 小工具固定大小 - 小(1) */
+        .widget.widget-size-1 {
+            height: 90px;
+            min-height: 90px;
+        }
+        
+        /* 小工具固定大小 - 中(2) 預設 */
+        .widget.widget-size-2 {
+            height: 160px;
+            min-height: 160px;
+        }
+        
+        /* 小工具固定大小 - 大(3) */
+        .widget.widget-size-3 {
+            height: 260px;
+            min-height: 300px;
+        }
+        
+        /* 小工具內容區域 - 禁止溺出和滾動 */
+        .widget-body {
+            height: calc(100% - 24px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 小工具大小設定按鈕 */
+        .widget-size-toggle {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            border: none;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            opacity: 0;
+            transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease;
+            z-index: 10;
+        }
+        
+        .widget:hover .widget-size-toggle {
+            opacity: 1;
+        }
+        
+        .widget-size-toggle:hover {
+            background: rgba(0, 212, 255, 0.3);
+            color: var(--primary-cyan);
+        }
+        
+        .widget:active {
+            cursor: grabbing;
+        }
+        .widget.dragging {
+            opacity: 0.9;
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+            cursor: grabbing;
+            z-index: 100;
+        }
+        .widget-drag-placeholder {
+            border: 1px dashed rgba(0, 212, 255, 0.5);
+            border-radius: var(--window-border-radius);
+            background: rgba(0, 212, 255, 0.03);
+            margin-bottom: 15px;
+            min-height: 80px;
+            transition: height 0.2s ease;
+            box-shadow: inset 0 0 20px rgba(0, 212, 255, 0.05);
+        }
+        .widget-header { 
+            font-family: var(--font-display); 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+            margin-bottom: 8px; 
+            cursor: grab;
+            padding-right: 30px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--primary-cyan);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+        
+        .widget-header i {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .widget-header .small {
+            font-family: var(--font-body);
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: none;
+            letter-spacing: 0;
+        }
+        .weather-widget { display: block; overflow: hidden; }
+        .weather-widget .widget-body { overflow: hidden; }
+        .weather-controls { 
+            display: flex; 
+            gap: 4px; 
+            margin-bottom: 6px; 
+            flex-shrink: 0; 
+        }
+        .weather-controls input[type="text"]{ 
+            flex: 1; 
+            padding: 5px 8px; 
+            border-radius: 4px; 
+            background: rgba(0, 212, 255, 0.05); 
+            border: 1px solid rgba(0, 212, 255, 0.2); 
+            color: #fff; 
+            outline: none; 
+            cursor: text; 
+            font-size: 0.75rem;
+            font-family: var(--font-body);
+        }
+        .weather-controls input[type="text"]:focus {
+            border-color: rgba(0, 212, 255, 0.5);
+        }
+        .weather-controls button{ 
+            background: rgba(0, 212, 255, 0.1); 
+            border: 1px solid rgba(0, 212, 255, 0.2); 
+            color: var(--primary-cyan); 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.8rem;
+        }
+        .weather-controls button:hover {
+            background: rgba(0, 212, 255, 0.2);
+        }
+        .weather-controls button[disabled]{ opacity: 0.4; cursor: not-allowed; }
+        .weather-main{ 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            flex-shrink: 0;
+        }
+        .weather-visual #weather-icon { 
+            font-size: 2rem; 
+            color: var(--primary-cyan);
+            filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.4));
+        }
+        .weather-visual img{ width: 40px; height: 40px; object-fit: cover; border-radius: 6px; }
+        .weather-info .temp { 
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            font-family: var(--font-display);
+            background: linear-gradient(135deg, #fff, var(--primary-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .weather-info .desc { 
+            font-size: 0.75rem; 
+            color: rgba(255, 255, 255, 0.7);
+            font-family: var(--font-body);
+        }
+        .weather-info .meta { 
+            font-size: 0.65rem; 
+            color: rgba(0, 212, 255, 0.6); 
+            margin-top: 2px;
+            font-family: var(--font-mono);
+        }
+        .weather-forecast { 
+            display: flex; 
+            gap: 6px; 
+            margin-top: 8px; 
+            align-items: stretch; 
+            overflow: hidden;
+            flex-wrap: nowrap;
+        }
+        .weather-forecast .forecast-item { 
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.08), rgba(0, 212, 255, 0.02));
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            padding: 6px 8px; 
+            border-radius: 6px; 
+            flex: 1;
+            min-width: 0;
+            text-align: center;
+        }
+        .weather-forecast .forecast-item:hover {
+            border-color: rgba(0, 212, 255, 0.4);
+        }
+        .weather-forecast .forecast-item .date{ 
+            font-size: 0.6rem; 
+            color: rgba(0, 212, 255, 0.7);
+            font-family: var(--font-mono);
+        }
+        .weather-forecast .forecast-item .temp{ 
+            font-weight: 700; 
+            font-size: 0.75rem;
+            font-family: var(--font-display);
+        }
+        .weather-forecast .forecast-item i {
+            font-size: 0.9rem;
+            color: var(--primary-cyan);
+            margin: 2px 0;
+            display: block;
+        }
+        
+        /* ===== 天氣小工具 - 大小 1 (90px) - 只顯示圖標和溫度 ===== */
+        .widget.widget-size-1.weather-widget { padding: 8px 12px; }
+        .widget.widget-size-1.weather-widget .widget-header { display: none; }
+        .widget.widget-size-1.weather-widget .widget-body { 
+            height: 100%;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .widget.widget-size-1.weather-widget .weather-controls { display: none; }
+        .widget.widget-size-1.weather-widget .weather-forecast { display: none; }
+        .widget.widget-size-1.weather-widget .weather-main { 
+            justify-content: center;
+            gap: 12px;
+        }
+        .widget.widget-size-1.weather-widget .weather-info .desc { display: none; }
+        .widget.widget-size-1.weather-widget .weather-info .meta { display: none; }
+        
+        /* ===== 天氣小工具 - 大小 2 (160px) - 顯示主要天氣+按鈕 ===== */
+        .widget.widget-size-2.weather-widget { padding: 8px 12px; }
+        .widget.widget-size-2.weather-widget .weather-controls { 
+            display: flex;
+            margin-bottom: 4px;
+        }
+        .widget.widget-size-2.weather-widget .weather-controls input[type="text"] { 
+            display: block; 
+            flex: 1;
+        }
+        .widget.widget-size-2.weather-widget .weather-main {
+            gap: 8px;
+        }
+        .widget.widget-size-2.weather-widget .weather-info .temp {
+            font-size: 1.3rem;
+        }
+        .widget.widget-size-2.weather-widget .weather-info .desc {
+            font-size: 0.7rem;
+        }
+        .widget.widget-size-2.weather-widget .weather-info .meta {
+            font-size: 0.6rem;
+        }
+        .widget.widget-size-2.weather-widget .weather-forecast { display: none; }
+        
+        /* ===== 天氣小工具 - 大小 3 (260px) - 顯示完整內容 ===== */
+        .widget.widget-size-3.weather-widget .weather-forecast {
+            display: flex;
+        }
+        
+        .news-item { 
+            display: flex; 
+            margin-bottom: 8px; 
+            flex-shrink: 0; 
+            align-items: center;
+            padding: 6px 8px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.05), transparent);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: 6px;
+        }
+        .news-item:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+        .news-item:last-child { margin-bottom: 0; }
+        .news-item img { 
+            width: 36px; 
+            height: 36px; 
+            object-fit: cover; 
+            border-radius: 4px; 
+            margin-right: 8px; 
+            flex-shrink: 0;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+        .news-item-info { 
+            font-size: 0.75rem; 
+            overflow: hidden; 
+            flex: 1;
+            font-family: var(--font-body);
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        .news-item-info span { 
+            font-size: 0.65rem; 
+            color: rgba(0, 212, 255, 0.6); 
+            display: block;
+            margin-top: 2px;
+            font-family: var(--font-mono);
+        }
+        
+        /* ===== 新聞小工具 - 大小 1 (90px) - 單條新聞 ===== */
+        .widget.widget-size-1.news-widget { padding: 8px 12px; }
+        .widget.widget-size-1.news-widget .widget-header { display: none; }
+        .widget.widget-size-1.news-widget .widget-body { height: 100%; }
+        .widget.widget-size-1.news-widget .news-item { 
+            margin-bottom: 0; 
+            height: 100%;
+            padding: 6px;
+        }
+        .widget.widget-size-1.news-widget .news-item img { 
+            width: 50px; 
+            height: 50px;
+        }
+        .widget.widget-size-1.news-widget .news-item:nth-child(n+2) { display: none; }
+        
+        /* ===== 新聞小工具 - 大小 2 (160px) - 2條新聞 ===== */
+        .widget.widget-size-2.news-widget .news-item:nth-child(n+3) { display: none; }
+        
+        /* ===== 新聞小工具 - 大小 3 (260px) - 4條新聞 ===== */
+        .widget.widget-size-3.news-widget .news-item:nth-child(n+5) { display: none; }
+        
+        /* 效能監控小工具 */
+        .performance-widget {
+            padding: 10px 12px;
+        }
+        
+        .performance-widget .widget-body {
+            overflow: hidden;
+        }
+        
+        .perf-section {
+            margin-bottom: 6px;
+            flex-shrink: 0;
+            padding: 4px 8px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.05), transparent);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        .perf-section:hover {
+            border-color: rgba(0, 212, 255, 0.25);
+        }
+        
+        .perf-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .perf-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.7rem;
+            margin-bottom: 3px;
+        }
+        
+        .perf-label-title {
+            color: rgba(0, 212, 255, 0.8);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-body);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .perf-label-title i {
+            font-size: 0.85rem;
+            width: 16px;
+            text-align: center;
+            color: var(--primary-cyan);
+        }
+        
+        .perf-label-value {
+            font-weight: 600;
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+            color: #fff;
+        }
+        
+        .perf-bar {
+            height: 4px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        /* ===== 效能監控小工具 - 大小 1 (90px) - 只顯示數值 ===== */
+        .widget.widget-size-1.performance-widget { padding: 8px 12px; }
+        .widget.widget-size-1.performance-widget .widget-header { display: none; }
+        .widget.widget-size-1.performance-widget .widget-body { 
+            height: 100%;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            gap: 8px;
+            align-items: center;
+            justify-content: space-around;
+        }
+        .widget.widget-size-1.performance-widget .perf-section { 
+            flex: 1;
+            margin-bottom: 0;
+            padding: 4px 6px;
+            text-align: center;
+        }
+        .widget.widget-size-1.performance-widget .perf-label { 
+            flex-direction: column;
+            margin-bottom: 0;
+            gap: 2px;
+        }
+        .widget.widget-size-1.performance-widget .perf-label-title { 
+            justify-content: center;
+            font-size: 0.6rem;
+        }
+        .widget.widget-size-1.performance-widget .perf-label-title i { font-size: 0.7rem; }
+        .widget.widget-size-1.performance-widget .perf-label-value { font-size: 0.75rem; }
+        .widget.widget-size-1.performance-widget .perf-bar { display: none; }
+        .widget.widget-size-1.performance-widget .perf-stats { display: none; }
+        
+        /* ===== 效能監控小工具 - 大小 2 (160px) - 顯示進度條 ===== */
+        .widget.widget-size-2.performance-widget { padding: 8px 10px; }
+        .widget.widget-size-2.performance-widget .widget-header { 
+            margin-bottom: 4px;
+            font-size: 0.7rem;
+        }
+        .widget.widget-size-2.performance-widget .perf-section { 
+            margin-bottom: 4px;
+            padding: 3px 6px;
+        }
+        .widget.widget-size-2.performance-widget .perf-label { 
+            font-size: 0.65rem;
+            margin-bottom: 2px;
+        }
+        .widget.widget-size-2.performance-widget .perf-label-title i { font-size: 0.7rem; }
+        .widget.widget-size-2.performance-widget .perf-label-value { font-size: 0.7rem; }
+        .widget.widget-size-2.performance-widget .perf-bar { height: 3px; }
+        .widget.widget-size-2.performance-widget .perf-stats { display: none; }
+        
+        /* ===== 效能監控小工具 - 大小 3 (260px) - 顯示統計 ===== */
+        .widget.widget-size-3.performance-widget .perf-stats { 
+            display: grid;
+            margin-top: 8px;
+            padding-top: 8px;
+            gap: 6px;
+        }
+        .widget.widget-size-3.performance-widget .perf-stat-item {
+            padding: 4px 6px;
+        }
+        .widget.widget-size-3.performance-widget .perf-stat-label { font-size: 0.6rem; }
+        .widget.widget-size-3.performance-widget .perf-stat-value { font-size: 0.75rem; }
+        
+        .perf-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        
+        .perf-bar-fill.cpu { 
+            background: linear-gradient(90deg, var(--primary-cyan), #00a8cc); 
+        }
+        .perf-bar-fill.memory { 
+            background: linear-gradient(90deg, var(--accent-pink), #ff6b9d); 
+        }
+        .perf-bar-fill.fps { 
+            background: linear-gradient(90deg, #4caf50, #8bc34a); 
+        }
+        
+        .perf-bar-fill.warning { 
+            background: linear-gradient(90deg, #ff9800, #ffc107); 
+        }
+        .perf-bar-fill.critical { 
+            background: linear-gradient(90deg, #f44336, #ff5722); 
+        }
+        
+        .perf-stats {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(0, 212, 255, 0.15);
+        }
+        
+        .perf-stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 4px 6px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.05), transparent);
+            border: 1px solid rgba(0, 212, 255, 0.08);
+            border-radius: 4px;
+        }
+        
+        .perf-stat-label {
+            font-size: 0.6rem;
+            color: rgba(0, 212, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: var(--font-body);
+        }
+        
+        .perf-stat-value {
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: var(--font-display);
+            color: #fff;
+        }
+                /* ------------------------------------------------------------------ */
         /* Calc: Ensure calculator window does not show scrollbars when sized */
         /* - Use flexbox to let inner #win-calc fill the window-content area
            - Prevent min-height from causing overflow in flex children
@@ -1819,11 +3444,46 @@
             
             <!-- 模擬器內容 (來自 win_improved.html) -->
 
-            <!-- 1. 啟動加載器 -->
+            <!-- 1. 現代化啟動加載器 -->
             <div id="boot-loader">
-                <img id="boot-logo" src="../../assets/images/logo.png" alt="Logo">
-                <div id="boot-spinner"></div>
-                <div id="boot-status">系統啟動中...</div>
+                <!-- 背景效果層 -->
+                <div class="boot-grid-bg"></div>
+                <div class="boot-particles" id="bootParticles"></div>
+
+                <div class="boot-rings">
+                    <div class="boot-ring"></div>
+                    <div class="boot-ring"></div>
+                    <div class="boot-ring"></div>
+                    <div class="boot-ring"></div>
+                </div>
+
+                
+
+                
+                <!-- 主要內容 -->
+                <div class="boot-content">
+                    <div class="boot-logo-container">
+                        <div class="boot-logo-ring"></div>
+                        <img id="boot-logo" src="../../assets/images/logo.png" alt="Logo">
+                    </div>
+                    
+                    <div class="boot-system-name">NAGATO SAKURA</div>
+                    <div class="boot-system-version">WEB OS v1.0</div>
+                    
+                    <div class="boot-progress-container">
+                        <div class="boot-progress-bar">
+                            <div class="boot-progress-fill" id="bootProgressFill"></div>
+                        </div>
+                        <div class="boot-progress-text">
+                            <span id="bootProgressLabel">初始化系統...</span>
+                            <span class="boot-progress-percent" id="bootProgressPercent">0%</span>
+                        </div>
+                    </div>
+                    
+
+                </div>
+                
+                <div class="boot-footer">© 2025 天野靜樹 - CYBER NEXUS</div>
             </div>
 
             <!-- start 的右鍵選單（開始設定） -->
@@ -2042,6 +3702,23 @@
                                         <span>使用較暖的色彩以協助睡眠</span>
                                     </div>
                                     <div class="toggle-switch" id="nightLightToggle" role="switch" aria-checked="false" tabindex="0"></div>
+                                </div>
+                                <div class="setting-item">
+                                    <div class="setting-item-label">
+                                        視窗越界允許
+                                        <span>視窗移出畫面的百分比</span>
+                                    </div>
+                                    <div class="slider-control">
+                                        <div class="slider-value" id="offscreenRatioValue">90%</div>
+                                        <input type="range" class="slider-range" id="offscreenRatio" min="0" max="100" value="90" step="5" aria-label="視窗越界允許">
+                                    </div>
+                                </div>
+                                <div class="setting-item">
+                                    <div class="setting-item-label">
+                                        隱藏導航欄
+                                        <span>隱藏頁面頂部的導航欄以獲得更大的顯示空間</span>
+                                    </div>
+                                    <div class="toggle-switch" id="hideNavbarToggle" role="switch" aria-checked="false" tabindex="0"></div>
                                 </div>
                             </div>
                             <!-- Nightlight subpage: hidden by default (inside Display page) -->
@@ -2655,37 +4332,193 @@
             
             <!-- 7. 小工具面板 (新增) -->
             <div id="widgets-panel">
-                <div class="widget weather-widget" id="widget-weather">
-                    <div class="widget-header">天氣 <span id="weather-location" class="small">台北市</span></div>
-                    <div class="weather-controls">
-                        <input id="weather-city-input" type="text" aria-label="城市" placeholder="城市 (例如：Taipei / 台北)" />
-                        <button id="weather-refresh" aria-label="刷新天氣" title="刷新"><i class="fa-solid fa-rotate-right"></i></button>
-                        <button id="weather-geolocate" aria-label="使用定位" title="使用定位"><i class="fa-solid fa-location-crosshairs"></i></button>
+                <!-- 小工具面板標題列 -->
+                <div class="widgets-panel-header">
+                    <span class="widgets-panel-title">小工具</span>
+                    <div class="widgets-panel-actions">
+                        <button class="widgets-panel-btn" id="widgets-collapse-btn" title="收合小工具" style="display: none;">
+                            <i class="fa-solid fa-angles-left"></i>
+                        </button>
+                        <button class="widgets-panel-btn" id="widgets-settings-btn" title="小工具設定">
+                            <i class="fa-solid fa-gear"></i>
+                        </button>
+                        <button class="widgets-panel-btn" id="widgets-fullscreen-btn" title="全螢幕">
+                            <i class="fa-solid fa-expand"></i>
+                        </button>
                     </div>
-                    <div class="weather-main">
-                        <div class="weather-visual"><i id="weather-icon" class="fa-solid fa-cloud-sun"></i></div>
-                        <div class="weather-info">
-                            <div class="temp" id="weather-temp">--°C</div>
-                            <div class="desc" id="weather-desc">載入中...</div>
-                            <div class="meta"><span id="weather-humidity"></span> <span id="weather-feels"></span> <span id="weather-updated" style="margin-left:8px;color:#9aa; font-size:0.8rem"></span></div>
-                        </div>
-                    </div>
-                    <div class="weather-forecast" id="weather-forecast"></div>
                 </div>
-                <div class="widget news-widget">
-                    <div class="widget-header">頭條新聞</div>
-                    <div class="news-item">
-                        <img src="https://placehold.co/100x100/333/fff?text=NEWS" alt="News">
-                        <div class="news-item-info">
-                            這是一條模擬的新聞標題...
-                            <span>2 小時前</span>
+                
+                <!-- 原始小工具內容 -->
+                <div class="widgets-content">
+                    <!-- 天氣小工具 -->
+                    <div class="widget weather-widget widget-size-3" id="widget-weather" data-widget-size="3">
+                        <button class="widget-size-toggle" title="調整大小">3</button>
+                        <div class="widget-header">天氣 <span id="weather-location" class="small">台北市</span></div>
+                        <div class="widget-body">
+                            <div class="weather-controls">
+                                <input id="weather-city-input" type="text" aria-label="城市" placeholder="城市 (例如：Taipei / 台北)" />
+                                <button id="weather-refresh" aria-label="刷新天氣" title="刷新"><i class="fa-solid fa-rotate-right"></i></button>
+                                <button id="weather-geolocate" aria-label="使用定位" title="使用定位"><i class="fa-solid fa-location-crosshairs"></i></button>
+                            </div>
+                            <div class="weather-main">
+                                <div class="weather-visual"><i id="weather-icon" class="fa-solid fa-cloud-sun"></i></div>
+                                <div class="weather-info">
+                                    <div class="temp" id="weather-temp">--°C</div>
+                                    <div class="desc" id="weather-desc">載入中...</div>
+                                    <div class="meta"><span id="weather-humidity"></span> <span id="weather-feels"></span> <span id="weather-updated" style="margin-left:8px;color:#9aa; font-size:0.7rem"></span></div>
+                                </div>
+                            </div>
+                            <div class="weather-forecast" id="weather-forecast"></div>
                         </div>
                     </div>
-                    <div class="news-item">
-                        <img src="https://placehold.co/100x100/555/fff?text=TECH" alt="Tech">
-                        <div class="news-item-info">
-                            關於網頁技術的最新進展...
-                            <span>3 小時前</span>
+                    
+                    <!-- 效能監控小工具 -->
+                    <div class="widget performance-widget widget-size-3" id="widget-performance" data-widget-size="3">
+                        <button class="widget-size-toggle" title="調整大小">3</button>
+                        <div class="widget-header"><i class="fa-solid fa-chart-line"></i> 效能監控</div>
+                        <div class="widget-body">
+                            <!-- CPU 使用率 -->
+                            <div class="perf-section">
+                                <div class="perf-label">
+                                    <span class="perf-label-title"><i class="fa-solid fa-microchip"></i> CPU</span>
+                                    <span class="perf-label-value" id="perf-cpu-value">---%</span>
+                                </div>
+                                <div class="perf-bar">
+                                    <div class="perf-bar-fill cpu" id="perf-cpu-bar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- 記憶體使用率 -->
+                            <div class="perf-section">
+                                <div class="perf-label">
+                                    <span class="perf-label-title"><i class="fa-solid fa-memory"></i> 記憶體</span>
+                                    <span class="perf-label-value" id="perf-memory-value">--- MB</span>
+                                </div>
+                                <div class="perf-bar">
+                                    <div class="perf-bar-fill memory" id="perf-memory-bar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- FPS -->
+                            <div class="perf-section">
+                                <div class="perf-label">
+                                    <span class="perf-label-title"><i class="fa-solid fa-gauge-high"></i> FPS</span>
+                                    <span class="perf-label-value" id="perf-fps-value">-- fps</span>
+                                </div>
+                                <div class="perf-bar">
+                                    <div class="perf-bar-fill fps" id="perf-fps-bar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- 額外統計 -->
+                            <div class="perf-stats">
+                                <div class="perf-stat-item">
+                                    <span class="perf-stat-label">執行時間</span>
+                                    <span class="perf-stat-value" id="perf-uptime">--:--:--</span>
+                                </div>
+                                <div class="perf-stat-item">
+                                    <span class="perf-stat-label">DOM 節點</span>
+                                    <span class="perf-stat-value" id="perf-dom-nodes">---</span>
+                                </div>
+                                <div class="perf-stat-item">
+                                    <span class="perf-stat-label">JS Heap</span>
+                                    <span class="perf-stat-value" id="perf-js-heap">--- MB</span>
+                                </div>
+                                <div class="perf-stat-item">
+                                    <span class="perf-stat-label">頁面載入</span>
+                                    <span class="perf-stat-value" id="perf-load-time">--- ms</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 新聞小工具 -->
+                    <div class="widget news-widget widget-size-1" id="widget-news" data-widget-size="1">
+                        <button class="widget-size-toggle" title="調整大小">1</button>
+                        <div class="widget-header">頭條新聞</div>
+                        <div class="widget-body">
+                            <div class="news-item">
+                                <img src="https://placehold.co/100x100/333/fff?text=NEWS" alt="News">
+                                <div class="news-item-info">
+                                    這是一條模擬的新聞標題...
+                                    <span>2 小時前</span>
+                                </div>
+                            </div>
+                            <div class="news-item">
+                                <img src="https://placehold.co/100x100/555/fff?text=TECH" alt="Tech">
+                                <div class="news-item-info">
+                                    關於網頁技術的最新進展...
+                                    <span>3 小時前</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Metro 風格所有程式區域 -->
+                <div class="metro-area">
+                    <div class="metro-header">所有程式</div>
+                    
+                    <!-- 系統工具 -->
+                    <div class="metro-category">
+                        <div class="metro-category-title">系統工具</div>
+                        <div class="metro-grid">
+                            <div class="metro-tile tile-cyan" data-app="settings">
+                                <div class="metro-tile-icon"><i class="fa-solid fa-gear"></i></div>
+                                <div class="metro-tile-label">設定</div>
+                            </div>
+                            <div class="metro-tile tile-blue" data-app="explorer">
+                                <div class="metro-tile-icon"><i class="fa-solid fa-folder"></i></div>
+                                <div class="metro-tile-label">檔案總管</div>
+                            </div>
+                            <div class="metro-tile tile-green" data-app="calculator">
+                                <div class="metro-tile-icon"><i class="fa-solid fa-calculator"></i></div>
+                                <div class="metro-tile-label">計算機</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 應用程式 -->
+                    <div class="metro-category">
+                        <div class="metro-category-title">應用程式</div>
+                        <div class="metro-grid">
+                            <div class="metro-tile wide tile-magenta" data-app="nagato">
+                                <div class="metro-tile-icon">
+                                    <img src="assets/apps/icon/NS-V2.png" alt="長門櫻">
+                                </div>
+                                <div class="metro-tile-label">長門櫻</div>
+                            </div>
+                            <div class="metro-tile tile-blue" data-app="browser">
+                                <div class="metro-tile-icon"><i class="fa-brands fa-edge"></i></div>
+                                <div class="metro-tile-label">瀏覽器</div>
+                            </div>
+                            <div class="metro-tile tile-orange" data-app="store">
+                                <div class="metro-tile-icon"><i class="fa-solid fa-store"></i></div>
+                                <div class="metro-tile-label">應用商店</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 工具 & 遊戲 -->
+                    <div class="metro-category">
+                        <div class="metro-category-title">更多</div>
+                        <div class="metro-grid">
+                            <div class="metro-tile tile-purple" data-app="notepad">
+                                <div class="metro-tile-icon"><i class="fa-solid fa-file-lines"></i></div>
+                                <div class="metro-tile-label">記事本</div>
+                            </div>
+                            <div class="metro-tile tile-red" data-app="terminal">
+                                <div class="metro-tile-icon"><i class="fa-solid fa-terminal"></i></div>
+                                <div class="metro-tile-label">終端機</div>
+                            </div>
+                            <div class="metro-tile tile-green" data-app="photos">
+                                <div class="metro-tile-icon"><i class="fa-solid fa-images"></i></div>
+                                <div class="metro-tile-label">相簿</div>
+                            </div>
+                            <div class="metro-tile tile-cyan" data-app="music">
+                                <div class="metro-tile-icon"><i class="fa-solid fa-music"></i></div>
+                                <div class="metro-tile-label">音樂</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2734,22 +4567,6 @@
                             <span data-value="50">小</span>
                             <span data-value="75">中</span>
                             <span data-value="100">大</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="setting-item">
-                    <div class="setting-label">
-                        <span>視窗越界允許</span>
-                        <span class="setting-description">允許視窗部分移出畫面的百分比 (左右/下方)</span>
-                    </div>
-                    <div class="slider-control">
-                        <div class="slider-value" id="offscreenRatioValue">90%</div>
-                        <input type="range" class="slider-range" id="offscreenRatio" min="0" max="100" value="90" step="5">
-                        <div class="slider-marks">
-                            <span data-value="0">0%</span>
-                            <span data-value="50">50%</span>
-                            <span data-value="100">100%</span>
                         </div>
                     </div>
                 </div>
@@ -2955,10 +4772,13 @@
                 }
             }
 
-            // --- Display settings: brightness + nightlight ---
+            // --- Display settings: brightness + nightlight + navbar ---
             const displayBrightness = document.getElementById('displayBrightness');
             const brightnessValue = document.getElementById('brightnessValue');
             const nightLightToggle = document.getElementById('nightLightToggle');
+            const hideNavbarToggle = document.getElementById('hideNavbarToggle');
+            const pageHeader = document.querySelector('header');
+            const mainWrapper = document.querySelector('.main-wrapper');
             const nightlightOverlay = document.getElementById('nightlight-overlay');
             // Subpage controls
             const nightlightItem = document.getElementById('nightlightItem');
@@ -3051,6 +4871,45 @@
                         if (document.getElementById('nightlight-schedule-controls')) document.getElementById('nightlight-schedule-controls').style.display = 'none';
                     }
                 }
+
+                // Apply navbar visibility
+                const hideNav = settings && !!settings.hideNavbar;
+                if (hideNavbarToggle) {
+                    if (hideNav) {
+                        hideNavbarToggle.classList.add('active');
+                        hideNavbarToggle.setAttribute('aria-checked', 'true');
+                    } else {
+                        hideNavbarToggle.classList.remove('active');
+                        hideNavbarToggle.setAttribute('aria-checked', 'false');
+                    }
+                }
+                applyNavbarVisibility(hideNav);
+            }
+
+            // 導航欄顯示/隱藏控制
+            function applyNavbarVisibility(hide) {
+                if (pageHeader) {
+                    if (hide) {
+                        pageHeader.style.height = '0';
+                        pageHeader.style.minHeight = '0';
+                        pageHeader.style.overflow = 'hidden';
+                        pageHeader.style.padding = '0';
+                        pageHeader.style.borderBottom = 'none';
+                    } else {
+                        pageHeader.style.height = '';
+                        pageHeader.style.minHeight = '';
+                        pageHeader.style.overflow = '';
+                        pageHeader.style.padding = '';
+                        pageHeader.style.borderBottom = '';
+                    }
+                }
+                // 調整主內容區的 margin-top
+                if (mainWrapper) {
+                    mainWrapper.style.marginTop = hide ? '0' : '';
+                    mainWrapper.style.minHeight = hide ? '100vh' : '';
+                }
+                // 更新 CSS 變數
+                document.documentElement.style.setProperty('--header-height', hide ? '0px' : '60px');
             }
 
             function saveDisplaySettings() {
@@ -3060,7 +4919,8 @@
                     nightlightStrength: nightlightStrength ? Number(nightlightStrength.value) : 50,
                     nightlightScheduleEnabled: nightlightScheduleToggle ? nightlightScheduleToggle.classList.contains('active') : false,
                     nightlightScheduleStart: nightlightStartInput ? nightlightStartInput.value : '22:00',
-                    nightlightScheduleEnd: nightlightEndInput ? nightlightEndInput.value : '06:00'
+                    nightlightScheduleEnd: nightlightEndInput ? nightlightEndInput.value : '06:00',
+                    hideNavbar: hideNavbarToggle ? hideNavbarToggle.classList.contains('active') : false
                 };
                 try { localStorage.setItem(DISPLAY_STORAGE_KEY, JSON.stringify(settings)); } catch (e) { /* ignore */ }
             }
@@ -3117,6 +4977,22 @@
                     if (e.key === ' ' || e.key === 'Enter') {
                         e.preventDefault();
                         nightLightToggle.click();
+                    }
+                });
+            }
+
+            // Hook up navbar toggle
+            if (hideNavbarToggle) {
+                hideNavbarToggle.addEventListener('click', (e) => {
+                    const hidden = hideNavbarToggle.classList.toggle('active');
+                    hideNavbarToggle.setAttribute('aria-checked', hidden ? 'true' : 'false');
+                    applyNavbarVisibility(hidden);
+                    saveDisplaySettings();
+                });
+                hideNavbarToggle.addEventListener('keydown', (e) => {
+                    if (e.key === ' ' || e.key === 'Enter') {
+                        e.preventDefault();
+                        hideNavbarToggle.click();
                     }
                 });
             }
@@ -3405,11 +5281,44 @@
                 // Theme
                 if (s.theme) {
                     document.documentElement.setAttribute('data-theme', s.theme);
+                    // 根據主題模式重置相關 CSS 變數
+                    if (s.theme === 'light') {
+                        document.documentElement.style.setProperty('--text', '#1a1a1a');
+                        document.documentElement.style.setProperty('--dark-bg', '#f5f5f7');
+                        document.documentElement.style.setProperty('--darker-bg', '#e8e8ec');
+                        document.documentElement.style.setProperty('--mica-bg', 'rgba(255, 255, 255, 0.85)');
+                        document.documentElement.style.setProperty('--mica-bg-light', 'rgba(255, 255, 255, 0.9)');
+                        document.documentElement.style.setProperty('--mica-bg-dark', 'rgba(245, 245, 247, 0.92)');
+                        document.documentElement.style.setProperty('--card', 'rgba(0, 0, 0, 0.03)');
+                        document.documentElement.style.setProperty('--bd', 'rgba(0, 0, 0, 0.1)');
+                        document.documentElement.style.setProperty('--s3d', 'rgba(0, 0, 0, 0.15)');
+                        document.documentElement.style.setProperty('--mm', 'rgba(0, 160, 200, 0.12)');
+                        document.body.style.color = '#1a1a1a';
+                    } else {
+                        // 深色模式 - 恢復原始設定
+                        document.documentElement.style.setProperty('--text', '#e6e6e6');
+                        document.documentElement.style.setProperty('--dark-bg', '#0a0a0f');
+                        document.documentElement.style.setProperty('--darker-bg', '#050507');
+                        document.documentElement.style.setProperty('--mica-bg', 'rgba(30, 30, 45, 0.7)');
+                        document.documentElement.style.setProperty('--mica-bg-light', 'rgba(45, 45, 60, 0.7)');
+                        document.documentElement.style.setProperty('--mica-bg-dark', 'rgba(20, 20, 30, 0.8)');
+                        document.documentElement.style.setProperty('--card', 'rgba(255,255,255,0.03)');
+                        document.documentElement.style.setProperty('--bd', 'rgba(0,0,0,0.2)');
+                        document.documentElement.style.setProperty('--s3d', 'rgba(0,0,0,0.35)');
+                        document.documentElement.style.setProperty('--mm', 'rgba(0,212,255,0.14)');
+                        document.body.style.color = '#f0f0f0';
+                    }
                 }
                 // Accent color
-                if (s.accentColor) {
+                if (s.accentColor && s.accentColor !== '#00d4ff') {
+                    // 只有當用戶設定了非預設的強調色時才覆蓋
                     document.documentElement.style.setProperty('--primary-cyan', s.accentColor);
                     try { updateAccentPreviews(s.accentColor); } catch (err) {}
+                } else {
+                    // 恢復預設強調色
+                    document.documentElement.style.setProperty('--primary-cyan', '#00d4ff');
+                    document.documentElement.style.setProperty('--primary-magenta', '#ff0080');
+                    try { updateAccentPreviews('#00d4ff'); } catch (err) {}
                 }
                 // Background
                 const sc = simulatorContainer;
@@ -3932,32 +5841,32 @@
                     savePersonalizationSettings(s);
                 });
             }
-                if (personalizationControls.bgBrightness) {
-                    // While the user is sliding, only update overlay (cheap compositing change)
-                    personalizationControls.bgBrightness.addEventListener('input', (e) => {
-                        const s = loadPersonalizationSettings() || DEFAULT_PERSONALIZATION;
-                        const val = Number(e.target.value);
-                        s.backgroundBrightness = val;
-                        if (personalizationControls.bgBrightnessValue) personalizationControls.bgBrightnessValue.textContent = val + '%';
-                        // apply overlay alpha for smoother updates without invoking the full personalization flow
-                        // Since brightness changes should not re-apply or re-fade background, update only CSS vars to avoid heavy operations
-                        document.documentElement.style.setProperty('--background-overlay', (1 - (val / 100)).toFixed(3));
-                        // Do not call applyPersonalizationSettings or save on every input to avoid reflows and localStorage churn
-                    });
-                    // On release/final change, update the filter and save so other code depending on the final value remains compatible
-                    personalizationControls.bgBrightness.addEventListener('change', (e) => {
-                        const s = loadPersonalizationSettings() || DEFAULT_PERSONALIZATION;
-                        const val = Number(e.target.value);
-                        s.backgroundBrightness = val;
-                        if (personalizationControls.bgBrightnessValue) personalizationControls.bgBrightnessValue.textContent = val + '%';
-                        // set final filter (less frequent, avoids repeated repainting while dragging)
-                        document.documentElement.style.setProperty('--background-brightness', (val / 100).toFixed(3));
-                        // keep overlay in sync
-                        document.documentElement.style.setProperty('--background-overlay', (1 - (val / 100)).toFixed(3));
-                        applyPersonalizationSettings(s);
-                        savePersonalizationSettings(s);
-                    });
-                }
+            if (personalizationControls.bgBrightness) {
+                // While the user is sliding, update both brightness filter and overlay for consistent visual feedback
+                personalizationControls.bgBrightness.addEventListener('input', (e) => {
+                    const s = loadPersonalizationSettings() || DEFAULT_PERSONALIZATION;
+                    const val = Number(e.target.value);
+                    s.backgroundBrightness = val;
+                    if (personalizationControls.bgBrightnessValue) personalizationControls.bgBrightnessValue.textContent = val + '%';
+                    // Update both CSS variables for consistent brightness effect during slider drag
+                    document.documentElement.style.setProperty('--background-brightness', (val / 100).toFixed(3));
+                    document.documentElement.style.setProperty('--background-overlay', (1 - (val / 100)).toFixed(3));
+                    // Do not call applyPersonalizationSettings or save on every input to avoid reflows and localStorage churn
+                });
+                // On release/final change, update the filter and save so other code depending on the final value remains compatible
+                personalizationControls.bgBrightness.addEventListener('change', (e) => {
+                    const s = loadPersonalizationSettings() || DEFAULT_PERSONALIZATION;
+                    const val = Number(e.target.value);
+                    s.backgroundBrightness = val;
+                    if (personalizationControls.bgBrightnessValue) personalizationControls.bgBrightnessValue.textContent = val + '%';
+                    // set final filter (less frequent, avoids repeated repainting while dragging)
+                    document.documentElement.style.setProperty('--background-brightness', (val / 100).toFixed(3));
+                    // keep overlay in sync
+                    document.documentElement.style.setProperty('--background-overlay', (1 - (val / 100)).toFixed(3));
+                    applyPersonalizationSettings(s);
+                    savePersonalizationSettings(s);
+                });
+            }
             if (personalizationControls.fontSet) {
                 personalizationControls.fontSet.addEventListener('change', (e) => {
                     const s = loadPersonalizationSettings() || DEFAULT_PERSONALIZATION;
@@ -4350,20 +6259,66 @@
                 captureTarget: null,
                 restoreOnDrag: false
             };
+
+            // ========== 現代化開機序列 ==========
             function initBootSequence() {
-                const status = document.getElementById('boot-status');
-                setTimeout(() => {
-                    status.textContent = '載入核心模組...';
-                }, 1000);
-                setTimeout(() => {
-                    status.textContent = '啟動使用者介面...';
-                }, 2000);
-                setTimeout(() => {
-                    bootLoader.style.opacity = '0';
+                const bootLoader = document.getElementById('boot-loader');
+                const progressFill = document.getElementById('bootProgressFill');
+                const progressLabel = document.getElementById('bootProgressLabel');
+                const progressPercent = document.getElementById('bootProgressPercent');
+                const particlesContainer = document.getElementById('bootParticles');
+
+                // 創建粒子效果
+                function createBootParticles() {
+                    if (!particlesContainer) return;
+                    for (let i = 0; i < 30; i++) {
+                        const particle = document.createElement('div');
+                        particle.className = 'boot-particle';
+                        particle.style.left = `${Math.random() * 100}%`;
+                        particle.style.animationDelay = `${Math.random() * 5}s`;
+                        particle.style.animationDuration = `${5 + Math.random() * 5}s`;
+                        particlesContainer.appendChild(particle);
+                    }
+                }
+
+                // 更新進度
+                function updateProgress(percent, label) {
+                    if (progressFill) progressFill.style.width = `${percent}%`;
+                    if (progressPercent) progressPercent.textContent = `${percent}%`;
+                    if (progressLabel) progressLabel.textContent = label;
+                }
+
+                // 初始化粒子
+                createBootParticles();
+
+                // 系統啟動進度序列
+                const bootSteps = [
+                    { delay: 200, label: '初始化系統...', progress: 5 },
+                    { delay: 500, label: '載入核心模組...', progress: 15 },
+                    { delay: 900, label: '偵測硬體設備...', progress: 30 },
+                    { delay: 1300, label: '掛載檔案系統...', progress: 45 },
+                    { delay: 1700, label: '載入驅動程式...', progress: 60 },
+                    { delay: 2100, label: '初始化網路...', progress: 75 },
+                    { delay: 2500, label: '載入使用者介面...', progress: 90 },
+                    { delay: 2900, label: '系統準備就緒', progress: 100 },
+                ];
+
+                // 執行進度序列
+                bootSteps.forEach(({ delay, label, progress }) => {
                     setTimeout(() => {
-                        bootLoader.remove();
-                    }, 500);
-                }, 3000);
+                        updateProgress(progress, label);
+                    }, delay);
+                });
+
+                // 完成開機動畫
+                setTimeout(() => {
+                    if (bootLoader) {
+                        bootLoader.classList.add('fade-out');
+                        setTimeout(() => {
+                            bootLoader.remove();
+                        }, 800);
+                    }
+                }, 3500);
             }
 
             // --- 2. 時間與日期 ---
@@ -4406,12 +6361,14 @@
 
                 const firstDay = new Date(year, month, 1).getDay();
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const daysInPrevMonth = new Date(year, month, 0).getDate();
                 const today = new Date();
 
-                // 上個月的日期
-                for (let i = 0; i < firstDay; i++) {
+                // 上個月的日期（填充開頭空白）
+                for (let i = firstDay - 1; i >= 0; i--) {
                     const cell = document.createElement('div');
                     cell.classList.add('calendar-cell', 'other-month');
+                    cell.textContent = daysInPrevMonth - i;
                     calendarGrid.appendChild(cell);
                 }
 
@@ -4423,6 +6380,17 @@
                     if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
                         cell.classList.add('today');
                     }
+                    calendarGrid.appendChild(cell);
+                }
+
+                // 下個月的日期（填充至固定6行，共42格）
+                const totalCells = 42; // 6行 x 7列
+                const currentCells = firstDay + daysInMonth;
+                const remainingCells = totalCells - currentCells;
+                for (let i = 1; i <= remainingCells; i++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('calendar-cell', 'other-month');
+                    cell.textContent = i;
                     calendarGrid.appendChild(cell);
                 }
             }
@@ -4438,23 +6406,495 @@
                 e.stopPropagation();
                 calendarFlyout.classList.toggle('show');
                 startMenu.classList.remove('show');
-                widgetsPanel.classList.remove('show');
+                // 全螢幕模式下不關閉小工具面板
+                if (!widgetsPanel.classList.contains('fullscreen')) {
+                    closeWidgetsPanel();
+                }
             });
+            
+            // Helper function to close widgets panel and reset its state
+            function closeWidgetsPanel() {
+                widgetsPanel.classList.remove('show');
+                widgetsPanel.classList.remove('fullscreen');
+                widgetsPanel.classList.remove('collapsed');
+                // Reset fullscreen button icon
+                const widgetsFsBtn = document.getElementById('widgets-fullscreen-btn');
+                if (widgetsFsBtn) {
+                    const icon = widgetsFsBtn.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('fa-compress');
+                        icon.classList.add('fa-expand');
+                    }
+                    widgetsFsBtn.title = '全螢幕';
+                }
+                // Reset collapse button
+                const widgetsColBtn = document.getElementById('widgets-collapse-btn');
+                if (widgetsColBtn) {
+                    widgetsColBtn.title = '收合小工具';
+                }
+            }
 
             // --- 4. 開始功能表 ---
             startButton.addEventListener('click', (e) => {
                 e.stopPropagation();
                 startMenu.classList.toggle('show');
                 calendarFlyout.classList.remove('show');
-                widgetsPanel.classList.remove('show');
+                // 全螢幕模式下不關閉小工具面板（作為桌面使用）
+                if (!widgetsPanel.classList.contains('fullscreen')) {
+                    closeWidgetsPanel();
+                }
             });
             
             // --- 5. 小工具面板 ---
             widgetsButton.addEventListener('click', (e) => {
                 e.stopPropagation();
-                widgetsPanel.classList.toggle('show');
+                // 如果在全螢幕模式，點擊會退出全螢幕並關閉面板
+                if (widgetsPanel.classList.contains('fullscreen')) {
+                    closeWidgetsPanel();
+                } else {
+                    widgetsPanel.classList.toggle('show');
+                }
                 startMenu.classList.remove('show');
                 calendarFlyout.classList.remove('show');
+            });
+            
+            // --- 5.1 小工具全螢幕按鈕 ---
+            const widgetsFullscreenBtn = document.getElementById('widgets-fullscreen-btn');
+            const widgetsSettingsBtn = document.getElementById('widgets-settings-btn');
+            const widgetsCollapseBtn = document.getElementById('widgets-collapse-btn');
+            
+            if (widgetsFullscreenBtn) {
+                widgetsFullscreenBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isEnteringFullscreen = !widgetsPanel.classList.contains('fullscreen');
+                    widgetsPanel.classList.toggle('fullscreen');
+                    
+                    // 進入全螢幕時最小化所有視窗
+                    if (isEnteringFullscreen) {
+                        minimizeAllWindows();
+                    }
+                    
+                    // 退出全螢幕時重置收合狀態
+                    if (!widgetsPanel.classList.contains('fullscreen')) {
+                        widgetsPanel.classList.remove('collapsed');
+                        if (widgetsCollapseBtn) {
+                            widgetsCollapseBtn.title = '收合小工具';
+                        }
+                    }
+                    // 更新圖示
+                    const icon = widgetsFullscreenBtn.querySelector('i');
+                    if (widgetsPanel.classList.contains('fullscreen')) {
+                        icon.classList.remove('fa-expand');
+                        icon.classList.add('fa-compress');
+                        widgetsFullscreenBtn.title = '退出全螢幕';
+                    } else {
+                        icon.classList.remove('fa-compress');
+                        icon.classList.add('fa-expand');
+                        widgetsFullscreenBtn.title = '全螢幕';
+                    }
+                });
+            }
+            
+            // 最小化所有視窗的輔助函數
+            function minimizeAllWindows() {
+                const allWindows = document.querySelectorAll('.window.show');
+                allWindows.forEach(win => {
+                    const appId = win.dataset.app;
+                    if (appId) {
+                        win.classList.add('minimized');
+                        win.classList.remove('show', 'active');
+                        // 更新任務欄圖標狀態
+                        const tbIcon = document.getElementById(`taskbar-icon-${appId}`);
+                        if (tbIcon) {
+                            tbIcon.classList.remove('active-app');
+                            tbIcon.classList.add('open-app');
+                            tbIcon.setAttribute('aria-pressed', 'false');
+                        }
+                    }
+                });
+                // 清除活躍視窗
+                if (activeWindow) {
+                    activeWindow = null;
+                    updateTaskbarActive(null);
+                }
+            }
+            
+            // --- 5.1.1 小工具收合按鈕 ---
+            if (widgetsCollapseBtn) {
+                widgetsCollapseBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    widgetsPanel.classList.toggle('collapsed');
+                    // 更新提示文字
+                    if (widgetsPanel.classList.contains('collapsed')) {
+                        widgetsCollapseBtn.title = '展開小工具';
+                    } else {
+                        widgetsCollapseBtn.title = '收合小工具';
+                    }
+                });
+            }
+            
+            // --- 5.2 小工具設定按鈕 ---
+            if (widgetsSettingsBtn) {
+                widgetsSettingsBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    // 開啟設定視窗
+                    openWindow('settings');
+                    // 全螢幕模式下不關閉小工具面板（類似 Win10 平板模式）
+                    if (!widgetsPanel.classList.contains('fullscreen')) {
+                        closeWidgetsPanel();
+                    }
+                });
+            }
+            
+            // --- 5.2.0 小工具狀態保存/載入功能 ---
+            const WIDGETS_STATE_KEY = 'webos_widgets_state_v1';
+            
+            // 保存小工具狀態
+            function saveWidgetsState() {
+                const widgetsContent = document.querySelector('.widgets-content');
+                if (!widgetsContent) return;
+                
+                const widgets = widgetsContent.querySelectorAll('.widget');
+                const state = [];
+                
+                widgets.forEach(widget => {
+                    const id = widget.id;
+                    const size = parseInt(widget.dataset.widgetSize) || 2;
+                    if (id) {
+                        state.push({ id, size });
+                    }
+                });
+                
+                try {
+                    localStorage.setItem(WIDGETS_STATE_KEY, JSON.stringify(state));
+                } catch (e) {
+                    console.warn('無法保存小工具狀態:', e);
+                }
+            }
+            
+            // 載入小工具狀態
+            function loadWidgetsState() {
+                const widgetsContent = document.querySelector('.widgets-content');
+                if (!widgetsContent) return;
+                
+                try {
+                    const raw = localStorage.getItem(WIDGETS_STATE_KEY);
+                    if (!raw) return;
+                    
+                    const state = JSON.parse(raw);
+                    if (!Array.isArray(state) || state.length === 0) return;
+                    
+                    // 建立 id 到元素的映射
+                    const widgetMap = {};
+                    widgetsContent.querySelectorAll('.widget').forEach(widget => {
+                        if (widget.id) {
+                            widgetMap[widget.id] = widget;
+                        }
+                    });
+                    
+                    // 根據保存的順序重新排列小工具
+                    state.forEach(item => {
+                        const widget = widgetMap[item.id];
+                        if (widget) {
+                            // 更新大小
+                            widget.classList.remove('widget-size-1', 'widget-size-2', 'widget-size-3');
+                            widget.classList.add(`widget-size-${item.size}`);
+                            widget.dataset.widgetSize = item.size;
+                            
+                            // 更新按鈕文字
+                            const sizeBtn = widget.querySelector('.widget-size-toggle');
+                            if (sizeBtn) {
+                                sizeBtn.textContent = item.size;
+                            }
+                            
+                            // 移動到正確位置
+                            widgetsContent.appendChild(widget);
+                        }
+                    });
+                } catch (e) {
+                    console.warn('無法載入小工具狀態:', e);
+                }
+            }
+            
+            // 頁面載入時載入小工具狀態
+            loadWidgetsState();
+            
+            // --- 5.2.1 小工具大小切換功能 ---
+            (function initWidgetSizeToggle() {
+                const widgetsContent = document.querySelector('.widgets-content');
+                if (!widgetsContent) return;
+                
+                // 處理大小切換按鈕點擊
+                widgetsContent.addEventListener('click', (e) => {
+                    const sizeBtn = e.target.closest('.widget-size-toggle');
+                    if (!sizeBtn) return;
+                    
+                    e.stopPropagation();
+                    e.preventDefault();
+                    
+                    const widget = sizeBtn.closest('.widget');
+                    if (!widget) return;
+                    
+                    // 獲取當前大小
+                    let currentSize = parseInt(widget.dataset.widgetSize) || 2;
+                    
+                    // 循環切換大小: 1 -> 2 -> 3 -> 1
+                    let newSize = currentSize >= 3 ? 1 : currentSize + 1;
+                    
+                    // 移除舊的大小類別
+                    widget.classList.remove('widget-size-1', 'widget-size-2', 'widget-size-3');
+                    
+                    // 添加新的大小類別
+                    widget.classList.add(`widget-size-${newSize}`);
+                    widget.dataset.widgetSize = newSize;
+                    
+                    // 更新按鈕文字
+                    sizeBtn.textContent = newSize;
+                    
+                    // 保存狀態
+                    saveWidgetsState();
+                });
+            })();
+            
+            // --- 5.2.2 小工具拖曳排序功能 ---
+            (function initWidgetDragSort() {
+                const widgetsContent = document.querySelector('.widgets-content');
+                if (!widgetsContent) return;
+                
+                let draggedWidget = null;
+                let placeholder = null;
+                let longPressTimer = null;
+                let isDragging = false;
+                let startY = 0;
+                let offsetY = 0;
+                const LONG_PRESS_DURATION = 500; // 長按 500ms 啟動拖曳
+                
+                // 獲取所有可拖曳的小工具
+                function getWidgets() {
+                    return widgetsContent.querySelectorAll('.widget');
+                }
+                
+                // 創建佔位元素
+                function createPlaceholder(height) {
+                    const el = document.createElement('div');
+                    el.className = 'widget-drag-placeholder';
+                    el.style.height = height + 'px';
+                    return el;
+                }
+                
+                // 開始拖曳
+                function startDrag(widget, clientY) {
+                    isDragging = true;
+                    draggedWidget = widget;
+                    
+                    const rect = widget.getBoundingClientRect();
+                    const contentRect = widgetsContent.getBoundingClientRect();
+                    offsetY = clientY - rect.top;
+                    
+                    // 創建佔位元素
+                    placeholder = createPlaceholder(rect.height);
+                    widget.parentNode.insertBefore(placeholder, widget);
+                    
+                    // 設定拖曳樣式
+                    widget.classList.add('dragging');
+                    widget.style.position = 'fixed';
+                    widget.style.width = rect.width + 'px';
+                    widget.style.left = rect.left + 'px';
+                    widget.style.top = (clientY - offsetY) + 'px';
+                    widget.style.zIndex = '1000';
+                    widget.style.pointerEvents = 'none';
+                    
+                    document.body.style.cursor = 'grabbing';
+                }
+                
+                // 移動拖曳中的小工具
+                function moveDrag(clientY) {
+                    if (!isDragging || !draggedWidget) return;
+                    
+                    // 更新位置
+                    draggedWidget.style.top = (clientY - offsetY) + 'px';
+                    
+                    // 自動滾動
+                    const contentRect = widgetsContent.getBoundingClientRect();
+                    const scrollThreshold = 50;
+                    const scrollSpeed = 10;
+                    
+                    if (clientY < contentRect.top + scrollThreshold) {
+                        widgetsContent.scrollTop -= scrollSpeed;
+                    } else if (clientY > contentRect.bottom - scrollThreshold) {
+                        widgetsContent.scrollTop += scrollSpeed;
+                    }
+                    
+                    // 檢測目標位置
+                    const widgets = Array.from(getWidgets()).filter(w => w !== draggedWidget);
+                    
+                    // 如果沒有其他小工具，直接返回
+                    if (widgets.length === 0) return;
+                    
+                    // 找到應該插入的位置
+                    let insertBefore = null;
+                    
+                    for (const widget of widgets) {
+                        if (widget === placeholder) continue;
+                        
+                        const rect = widget.getBoundingClientRect();
+                        const midY = rect.top + rect.height / 2;
+                        
+                        if (clientY < midY) {
+                            insertBefore = widget;
+                            break;
+                        }
+                    }
+                    
+                    // 如果 insertBefore 為 null，表示要放到最後
+                    // 否則插入到 insertBefore 之前
+                    if (insertBefore) {
+                        if (placeholder.nextElementSibling !== insertBefore) {
+                            widgetsContent.insertBefore(placeholder, insertBefore);
+                        }
+                    } else {
+                        // 放到最後
+                        const lastWidget = widgets[widgets.length - 1];
+                        if (lastWidget && lastWidget !== placeholder && placeholder.previousElementSibling !== lastWidget) {
+                            widgetsContent.appendChild(placeholder);
+                        }
+                    }
+                }
+                
+                // 結束拖曳
+                function endDrag() {
+                    if (!isDragging || !draggedWidget) return;
+                    
+                    // 將小工具移到佔位元素的位置
+                    if (placeholder && placeholder.parentNode) {
+                        placeholder.parentNode.insertBefore(draggedWidget, placeholder);
+                        placeholder.parentNode.removeChild(placeholder);
+                    }
+                    
+                    // 重置樣式
+                    draggedWidget.classList.remove('dragging');
+                    draggedWidget.style.position = '';
+                    draggedWidget.style.width = '';
+                    draggedWidget.style.left = '';
+                    draggedWidget.style.top = '';
+                    draggedWidget.style.zIndex = '';
+                    draggedWidget.style.pointerEvents = '';
+                    
+                    document.body.style.cursor = '';
+                    
+                    draggedWidget = null;
+                    placeholder = null;
+                    isDragging = false;
+                    
+                    // 保存狀態
+                    saveWidgetsState();
+                }
+                
+                // 取消拖曳
+                function cancelDrag() {
+                    if (longPressTimer) {
+                        clearTimeout(longPressTimer);
+                        longPressTimer = null;
+                    }
+                    if (isDragging) {
+                        endDrag();
+                    }
+                }
+                
+                // 滑鼠事件
+                widgetsContent.addEventListener('mousedown', (e) => {
+                    const widget = e.target.closest('.widget');
+                    if (!widget) return;
+                    
+                    // 如果點擊的是輸入框、按鈕或大小切換按鈕，不啟動拖曳
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('.widget-size-toggle')) {
+                        return;
+                    }
+                    
+                    startY = e.clientY;
+                    
+                    longPressTimer = setTimeout(() => {
+                        startDrag(widget, e.clientY);
+                    }, LONG_PRESS_DURATION);
+                });
+                
+                document.addEventListener('mousemove', (e) => {
+                    // 如果還在長按等待中，檢查是否移動太多
+                    if (longPressTimer && Math.abs(e.clientY - startY) > 10) {
+                        clearTimeout(longPressTimer);
+                        longPressTimer = null;
+                    }
+                    
+                    if (isDragging) {
+                        e.preventDefault();
+                        moveDrag(e.clientY);
+                    }
+                });
+                
+                document.addEventListener('mouseup', () => {
+                    cancelDrag();
+                });
+                
+                // 觸控事件 (支援行動裝置)
+                widgetsContent.addEventListener('touchstart', (e) => {
+                    const widget = e.target.closest('.widget');
+                    if (!widget) return;
+                    
+                    // 如果點擊的是輸入框、按鈕或大小切換按鈕，不啟動拖曳
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('.widget-size-toggle')) {
+                        return;
+                    }
+                    
+                    const touch = e.touches[0];
+                    startY = touch.clientY;
+                    
+                    longPressTimer = setTimeout(() => {
+                        startDrag(widget, touch.clientY);
+                        // 震動回饋 (如果支援)
+                        if (navigator.vibrate) {
+                            navigator.vibrate(50);
+                        }
+                    }, LONG_PRESS_DURATION);
+                }, { passive: true });
+                
+                document.addEventListener('touchmove', (e) => {
+                    if (!isDragging) {
+                        // 如果還在長按等待中，檢查是否移動太多
+                        if (longPressTimer) {
+                            const touch = e.touches[0];
+                            if (Math.abs(touch.clientY - startY) > 10) {
+                                clearTimeout(longPressTimer);
+                                longPressTimer = null;
+                            }
+                        }
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    moveDrag(touch.clientY);
+                }, { passive: false });
+                
+                document.addEventListener('touchend', () => {
+                    cancelDrag();
+                });
+                
+                document.addEventListener('touchcancel', () => {
+                    cancelDrag();
+                });
+            })();
+            
+            // --- 5.3 Metro 磚塊點擊事件 ---
+            const metroTiles = document.querySelectorAll('.metro-tile[data-app]');
+            metroTiles.forEach(tile => {
+                tile.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const appName = tile.dataset.app;
+                    if (appName) {
+                        openWindow(appName);
+                        // 保持小工具面板開啟，類似 Win10 平板模式
+                    }
+                });
             });
 
             // --- 6. 全域點擊 (隱藏彈窗) ---
@@ -4466,8 +6906,9 @@
                 if (!calendarFlyout.contains(e.target) && e.target !== taskbarTime) {
                     calendarFlyout.classList.remove('show');
                 }
-                if (!widgetsPanel.contains(e.target) && e.target !== widgetsButton) {
-                    widgetsPanel.classList.remove('show');
+                // 全螢幕模式下不關閉小工具面板（作為桌面使用）
+                if (!widgetsPanel.contains(e.target) && e.target !== widgetsButton && !widgetsPanel.classList.contains('fullscreen')) {
+                    closeWidgetsPanel();
                 }
                 contextMenu.classList.remove('show');
                 // Hide start menu context if visible
@@ -4479,13 +6920,53 @@
                 if (!simulatorContainer.contains(e.target)) {
                     startMenu.classList.remove('show');
                     calendarFlyout.classList.remove('show');
-                    widgetsPanel.classList.remove('show');
+                    // 全螢幕模式下不關閉小工具面板
+                    if (!widgetsPanel.classList.contains('fullscreen')) {
+                        closeWidgetsPanel();
+                    }
                     contextMenu.classList.remove('show');
                     const startCtx2 = document.getElementById('start-context-menu');
                     if (startCtx2) startCtx2.classList.remove('show');
                 }
             });
             
+            // --- 6.1 點擊非視窗區域時取消活躍視窗 (像 Windows 一樣) ---
+            // 桌面點擊
+            desktop.addEventListener('mousedown', (e) => {
+                // 如果點擊的是桌面本身（不是桌面上的應用圖示）
+                if (e.target === desktop || e.target.closest('.desktop-icon')) {
+                    clearActiveWindow();
+                }
+            });
+            
+            // 工作列點擊 (排除會開啟視窗的按鈕)
+            taskbar.addEventListener('mousedown', (e) => {
+                const target = e.target;
+                const taskbarIcon = target.closest('.taskbar-icon[data-app]');
+                // 如果不是點擊應用圖示，則清除活躍視窗
+                if (!taskbarIcon) {
+                    clearActiveWindow();
+                }
+            });
+            
+            // 小工具面板點擊
+            widgetsPanel.addEventListener('mousedown', (e) => {
+                // 只在點擊小工具面板內部非視窗區域時清除
+                if (!e.target.closest('.window')) {
+                    clearActiveWindow();
+                }
+            });
+            
+            // 開始選單點擊
+            startMenu.addEventListener('mousedown', (e) => {
+                clearActiveWindow();
+            });
+            
+            // 日曆彈窗點擊
+            calendarFlyout.addEventListener('mousedown', (e) => {
+                clearActiveWindow();
+            });
+
             // --- 7. 右鍵選單 ---
             desktop.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
@@ -4554,6 +7035,57 @@
                 });
             }
 
+            // --- 7.5 工具列點擊反饋動畫 ---
+            
+            // 創建漣漪效果
+            function createRipple(element, event) {
+                // 移除現有的漣漪效果
+                const existingRipple = element.querySelector('.ripple');
+                if (existingRipple) {
+                    existingRipple.remove();
+                }
+                
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                
+                const rect = element.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = event.clientX - rect.left - size / 2;
+                const y = event.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = `${size}px`;
+                ripple.style.left = `${x}px`;
+                ripple.style.top = `${y}px`;
+                
+                element.appendChild(ripple);
+                
+                // 動畫結束後移除漣漪元素
+                ripple.addEventListener('animationend', () => {
+                    ripple.remove();
+                });
+            }
+            
+            // 添加彈跳效果
+            function addClickBounce(element) {
+                element.classList.remove('click-bounce');
+                // 觸發 reflow 以重新啟動動畫
+                void element.offsetWidth;
+                element.classList.add('click-bounce');
+                
+                element.addEventListener('animationend', () => {
+                    element.classList.remove('click-bounce');
+                }, { once: true });
+            }
+            
+            // 為所有任務欄圖標綁定點擊動畫效果 (使用事件委派)
+            taskbar.addEventListener('click', (e) => {
+                const icon = e.target.closest('.taskbar-icon');
+                if (icon) {
+                    createRipple(icon, e);
+                    addClickBounce(icon);
+                }
+            });
+
             // --- 8. 視窗管理 ---
             
             // 8.1 設為活躍
@@ -4581,6 +7113,17 @@
                 activeWindow.style.zIndex = 3000;
                 
                 updateTaskbarActive(activeWindow.dataset.app);
+            }
+
+            // 8.1.1 清除活躍視窗 (點擊桌面、工作列、小工具等非視窗區域時)
+            function clearActiveWindow() {
+                if (activeWindow) {
+                    activeWindow.classList.remove('active');
+                    highestZIndex++;
+                    activeWindow.style.zIndex = highestZIndex;
+                    activeWindow = null;
+                    updateTaskbarActive(null);
+                }
             }
 
             // 8.2 更新任務欄
@@ -5823,10 +8366,11 @@
                 });
             }
             syncTaskbarWithWindows();
-            // 全域初始化 (背景、導航、動畫)
+            // 全域初始化 (背景、導航)
+            // 注意：此頁面有自己的開機畫面，不需要顯示過場動畫
             if (typeof Core !== 'undefined' && typeof Core.initBackground === 'function') Core.initBackground();
             if (typeof Navigation !== 'undefined' && typeof Navigation.init === 'function') Navigation.init();
-            if (typeof Animations !== 'undefined' && typeof Animations.init === 'function') Animations.init();
+            // 跳過 Animations.init() 以避免顯示過場動畫
             
             // 處理窗口大小變化 (用於最大化視窗)
             // 監聽 window resize 事件，以確保在瀏覽器大小變化時，最大化的視窗能正確調整高度
@@ -6032,6 +8576,27 @@
                 e.stopPropagation();
                 browserUrlInput.focus();
             });
+
+            // 監聽 iframe 獲得焦點時，將瀏覽器視窗設為前台
+            // 由於 iframe 內部點擊不會冒泡，使用 window blur 事件檢測
+            window.addEventListener('blur', () => {
+                // 當主視窗失去焦點時，檢查是否是因為 iframe 獲得焦點
+                setTimeout(() => {
+                    if (document.activeElement === browserIframe) {
+                        // iframe 獲得焦點，將瀏覽器視窗設為活躍
+                        if (browserWindow && browserWindow.classList.contains('show')) {
+                            focusWindow(browserWindow);
+                        }
+                    }
+                }, 0);
+            });
+
+            // 使用 focusin 事件監聽 iframe 焦點（某些瀏覽器支援）
+            browserIframe.addEventListener('focus', () => {
+                if (browserWindow && browserWindow.classList.contains('show')) {
+                    focusWindow(browserWindow);
+                }
+            });
         });
     </script>
 
@@ -6213,6 +8778,167 @@
             // Auto refresh every 10 minutes (cache TTL)
             setInterval(() => { updateWeather(weatherInput.value.trim() || DEFAULT_CITY); }, CACHE_TTL);
 
+    })();
+    </script>
+
+    <!-- Performance Monitor Widget Script -->
+    <script>
+    (function() {
+        'use strict';
+        
+        // Elements
+        const cpuValueEl = document.getElementById('perf-cpu-value');
+        const cpuBarEl = document.getElementById('perf-cpu-bar');
+        const memoryValueEl = document.getElementById('perf-memory-value');
+        const memoryBarEl = document.getElementById('perf-memory-bar');
+        const fpsValueEl = document.getElementById('perf-fps-value');
+        const fpsBarEl = document.getElementById('perf-fps-bar');
+        const uptimeEl = document.getElementById('perf-uptime');
+        const domNodesEl = document.getElementById('perf-dom-nodes');
+        const jsHeapEl = document.getElementById('perf-js-heap');
+        const loadTimeEl = document.getElementById('perf-load-time');
+        
+        // Check if elements exist
+        if (!cpuValueEl) return;
+        
+        // Page load time
+        const pageStartTime = performance.timeOrigin || Date.now();
+        
+        // FPS calculation variables
+        let frameCount = 0;
+        let lastFpsTime = performance.now();
+        let currentFps = 0;
+        
+        // CPU simulation (based on frame timing variance)
+        let lastFrameTime = performance.now();
+        let frameTimes = [];
+        const MAX_FRAME_SAMPLES = 60;
+        
+        // FPS loop
+        function fpsLoop(timestamp) {
+            frameCount++;
+            
+            // Calculate frame delta for CPU estimation
+            const frameDelta = timestamp - lastFrameTime;
+            lastFrameTime = timestamp;
+            frameTimes.push(frameDelta);
+            if (frameTimes.length > MAX_FRAME_SAMPLES) {
+                frameTimes.shift();
+            }
+            
+            // Calculate FPS every second
+            const elapsed = timestamp - lastFpsTime;
+            if (elapsed >= 1000) {
+                currentFps = Math.round((frameCount * 1000) / elapsed);
+                frameCount = 0;
+                lastFpsTime = timestamp;
+            }
+            
+            requestAnimationFrame(fpsLoop);
+        }
+        requestAnimationFrame(fpsLoop);
+        
+        // Update bar status class based on value
+        function updateBarStatus(barEl, value, thresholds) {
+            barEl.classList.remove('warning', 'critical');
+            if (value >= thresholds.critical) {
+                barEl.classList.add('critical');
+            } else if (value >= thresholds.warning) {
+                barEl.classList.add('warning');
+            }
+        }
+        
+        // Format uptime
+        function formatUptime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Main update function
+        function updatePerformance() {
+            // --- CPU Estimation (based on frame time variance) ---
+            // Higher variance = more CPU load (approximate)
+            let cpuEstimate = 0;
+            if (frameTimes.length > 10) {
+                const avgFrameTime = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
+                const targetFrameTime = 16.67; // 60fps target
+                // If frames take longer than target, estimate higher CPU
+                cpuEstimate = Math.min(100, Math.round((avgFrameTime / targetFrameTime) * 30 + Math.random() * 10));
+                // Add some baseline usage
+                cpuEstimate = Math.max(5, Math.min(100, cpuEstimate));
+            }
+            
+            cpuValueEl.textContent = `${cpuEstimate}%`;
+            cpuBarEl.style.width = `${cpuEstimate}%`;
+            updateBarStatus(cpuBarEl, cpuEstimate, { warning: 70, critical: 90 });
+            
+            // --- Memory Usage ---
+            let memoryUsed = 0;
+            let memoryPercent = 0;
+            let jsHeapUsed = 0;
+            
+            if (performance.memory) {
+                // Chrome only
+                jsHeapUsed = performance.memory.usedJSHeapSize / (1024 * 1024);
+                const jsHeapLimit = performance.memory.jsHeapSizeLimit / (1024 * 1024);
+                memoryPercent = Math.round((jsHeapUsed / jsHeapLimit) * 100);
+                memoryUsed = jsHeapUsed;
+            } else {
+                // Estimate based on DOM complexity for other browsers
+                const domCount = document.getElementsByTagName('*').length;
+                memoryUsed = Math.round(domCount * 0.01 + 20 + Math.random() * 5);
+                memoryPercent = Math.min(100, Math.round(memoryUsed / 2));
+                jsHeapUsed = memoryUsed;
+            }
+            
+            memoryValueEl.textContent = `${Math.round(memoryUsed)} MB`;
+            memoryBarEl.style.width = `${Math.min(100, memoryPercent)}%`;
+            updateBarStatus(memoryBarEl, memoryPercent, { warning: 60, critical: 80 });
+            
+            // --- FPS ---
+            const fpsPercent = Math.min(100, Math.round((currentFps / 60) * 100));
+            fpsValueEl.textContent = `${currentFps} fps`;
+            fpsBarEl.style.width = `${fpsPercent}%`;
+            
+            // FPS bar: lower is worse
+            fpsBarEl.classList.remove('warning', 'critical');
+            if (currentFps < 30) {
+                fpsBarEl.classList.add('critical');
+            } else if (currentFps < 50) {
+                fpsBarEl.classList.add('warning');
+            }
+            
+            // --- Additional Stats ---
+            // Uptime
+            const uptime = Date.now() - pageStartTime;
+            uptimeEl.textContent = formatUptime(uptime);
+            
+            // DOM Nodes
+            const domNodes = document.getElementsByTagName('*').length;
+            domNodesEl.textContent = domNodes.toLocaleString();
+            
+            // JS Heap
+            jsHeapEl.textContent = `${Math.round(jsHeapUsed)} MB`;
+            
+            // Page Load Time
+            if (performance.timing && performance.timing.loadEventEnd) {
+                const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+                loadTimeEl.textContent = loadTime > 0 ? `${loadTime} ms` : '---';
+            } else if (performance.getEntriesByType) {
+                const navEntries = performance.getEntriesByType('navigation');
+                if (navEntries.length > 0) {
+                    loadTimeEl.textContent = `${Math.round(navEntries[0].loadEventEnd)} ms`;
+                }
+            }
+        }
+        
+        // Initial update and interval
+        updatePerformance();
+        setInterval(updatePerformance, 1000);
+        
     })();
     </script>
 
