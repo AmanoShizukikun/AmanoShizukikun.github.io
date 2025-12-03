@@ -103,15 +103,18 @@
             flex-direction: column;
             /* 防止 navigation.js 中 toggleSettings 設定的 paddingTop 影響佈局 */
             padding-top: 0 !important;
+            margin-top: 0 !important;
         }
 
         header {
-            position: fixed;
-            top: 0;
+            /* 此頁面為固定視窗模擬器，header 必須始終固定，覆蓋 navigation.js 的動態設定 */
+            position: fixed !important;
+            top: 0 !important;
             left: 0;
             right: 0;
             z-index: 20000; /* 確保 header 高於 nav-overlay (19998) */
             flex-shrink: 0;
+            transform: none !important; /* 防止 navigation.js 的 transform 影響 */
         }
 
         /* 針對此頁面的 nav-overlay 調整，確保低於 header */
@@ -1079,9 +1082,11 @@
             color: #0099cc;
         }
 
-        /* 視窗 - 與整體風格保持一致 */
+        /* 視窗 - 與整體風格保持一致，使用 CSS 變數支援透明度控制 */
         [data-theme="light"] .window {
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--window-bg);
+            backdrop-filter: var(--window-backdrop);
+            -webkit-backdrop-filter: var(--window-backdrop);
             border: 1px solid rgba(0, 153, 204, 0.15);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
         }
@@ -1187,13 +1192,15 @@
         }
 
         [data-theme="light"] #personalization_background_back,
-        [data-theme="light"] #personalization_font_back {
+        [data-theme="light"] #personalization_font_back,
+        [data-theme="light"] #personalization_window_back {
             border-color: rgba(0, 153, 204, 0.2) !important;
             color: #0099cc !important;
         }
 
         [data-theme="light"] #personalization_background_back:hover,
-        [data-theme="light"] #personalization_font_back:hover {
+        [data-theme="light"] #personalization_font_back:hover,
+        [data-theme="light"] #personalization_window_back:hover {
             background: rgba(0, 153, 204, 0.08) !important;
         }
 
@@ -4876,7 +4883,7 @@
                             </div>
                             <div class="setting-item" style="margin-top:6px;" id="personalization_bg_brightness_item">
                                 <div class="setting-item-label">背景亮度
-                                    <span>獨立調整桌面背景的亮度（不影響 UI）</span>
+                                    <span>獨立調整桌面背景的亮度</span>
                                 </div>
                                 <div class="slider-control">
                                     <div class="slider-value" id="personalization_bgBrightnessValue">100%</div>
@@ -4885,13 +4892,12 @@
                             </div>
                             <div class="setting-item">
                                 <div class="setting-item-label">模式
-                                    <span>選擇桌面背景類型（預設 / 漸層 / 單色 / 圖片 / 影片）</span>
+                                    <span>選擇桌面背景類型</span>
                                 </div>
                                 <div class="select-control">
                                     <select id="personalization_backgroundMode" aria-label="背景模式">
                                         <option value="default">預設</option>
-                                        <option value="gradient1">漸層 1</option>
-                                        <option value="gradient2">漸層 2</option>
+                                        <option value="gradient">漸層</option>
                                         <option value="solid">單色</option>
                                         <option value="image">圖片</option>
                                         <option value="video">影片</option>
@@ -4908,25 +4914,14 @@
                                 </div>
                             </div>
 
-                            <!-- Gradient 1 control -->
-                            <div id="personalization_background_gradient1" class="setting-item" style="display:none;">
-                                <div class="setting-item-label">漸層 1
+                            <!-- Gradient control -->
+                            <div id="personalization_background_gradient" class="setting-item" style="display:none;">
+                                <div class="setting-item-label">漸層
                                     <span>從起始顏色到結束顏色 (線性漸層)</span>
                                 </div>
                                 <div style="display:flex; gap:8px; align-items:center;">
-                                    <input type="color" id="personalization_bgGradient1_start" aria-label="漸層1 起始顏色">
-                                    <input type="color" id="personalization_bgGradient1_end" aria-label="漸層1 結束顏色">
-                                </div>
-                            </div>
-
-                            <!-- Gradient 2 control -->
-                            <div id="personalization_background_gradient2" class="setting-item" style="display:none;">
-                                <div class="setting-item-label">漸層 2
-                                    <span>從起始顏色到結束顏色 (線性漸層)</span>
-                                </div>
-                                <div style="display:flex; gap:8px; align-items:center;">
-                                    <input type="color" id="personalization_bgGradient2_start" aria-label="漸層2 起始顏色">
-                                    <input type="color" id="personalization_bgGradient2_end" aria-label="漸層2 結束顏色">
+                                    <input type="color" id="personalization_bgGradient_start" aria-label="漸層起始顏色">
+                                    <input type="color" id="personalization_bgGradient_end" aria-label="漸層結束顏色">
                                 </div>
                             </div>
 
@@ -6554,10 +6549,8 @@
                 bgPreview: document.getElementById('personalization_bgPreview'),
                 bgBrightness: document.getElementById('personalization_bgBrightness'),
                 bgBrightnessValue: document.getElementById('personalization_bgBrightnessValue'),
-                bgGradient1Start: document.getElementById('personalization_bgGradient1_start'),
-                bgGradient1End: document.getElementById('personalization_bgGradient1_end'),
-                bgGradient2Start: document.getElementById('personalization_bgGradient2_start'),
-                bgGradient2End: document.getElementById('personalization_bgGradient2_end'),
+                bgGradientStart: document.getElementById('personalization_bgGradient_start'),
+                bgGradientEnd: document.getElementById('personalization_bgGradient_end'),
                 startShowSuggested: document.getElementById('personalization_startShowSuggested'),
                 startShowRecent: document.getElementById('personalization_startShowRecent'),
                 taskbarPosition: document.getElementById('personalization_taskbarPosition'),
@@ -6598,10 +6591,8 @@
                 backgroundColor: '#0a0a0f',
                 backgroundImageURL: '',
                 backgroundVideoURL: '',
-                backgroundGradient1Start: '#0f2027',
-                backgroundGradient1End: '#2c5364',
-                backgroundGradient2Start: '#141e30',
-                backgroundGradient2End: '#243b55',
+                backgroundGradientStart: '#00ffff',
+                backgroundGradientEnd: '#ff69b4',
                 startSuggested: true,
                 startRecent: true,
                 taskbarPosition: 'center',
@@ -6714,37 +6705,21 @@
                         if (sc && (_lastBackgroundMode !== 'default' || _lastBackgroundValue !== bgDefault)) { sc.style.background = bgDefault; _lastBackgroundMode = 'default'; _lastBackgroundValue = bgDefault; }
                         if (deskEl && (_lastBackgroundMode !== 'default' || _lastBackgroundValue !== bgDefault)) { deskEl.style.background = bgDefault; _lastBackgroundMode = 'default'; _lastBackgroundValue = bgDefault; }
                     }
-                } else if (s.backgroundMode === 'gradient1') {
-                    const g1s = s.backgroundGradient1Start || '#0f2027';
-                    const g1e = s.backgroundGradient1End || '#2c5364';
-                    const bgG1 = `linear-gradient(135deg, ${g1s} 0%, ${g1e} 100%)`;
+                } else if (s.backgroundMode === 'gradient') {
+                    const gs = s.backgroundGradientStart || '#00ffff';
+                    const ge = s.backgroundGradientEnd || '#ff69b4';
+                    const bgG = `linear-gradient(135deg, ${gs} 0%, ${ge} 100%)`;
                     if (desktopBgEl) {
-                        if (_lastBackgroundMode !== 'gradient1' || _lastBackgroundValue !== bgG1) {
-                            desktopBgEl.style.background = bgG1;
-                            _lastBackgroundMode = 'gradient1';
-                            _lastBackgroundValue = bgG1;
+                        if (_lastBackgroundMode !== 'gradient' || _lastBackgroundValue !== bgG) {
+                            desktopBgEl.style.background = bgG;
+                            _lastBackgroundMode = 'gradient';
+                            _lastBackgroundValue = bgG;
                         }
                         if (sc) sc.style.background = 'none';
                         if (deskEl) deskEl.style.background = 'none';
                     } else {
-                        if (sc && (_lastBackgroundMode !== 'gradient1' || _lastBackgroundValue !== bgG1)) { sc.style.background = bgG1; _lastBackgroundMode = 'gradient1'; _lastBackgroundValue = bgG1; }
-                        if (deskEl && (_lastBackgroundMode !== 'gradient1' || _lastBackgroundValue !== bgG1)) { deskEl.style.background = bgG1; _lastBackgroundMode = 'gradient1'; _lastBackgroundValue = bgG1; }
-                    }
-                } else if (s.backgroundMode === 'gradient2') {
-                    const g2s = s.backgroundGradient2Start || '#141e30';
-                    const g2e = s.backgroundGradient2End || '#243b55';
-                    const bgG2 = `linear-gradient(135deg, ${g2s} 0%, ${g2e} 100%)`;
-                    if (desktopBgEl) {
-                        if (_lastBackgroundMode !== 'gradient2' || _lastBackgroundValue !== bgG2) {
-                            desktopBgEl.style.background = bgG2;
-                            _lastBackgroundMode = 'gradient2';
-                            _lastBackgroundValue = bgG2;
-                        }
-                        if (sc) sc.style.background = 'none';
-                        if (deskEl) deskEl.style.background = 'none';
-                    } else {
-                        if (sc && (_lastBackgroundMode !== 'gradient2' || _lastBackgroundValue !== bgG2)) { sc.style.background = bgG2; _lastBackgroundMode = 'gradient2'; _lastBackgroundValue = bgG2; }
-                        if (deskEl && (_lastBackgroundMode !== 'gradient2' || _lastBackgroundValue !== bgG2)) { deskEl.style.background = bgG2; _lastBackgroundMode = 'gradient2'; _lastBackgroundValue = bgG2; }
+                        if (sc && (_lastBackgroundMode !== 'gradient' || _lastBackgroundValue !== bgG)) { sc.style.background = bgG; _lastBackgroundMode = 'gradient'; _lastBackgroundValue = bgG; }
+                        if (deskEl && (_lastBackgroundMode !== 'gradient' || _lastBackgroundValue !== bgG)) { deskEl.style.background = bgG; _lastBackgroundMode = 'gradient'; _lastBackgroundValue = bgG; }
                     }
                 } else if (s.backgroundMode === 'solid') {
                     const bgSolid = s.backgroundColor || '#0a0a0f';
@@ -6842,14 +6817,10 @@
                     if (bp) {
                         if (s.backgroundMode === 'default') {
                             bp.style.background = 'radial-gradient(ellipse at bottom, #0a192f 0%, #05080f 100%)';
-                        } else if (s.backgroundMode === 'gradient1') {
-                            const g1s = s.backgroundGradient1Start || '#0f2027';
-                            const g1e = s.backgroundGradient1End || '#2c5364';
-                            bp.style.background = `linear-gradient(135deg, ${g1s} 0%, ${g1e} 100%)`;
-                        } else if (s.backgroundMode === 'gradient2') {
-                            const g2s = s.backgroundGradient2Start || '#141e30';
-                            const g2e = s.backgroundGradient2End || '#243b55';
-                            bp.style.background = `linear-gradient(135deg, ${g2s} 0%, ${g2e} 100%)`;
+                        } else if (s.backgroundMode === 'gradient') {
+                            const gs = s.backgroundGradientStart || '#00ffff';
+                            const ge = s.backgroundGradientEnd || '#ff69b4';
+                            bp.style.background = `linear-gradient(135deg, ${gs} 0%, ${ge} 100%)`;
                         } else if (s.backgroundMode === 'solid') {
                             bp.style.background = s.backgroundColor || '#0a0a0f';
                         } else if (s.backgroundMode === 'image' && s.backgroundImageURL) {
@@ -6990,10 +6961,8 @@
                     const fsPanel = document.getElementById('personalization_fontSet_panel'); if (fsPanel) fsPanel.value = s.fontSet;
                     const fsScalePanel = document.getElementById('personalization_fontScale_panel'); if (fsScalePanel) fsScalePanel.value = s.fontScale, (document.getElementById('personalization_fontScaleValue_panel') && (document.getElementById('personalization_fontScaleValue_panel').textContent = s.fontScale + '%'));
                     const bgModePanel = document.getElementById('personalization_backgroundMode'); if (bgModePanel) bgModePanel.value = s.backgroundMode;
-                    const bgG1sPanel = document.getElementById('personalization_bgGradient1_start'); if (bgG1sPanel) bgG1sPanel.value = s.backgroundGradient1Start || '#0f2027';
-                    const bgG1ePanel = document.getElementById('personalization_bgGradient1_end'); if (bgG1ePanel) bgG1ePanel.value = s.backgroundGradient1End || '#2c5364';
-                    const bgG2sPanel = document.getElementById('personalization_bgGradient2_start'); if (bgG2sPanel) bgG2sPanel.value = s.backgroundGradient2Start || '#141e30';
-                    const bgG2ePanel = document.getElementById('personalization_bgGradient2_end'); if (bgG2ePanel) bgG2ePanel.value = s.backgroundGradient2End || '#243b55';
+                    const bgGsPanel = document.getElementById('personalization_bgGradient_start'); if (bgGsPanel) bgGsPanel.value = s.backgroundGradientStart || '#00ffff';
+                    const bgGePanel = document.getElementById('personalization_bgGradient_end'); if (bgGePanel) bgGePanel.value = s.backgroundGradientEnd || '#ff69b4';
                     const bgColorPanel = document.getElementById('personalization_bgColor'); if (bgColorPanel) bgColorPanel.value = s.backgroundColor;
                     const bgImagePanel = document.getElementById('personalization_bgImageUrl'); if (bgImagePanel) bgImagePanel.value = s.backgroundImageURL;
                     const bgVideoPanel = document.getElementById('personalization_bgVideoUrl'); if (bgVideoPanel) bgVideoPanel.value = s.backgroundVideoURL || '';
@@ -7003,20 +6972,16 @@
                     const mode = s.backgroundMode;
                     if (personalizationControls.bgColor) personalizationControls.bgColor.style.display = mode === 'solid' ? '' : 'none';
                     if (personalizationControls.bgImageUrl) personalizationControls.bgImageUrl.style.display = mode === 'image' ? '' : 'none';
-                    if (personalizationControls.bgGradient1Start) personalizationControls.bgGradient1Start.style.display = mode === 'gradient1' ? '' : 'none';
-                    if (personalizationControls.bgGradient1End) personalizationControls.bgGradient1End.style.display = mode === 'gradient1' ? '' : 'none';
-                    if (personalizationControls.bgGradient2Start) personalizationControls.bgGradient2Start.style.display = mode === 'gradient2' ? '' : 'none';
-                    if (personalizationControls.bgGradient2End) personalizationControls.bgGradient2End.style.display = mode === 'gradient2' ? '' : 'none';
+                    if (personalizationControls.bgGradientStart) personalizationControls.bgGradientStart.style.display = mode === 'gradient' ? '' : 'none';
+                    if (personalizationControls.bgGradientEnd) personalizationControls.bgGradientEnd.style.display = mode === 'gradient' ? '' : 'none';
                     const solidItem = document.getElementById('personalization_background_solid');
                     const imageItem = document.getElementById('personalization_background_image');
-                    const gradient1Item = document.getElementById('personalization_background_gradient1');
-                    const gradient2Item = document.getElementById('personalization_background_gradient2');
+                    const gradientItem = document.getElementById('personalization_background_gradient');
                     const videoItem = document.getElementById('personalization_background_video');
                     if (solidItem) solidItem.style.display = mode === 'solid' ? 'flex' : 'none';
                     if (imageItem) imageItem.style.display = mode === 'image' ? 'flex' : 'none';
                     if (videoItem) videoItem.style.display = mode === 'video' ? 'flex' : 'none';
-                    if (gradient1Item) gradient1Item.style.display = mode === 'gradient1' ? 'flex' : 'none';
-                    if (gradient2Item) gradient2Item.style.display = mode === 'gradient2' ? 'flex' : 'none';
+                    if (gradientItem) gradientItem.style.display = mode === 'gradient' ? 'flex' : 'none';
                     // reflect start menu toggles status
                     if (personalizationControls.startShowSuggested) {
                         if (s.startSuggested) personalizationControls.startShowSuggested.classList.add('active'); else personalizationControls.startShowSuggested.classList.remove('active');
@@ -7124,6 +7089,8 @@
                     }
                     applyPersonalizationSettings(s);
                     savePersonalizationSettings(s);
+                    // 同步主題設定到 navigation.js 使用的 localStorage key，確保頁面重新載入時主題一致
+                    try { localStorage.setItem('theme', e.target.value); } catch (err) {}
                 });
             }
             if (personalizationControls.accentColor) {
@@ -7157,14 +7124,10 @@
                         personalizationControls.bgImageUrl.style.display = 'none';
                         // No direct main input for video here; the bgVideoUrl is available in the panel
                         try { const videoItem = document.getElementById('personalization_background_video'); if (videoItem) videoItem.style.display = 'flex'; } catch(e){}
-                    } else if (e.target.value === 'gradient1') {
+                    } else if (e.target.value === 'gradient') {
                         personalizationControls.bgColor.style.display = 'none';
                         personalizationControls.bgImageUrl.style.display = 'none';
-                        try { document.getElementById('personalization_background_gradient1').style.display = 'flex'; } catch(e){}
-                    } else if (e.target.value === 'gradient2') {
-                        personalizationControls.bgColor.style.display = 'none';
-                        personalizationControls.bgImageUrl.style.display = 'none';
-                        try { document.getElementById('personalization_background_gradient2').style.display = 'flex'; } catch(e){}
+                        try { document.getElementById('personalization_background_gradient').style.display = 'flex'; } catch(e){}
                     } else {
                         personalizationControls.bgColor.style.display = 'none';
                         personalizationControls.bgImageUrl.style.display = 'none';
@@ -7173,12 +7136,10 @@
                     try {
                         const solidItem = document.getElementById('personalization_background_solid');
                         const imageItem = document.getElementById('personalization_background_image');
-                        const gradient1Item = document.getElementById('personalization_background_gradient1');
-                        const gradient2Item = document.getElementById('personalization_background_gradient2');
+                        const gradientItem = document.getElementById('personalization_background_gradient');
                         if (solidItem) solidItem.style.display = e.target.value === 'solid' ? 'flex' : 'none';
                         if (imageItem) imageItem.style.display = e.target.value === 'image' ? 'flex' : 'none';
-                        if (gradient1Item) gradient1Item.style.display = e.target.value === 'gradient1' ? 'flex' : 'none';
-                        if (gradient2Item) gradient2Item.style.display = e.target.value === 'gradient2' ? 'flex' : 'none';
+                        if (gradientItem) gradientItem.style.display = e.target.value === 'gradient' ? 'flex' : 'none';
                     } catch (err) {}
                     applyPersonalizationSettings(s);
                     savePersonalizationSettings(s);
@@ -7194,42 +7155,22 @@
                     savePersonalizationSettings(s);
                 });
             }
-            if (personalizationControls.bgGradient1Start) {
-                personalizationControls.bgGradient1Start.addEventListener('input', (e) => {
+            if (personalizationControls.bgGradientStart) {
+                personalizationControls.bgGradientStart.addEventListener('input', (e) => {
                     const s = loadPersonalizationSettings() || DEFAULT_PERSONALIZATION;
-                    s.backgroundGradient1Start = e.target.value;
-                    s.backgroundMode = 'gradient1';
-                    personalizationControls.backgroundMode.value = 'gradient1';
+                    s.backgroundGradientStart = e.target.value;
+                    s.backgroundMode = 'gradient';
+                    personalizationControls.backgroundMode.value = 'gradient';
                     applyPersonalizationSettings(s);
                     savePersonalizationSettings(s);
                 });
             }
-            if (personalizationControls.bgGradient1End) {
-                personalizationControls.bgGradient1End.addEventListener('input', (e) => {
+            if (personalizationControls.bgGradientEnd) {
+                personalizationControls.bgGradientEnd.addEventListener('input', (e) => {
                     const s = loadPersonalizationSettings() || DEFAULT_PERSONALIZATION;
-                    s.backgroundGradient1End = e.target.value;
-                    s.backgroundMode = 'gradient1';
-                    personalizationControls.backgroundMode.value = 'gradient1';
-                    applyPersonalizationSettings(s);
-                    savePersonalizationSettings(s);
-                });
-            }
-            if (personalizationControls.bgGradient2Start) {
-                personalizationControls.bgGradient2Start.addEventListener('input', (e) => {
-                    const s = loadPersonalizationSettings() || DEFAULT_PERSONALIZATION;
-                    s.backgroundGradient2Start = e.target.value;
-                    s.backgroundMode = 'gradient2';
-                    personalizationControls.backgroundMode.value = 'gradient2';
-                    applyPersonalizationSettings(s);
-                    savePersonalizationSettings(s);
-                });
-            }
-            if (personalizationControls.bgGradient2End) {
-                personalizationControls.bgGradient2End.addEventListener('input', (e) => {
-                    const s = loadPersonalizationSettings() || DEFAULT_PERSONALIZATION;
-                    s.backgroundGradient2End = e.target.value;
-                    s.backgroundMode = 'gradient2';
-                    personalizationControls.backgroundMode.value = 'gradient2';
+                    s.backgroundGradientEnd = e.target.value;
+                    s.backgroundMode = 'gradient';
+                    personalizationControls.backgroundMode.value = 'gradient';
                     applyPersonalizationSettings(s);
                     savePersonalizationSettings(s);
                 });
@@ -7370,7 +7311,12 @@
             // Initialize personalization at startup
             try {
                 const savedPersonalization = loadPersonalizationSettings();
-                applyPersonalizationSettings(savedPersonalization || DEFAULT_PERSONALIZATION);
+                const settings = savedPersonalization || DEFAULT_PERSONALIZATION;
+                applyPersonalizationSettings(settings);
+                // 同步主題設定到 navigation.js 使用的 localStorage key，確保兩個系統保持一致
+                if (settings.theme) {
+                    try { localStorage.setItem('theme', settings.theme); } catch (err) {}
+                }
             } catch (err) { /* ignore */ }
 
             // Setup toggle controls for start suggestions & recent
