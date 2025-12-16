@@ -1500,7 +1500,7 @@
             color: rgba(0, 153, 204, 0.7);
         }
         
-        [data-theme="light"] .weather-visual #weather-icon {
+        [data-theme="light"] .weather-visual i {
             color: #0099cc;
             filter: drop-shadow(0 0 8px rgba(0, 153, 204, 0.3));
         }
@@ -3110,7 +3110,7 @@
             gap: 10px; 
             flex-shrink: 0;
         }
-        .weather-visual #weather-icon { 
+        .weather-visual i { 
             font-size: 2rem; 
             color: var(--primary-cyan);
             filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.4));
@@ -5709,7 +5709,7 @@
                                 <div class="weather-info">
                                     <div class="temp" id="weather-temp">--°C</div>
                                     <div class="desc" id="weather-desc">載入中...</div>
-                                    <div class="meta"><span id="weather-humidity"></span> <span id="weather-feels"></span> <span id="weather-updated" style="margin-left:8px;color:#9aa; font-size:0.7rem"></span></div>
+                                    <div class="meta"><span class="weather-humidity" id="weather-humidity"></span> <span class="weather-feels" id="weather-feels"></span> <span class="weather-updated" id="weather-updated" style="margin-left:8px;color:#9aa; font-size:0.7rem"></span></div>
                                 </div>
                             </div>
                             <div class="weather-forecast" id="weather-forecast"></div>
@@ -5761,19 +5761,19 @@
                             <div class="perf-stats">
                                 <div class="perf-stat-item">
                                     <span class="perf-stat-label">執行時間</span>
-                                    <span class="perf-stat-value" id="perf-uptime">--:--:--</span>
+                                    <span class="perf-stat-value perf-uptime" id="perf-uptime">--:--:--</span>
                                 </div>
                                 <div class="perf-stat-item">
                                     <span class="perf-stat-label">DOM 節點</span>
-                                    <span class="perf-stat-value" id="perf-dom-nodes">---</span>
+                                    <span class="perf-stat-value perf-dom-nodes" id="perf-dom-nodes">---</span>
                                 </div>
                                 <div class="perf-stat-item">
                                     <span class="perf-stat-label">JS Heap</span>
-                                    <span class="perf-stat-value" id="perf-js-heap">--- MB</span>
+                                    <span class="perf-stat-value perf-js-heap" id="perf-js-heap">--- MB</span>
                                 </div>
                                 <div class="perf-stat-item">
                                     <span class="perf-stat-label">頁面載入</span>
-                                    <span class="perf-stat-value" id="perf-load-time">--- ms</span>
+                                    <span class="perf-stat-value perf-load-time" id="perf-load-time">--- ms</span>
                                 </div>
                             </div>
                         </div>
@@ -6142,6 +6142,9 @@
             const nightlightEndInput = document.getElementById('nightlightEnd');
 
             const DISPLAY_STORAGE_KEY = 'webos_display_settings';
+            const PAGE_ID = window.location.pathname.split('/').pop().replace('.html','') || '';
+            const PAGE_HIDE_KEY = 'webos_hide_nav_' + PAGE_ID; // hide-navbar is per-page for nagato-sakura-webos
+
 
             function mapSliderToBrightness(val) {
                 // Map 0..100 slider to 0.6..1.2 brightness range
@@ -6222,8 +6225,15 @@
                     }
                 }
 
-                // Apply navbar visibility
-                const hideNav = settings && !!settings.hideNavbar;
+                // Apply navbar visibility (scoped to this page)
+                const storedPageHide = localStorage.getItem(PAGE_HIDE_KEY);
+                let hideNav;
+                if (storedPageHide !== null) {
+                    hideNav = storedPageHide === 'true';
+                } else {
+                    hideNav = settings && !!settings.hideNavbar;
+                }
+
                 if (hideNavbarToggle) {
                     if (hideNav) {
                         hideNavbarToggle.classList.add('active');
@@ -6272,7 +6282,11 @@
                     nightlightScheduleEnd: nightlightEndInput ? nightlightEndInput.value : '06:00',
                     hideNavbar: hideNavbarToggle ? hideNavbarToggle.classList.contains('active') : false
                 };
-                try { localStorage.setItem(DISPLAY_STORAGE_KEY, JSON.stringify(settings)); } catch (e) { /* ignore */ }
+                try {
+                    localStorage.setItem(DISPLAY_STORAGE_KEY, JSON.stringify(settings));
+                    // 存取 hideNavbar 為每頁設定，避免影響其他頁面
+                    try { localStorage.setItem(PAGE_HIDE_KEY, settings.hideNavbar ? 'true' : 'false'); } catch (e) { /* ignore */ }
+                } catch (e) { /* ignore */ }
             }
 
             // Initialize from localStorage
@@ -7512,7 +7526,7 @@
                     }
                     // Video thumbnails & upload handlers
                     try {
-                        async function loadVideoIndex() { return ['assets/videos/test.mp4']; }
+                        async function loadVideoIndex() { return ['assets/videos/NS-V5-D.mp4', 'assets/videos/NS-V5-W.mp4']; }
                         const vidsContainer = document.getElementById('personalization_bgVideoThumbs');
                         if (vidsContainer) {
                             vidsContainer.innerHTML = '';
@@ -8028,16 +8042,16 @@
                     icon: 'fa-cloud-sun',
                     create: (id, size) => {
                         const widget = document.createElement('div');
-                        widget.className = `widget weather-widget widget-size-${size || 2}`;
+                        widget.className = `widget weather-widget widget-size-${size || 3}`;
                         widget.id = id || 'widget-weather-' + Date.now();
-                        widget.dataset.widgetSize = String(size || 2);
+                        widget.dataset.widgetSize = String(size || 3);
                         widget.dataset.widgetType = 'weather';
                         widget.innerHTML = `
                             <div class="widget-controls">
-                                <button class="widget-size-toggle" title="調整大小">${size || 2}</button>
+                                <button class="widget-size-toggle" title="調整大小">${size || 3}</button>
                                 <button class="widget-remove-btn" title="移除小工具"><i class="fa-solid fa-xmark"></i></button>
                             </div>
-                            <div class="widget-header">天氣 <span class="small">台北市</span></div>
+                            <div class="widget-header">天氣 <span class="small weather-location">台北市</span></div>
                             <div class="widget-body">
                                 <div class="weather-controls">
                                     <input type="text" aria-label="城市" placeholder="城市 (例如：Taipei / 台北)" />
@@ -8049,8 +8063,10 @@
                                     <div class="weather-info">
                                         <div class="temp">--°C</div>
                                         <div class="desc">點擊刷新獲取天氣</div>
+                                        <div class="meta"><span class="weather-humidity"></span> <span class="weather-feels"></span> <span class="weather-updated" style="margin-left:8px;color:#9aa; font-size:0.7rem"></span></div>
                                     </div>
                                 </div>
+                                <div class="weather-forecast"></div>
                             </div>
                         `;
                         return widget;
@@ -8061,13 +8077,13 @@
                     icon: 'fa-chart-line',
                     create: (id, size) => {
                         const widget = document.createElement('div');
-                        widget.className = `widget performance-widget widget-size-${size || 2}`;
+                        widget.className = `widget performance-widget widget-size-${size || 3}`;
                         widget.id = id || 'widget-performance-' + Date.now();
-                        widget.dataset.widgetSize = String(size || 2);
+                        widget.dataset.widgetSize = String(size || 3);
                         widget.dataset.widgetType = 'performance';
                         widget.innerHTML = `
                             <div class="widget-controls">
-                                <button class="widget-size-toggle" title="調整大小">${size || 2}</button>
+                                <button class="widget-size-toggle" title="調整大小">${size || 3}</button>
                                 <button class="widget-remove-btn" title="移除小工具"><i class="fa-solid fa-xmark"></i></button>
                             </div>
                             <div class="widget-header"><i class="fa-solid fa-chart-line"></i> 效能監控</div>
@@ -8092,6 +8108,24 @@
                                         <span class="perf-label-value">-- fps</span>
                                     </div>
                                     <div class="perf-bar"><div class="perf-bar-fill fps" style="width: 0%"></div></div>
+                                </div>
+                                <div class="perf-stats">
+                                    <div class="perf-stat-item">
+                                        <span class="perf-stat-label">執行時間</span>
+                                        <span class="perf-stat-value perf-uptime">--:--:--</span>
+                                    </div>
+                                    <div class="perf-stat-item">
+                                        <span class="perf-stat-label">DOM 節點</span>
+                                        <span class="perf-stat-value perf-dom-nodes">---</span>
+                                    </div>
+                                    <div class="perf-stat-item">
+                                        <span class="perf-stat-label">JS Heap</span>
+                                        <span class="perf-stat-value perf-js-heap">--- MB</span>
+                                    </div>
+                                    <div class="perf-stat-item">
+                                        <span class="perf-stat-label">頁面載入</span>
+                                        <span class="perf-stat-value perf-load-time">--- ms</span>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -8244,6 +8278,11 @@
                             
                             // 移動到正確位置（按照狀態中的順序）
                             widgetsContent.appendChild(widget);
+                            // 初始化從狀態恢復的小工具
+                            try {
+                                if (widget.classList.contains('weather-widget') && typeof window.initWeatherWidget === 'function') window.initWeatherWidget(widget);
+                                if (widget.classList.contains('performance-widget') && typeof window.initPerfWidget === 'function') window.initPerfWidget(widget);
+                            } catch (e) { console.warn('init restored widget failed', e); }
                         }
                     });
                 } catch (e) {
@@ -8329,7 +8368,13 @@
                             removedWidgets.push(widget.dataset.widgetType);
                             localStorage.setItem('webos_removed_widgets', JSON.stringify(removedWidgets));
                         }
-                        
+
+                        // 清理 widget 內可能存在的 interval
+                        try {
+                            if (widget._weatherInterval) { clearInterval(widget._weatherInterval); widget._weatherInterval = null; }
+                            if (widget._perfInterval) { clearInterval(widget._perfInterval); widget._perfInterval = null; }
+                        } catch (e) {}
+
                         widget.remove();
                         saveWidgetsState();
                     }, 300);
@@ -8409,6 +8454,12 @@
                             newWidget.style.opacity = '0';
                             newWidget.style.transform = 'translateY(10px)';
                             widgetsContent.appendChild(newWidget);
+
+                            // 初始化剛新增的小工具（支援天氣與效能監控）
+                            try {
+                                if (newWidget.classList.contains('weather-widget') && typeof window.initWeatherWidget === 'function') window.initWeatherWidget(newWidget);
+                                if (newWidget.classList.contains('performance-widget') && typeof window.initPerfWidget === 'function') window.initPerfWidget(newWidget);
+                            } catch (e) { console.warn('init widget failed', e); }
                             
                             // 從已移除列表中移除
                             const removedWidgets = JSON.parse(localStorage.getItem('webos_removed_widgets') || '[]');
@@ -11208,29 +11259,18 @@
         });
     </script>
 
-    <!-- Weather widget script -->
+    <!-- Weather widget script (supports multiple instances) -->
     <script>
     (function (){
         const DEFAULT_CITY = '台北';
         const CACHE_KEY = 'webos_weather_cache_v1';
         const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
-        const weatherInput = document.getElementById('weather-city-input');
-        const weatherRefresh = document.getElementById('weather-refresh');
-        const weatherGeo = document.getElementById('weather-geolocate');
-        const weatherIcon = document.getElementById('weather-icon');
-        const weatherTemp = document.getElementById('weather-temp');
-        const weatherDesc = document.getElementById('weather-desc');
-        const weatherHumidity = document.getElementById('weather-humidity');
-        const weatherFeels = document.getElementById('weather-feels');
-        const weatherForecast = document.getElementById('weather-forecast');
-        const weatherLocSpan = document.getElementById('weather-location');
-        const weatherUpdatedElem = document.getElementById('weather-updated');
 
         function _getCache(){
             try{ return JSON.parse(localStorage.getItem(CACHE_KEY)); }catch(e){return null}
         }
         function _setCache(city, data){
-            localStorage.setItem(CACHE_KEY, JSON.stringify({city, ts: Date.now(), data}));
+            try{ localStorage.setItem(CACHE_KEY, JSON.stringify({city, ts: Date.now(), data})); }catch(e){}
         }
         function _checkCache(city){
             const c = _getCache();
@@ -11240,20 +11280,17 @@
         }
 
         async function fetchWeatherData(city){
-            // Primary: wttr.in JSON
             const wttrUrl = `https://wttr.in/${encodeURIComponent(city)}?format=j1`;
             try{
                 const resp = await fetch(wttrUrl);
                 if(resp.ok){
                     return await resp.json();
                 }
-                // fallback via allorigins to avoid CORS issues
                 const fallback = `https://api.allorigins.win/raw?url=${encodeURIComponent(wttrUrl)}`;
                 const alt = await fetch(fallback);
                 if(alt.ok) return await alt.json();
                 throw new Error('無法從 wttr.in 獲取資料');
             }catch(e){
-                // Try allorigins if first failed
                 try{
                     const fallback = `https://api.allorigins.win/raw?url=${encodeURIComponent(wttrUrl)}`;
                     const alt = await fetch(fallback);
@@ -11274,58 +11311,71 @@
             return 'fa-cloud-sun';
         }
 
-        function render(data, city){
+        function renderToWidget(widget, data, city){
             try{
                 const current = data.current_condition && data.current_condition[0];
                 const nearest = (data.nearest_area && data.nearest_area[0]) || null;
                 const locName = nearest && (nearest.areaName && nearest.areaName[0] && nearest.areaName[0].value) ? nearest.areaName[0].value : city;
-                weatherLocSpan.innerText = locName;
-                // icon
+                const weatherLocSpan = widget.querySelector('.widget-header .small') || widget.querySelector('.weather-location');
+                const weatherIcon = widget.querySelector('.weather-visual i');
+                const weatherTemp = widget.querySelector('.temp');
+                const weatherDesc = widget.querySelector('.desc');
+                const weatherHumidity = widget.querySelector('.weather-humidity') || widget.querySelector('.meta span:nth-child(1)');
+                const weatherFeels = widget.querySelector('.weather-feels') || widget.querySelector('.meta span:nth-child(2)');
+                const weatherForecast = widget.querySelector('.weather-forecast');
+                const weatherUpdatedElem = widget.querySelector('.weather-updated') || widget.querySelector('#weather-updated');
+
+                if(weatherLocSpan) weatherLocSpan.innerText = locName;
                 const desc = (current && current.weatherDesc && current.weatherDesc[0] && current.weatherDesc[0].value) || '';
                 const iconClass = getIconForDesc(desc);
-                // using font awesome classes on <i>
-                // Replace icon element classes
-                weatherIcon.className = `fa-solid ${iconClass}`;
-                // temps
-                weatherTemp.innerText = `${current.temp_C}°C`;
-                weatherDesc.innerText = desc;
-                weatherHumidity.innerText = `濕度: ${current.humidity}%`;
-                weatherFeels.innerText = `體感: ${current.FeelsLikeC}°C`;
-                // forecast
-                weatherForecast.innerHTML = '';
-                if(Array.isArray(data.weather)){
-                    for(let i=0;i<data.weather.length && i<3;i++){
-                        const d = data.weather[i];
-                        const date = d.date;
-                        const high = d.maxtempC;
-                        const low = d.mintempC;
-                        const midday = (d.hourly && d.hourly[4] && d.hourly[4].weatherDesc && d.hourly[4].weatherDesc[0] && d.hourly[4].weatherDesc[0].value) ? d.hourly[4].weatherDesc[0].value : '';
-                        const ic = getIconForDesc(midday);
-                        const item = document.createElement('div');
-                        item.className = 'forecast-item';
-                        item.innerHTML = `
-                            <div class="date">${date}</div>
-                            <div class="icon"><i class="fa-solid ${ic}"></i></div>
-                            <div class="temp">${high}° / ${low}°</div>
-                            <div class="desc" style="font-size:0.8rem;color:#bbb">${midday}</div>
-                        `;
-                        weatherForecast.appendChild(item);
+                if(weatherIcon) weatherIcon.className = `fa-solid ${iconClass}`;
+                if(weatherTemp) weatherTemp.innerText = `${current.temp_C}°C`;
+                if(weatherDesc) weatherDesc.innerText = desc;
+                if(weatherHumidity) weatherHumidity.innerText = `濕度: ${current.humidity}%`;
+                if(weatherFeels) weatherFeels.innerText = `體感: ${current.FeelsLikeC}°C`;
+
+                if(weatherForecast) {
+                    weatherForecast.innerHTML = '';
+                    if(Array.isArray(data.weather)){
+                        for(let i=0;i<data.weather.length && i<3;i++){
+                            const d = data.weather[i];
+                            const date = d.date;
+                            const high = d.maxtempC;
+                            const low = d.mintempC;
+                            const midday = (d.hourly && d.hourly[4] && d.hourly[4].weatherDesc && d.hourly[4].weatherDesc[0] && d.hourly[4].weatherDesc[0].value) ? d.hourly[4].weatherDesc[0].value : '';
+                            const ic = getIconForDesc(midday);
+                            const item = document.createElement('div');
+                            item.className = 'forecast-item';
+                            item.innerHTML = `
+                                <div class="date">${date}</div>
+                                <div class="icon"><i class="fa-solid ${ic}"></i></div>
+                                <div class="temp">${high}° / ${low}°</div>
+                                <div class="desc" style="font-size:0.8rem;color:#bbb">${midday}</div>
+                            `;
+                            weatherForecast.appendChild(item);
+                        }
                     }
                 }
-                // Update last refreshed time
-                try{ weatherUpdatedElem.innerText = '更新: ' + new Date().toLocaleTimeString(); }catch(e){}
+
+                if(weatherUpdatedElem) {
+                    try{ weatherUpdatedElem.innerText = '更新: ' + new Date().toLocaleTimeString(); }catch(e){}
+                }
             }catch(e){
-                weatherDesc.innerText = '解析資料時發生錯誤';
-                weatherForecast.innerHTML = '';
+                const weatherDesc = widget.querySelector('.desc');
+                const weatherForecast = widget.querySelector('.weather-forecast');
+                if(weatherDesc) weatherDesc.innerText = '解析資料時發生錯誤';
+                if(weatherForecast) weatherForecast.innerHTML = '';
             }
         }
 
-        async function updateWeather(city){
+        async function updateWeatherForWidget(widget, city){
+            const input = widget.querySelector('.weather-controls input[type="text"]');
+            const refreshBtn = widget.querySelector('.weather-controls button[aria-label="刷新天氣"], .weather-controls button');
+            const descEl = widget.querySelector('.desc');
+            if(!city && input) city = input.value.trim();
             if(!city) city = DEFAULT_CITY;
-            // show loading
-            weatherDesc.innerText = '載入中...';
-            // UI feedback - disable buttons and animate refresh icon
-            try{ weatherRefresh.disabled = true; weatherRefresh.style.opacity = '0.6'; weatherRefresh.querySelector('i')?.classList.add('fa-spin'); }catch(e){}
+            if(descEl) descEl.innerText = '載入中...';
+            if(refreshBtn){ refreshBtn.disabled = true; refreshBtn.style.opacity = '0.6'; const ic = refreshBtn.querySelector('i'); if(ic) ic.classList.add('fa-spin'); }
             try{
                 const cached = _checkCache(city);
                 let data = cached;
@@ -11333,20 +11383,20 @@
                     data = await fetchWeatherData(city);
                     _setCache(city, data);
                 }
-                render(data, city);
+                renderToWidget(widget, data, city);
             }catch(e){
                 console.error(e);
-                weatherDesc.innerText = '無法獲取天氣資料';
-                weatherForecast.innerHTML = '';
+                if(descEl) descEl.innerText = '無法獲取天氣資料';
+                const forecast = widget.querySelector('.weather-forecast'); if(forecast) forecast.innerHTML = '';
             }
-            try{ weatherRefresh.disabled = false; weatherRefresh.style.opacity = '1'; weatherRefresh.querySelector('i')?.classList.remove('fa-spin'); }catch(e){}
+            if(refreshBtn){ refreshBtn.disabled = false; refreshBtn.style.opacity = '1'; const ic = refreshBtn.querySelector('i'); if(ic) ic.classList.remove('fa-spin'); }
         }
 
-        async function detectLocationAndUpdate(){
+        async function detectLocationAndUpdateWidget(widget){
             if(!navigator.geolocation){
-                return updateWeather(DEFAULT_CITY);
+                return updateWeatherForWidget(widget, DEFAULT_CITY);
             }
-            weatherDesc.innerText = '獲取定位中...';
+            const descEl = widget.querySelector('.desc'); if(descEl) descEl.innerText = '獲取定位中...';
             navigator.geolocation.getCurrentPosition(async pos => {
                 try{
                     const {latitude, longitude} = pos.coords;
@@ -11355,108 +11405,101 @@
                     if(r.ok){
                         const rjson = await r.json();
                         const city = rjson.address.city || rjson.address.town || rjson.address.village || rjson.address.county || rjson.address.state || DEFAULT_CITY;
-                        weatherInput.value = city;
-                        updateWeather(city);
+                        const input = widget.querySelector('.weather-controls input[type="text"]'); if(input) input.value = city;
+                        updateWeatherForWidget(widget, city);
                     }else{
-                        updateWeather(DEFAULT_CITY);
+                        updateWeatherForWidget(widget, DEFAULT_CITY);
                     }
                 }catch(e){
-                    updateWeather(DEFAULT_CITY);
+                    updateWeatherForWidget(widget, DEFAULT_CITY);
                 }
             }, err => {
-                updateWeather(DEFAULT_CITY);
+                updateWeatherForWidget(widget, DEFAULT_CITY);
             }, {timeout: 8000});
         }
 
-        // Initialize: populate input and run first fetch
-            (function init(){
-            weatherInput.value = DEFAULT_CITY;
-            weatherInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') updateWeather(weatherInput.value.trim()); });
-            weatherRefresh.addEventListener('click', () => { updateWeather(weatherInput.value.trim() || DEFAULT_CITY); });
-            weatherGeo.addEventListener('click', () => { detectLocationAndUpdate(); });
-            // auto populate from cache or run update
-            const cache = _getCache();
-            const city = (cache && cache.city) ? cache.city : DEFAULT_CITY;
-            if(cache && cache.ts && (Date.now() - cache.ts) < CACHE_TTL && cache.data){
-                render(cache.data, city);
-            }else{
-                updateWeather(city);
+        // Initialize a single weather widget (bind events and start auto-refresh)
+        function initWeatherWidget(widget){
+            if(!widget) return;
+            // Avoid double-init
+            if(widget._weatherInited) return;
+            widget._weatherInited = true;
+
+            const input = widget.querySelector('.weather-controls input[type="text"]');
+            const refreshBtn = widget.querySelector('.weather-controls button[aria-label="刷新天氣"]');
+            const geoBtn = widget.querySelector('.weather-controls button[aria-label="使用定位"]');
+
+            if(input){
+                input.value = input.value || DEFAULT_CITY;
+                input.addEventListener('keydown', (e) => { if(e.key === 'Enter') updateWeatherForWidget(widget, input.value.trim()); });
             }
-            })();
-            // Auto refresh every 10 minutes (cache TTL)
-            setInterval(() => { updateWeather(weatherInput.value.trim() || DEFAULT_CITY); }, CACHE_TTL);
+
+            if(refreshBtn){ refreshBtn.addEventListener('click', () => { updateWeatherForWidget(widget, (input && input.value.trim()) || DEFAULT_CITY); }); }
+            if(geoBtn){ geoBtn.addEventListener('click', () => { detectLocationAndUpdateWidget(widget); }); }
+
+            // Try to load from cache or fetch once
+            const cache = _getCache();
+            const city = (cache && cache.city) ? cache.city : (input && input.value) || DEFAULT_CITY;
+            const cached = _checkCache(city);
+            if(cached){ renderToWidget(widget, cached, city); }
+            else { updateWeatherForWidget(widget, city); }
+
+            // Auto refresh timer (per-widget)
+            try{ widget._weatherInterval = setInterval(() => { updateWeatherForWidget(widget, (input && input.value.trim()) || DEFAULT_CITY); }, CACHE_TTL); }catch(e){}
+        }
+
+        // Auto-init existing weather widgets
+        document.querySelectorAll('.weather-widget').forEach(w => initWeatherWidget(w));
+
+        // Expose init function so dynamically created widgets can be initialized
+        window.initWeatherWidget = initWeatherWidget;
 
     })();
     </script>
 
-    <!-- Performance Monitor Widget Script -->
+    <!-- Performance Monitor Widget Script (supports multiple instances) -->
     <script>
     (function() {
         'use strict';
-        
-        // Elements
-        const cpuValueEl = document.getElementById('perf-cpu-value');
-        const cpuBarEl = document.getElementById('perf-cpu-bar');
-        const memoryValueEl = document.getElementById('perf-memory-value');
-        const memoryBarEl = document.getElementById('perf-memory-bar');
-        const fpsValueEl = document.getElementById('perf-fps-value');
-        const fpsBarEl = document.getElementById('perf-fps-bar');
-        const uptimeEl = document.getElementById('perf-uptime');
-        const domNodesEl = document.getElementById('perf-dom-nodes');
-        const jsHeapEl = document.getElementById('perf-js-heap');
-        const loadTimeEl = document.getElementById('perf-load-time');
-        
-        // Check if elements exist
-        if (!cpuValueEl) return;
-        
-        // Page load time
+
+        // Page start time
         const pageStartTime = performance.timeOrigin || Date.now();
-        
-        // FPS calculation variables
+
+        // FPS calculation variables (global)
         let frameCount = 0;
         let lastFpsTime = performance.now();
         let currentFps = 0;
-        
-        // CPU simulation (based on frame timing variance)
+
+        // CPU estimation variables
         let lastFrameTime = performance.now();
         let frameTimes = [];
         const MAX_FRAME_SAMPLES = 60;
-        
-        // FPS loop
+
+        // Start FPS loop
         function fpsLoop(timestamp) {
             frameCount++;
-            
-            // Calculate frame delta for CPU estimation
             const frameDelta = timestamp - lastFrameTime;
             lastFrameTime = timestamp;
             frameTimes.push(frameDelta);
-            if (frameTimes.length > MAX_FRAME_SAMPLES) {
-                frameTimes.shift();
-            }
-            
-            // Calculate FPS every second
+            if (frameTimes.length > MAX_FRAME_SAMPLES) frameTimes.shift();
+
             const elapsed = timestamp - lastFpsTime;
             if (elapsed >= 1000) {
                 currentFps = Math.round((frameCount * 1000) / elapsed);
                 frameCount = 0;
                 lastFpsTime = timestamp;
             }
-            
             requestAnimationFrame(fpsLoop);
         }
         requestAnimationFrame(fpsLoop);
-        
-        // Update bar status class based on value
+
         function updateBarStatus(barEl, value, thresholds) {
+            if(!barEl) return;
             barEl.classList.remove('warning', 'critical');
-            if (value >= thresholds.critical) {
-                barEl.classList.add('critical');
-            } else if (value >= thresholds.warning) {
-                barEl.classList.add('warning');
-            }
+            if (value >= thresholds.critical) barEl.classList.add('critical');
+            else if (value >= thresholds.warning) barEl.classList.add('warning');
         }
-        
-        // Format uptime
+
         function formatUptime(ms) {
             const totalSeconds = Math.floor(ms / 1000);
             const hours = Math.floor(totalSeconds / 3600);
@@ -11464,89 +11507,122 @@
             const seconds = totalSeconds % 60;
             return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
-        
-        // Main update function
-        function updatePerformance() {
-            // --- CPU Estimation (based on frame time variance) ---
-            // Higher variance = more CPU load (approximate)
+
+        // Compute metrics (shared)
+        function computeMetrics() {
             let cpuEstimate = 0;
             if (frameTimes.length > 10) {
                 const avgFrameTime = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
-                const targetFrameTime = 16.67; // 60fps target
-                // If frames take longer than target, estimate higher CPU
+                const targetFrameTime = 16.67;
                 cpuEstimate = Math.min(100, Math.round((avgFrameTime / targetFrameTime) * 30 + Math.random() * 10));
-                // Add some baseline usage
                 cpuEstimate = Math.max(5, Math.min(100, cpuEstimate));
             }
-            
-            cpuValueEl.textContent = `${cpuEstimate}%`;
-            cpuBarEl.style.width = `${cpuEstimate}%`;
-            updateBarStatus(cpuBarEl, cpuEstimate, { warning: 70, critical: 90 });
-            
-            // --- Memory Usage ---
+
             let memoryUsed = 0;
             let memoryPercent = 0;
             let jsHeapUsed = 0;
-            
             if (performance.memory) {
-                // Chrome only
                 jsHeapUsed = performance.memory.usedJSHeapSize / (1024 * 1024);
                 const jsHeapLimit = performance.memory.jsHeapSizeLimit / (1024 * 1024);
                 memoryPercent = Math.round((jsHeapUsed / jsHeapLimit) * 100);
                 memoryUsed = jsHeapUsed;
             } else {
-                // Estimate based on DOM complexity for other browsers
                 const domCount = document.getElementsByTagName('*').length;
                 memoryUsed = Math.round(domCount * 0.01 + 20 + Math.random() * 5);
                 memoryPercent = Math.min(100, Math.round(memoryUsed / 2));
                 jsHeapUsed = memoryUsed;
             }
-            
-            memoryValueEl.textContent = `${Math.round(memoryUsed)} MB`;
-            memoryBarEl.style.width = `${Math.min(100, memoryPercent)}%`;
-            updateBarStatus(memoryBarEl, memoryPercent, { warning: 60, critical: 80 });
-            
-            // --- FPS ---
-            const fpsPercent = Math.min(100, Math.round((currentFps / 60) * 100));
-            fpsValueEl.textContent = `${currentFps} fps`;
-            fpsBarEl.style.width = `${fpsPercent}%`;
-            
-            // FPS bar: lower is worse
-            fpsBarEl.classList.remove('warning', 'critical');
-            if (currentFps < 30) {
-                fpsBarEl.classList.add('critical');
-            } else if (currentFps < 50) {
-                fpsBarEl.classList.add('warning');
-            }
-            
-            // --- Additional Stats ---
-            // Uptime
+
             const uptime = Date.now() - pageStartTime;
-            uptimeEl.textContent = formatUptime(uptime);
-            
-            // DOM Nodes
             const domNodes = document.getElementsByTagName('*').length;
-            domNodesEl.textContent = domNodes.toLocaleString();
-            
-            // JS Heap
-            jsHeapEl.textContent = `${Math.round(jsHeapUsed)} MB`;
-            
-            // Page Load Time
-            if (performance.timing && performance.timing.loadEventEnd) {
-                const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
-                loadTimeEl.textContent = loadTime > 0 ? `${loadTime} ms` : '---';
-            } else if (performance.getEntriesByType) {
-                const navEntries = performance.getEntriesByType('navigation');
-                if (navEntries.length > 0) {
-                    loadTimeEl.textContent = `${Math.round(navEntries[0].loadEventEnd)} ms`;
-                }
-            }
+
+            return { cpuEstimate, memoryUsed, memoryPercent, jsHeapUsed, uptime, domNodes, currentFps };
         }
-        
-        // Initial update and interval
-        updatePerformance();
-        setInterval(updatePerformance, 1000);
-        
+
+        // Update a single performance widget
+        function updatePerfForWidget(widget) {
+            if(!widget) return;
+            const metrics = computeMetrics();
+
+            // find sections by label
+            const sections = Array.from(widget.querySelectorAll('.perf-section'));
+            sections.forEach(sec => {
+                const titleEl = sec.querySelector('.perf-label-title');
+                const valueEl = sec.querySelector('.perf-label-value');
+                const barFill = sec.querySelector('.perf-bar-fill');
+                if(!titleEl) return;
+                const t = titleEl.textContent || '';
+                if(t.includes('CPU') || t.includes('微')) {
+                    if(valueEl) valueEl.textContent = `${metrics.cpuEstimate}%`;
+                    if(barFill) { barFill.style.width = `${metrics.cpuEstimate}%`; updateBarStatus(barFill, metrics.cpuEstimate, { warning: 70, critical: 90 }); }
+                } else if(t.includes('記憶')) {
+                    if(valueEl) valueEl.textContent = `${Math.round(metrics.memoryUsed)} MB`;
+                    if(barFill) { barFill.style.width = `${Math.min(100, metrics.memoryPercent)}%`; updateBarStatus(barFill, metrics.memoryPercent, { warning: 60, critical: 80 }); }
+                } else if(t.includes('FPS')) {
+                    if(valueEl) valueEl.textContent = `${metrics.currentFps} fps`;
+                    if(barFill) { const fpsPercent = Math.min(100, Math.round((metrics.currentFps / 60) * 100)); barFill.style.width = `${fpsPercent}%`; barFill.classList.remove('warning','critical'); if(metrics.currentFps < 30) barFill.classList.add('critical'); else if(metrics.currentFps < 50) barFill.classList.add('warning'); }
+                }
+            });
+
+            // Directly set perf stat elements (prefer class-based selectors)
+            try {
+                const uptimeEl = widget.querySelector('.perf-uptime');
+                if (uptimeEl) uptimeEl.textContent = formatUptime(metrics.uptime);
+                const domNodesElLocal = widget.querySelector('.perf-dom-nodes');
+                if (domNodesElLocal) domNodesElLocal.textContent = metrics.domNodes.toLocaleString();
+                const jsHeapElLocal = widget.querySelector('.perf-js-heap');
+                if (jsHeapElLocal) jsHeapElLocal.textContent = `${Math.round(metrics.jsHeapUsed)} MB`;
+                const loadTimeElLocal = widget.querySelector('.perf-load-time');
+                if (loadTimeElLocal) {
+                    if (performance.timing && performance.timing.loadEventEnd) {
+                        const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+                        loadTimeElLocal.textContent = loadTime > 0 ? `${loadTime} ms` : '---';
+                    } else if (performance.getEntriesByType) {
+                        const navEntries = performance.getEntriesByType('navigation');
+                        if (navEntries.length > 0) loadTimeElLocal.textContent = `${Math.round(navEntries[0].loadEventEnd)} ms`;
+                    }
+                }
+            } catch (e) {}
+
+            // Fallback: perf-stats by label matching (legacy)
+            const statItems = Array.from(widget.querySelectorAll('.perf-stat-item'));
+            statItems.forEach(item => {
+                const label = (item.querySelector('.perf-stat-label')?.textContent || '').trim();
+                const valEl = item.querySelector('.perf-stat-value');
+                if(!label || !valEl) return;
+                if(label.includes('執行時間') && !item.querySelector('.perf-uptime')) valEl.textContent = formatUptime(metrics.uptime);
+                else if(label.includes('DOM') && !item.querySelector('.perf-dom-nodes')) valEl.textContent = metrics.domNodes.toLocaleString();
+                else if(label.includes('JS Heap') && !item.querySelector('.perf-js-heap')) valEl.textContent = `${Math.round(metrics.jsHeapUsed)} MB`;
+                else if(label.includes('載入') && !item.querySelector('.perf-load-time')) {
+                    if (performance.timing && performance.timing.loadEventEnd) {
+                        const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+                        valEl.textContent = loadTime > 0 ? `${loadTime} ms` : '---';
+                    } else if (performance.getEntriesByType) {
+                        const navEntries = performance.getEntriesByType('navigation');
+                        if (navEntries.length > 0) valEl.textContent = `${Math.round(navEntries[0].loadEventEnd)} ms`;
+                    }
+                }
+            });
+        }
+
+        function initPerfWidget(widget){
+            if(!widget) return;
+            if(widget._perfInited) return;
+            widget._perfInited = true;
+
+            // Initial update
+            updatePerfForWidget(widget);
+
+            // periodic update
+            widget._perfInterval = setInterval(() => {
+                updatePerfForWidget(widget);
+            }, 1000);
+        }
+
+        // Auto-init existing performance widgets
+        document.querySelectorAll('.performance-widget').forEach(w => initPerfWidget(w));
+        window.initPerfWidget = initPerfWidget;
+
     })();
     </script>
 

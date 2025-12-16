@@ -3193,15 +3193,15 @@
             <!-- 統計面板 -->
             <div class="gc-stats">
                 <div class="gc-stat-card">
-                    <div class="gc-stat-value" data-target="6">0</div>
+                    <div class="gc-stat-value" data-target="3">0</div>
                     <div class="gc-stat-label">總遊戲數</div>
                 </div>
                 <div class="gc-stat-card">
-                    <div class="gc-stat-value" data-target="1">0</div>
+                    <div class="gc-stat-value" data-target="3">0</div>
                     <div class="gc-stat-label">可遊玩</div>
                 </div>
                 <div class="gc-stat-card">
-                    <div class="gc-stat-value" data-target="5">0</div>
+                    <div class="gc-stat-value" data-target="0">0</div>
                     <div class="gc-stat-label">開發中</div>
                 </div>
                 <div class="gc-stat-card">
@@ -3235,59 +3235,32 @@
     <script>
         // 遊戲資料
         const games = [
-                {
-                id: 'tetris',
-                title: 'Cyber Tetris',
-                description: '經典俄羅斯方塊的賽博龐克版本，挑戰你的反應速度！',
-                category: 'puzzle',
-                status: 'development',
-                icon: '🎮',
-                url: '#'
-            },
             {
                 id: 'snake',
                 title: 'Neon Snake',
-                description: '霓虹風格的貪食蛇遊戲，吃掉所有的數據方塊！',
+                description: '霓虹風格的貪食蛇遊戲。',
                 category: 'action',
                 status: 'available',
                 icon: '🐍',
                 url: 'games/snake/snake.html'
             },
             {
-                id: 'code-breaker',
-                title: 'Code Breaker',
-                description: '限時破解隨機代碼序列，挑戰你的反應與記憶力！',
-                category: 'puzzle',
-                status: 'development',
-                icon: '💻',
-                url: '#'
+                id: 'piano',
+                title: 'Cyber Piano',
+                description: '未來感賽博鋼琴。',
+                category: 'music',
+                status: 'available',
+                icon: '🎹',
+                url: 'games/piano/piano.html'
             },
             {
-                id: 'breakout',
-                title: 'Data Breaker',
-                description: '打破防火牆的數據方塊遊戲',
-                category: 'action',
-                status: 'development',
-                icon: '🧱',
-                url: '#'
-            },
-            {
-                id: 'memory',
-                title: 'Memory Matrix',
-                description: '測試你的記憶力，配對相同的賽博圖案',
-                category: 'puzzle',
-                status: 'development',
-                icon: '🧠',
-                url: '#'
-            },
-            {
-                id: 'runner',
-                title: 'Cyber Runner',
-                description: '在賽博空間中奔跑，避開障礙物！',
-                category: 'action',
-                status: 'development',
-                icon: '🏃',
-                url: '#'
+                id: 'cyberrace',
+                title: 'Cyber Racer',
+                description: '3D 未來風格賽車遊戲。',
+                category: 'racing',
+                status: 'available',
+                icon: '🏎️',
+                url: 'games/cyberrace/cyberrace.html'
             }
         ];
 

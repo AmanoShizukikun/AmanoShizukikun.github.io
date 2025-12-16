@@ -443,10 +443,25 @@ const Navigation = {
             const html = document.documentElement;
 
             // Header 高度設定
+            // 如果該頁面有自己的隱藏導航設定，優先使用該設定；否則（僅限向後相容）再檢查全域 display 設定
+            const pageId = window.location.pathname.split('/').pop().replace('.html','') || '';
+            const pageHideKey = 'webos_hide_nav_' + pageId;
+            const pageHide = localStorage.getItem(pageHideKey);
+            const displaySettings = JSON.parse(localStorage.getItem('webos_display_settings') || 'null');
+            // 只在 nagato-sakura-webos 頁面允許影響 header（避免其他頁面受影響）
+            const hideNavbar = (pageId === 'nagato-sakura-webos') && (pageHide === 'true' || (displaySettings && !!displaySettings.hideNavbar && pageHide === null));
+
             if (header) {
-                const headerHeight = settings.headerHeight + 'px';
+                const headerHeight = hideNavbar ? '0px' : settings.headerHeight + 'px';
                 header.style.height = headerHeight;
+                if (hideNavbar) {
+                    header.style.minHeight = '0';
+                    header.style.overflow = 'hidden';
+                    header.style.padding = '0';
+                    header.style.borderBottom = 'none';
+                }
                 html.style.setProperty('--header-height', headerHeight);
+                if (hideNavbar) document.body.style.paddingTop = '0';
             }
 
             // Header 固定 - 可選擇跳過
@@ -463,6 +478,11 @@ const Navigation = {
                     header.style.position = 'relative';
                     header.style.transform = 'translateY(0)';
                     header.style.opacity = '1';
+                    document.body.style.paddingTop = '0';
+                }
+
+                // 如果顯示設定要求隱藏導航欄，覆寫任何 paddingTop
+                if (hideNavbar) {
                     document.body.style.paddingTop = '0';
                 }
             }
@@ -871,20 +891,34 @@ const Navigation = {
         const header = document.querySelector('header');
         if (!header) return;
 
-        // 獲取 header 的實際高度（包括 padding 和邊框）
-        const headerHeight = header.offsetHeight;
-        
-        // 設置 CSS 變數
-        document.documentElement.style.setProperty('--header-height', headerHeight + 'px');
-        
-        // 在窗口大小改變時重新計算
+        // 如果使用者已選擇隱藏導覽欄，優先使用該設定，避免覆寫
+        const pageId = window.location.pathname.split('/').pop().replace('.html','') || '';
+        const pageHideKey = 'webos_hide_nav_' + pageId;
+        const pageHide = localStorage.getItem(pageHideKey);
+        const displaySettings = JSON.parse(localStorage.getItem('webos_display_settings') || 'null');
+        const hideNavbar = (pageId === 'nagato-sakura-webos') && (pageHide === 'true' || (displaySettings && !!displaySettings.hideNavbar && pageHide === null));
+        if (hideNavbar) {
+            document.documentElement.style.setProperty('--header-height', '0px');
+        } else {
+            // 獲取 header 的實際高度（包括 padding 和邊框）
+            const headerHeight = header.offsetHeight;
+            // 設置 CSS 變數
+            document.documentElement.style.setProperty('--header-height', headerHeight + 'px');
+        }
+
+        // 在窗口大小改變時重新計算（若隱藏則不需要重算）
         const updateHeaderHeight = Core.debounce(() => {
+            const displaySettings = JSON.parse(localStorage.getItem('webos_display_settings') || 'null');
+            const hideNavbar = displaySettings && !!displaySettings.hideNavbar;
+            if (hideNavbar) return; // 若隱藏，保持為 0px
+
             const newHeight = header.offsetHeight;
             document.documentElement.style.setProperty('--header-height', newHeight + 'px');
         }, 200);
         
         window.addEventListener('resize', updateHeaderHeight);
     },
+
 
     /**
      * 初始化導航搜尋功能

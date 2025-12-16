@@ -1,0 +1,2446 @@
+<!-- 賽博鋼琴 Cyber Piano -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Cyber Piano - 未來感賽博鋼琴">
+    <title>Cyber Piano - 天野靜樹</title>
+    <link rel="icon" href="../../../../assets/images/logo.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../../../assets/css/core.css">
+    <link rel="stylesheet" href="../../../../assets/css/components.css">
+    <link rel="stylesheet" href="../../../../assets/css/animations.css">
+    
+    <style>
+        /* ========== 遊戲容器整體布局 ========== */
+        body {
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .game-center-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ========== 左側導覽欄 ========== */
+        .gc-sidebar {
+            width: 300px;
+            height: calc(100vh - var(--header-height, 75px));
+            position: fixed;
+            left: 0;
+            top: var(--header-height, 75px);
+            background: linear-gradient(180deg, rgba(10, 10, 20, 0.9), rgba(20, 5, 40, 0.9));
+            border-right: 2px solid rgba(0, 255, 255, 0.2);
+            padding: 40px 30px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex-shrink: 0;
+            transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        padding 0.3s ease,
+                        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        top 0.01s ease-out,
+                        height 0.01s ease-out;
+            z-index: 900;
+        }
+
+        @keyframes sidebarSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* 只有在非隱藏狀態下播放進場動畫，避免隱藏時也觸發動畫 */
+        .gc-sidebar:not(.hidden) {
+            animation: sidebarSlideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both;
+        }
+
+        /* Toggle focus style for accessibility */
+        .toggle-switch:focus {
+            outline: none;
+            box-shadow: 0 0 0 6px rgba(0, 255, 255, 0.06);
+        }
+
+        .gc-sidebar.collapsed {
+            width: 70px;
+            padding: 40px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .gc-sidebar.hidden {
+            transform: translateX(-100%);
+            width: 0;
+            padding: 0;
+            border: none;
+        }
+
+        [data-theme="light"] .gc-sidebar {
+            background: linear-gradient(180deg, rgba(240, 245, 252, 0.95), rgba(235, 240, 248, 0.95));
+            border-right-color: rgba(0, 150, 150, 0.2);
+        }
+
+        .gc-sidebar-title {
+            display: none;
+        }
+
+        .gc-sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .gc-sidebar-item {
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .gc-sidebar-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            padding: 10px;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            border-radius: 4px;
+            width: 44px;
+            height: 44px;
+            text-align: center;
+            margin: 0 auto 8px auto;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+        }
+
+        [data-theme="light"] .gc-sidebar-link {
+            color: #666;
+        }
+
+        .gc-sidebar-link::before {
+            content: attr(data-icon);
+            display: inline-flex;
+            width: 24px;
+            height: 24px;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .gc-sidebar-link span {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            width: 0;
+        }
+
+        .gc-sidebar:not(.collapsed) .gc-sidebar-link {
+            width: 100%;
+            justify-content: flex-start;
+            gap: 15px;
+            margin-bottom: 8px;
+            flex-direction: row;
+        }
+
+        .gc-sidebar:not(.collapsed) .gc-sidebar-link span {
+            opacity: 1;
+            width: auto;
+            overflow: visible;
+        }
+
+        .gc-sidebar.collapsed .gc-sidebar-link span {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        .gc-sidebar.collapsed .gc-sidebar-link {
+            width: 44px;
+            height: 44px;
+            margin: 0 auto 8px auto;
+            padding: 10px;
+        }
+
+        .gc-sidebar-link:hover {
+            color: var(--accent-cyan);
+            border-left-color: transparent;
+            background: rgba(0, 255, 255, 0.1);
+            transform: scale(1.1);
+            border-radius: 8px;
+        }
+
+        .gc-sidebar:not(.collapsed) .gc-sidebar-link:hover {
+            border-left-color: var(--accent-cyan);
+            transform: translateX(5px);
+        }
+
+        .gc-sidebar.collapsed .gc-sidebar-link:hover {
+            transform: scale(1.1);
+            border-left-color: transparent;
+            padding: 12px;
+        }
+
+        [data-theme="light"] .gc-sidebar-link:hover {
+            color: #009999;
+            border-left-color: #009999;
+            background: rgba(0, 150, 150, 0.1);
+        }
+
+        /* 關閉左側欄按鈕的特殊樣式 */
+        #hideSidebarBtn {
+            margin-top: auto; /* 推到底部 */
+        }
+
+        #hideSidebarBtn:hover {
+            color: #ff0055 !important;
+            border-left-color: #ff0055 !important;
+            background: rgba(255, 0, 85, 0.1) !important;
+        }
+
+        [data-theme="light"] #hideSidebarBtn:hover {
+            color: #cc0044 !important;
+            border-left-color: #cc0044 !important;
+            background: rgba(204, 0, 68, 0.1) !important;
+        }
+
+        /* OSD 多功能顯示面板 */
+        .fps-osd {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid var(--accent-cyan);
+            border-radius: 12px;
+            padding: 0;
+            font-family: 'Orbitron', monospace;
+            z-index: 9999;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+            display: none;
+            animation: osdSlideIn 0.3s ease-out;
+            width: 280px;
+            height: auto;
+            min-width: 150px;
+            min-height: 80px;
+            max-width: 600px;
+            max-height: 80vh;
+            resize: both;
+            overflow: hidden;
+            cursor: move;
+            container-type: size;
+        }
+
+        @keyframes osdSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fps-osd.active {
+            display: block;
+        }
+
+        .fps-osd.dragging {
+            cursor: grabbing;
+            user-select: none;
+        }
+
+        .fps-osd.resizing {
+            transition: none;
+        }
+
+        /* OSD 標題區 */
+        .osd-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: clamp(8px, 3cqw, 20px);
+            padding-bottom: clamp(5px, 2cqw, 10px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            cursor: move;
+            user-select: none;
+        }
+
+        .osd-header:active {
+            cursor: grabbing;
+        }
+
+        .osd-title {
+            font-size: clamp(0.6rem, 3cqw, 0.9rem);
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .osd-mode-switcher {
+            display: flex;
+            gap: clamp(3px, 1cqw, 5px);
+            flex-shrink: 0;
+        }
+
+        .osd-mode-btn {
+            width: clamp(6px, 2cqw, 8px);
+            height: clamp(6px, 2cqw, 8px);
+            border-radius: 50%;
+            background: rgba(0, 255, 255, 0.3);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .osd-mode-btn.active {
+            background: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        }
+
+        .osd-mode-btn:hover {
+            background: rgba(0, 255, 255, 0.6);
+            transform: scale(1.2);
+        }
+
+        /* OSD 內容區 */
+        .osd-content {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(6px, 2cqw, 12px);
+            padding: clamp(8px, 3cqw, 20px);
+            padding-top: clamp(6px, 2cqw, 15px);
+        }
+
+        .osd-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: clamp(4px, 2cqw, 8px);
+        }
+
+        .osd-label {
+            font-size: clamp(0.5rem, 2.5cqw, 0.75rem);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            white-space: nowrap;
+        }
+
+        .osd-value {
+            font-size: clamp(0.7rem, 4cqw, 1.2rem);
+            font-weight: 700;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            white-space: nowrap;
+        }
+
+        .osd-value.large {
+            font-size: clamp(1.2rem, 6cqw, 2.5rem);
+            line-height: 1;
+        }
+
+        .osd-unit {
+            font-size: clamp(0.5rem, 3cqw, 0.9rem);
+            color: var(--accent-cyan);
+            margin-left: clamp(2px, 0.5cqw, 5px);
+            opacity: 0.7;
+        }
+
+        .osd-icon {
+            font-size: clamp(0.7rem, 3cqw, 1rem);
+            margin-right: clamp(3px, 1cqw, 5px);
+        }
+
+        /* OSD 進度條 */
+        .osd-progress {
+            width: 100%;
+            height: clamp(3px, 1cqw, 4px);
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: clamp(2px, 0.5cqw, 2px);
+            overflow: hidden;
+            margin-top: clamp(2px, 1cqw, 5px);
+        }
+
+        .osd-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+            border-radius: clamp(2px, 0.5cqw, 2px);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+        }
+
+        /* 淺色主題適配 */
+        [data-theme="light"] .fps-osd {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #009999;
+            box-shadow: 0 0 30px rgba(0, 150, 150, 0.4);
+        }
+
+        [data-theme="light"] .osd-header {
+            border-bottom-color: rgba(0, 150, 150, 0.3);
+        }
+
+        [data-theme="light"] .osd-title,
+        [data-theme="light"] .osd-value {
+            color: #009999;
+            text-shadow: 0 0 15px rgba(0, 150, 150, 0.4);
+        }
+
+        [data-theme="light"] .osd-mode-btn {
+            background: rgba(0, 150, 150, 0.3);
+        }
+
+        [data-theme="light"] .osd-mode-btn.active {
+            background: #009999;
+            box-shadow: 0 0 10px rgba(0, 150, 150, 0.8);
+        }
+
+        [data-theme="light"] .osd-progress {
+            background: rgba(0, 150, 150, 0.2);
+        }
+
+        [data-theme="light"] .osd-progress-bar {
+            background: linear-gradient(90deg, #009999, #990099);
+        }
+
+        [data-theme="light"] .osd-unit {
+            color: #009999;
+        }
+
+        /* ========== 主遊戲容器 ========== */
+        .game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-left: 300px;
+            margin-top: var(--header-height, 75px);
+            height: calc(100vh - var(--header-height, 75px));
+            transition: margin-left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+            position: relative;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .gc-sidebar.collapsed ~ .game-container {
+            margin-left: 70px;
+        }
+
+        .gc-sidebar.hidden ~ .game-container {
+            margin-left: 0 !important;
+        }
+
+        /* ========== 鋼琴容器 ========== */
+        .piano-wrapper {
+            width: 100%;
+            max-width: 1600px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            animation: fadeIn 0.8s ease-out;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========== 控制面板 - 科技增強版 ========== */
+        .piano-controls {
+            background: linear-gradient(135deg, 
+                rgba(5, 5, 15, 0.98) 0%,
+                rgba(15, 5, 30, 0.98) 50%,
+                rgba(5, 15, 25, 0.98) 100%);
+            border: 2px solid transparent;
+            border-radius: 20px;
+            padding: 30px 40px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 40px;
+            align-items: center;
+            box-shadow: 
+                0 0 0 1px rgba(0, 255, 255, 0.2),
+                0 15px 60px rgba(0, 0, 0, 0.7),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05),
+                inset 0 -1px 0 rgba(0, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .piano-controls::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent,
+                rgba(0, 255, 255, 0.5) 20%,
+                rgba(0, 255, 255, 0.8) 50%,
+                rgba(0, 255, 255, 0.5) 80%,
+                transparent);
+            animation: borderScan 4s ease-in-out infinite;
+        }
+
+        @keyframes borderScan {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        [data-theme="light"] .piano-controls {
+            background: linear-gradient(135deg, 
+                rgba(250, 252, 255, 0.98) 0%,
+                rgba(240, 245, 255, 0.98) 50%,
+                rgba(245, 250, 255, 0.98) 100%);
+            box-shadow: 
+                0 0 0 1px rgba(0, 136, 204, 0.2),
+                0 15px 60px rgba(0, 136, 204, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        [data-theme="light"] .piano-controls::before {
+            background: conic-gradient(
+                from 0deg,
+                transparent 0deg,
+                rgba(0, 136, 204, 0.08) 60deg,
+                transparent 120deg
+            );
+        }
+
+        .piano-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32px;
+            font-weight: 900;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-shadow: 
+                0 0 10px rgba(0, 255, 255, 1),
+                0 0 30px rgba(0, 255, 255, 0.6),
+                0 0 60px rgba(0, 255, 255, 0.3);
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .piano-title::before {
+            content: '🎹';
+            font-size: 36px;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.6));
+        }
+
+        [data-theme="light"] .piano-title {
+            color: #0088cc;
+            text-shadow: 
+                0 0 10px rgba(0, 136, 204, 0.6),
+                0 0 30px rgba(0, 136, 204, 0.3);
+        }
+
+        /* ========== 波形顯示器 ========== */
+        .waveform-display {
+            position: relative;
+            width: 200px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .waveform-display canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        [data-theme="light"] .waveform-display {
+            background: rgba(255, 255, 255, 0.5);
+            border-color: rgba(0, 136, 204, 0.3);
+        }
+
+        .control-group {
+            display: flex;
+            gap: 35px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 150px;
+        }
+
+        .control-label {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: rgba(0, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-label::before {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background: currentColor;
+            border-radius: 50%;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        [data-theme="light"] .control-label {
+            color: rgba(0, 136, 204, 0.8);
+        }
+
+        /* ========== 音量滑桿 ========== */
+        .volume-slider {
+            width: 150px;
+            height: 6px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .volume-slider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: var(--volume-percent, 50%);
+            background: linear-gradient(90deg, #00ffff, #0088ff);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            transition: width 0.01s linear;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #00ffff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+            position: relative;
+            z-index: 2;
+            transition: all 0.2s ease;
+        }
+
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 1);
+        }
+
+        [data-theme="light"] .volume-slider {
+            background: rgba(0, 136, 204, 0.1);
+        }
+
+        [data-theme="light"] .volume-slider::before {
+            background: linear-gradient(90deg, #0088cc, #0066ff);
+        }
+
+        [data-theme="light"] .volume-slider::-webkit-slider-thumb {
+            background: #0088cc;
+            box-shadow: 0 0 15px rgba(0, 136, 204, 0.6);
+        }
+
+        /* 開關按鈕樣式：使用全域預設樣式以保持與其他頁面一致 */
+        /* 若需要覆寫樣式，請同時更新其他頁面以保持一致性。 */
+
+        /* ========== 波形選擇器 ========== */
+        .waveform-select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0, 20, 40, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: 'Rajdhani', 'Noto Sans TC', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+            appearance: none;
+            background-image: linear-gradient(45deg, transparent 50%, rgba(0, 255, 255, 0.5) 50%),
+                              linear-gradient(135deg, rgba(0, 255, 255, 0.5) 50%, transparent 50%);
+            background-position: calc(100% - 20px) calc(1em), calc(100% - 15px) calc(1em);
+            background-size: 5px 5px, 5px 5px;
+            background-repeat: no-repeat;
+        }
+
+        .waveform-select:hover {
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            background-color: rgba(0, 30, 50, 0.8);
+        }
+
+        .waveform-select:focus {
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .waveform-select option {
+            background: rgba(10, 20, 40, 0.95);
+            color: var(--text-primary);
+            padding: 12px;
+        }
+
+        [data-theme="light"] .waveform-select {
+            background: rgba(240, 245, 250, 0.9);
+            border-color: rgba(0, 136, 204, 0.4);
+            color: #1a1a2e;
+        }
+
+        [data-theme="light"] .waveform-select:hover {
+            border-color: #0088cc;
+            box-shadow: 0 0 15px rgba(0, 136, 204, 0.3);
+            background-color: rgba(230, 240, 250, 0.95);
+        }
+
+        [data-theme="light"] .waveform-select option {
+            background: rgba(250, 252, 255, 0.98);
+            color: #1a1a2e;
+        }
+
+        /* ========== 鋼琴鍵盤容器 ========== */
+        .piano-keyboard {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .keyboard-wrapper {
+            position: relative;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(10, 10, 30, 0.6));
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 
+                0 0 0 1px rgba(0, 255, 255, 0.1),
+                0 20px 80px rgba(0, 0, 0, 0.8),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        [data-theme="light"] .keyboard-wrapper {
+            background: linear-gradient(135deg, rgba(240, 245, 255, 0.9), rgba(230, 240, 255, 0.9));
+            border-color: rgba(0, 136, 204, 0.2);
+            box-shadow: 
+                0 0 0 1px rgba(0, 136, 204, 0.1),
+                0 20px 80px rgba(0, 136, 204, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        .piano-keys {
+            display: flex;
+            position: relative;
+            filter: drop-shadow(0 25px 60px rgba(0, 0, 0, 0.6));
+        }
+
+        .piano-key {
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.1s ease;
+            border: none;
+            outline: none;
+        }
+
+        /* ========== 白鍵 - 科技增強 ========== */
+        .piano-key.white {
+            width: 70px;
+            height: 300px;
+            background: rgba(10, 20, 40, 0.12);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            border-radius: 0 0 12px 12px;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.1),
+                inset 0 1px 0 rgba(0, 255, 255, 0.2),
+                inset 0 -1px 0 rgba(0, 255, 255, 0.2);
+            z-index: 1;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.08s ease;
+        }
+
+        .piano-key.white::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(180deg, 
+                rgba(0, 255, 255, 0.4) 0%, 
+                transparent 50%,
+                rgba(0, 255, 255, 0.4) 100%);
+            opacity: 0.5;
+        }
+
+        .piano-key.white::after {
+            content: '';
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 4px;
+            background: rgba(0, 255, 255, 0.3);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .piano-key.white:hover {
+            background: rgba(0, 255, 255, 0.08);
+            border-color: rgba(0, 255, 255, 0.8);
+            box-shadow: 
+                0 0 30px rgba(0, 255, 255, 0.4),
+                inset 0 0 30px rgba(0, 255, 255, 0.1),
+                inset 0 1px 0 rgba(0, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(0, 255, 255, 0.4);
+            transform: translateY(-3px);
+        }
+
+        .piano-key.white.active {
+            background: rgba(0, 255, 255, 0.25);
+            border-color: rgba(0, 255, 255, 1);
+            box-shadow: 
+                0 0 50px rgba(0, 255, 255, 0.8),
+                0 0 100px rgba(0, 255, 255, 0.4),
+                inset 0 0 50px rgba(0, 255, 255, 0.3),
+                inset 0 2px 0 rgba(0, 255, 255, 0.8),
+                inset 0 -2px 0 rgba(0, 255, 255, 0.8);
+            transform: translateY(2px);
+        }
+
+        .piano-key.white.active::before {
+            background: linear-gradient(180deg, 
+                rgba(0, 255, 255, 1) 0%, 
+                rgba(0, 255, 255, 0.5) 50%,
+                rgba(0, 255, 255, 1) 100%);
+            opacity: 1;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+        }
+
+        .piano-key.white.active::after {
+            background: rgba(0, 255, 255, 1);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 1);
+        }
+
+        [data-theme="light"] .piano-key.white {
+            border-color: rgba(0, 136, 204, 0.3);
+        }
+
+        [data-theme="light"] .piano-key.white:hover {
+            border-color: rgba(0, 136, 204, 0.6);
+            box-shadow: 0 5px 20px rgba(0, 136, 204, 0.2);
+        }
+
+        [data-theme="light"] .piano-key.white.active {
+            background: linear-gradient(180deg, #00ccff 0%, #0099cc 100%);
+            box-shadow: 0 0 30px rgba(0, 136, 204, 0.6);
+        }
+
+        /* ========== 黑鍵 - 透明邊框科技風格 ========== */
+        .piano-key.black {
+            width: 45px;
+            height: 190px;
+            background: rgba(5, 10, 20, 0.4);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 255, 255, 0.6);
+            border-radius: 0 0 8px 8px;
+            box-shadow: 
+                0 0 25px rgba(0, 255, 255, 0.2),
+                inset 0 1px 0 rgba(0, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(0, 255, 255, 0.3);
+            position: absolute;
+            z-index: 2;
+            margin-left: -22.5px;
+            overflow: hidden;
+            transition: all 0.08s ease;
+        }
+
+        .piano-key.black::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(180deg, 
+                rgba(0, 255, 255, 0.8) 0%, 
+                rgba(0, 255, 255, 0.3) 50%,
+                rgba(0, 255, 255, 0.8) 100%);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+        }
+
+        .piano-key.black::after {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 3px;
+            background: rgba(0, 255, 255, 0.5);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .piano-key.black:hover {
+            background: rgba(0, 255, 255, 0.15);
+            border-color: rgba(0, 255, 255, 0.9);
+            box-shadow: 
+                0 0 35px rgba(0, 255, 255, 0.5),
+                inset 0 0 30px rgba(0, 255, 255, 0.15),
+                inset 0 1px 0 rgba(0, 255, 255, 0.5),
+                inset 0 -1px 0 rgba(0, 255, 255, 0.5);
+            transform: translateY(-3px);
+        }
+
+        .piano-key.black.active {
+            background: rgba(0, 255, 255, 0.35);
+            border-color: rgba(0, 255, 255, 1);
+            box-shadow: 
+                0 0 60px rgba(0, 255, 255, 0.9),
+                0 0 120px rgba(0, 255, 255, 0.5),
+                inset 0 0 60px rgba(0, 255, 255, 0.4),
+                inset 0 2px 0 rgba(0, 255, 255, 1),
+                inset 0 -2px 0 rgba(0, 255, 255, 1);
+            transform: translateY(2px);
+        }
+
+        .piano-key.black.active::before {
+            background: linear-gradient(180deg, 
+                rgba(0, 255, 255, 1) 0%, 
+                rgba(0, 255, 255, 0.8) 50%,
+                rgba(0, 255, 255, 1) 100%);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 1);
+        }
+
+        .piano-key.black.active::after {
+            background: rgba(0, 255, 255, 1);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 1);
+        }
+
+        [data-theme="light"] .piano-key.black {
+            background: linear-gradient(180deg, #2a2a3e 0%, #1a1a2e 100%);
+            border-color: rgba(0, 136, 204, 0.4);
+        }
+
+        [data-theme="light"] .piano-key.black:hover {
+            border-color: rgba(0, 136, 204, 0.7);
+            box-shadow: 0 8px 25px rgba(0, 136, 204, 0.3);
+        }
+
+        [data-theme="light"] .piano-key.black.active {
+            background: linear-gradient(180deg, #00aaff 0%, #0077cc 100%);
+            box-shadow: 0 0 40px rgba(0, 136, 204, 0.8);
+        }
+
+        /* ========== 按鍵標籤 ========== */
+        .key-label {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            color: rgba(0, 255, 255, 0.6);
+            text-transform: uppercase;
+            pointer-events: none;
+            transition: all 0.2s ease;
+        }
+
+        .piano-key.black .key-label {
+            color: rgba(0, 255, 255, 0.8);
+            bottom: 10px;
+        }
+
+        .piano-key.active .key-label {
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            transform: translateX(-50%) scale(1.2);
+        }
+
+        .key-label.hide {
+            opacity: 0;
+        }
+
+        [data-theme="light"] .key-label {
+            color: rgba(0, 136, 204, 0.7);
+        }
+
+        [data-theme="light"] .piano-key.black .key-label {
+            color: rgba(0, 255, 255, 0.9);
+        }
+
+        /* ========== 黑鍵位置定位 ========== */
+        .piano-key.black[data-key="w"] { left: 70px; }
+        .piano-key.black[data-key="e"] { left: 140px; }
+        .piano-key.black[data-key="t"] { left: 280px; }
+        .piano-key.black[data-key="y"] { left: 350px; }
+        .piano-key.black[data-key="u"] { left: 420px; }
+        .piano-key.black[data-key="o"] { left: 560px; }
+        .piano-key.black[data-key="p"] { left: 630px; }
+
+        /* ========== 響應式設計 ========== */
+        @media (max-width: 1400px) {
+            .piano-key.white { width: 60px; height: 240px; }
+            .piano-key.black { width: 40px; height: 150px; margin-left: -20px; }
+            .piano-key.black[data-key="w"] { left: 60px; }
+            .piano-key.black[data-key="e"] { left: 120px; }
+            .piano-key.black[data-key="t"] { left: 240px; }
+            .piano-key.black[data-key="y"] { left: 300px; }
+            .piano-key.black[data-key="u"] { left: 360px; }
+            .piano-key.black[data-key="o"] { left: 480px; }
+            .piano-key.black[data-key="p"] { left: 540px; }
+        }
+
+        @media (max-width: 1024px) {
+            .gc-sidebar {
+                transform: translateX(-100%);
+            }
+            .gc-sidebar.visible {
+                transform: translateX(0);
+            }
+            .game-container {
+                margin-left: 0;
+            }
+            .piano-controls {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .control-group {
+                width: 100%;
+                justify-content: space-around;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .piano-key.white { width: 45px; height: 200px; }
+            .piano-key.black { width: 30px; height: 120px; margin-left: -15px; }
+            .piano-key.black[data-key="w"] { left: 45px; }
+            .piano-key.black[data-key="e"] { left: 90px; }
+            .piano-key.black[data-key="t"] { left: 180px; }
+            .piano-key.black[data-key="y"] { left: 225px; }
+            .piano-key.black[data-key="u"] { left: 270px; }
+            .piano-key.black[data-key="o"] { left: 360px; }
+            .piano-key.black[data-key="p"] { left: 405px; }
+            .piano-title { font-size: 20px; }
+            .key-label { font-size: 11px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 立即應用主題 -->
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+
+    <!-- 背景系統 -->
+    <div class="cyber-bg"></div>
+    <div class="grid-overlay"></div>
+    <div class="particles" id="particles"></div>
+
+    <header>
+        <a href="../../../../index.html">
+            <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
+        </a>
+        <div class="nav-container">
+            <ul class="nav-links">
+                <div class="nav-header">
+                    <h2 class="nav-title">選單導航</h2>
+                </div>
+                
+                <div class="search-box">
+                    <input type="text" id="navSearch" class="search-input" placeholder="搜尋頁面...">
+                    <button class="search-btn" aria-label="Search">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="nav-section">
+                    <h3 class="nav-section-title">主要頁面</h3>
+                    <li><a href="../../../../pages/about.html">◆ ABOUT</a></li>
+                    <li><a href="../../../../pages/experience.html">◆ EXPERIENCE</a></li>
+                    <li><a href="../../../../pages/skills.html">◆ SKILLS</a></li>
+                    <li><a href="../../../../pages/contact.html">◆ CONTACT</a></li>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-section-title">特別內容</h3>
+                    <li><a href="../../game-center.html">◆ GAME CENTER</a></li>
+                    <li><a href="../../../nagato-sakura-webos/nagato-sakura-webos.html">◆ WEB OS</a></li>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-section-title">更多連結</h3>
+                    <li>
+                        <a href="https://www.youtube.com/@Amano_Shizuki_Kun" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
+                            YouTube
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/AmanoShizukikun" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                            GitHub
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://discord.gg/jac8eAFzjz" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                            </svg>
+                            Discord
+                        </a>
+                    </li>
+                    <li>
+                        <a href="mailto:3b017128@gm.student.ncut.edu.tw" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            Email
+                        </a>
+                    </li>
+                </div>
+            </ul>
+        </div>
+        <div class="header-actions">
+            <button class="settings-toggle" aria-label="Settings"></button>
+            <button class="menu-toggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel">
+        <div class="settings-header">
+            <h2 class="settings-title">系統設定</h2>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="settings-section-title">顯示設定</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>固定導航欄</span>
+                    <span class="setting-description">保持導航欄在頂部固定</span>
+                </div>
+                <div class="toggle-switch" id="headerFixed"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>導航欄高度</span>
+                    <span class="setting-description">調整頂部導航欄的高度</span>
+                </div>
+                <div class="slider-control">
+                    <div class="slider-value" id="headerHeightValue">75px</div>
+                    <input type="range" class="slider-range" id="headerHeight" min="50" max="100" value="75" step="5">
+                    <div class="slider-marks">
+                        <span data-value="50">小</span>
+                        <span data-value="75">中</span>
+                        <span data-value="100">大</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>側邊欄文字顯示</span>
+                    <span class="setting-description">是否持續顯示側邊欄文字標題</span>
+                </div>
+                <div class="toggle-switch active" id="sideNavTextVisible"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>顯示左側導覽欄</span>
+                    <span class="setting-description">顯示或隱藏遊戲中心左側導覽欄</span>
+                </div>
+                <div class="toggle-switch active" id="showSidebar"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>主題模式</span>
+                    <span class="setting-description">切換深色/淺色模式</span>
+                </div>
+                <div class="select-control">
+                    <select id="themeMode">
+                        <option value="dark">深色模式</option>
+                        <option value="light">淺色模式</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="settings-section-title">效能設定</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>動畫強度</span>
+                    <span class="setting-description">調整頁面動畫效果強度</span>
+                </div>
+                <div class="slider-control">
+                    <div class="slider-value" id="animationValue">強</div>
+                    <input type="range" class="slider-range" id="animationStrength" min="0" max="2" value="2" step="1">
+                    <div class="slider-marks">
+                        <span data-value="0">關</span>
+                        <span data-value="1">低</span>
+                        <span data-value="2">強</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item fps-monitor">
+                <div class="setting-label">
+                    <span>幀數監控</span>
+                    <span class="setting-description">即時顯示頁面渲染幀率</span>
+                </div>
+                <div class="fps-display">
+                    <span class="fps-value" id="fpsValue">000</span>
+                    <span class="fps-unit">FPS</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3 class="settings-section-title">音效設定</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>音效開關</span>
+                    <span class="setting-description">啟用/關閉互動音效</span>
+                </div>
+                <div class="toggle-switch active" id="soundEnabled"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="game-center-wrapper">
+        <!-- OSD 多功能顯示面板 -->
+        <div class="fps-osd" id="fpsOSD">
+            <div class="osd-header">
+                <div class="osd-title" id="osdTitle">FPS</div>
+                <div class="osd-mode-switcher">
+                    <button class="osd-mode-btn active" data-mode="performance" title="FPS模式"></button>
+                    <button class="osd-mode-btn" data-mode="game" title="遊戲模式"></button>
+                    <button class="osd-mode-btn" data-mode="simple" title="完整模式"></button>
+                </div>
+            </div>
+            <div class="osd-content" id="osdContent">
+                <!-- 內容將由 JavaScript 動態生成 -->
+            </div>
+        </div>
+
+        <!-- 左側導覽欄 -->
+        <aside class="gc-sidebar" id="gcSidebar">
+            <ul class="gc-sidebar-menu">
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="sidebarToggle" data-icon="◀" title="側邊欄摺疊">
+                        <span>摺疊</span>
+                    </a>
+                </li>
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="gcBackBtn" data-icon="🏠" title="返回遊戲中心">
+                        <span>遊戲中心</span>
+                    </a>
+                </li>
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="fpsOSDToggle" data-icon="📊" title="顯示幀數">
+                        <span>幀數顯示</span>
+                    </a>
+                </li>
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="hideSidebarBtn" data-icon="✕" title="關閉左側欄">
+                        <span>關閉左側欄</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 遊戲容器 -->
+        <div class="game-container" id="gameContainer">
+            <div class="piano-wrapper">
+                <!-- 控制面板 -->
+                <div class="piano-controls">
+                    <h1 class="piano-title">Cyber Piano</h1>
+                    
+                    <!-- 波形顯示器 -->
+                    <div class="waveform-display">
+                        <canvas id="waveformCanvas"></canvas>
+                    </div>
+                    
+                    <div class="control-group">
+                        <div class="control-item">
+                            <label class="control-label"><span class="dot"></span>音量控制</label>
+                            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
+                        </div>
+                        <div class="control-item">
+                            <label class="control-label"><span class="dot"></span>波形類型</label>
+                            <select class="waveform-select" id="waveformType">
+                                <option value="cyber">賽博混合</option>
+                                <option value="sine">正弦波</option>
+                                <option value="square">方波</option>
+                                <option value="sawtooth">鋸齒波</option>
+                                <option value="triangle">三角波</option>
+                            </select>
+                        </div>
+                        <div class="control-item">
+                            <label class="control-label"><span class="dot"></span>顯示按鍵</label>
+                            <div class="toggle-switch active" id="showKeysToggle"></div>
+                        </div>
+                        <div class="control-item">
+                            <label class="control-label"><span class="dot"></span>持續音效</label>
+                            <div class="toggle-switch" id="sustainToggle"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 鋼琴鍵盤 -->
+                <div class="piano-keyboard">
+                    <div class="keyboard-wrapper">
+                        <div class="piano-keys">
+                        <!-- 白鍵 -->
+                        <button class="piano-key white" data-key="a" data-note="C4">
+                            <span class="key-label">A</span>
+                        </button>
+                        <button class="piano-key white" data-key="s" data-note="D4">
+                            <span class="key-label">S</span>
+                        </button>
+                        <button class="piano-key white" data-key="d" data-note="E4">
+                            <span class="key-label">D</span>
+                        </button>
+                        <button class="piano-key white" data-key="f" data-note="F4">
+                            <span class="key-label">F</span>
+                        </button>
+                        <button class="piano-key white" data-key="g" data-note="G4">
+                            <span class="key-label">G</span>
+                        </button>
+                        <button class="piano-key white" data-key="h" data-note="A4">
+                            <span class="key-label">H</span>
+                        </button>
+                        <button class="piano-key white" data-key="j" data-note="B4">
+                            <span class="key-label">J</span>
+                        </button>
+                        <button class="piano-key white" data-key="k" data-note="C5">
+                            <span class="key-label">K</span>
+                        </button>
+                        <button class="piano-key white" data-key="l" data-note="D5">
+                            <span class="key-label">L</span>
+                        </button>
+                        <button class="piano-key white" data-key=";" data-note="E5">
+                            <span class="key-label">;</span>
+                        </button>
+
+                        <!-- 黑鍵 -->
+                        <button class="piano-key black" data-key="w" data-note="C#4">
+                            <span class="key-label">W</span>
+                        </button>
+                        <button class="piano-key black" data-key="e" data-note="D#4">
+                            <span class="key-label">E</span>
+                        </button>
+                        <button class="piano-key black" data-key="t" data-note="F#4">
+                            <span class="key-label">T</span>
+                        </button>
+                        <button class="piano-key black" data-key="y" data-note="G#4">
+                            <span class="key-label">Y</span>
+                        </button>
+                        <button class="piano-key black" data-key="u" data-note="A#4">
+                            <span class="key-label">U</span>
+                        </button>
+                        <button class="piano-key black" data-key="o" data-note="C#5">
+                            <span class="key-label">O</span>
+                        </button>
+                        <button class="piano-key black" data-key="p" data-note="D#5">
+                            <span class="key-label">P</span>
+                        </button>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../../../../assets/js/core.js"></script>
+    <script src="../../../../assets/js/navigation.js"></script>
+    <script src="../../../../assets/js/animations.js"></script>
+
+    <script>
+        // ========== Web Audio API 音效合成系統 ==========
+        class CyberPianoSynth {
+            constructor() {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                this.masterGain = this.audioContext.createGain();
+                this.masterGain.gain.value = 0.5;
+                
+                // 創建分析器節點用於波形顯示
+                this.analyser = this.audioContext.createAnalyser();
+                this.analyser.fftSize = 2048;
+                this.analyser.smoothingTimeConstant = 0.8;
+                
+                // 連接音訊路由：masterGain -> analyser -> destination
+                this.masterGain.connect(this.analyser);
+                this.analyser.connect(this.audioContext.destination);
+                
+                this.activeNotes = new Map();
+                this.sustainEnabled = false;
+                this.waveformType = 'cyber'; // cyber, sine, square, sawtooth, triangle
+                
+                // 音符頻率映射表 (3個八度: C3-B5)
+                this.noteFrequencies = {
+                    // C3 八度
+                    'C3': 130.81, 'C#3': 138.59, 'D3': 146.83, 'D#3': 155.56,
+                    'E3': 164.81, 'F3': 174.61, 'F#3': 185.00, 'G3': 196.00,
+                    'G#3': 207.65, 'A3': 220.00, 'A#3': 233.08, 'B3': 246.94,
+                    // C4 八度
+                    'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13,
+                    'E4': 329.63, 'F4': 349.23, 'F#4': 369.99, 'G4': 392.00,
+                    'G#4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
+                    // C5 八度
+                    'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'D#5': 622.25,
+                    'E5': 659.25, 'F5': 698.46, 'F#5': 739.99, 'G5': 783.99,
+                    'G#5': 830.61, 'A5': 880.00, 'A#5': 932.33, 'B5': 987.77
+                };
+            }
+
+            setWaveformType(type) {
+                this.waveformType = type;
+            }
+
+            playNote(note) {
+                const frequency = this.noteFrequencies[note];
+                if (!frequency) return;
+
+                let oscillators = [];
+                let gains = [];
+
+                // 根據選擇的波形類型創建振盪器
+                if (this.waveformType === 'cyber') {
+                    const osc1 = this.audioContext.createOscillator();
+                    const osc2 = this.audioContext.createOscillator();
+                    const osc3 = this.audioContext.createOscillator();
+
+                    osc1.type = 'sine';
+                    osc2.type = 'triangle';
+                    osc3.type = 'square';
+
+                    osc1.frequency.value = frequency;
+                    osc2.frequency.value = frequency * 2;
+                    osc3.frequency.value = frequency * 0.5;
+
+                    const gain1 = this.audioContext.createGain();
+                    const gain2 = this.audioContext.createGain();
+                    const gain3 = this.audioContext.createGain();
+
+                    gain1.gain.value = 0.5;
+                    gain2.gain.value = 0.2;
+                    gain3.gain.value = 0.15;
+
+                    oscillators = [osc1, osc2, osc3];
+                    gains = [gain1, gain2, gain3];
+                } else {
+                    const osc = this.audioContext.createOscillator();
+                    osc.type = this.waveformType;
+                    osc.frequency.value = frequency;
+
+                    const gain = this.audioContext.createGain();
+                    gain.gain.value = 0.7;
+
+                    oscillators = [osc];
+                    gains = [gain];
+                }
+
+                // 創建濾波器與包絡
+                const filter = this.audioContext.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 2000;
+                filter.Q.value = 1;
+
+                const envelopeGain = this.audioContext.createGain();
+                envelopeGain.gain.value = 0;
+
+                // 連接節點
+                oscillators.forEach((osc, i) => {
+                    osc.connect(gains[i]);
+                    gains[i].connect(filter);
+                });
+                filter.connect(envelopeGain);
+                envelopeGain.connect(this.masterGain);
+
+                // ADSR
+                const now = this.audioContext.currentTime;
+                envelopeGain.gain.setValueAtTime(0, now);
+                envelopeGain.gain.linearRampToValueAtTime(0.8, now + 0.01);
+                envelopeGain.gain.linearRampToValueAtTime(0.6, now + 0.1);
+                envelopeGain.gain.setValueAtTime(0.6, now + 0.1);
+
+                // 啟動
+                oscillators.forEach(osc => osc.start(now));
+
+                // 建立 voice，並加入 note 的 voice 陣列（支援多聲部 retrigger）
+                const voice = { oscillators, gains, filter, envelopeGain, startTime: now };
+                if (!this.activeNotes.has(note)) this.activeNotes.set(note, []);
+                const voicesArr = this.activeNotes.get(note);
+                voicesArr.push(voice);
+
+                // 限制每個 note 的最大同時 voice 數，避免因過快重複觸發造成過多殘留節點
+                const maxVoicesPerNote = 4;
+                if (voicesArr.length > maxVoicesPerNote) {
+                    const oldest = voicesArr.shift();
+                    const tnow = this.audioContext.currentTime;
+                    try { if (oldest.envelopeGain) { oldest.envelopeGain.gain.cancelScheduledValues(tnow); oldest.envelopeGain.gain.setTargetAtTime(0, tnow, 0.02); } } catch (e) {}
+                    try { oldest.oscillators.forEach(o => { try { o.stop(tnow + 0.02); o.disconnect(); } catch (e) {} }); } catch (e) {}
+                    try { if (oldest.envelopeGain) oldest.envelopeGain.disconnect(); } catch (e) {}
+                    try { if (oldest.filter) oldest.filter.disconnect(); } catch (e) {}
+                    try { if (oldest.gains && oldest.gains.length) oldest.gains.forEach(g => { try { g.disconnect(); } catch(e) {} }); } catch (e) {}
+                }
+            }
+
+            stopNote(note) {
+                // 釋放該 note 的最後一個 voice（對應鍵盤的最新按下）
+                if (!this.activeNotes.has(note)) return;
+                const voices = this.activeNotes.get(note);
+                if (!voices || voices.length === 0) return;
+
+                const noteData = voices.pop();
+                const now = this.audioContext.currentTime;
+
+                // Release 階段
+                const releaseTime = this.sustainEnabled ? 1.0 : 0.3;
+                try { noteData.envelopeGain.gain.cancelScheduledValues(now); } catch (e) {}
+                try { noteData.envelopeGain.gain.setTargetAtTime(0, now, releaseTime * 0.5); } catch (e) {}
+
+                // 停止振盪器並在稍後清理
+                noteData.oscillators.forEach(osc => {
+                    try { osc.stop(now + releaseTime + 0.02); } catch (e) {}
+                });
+
+                // 在停止後斷開節點並移除記錄
+                setTimeout(() => {
+                    try {
+                        if (noteData.envelopeGain) noteData.envelopeGain.disconnect();
+                        if (noteData.filter) noteData.filter.disconnect();
+                        if (noteData.gains && noteData.gains.length) noteData.gains.forEach(g => { try { g.disconnect(); } catch(e) {} });
+                        noteData.oscillators.forEach(o => { try { o.disconnect(); } catch(e) {} });
+                    } catch (e) {}
+                }, releaseTime * 1000 + 150);
+
+                if (voices.length === 0) this.activeNotes.delete(note);
+            }
+
+            // 立即停止該 note 的所有 voices（用於清理殘留或強制 retrigger）
+            stopNoteImmediate(note) {
+                if (!this.activeNotes.has(note)) return;
+                const voices = this.activeNotes.get(note);
+                const now = this.audioContext.currentTime;
+
+                voices.forEach(noteData => {
+                    try {
+                        if (noteData.envelopeGain) {
+                            noteData.envelopeGain.gain.cancelScheduledValues(now);
+                            noteData.envelopeGain.gain.setValueAtTime(0, now + 0.001);
+                        }
+                    } catch (e) {}
+
+                    noteData.oscillators.forEach(osc => {
+                        try { osc.stop(now + 0.02); } catch (e) {}
+                        try { osc.disconnect(); } catch (e) {}
+                    });
+
+                    try { if (noteData.envelopeGain) noteData.envelopeGain.disconnect(); } catch (e) {}
+                    try { if (noteData.filter) noteData.filter.disconnect(); } catch (e) {}
+                    try { if (noteData.gains && noteData.gains.length) noteData.gains.forEach(g => { try { g.disconnect(); } catch(e) {} }); } catch (e) {}
+                });
+
+                this.activeNotes.delete(note);
+            }
+
+            // 回傳目前活躍的 voice 數量（用於 OSD 顯示）
+            getActiveVoiceCount() {
+                let count = 0;
+                this.activeNotes.forEach(arr => { if (Array.isArray(arr)) count += arr.length; });
+                return count;
+            }
+
+            setVolume(value) {
+                this.masterGain.gain.setValueAtTime(value, this.audioContext.currentTime);
+            }
+
+            setSustain(enabled) {
+                this.sustainEnabled = enabled;
+            }
+        }
+
+        // ========== 鋼琴控制器 ==========
+        class CyberPiano {
+            constructor(synth) {
+                this.synth = synth;
+                this.keys = document.querySelectorAll('.piano-key');
+                this.volumeSlider = document.getElementById('volumeSlider');
+                this.showKeysToggle = document.getElementById('showKeysToggle');
+                this.sustainToggle = document.getElementById('sustainToggle');
+                this.keyLabels = document.querySelectorAll('.key-label');
+                
+                this.pressedKeys = new Set();
+                this.showKeys = true;
+                
+                this.init();
+            }
+
+            init() {
+                // 鍵盤事件
+                this.keys.forEach(key => {
+                    const keyCode = key.dataset.key;
+                    const note = key.dataset.note;
+
+                    // 點擊事件
+                    key.addEventListener('mousedown', () => this.handleKeyPress(key, note));
+                    key.addEventListener('mouseup', () => this.handleKeyRelease(key, note));
+                    key.addEventListener('mouseleave', () => {
+                        if (key.classList.contains('active')) {
+                            this.handleKeyRelease(key, note);
+                        }
+                    });
+
+                    // 觸控事件
+                    key.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        this.handleKeyPress(key, note);
+                    });
+                    key.addEventListener('touchend', (e) => {
+                        e.preventDefault();
+                        this.handleKeyRelease(key, note);
+                    });
+                });
+
+                // 鍵盤輸入（容錯：支援大寫/小寫，並避免在輸入框內觸發）
+                document.addEventListener('keydown', (e) => {
+                    const activeTag = document.activeElement && document.activeElement.tagName;
+                    if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT' || document.activeElement && document.activeElement.isContentEditable) return;
+
+                    const keyStr = String(e.key).toLowerCase();
+                    if (this.pressedKeys.has(keyStr)) return;
+                    this.pressedKeys.add(keyStr);
+
+                    const key = document.querySelector(`[data-key="${keyStr}"]`);
+                    if (key) {
+                        const note = key.dataset.note;
+                        this.handleKeyPress(key, note);
+                    }
+                });
+
+                document.addEventListener('keyup', (e) => {
+                    const keyStr = String(e.key).toLowerCase();
+                    this.pressedKeys.delete(keyStr);
+
+                    const key = document.querySelector(`[data-key="${keyStr}"]`);
+                    if (key) {
+                        const note = key.dataset.note;
+                        this.handleKeyRelease(key, note);
+                    }
+                });
+
+                // 音量控制
+                this.volumeSlider.addEventListener('input', (e) => {
+                    const value = parseFloat(e.target.value);
+                    this.synth.setVolume(value);
+                    e.target.style.setProperty('--volume-percent', `${value * 100}%`);
+                });
+
+                // 顯示按鍵切換（含鍵盤互動與 aria）
+                if (this.showKeysToggle) {
+                    this.showKeysToggle.setAttribute('role', 'switch');
+                    this.showKeysToggle.setAttribute('tabindex', '0');
+                    const skInitial = this.showKeysToggle.classList.contains('active');
+                    this.showKeysToggle.setAttribute('aria-checked', skInitial ? 'true' : 'false');
+                    this.showKeysToggle.addEventListener('click', () => {
+                        this.showKeys = !this.showKeys;
+                        const isActive = this.showKeysToggle.classList.toggle('active');
+                        this.showKeysToggle.setAttribute('aria-checked', isActive ? 'true' : 'false');
+                        this.keyLabels.forEach(label => {
+                            label.classList.toggle('hide', !this.showKeys);
+                        });
+                    });
+                    this.showKeysToggle.addEventListener('keydown', (e) => {
+                        if (e.key === ' ' || e.key === 'Enter') {
+                            e.preventDefault();
+                            this.showKeysToggle.click();
+                        }
+                    });
+                }
+
+                // 持續音切換（含鍵盤互動與 aria）
+                if (this.sustainToggle) {
+                    this.sustainToggle.setAttribute('role', 'switch');
+                    this.sustainToggle.setAttribute('tabindex', '0');
+                    const sInitial = this.sustainToggle.classList.contains('active');
+                    this.sustainToggle.setAttribute('aria-checked', sInitial ? 'true' : 'false');
+                    this.sustainToggle.addEventListener('click', () => {
+                        const enabled = !this.sustainToggle.classList.contains('active');
+                        const isActive = this.sustainToggle.classList.toggle('active');
+                        this.sustainToggle.setAttribute('aria-checked', isActive ? 'true' : 'false');
+                        this.synth.setSustain(enabled);
+                    });
+                    this.sustainToggle.addEventListener('keydown', (e) => {
+                        if (e.key === ' ' || e.key === 'Enter') {
+                            e.preventDefault();
+                            this.sustainToggle.click();
+                        }
+                    });
+                }
+
+                // 波形類型切換
+                const waveformSelect = document.getElementById('waveformType');
+                if (waveformSelect) {
+                    waveformSelect.addEventListener('change', (e) => {
+                        this.synth.setWaveformType(e.target.value);
+                        localStorage.setItem('pianoWaveformType', e.target.value);
+                    });
+                    
+                    // 從 localStorage 恢復設定
+                    const savedWaveform = localStorage.getItem('pianoWaveformType') || 'cyber';
+                    waveformSelect.value = savedWaveform;
+                    this.synth.setWaveformType(savedWaveform);
+                }
+
+                // 初始化音量顯示
+                this.volumeSlider.style.setProperty('--volume-percent', '50%');
+            }
+
+            handleKeyPress(keyElement, note) {
+                keyElement.classList.add('active');
+                
+                // 檢查音效是否啟用
+                const soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+                if (soundEnabled) {
+                    this.synth.playNote(note);
+                }
+            }
+
+            handleKeyRelease(keyElement, note) {
+                keyElement.classList.remove('active');
+                
+                const soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+                if (soundEnabled) {
+                    this.synth.stopNote(note);
+                }
+            }
+        }
+
+        // ========== 波形顯示器 ==========
+        class WaveformVisualizer {
+            constructor(canvas, analyser) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.analyser = analyser;
+                this.bufferLength = analyser.frequencyBinCount;
+                this.dataArray = new Uint8Array(this.bufferLength);
+                this.isActive = false;
+                this.animationId = null;
+                
+                // 設置 canvas 尺寸
+                this.canvas.width = this.canvas.offsetWidth;
+                this.canvas.height = this.canvas.offsetHeight;
+            }
+
+            start() {
+                if (this.isActive) return;
+                this.isActive = true;
+                this.draw();
+            }
+
+            stop() {
+                this.isActive = false;
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+                this.clear();
+            }
+
+            draw() {
+                if (!this.isActive) return;
+
+                this.animationId = requestAnimationFrame(() => this.draw());
+
+                // 獲取波形數據
+                this.analyser.getByteTimeDomainData(this.dataArray);
+
+                // 清空 canvas
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // 繪製波形
+                this.ctx.lineWidth = 2;
+                this.ctx.strokeStyle = '#00ffff';
+                this.ctx.shadowBlur = 10;
+                this.ctx.shadowColor = '#00ffff';
+                
+                this.ctx.beginPath();
+                
+                const sliceWidth = this.canvas.width / this.bufferLength;
+                let x = 0;
+
+                for (let i = 0; i < this.bufferLength; i++) {
+                    const v = this.dataArray[i] / 128.0;
+                    const y = (v * this.canvas.height) / 2;
+
+                    if (i === 0) {
+                        this.ctx.moveTo(x, y);
+                    } else {
+                        this.ctx.lineTo(x, y);
+                    }
+
+                    x += sliceWidth;
+                }
+
+                this.ctx.lineTo(this.canvas.width, this.canvas.height / 2);
+                this.ctx.stroke();
+                
+                // 繪製頻譜條
+                this.analyser.getByteFrequencyData(this.dataArray);
+                const barWidth = (this.canvas.width / this.bufferLength) * 2.5;
+                let barHeight;
+                let barX = 0;
+                
+                for (let i = 0; i < this.bufferLength / 4; i++) {
+                    barHeight = (this.dataArray[i] / 255) * this.canvas.height * 0.5;
+                    
+                    const gradient = this.ctx.createLinearGradient(0, this.canvas.height, 0, this.canvas.height - barHeight);
+                    gradient.addColorStop(0, '#00ffff');
+                    gradient.addColorStop(0.5, '#0088ff');
+                    gradient.addColorStop(1, '#0044ff');
+                    
+                    this.ctx.fillStyle = gradient;
+                    this.ctx.fillRect(barX, this.canvas.height - barHeight, barWidth, barHeight);
+                    
+                    barX += barWidth + 1;
+                }
+            }
+
+            clear() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+        }
+
+        // ========== 側邊欄控制 ==========
+        function initSidebarControls() {
+            const sidebar = document.getElementById('gcSidebar');
+            const gameContainer = document.getElementById('gameContainer');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const hideSidebarBtn = document.getElementById('hideSidebarBtn');
+            const gcBackBtn = document.getElementById('gcBackBtn');
+
+            // 恢復摺疊狀態
+            const savedCollapsed = localStorage.getItem('gcSidebarCollapsed') === 'true';
+            if (savedCollapsed) {
+                sidebar.classList.add('collapsed');
+                sidebarToggle.dataset.icon = '▶';
+                sidebarToggle.querySelector('span').textContent = '展開';
+                gameContainer.classList.add('sidebar-collapsed');
+            } else {
+                sidebarToggle.dataset.icon = '◀';
+                sidebarToggle.querySelector('span').textContent = '摺疊';
+            }
+
+            // 恢復顯示狀態
+            const savedVisible = localStorage.getItem('showSidebar');
+            if (savedVisible === 'false') {
+                sidebar.classList.add('hidden');
+                gameContainer.classList.add('sidebar-hidden');
+            } else {
+                sidebar.classList.remove('hidden');
+                gameContainer.classList.remove('sidebar-hidden');
+            }
+
+            // 摺疊/展開
+            sidebarToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                const isCollapsed = sidebar.classList.toggle('collapsed');
+                sidebarToggle.dataset.icon = isCollapsed ? '▶' : '◀';
+                sidebarToggle.querySelector('span').textContent = isCollapsed ? '展開' : '摺疊';
+                gameContainer.classList.toggle('sidebar-collapsed', isCollapsed);
+                localStorage.setItem('gcSidebarCollapsed', isCollapsed);
+            });
+
+            // 隱藏側邊欄
+            hideSidebarBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                sidebar.classList.add('hidden');
+                gameContainer.classList.add('sidebar-hidden');
+                // 同步設定面板
+                const settingToggle = document.getElementById('showSidebar');
+                if (settingToggle) settingToggle.classList.remove('active');
+                localStorage.setItem('showSidebar', 'false');
+                const event = new CustomEvent('sidebarToggle', { detail: { visible: false } });
+                window.dispatchEvent(event);
+            });
+
+            // 監聽全域側邊欄切換事件
+            window.addEventListener('sidebarToggle', (e) => {
+                const visible = e.detail.visible;
+                if (visible) {
+                    sidebar.classList.remove('hidden');
+                    gameContainer.classList.remove('sidebar-hidden');
+                } else {
+                    sidebar.classList.add('hidden');
+                    gameContainer.classList.add('sidebar-hidden');
+                }
+            });
+
+            // 返回遊戲中心
+            gcBackBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                sessionStorage.setItem('skipEntranceAnimation', 'true');
+                window.location.href = '../../game-center.html';
+            });
+        }
+
+        // ========== FPS OSD 控制 ==========
+        function initFPSOSD() {
+            const fpsOSD = document.getElementById('fpsOSD');
+            const fpsToggle = document.getElementById('fpsOSDToggle');
+            const osdContent = document.getElementById('osdContent');
+            const osdTitle = document.getElementById('osdTitle');
+            const modeButtons = document.querySelectorAll('.osd-mode-btn');
+
+            // 從 localStorage 恢復 OSD 狀態
+            const savedVisible = localStorage.getItem('fpsOSDVisible') === 'true';
+            const savedMode = localStorage.getItem('osdMode') || 'performance';
+            const savedPosition = JSON.parse(localStorage.getItem('osdPosition') || '{"top": "90px", "right": "20px"}');
+            const savedSize = JSON.parse(localStorage.getItem('osdSize') || '{"width": "280px", "height": "auto"}');
+
+            // 恢復位置和大小
+            if (savedPosition.top) fpsOSD.style.top = savedPosition.top;
+            if (savedPosition.right) fpsOSD.style.right = savedPosition.right;
+            if (savedSize.width) fpsOSD.style.width = savedSize.width;
+
+            let currentMode = savedMode;
+            let osdState = {
+                lastTime: performance.now(),
+                frames: 0,
+                fps: 0,
+                animationId: null,
+                startTimestamp: Date.now()
+            };
+
+            // 設置初始模式
+            modeButtons.forEach(btn => {
+                if (btn.dataset.mode === currentMode) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // 恢復顯示狀態
+            if (savedVisible) {
+                fpsOSD.classList.add('active');
+                startFPSMonitor();
+            }
+
+            // 切換顯示
+            fpsToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                const isVisible = fpsOSD.classList.toggle('active');
+                localStorage.setItem('fpsOSDVisible', isVisible);
+                if (isVisible) {
+                    startFPSMonitor();
+                } else {
+                    stopFPSMonitor();
+                }
+            });
+
+            // 模式切換
+            modeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    modeButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentMode = btn.dataset.mode;
+                    localStorage.setItem('osdMode', currentMode);
+                    updateOSDContent();
+                    stopFPSMonitor();
+                    startFPSMonitor();
+                });
+            });
+
+            function updateOSDContent() {
+                const titles = {
+                    performance: 'FPS',
+                    game: '遊戲資訊',
+                    simple: '完整顯示'
+                };
+                osdTitle.textContent = titles[currentMode];
+
+                if (currentMode === 'performance') {
+                    osdContent.innerHTML = `
+                        <div class="osd-item">
+                            <div>
+                                <span class="osd-icon">📊</span>
+                                <span class="osd-label">FPS</span>
+                            </div>
+                            <div>
+                                <span class="osd-value large" id="osdFPS">000</span>
+                                <span class="osd-unit">FPS</span>
+                            </div>
+                        </div>
+                        <div class="osd-item">
+                            <span class="osd-label">記憶體</span>
+                            <span class="osd-value" id="memValue">-- MB</span>
+                        </div>
+                        <div class="osd-item">
+                            <span class="osd-label">播放時間</span>
+                            <span class="osd-value" id="timeValue">00:00</span>
+                        </div>
+                    `;
+                } else if (currentMode === 'game') {
+                    osdContent.innerHTML = `
+                        <div class="osd-item">
+                            <span class="osd-label">活躍音符</span>
+                            <span class="osd-value" id="noteValue">0</span>
+                        </div>
+                        <div class="osd-item">
+                            <span class="osd-label">音量</span>
+                            <span class="osd-value" id="volValue">50%</span>
+                        </div>
+                        <div class="osd-item">
+                            <span class="osd-label">持續音</span>
+                            <span class="osd-value" id="sustainValue">關閉</span>
+                        </div>
+                    `;
+                } else {
+                    osdContent.innerHTML = `
+                        <div class="osd-item">
+                            <div>
+                                <span class="osd-icon">📊</span>
+                                <span class="osd-label">FPS</span>
+                            </div>
+                            <div>
+                                <span class="osd-value large" id="osdFPSFull">000</span>
+                                <span class="osd-unit">FPS</span>
+                            </div>
+                        </div>
+                        <div class="osd-item">
+                            <span class="osd-label">活躍音符</span>
+                            <span class="osd-value" id="noteValue">0</span>
+                        </div>
+                        <div class="osd-item">
+                            <span class="osd-label">音量</span>
+                            <span class="osd-value" id="volValue">50%</span>
+                        </div>
+                        <div class="osd-item">
+                            <span class="osd-label">播放時間</span>
+                            <span class="osd-value" id="timeValue">00:00</span>
+                        </div>
+                    `;
+                }
+            }
+
+            function updateOSDValues() {
+                // FPS
+                const padded = osdState.fps.toString().padStart(3, '0');
+                const osdFPS = document.getElementById('osdFPS');
+                const osdFPSFull = document.getElementById('osdFPSFull');
+                const fpsValueEl = document.getElementById('fpsValue');
+                if (osdFPS) {
+                    osdFPS.textContent = padded;
+                }
+                if (osdFPSFull) {
+                    osdFPSFull.textContent = padded;
+                }
+                if (fpsValueEl) {
+                    fpsValueEl.textContent = padded;
+                }
+                // 記憶體
+                if (performance.memory) {
+                    const memValueEl = document.getElementById('memValue');
+                    if (memValueEl) {
+                        const usedMB = (performance.memory.usedJSHeapSize / 1048576).toFixed(1);
+                        memValueEl.textContent = `${usedMB} MB`;
+                    }
+                }
+                // 音量
+                const volValueEl = document.getElementById('volValue');
+                if (volValueEl) {
+                    const vol = Math.round(document.getElementById('volumeSlider').value * 100);
+                    volValueEl.textContent = `${vol}%`;
+                }
+                // 持續音
+                const sustainValueEl = document.getElementById('sustainValue');
+                if (sustainValueEl) {
+                    const sustainBtn = document.getElementById('sustainToggle');
+                    sustainValueEl.textContent = sustainBtn.classList.contains('active') ? '啟用' : '關閉';
+                }
+                // 播放時間
+                const timeValueEl = document.getElementById('timeValue');
+                if (timeValueEl) {
+                    const elapsed = Math.floor((Date.now() - osdState.startTimestamp) / 1000);
+                    const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                    const seconds = (elapsed % 60).toString().padStart(2, '0');
+                    timeValueEl.textContent = `${minutes}:${seconds}`;
+                }
+                // 活躍音符
+                const noteValueEl = document.getElementById('noteValue');
+                if (noteValueEl && window.pianoSynth) {
+                    noteValueEl.textContent = window.pianoSynth.getActiveVoiceCount();
+                }
+            }
+
+            function fpsLoop() {
+                osdState.frames++;
+                const now = performance.now();
+                if (now - osdState.lastTime >= 1000) {
+                    osdState.fps = Math.round((osdState.frames * 1000) / (now - osdState.lastTime));
+                    osdState.frames = 0;
+                    osdState.lastTime = now;
+                    updateOSDValues();
+                }
+                osdState.animationId = requestAnimationFrame(fpsLoop);
+            }
+
+            function startFPSMonitor() {
+                stopFPSMonitor();
+                updateOSDContent();
+                osdState.lastTime = performance.now();
+                osdState.frames = 0;
+                osdState.fps = 0;
+                osdState.startTimestamp = Date.now();
+                updateOSDValues();
+                osdState.animationId = requestAnimationFrame(fpsLoop);
+            }
+
+            function stopFPSMonitor() {
+                if (osdState.animationId) {
+                    cancelAnimationFrame(osdState.animationId);
+                    osdState.animationId = null;
+                }
+            }
+
+            // 使 OSD 可拖動和調整大小
+            makeDraggable(fpsOSD);
+        }
+
+        // 使元素可拖動
+        function makeDraggable(element) {
+            let isDragging = false;
+            let currentX;
+            let currentY;
+            let initialX;
+            let initialY;
+
+            const header = element.querySelector('.osd-header');
+
+            header.addEventListener('mousedown', dragStart);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', dragEnd);
+
+            function dragStart(e) {
+                if (e.target.closest('.osd-mode-switcher')) return;
+                
+                initialX = e.clientX - element.offsetLeft;
+                initialY = e.clientY - element.offsetTop;
+                isDragging = true;
+                header.style.cursor = 'grabbing';
+            }
+
+            function drag(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+
+                element.style.left = currentX + 'px';
+                element.style.top = currentY + 'px';
+                element.style.right = 'auto';
+                element.style.bottom = 'auto';
+            }
+
+            function dragEnd() {
+                if (!isDragging) return;
+                isDragging = false;
+                header.style.cursor = 'grab';
+
+                // 保存位置
+                localStorage.setItem('osdPosition', JSON.stringify({
+                    top: element.style.top,
+                    left: element.style.left,
+                    right: 'auto',
+                    bottom: 'auto'
+                }));
+            }
+        }
+
+        // ========== 系統設定控制 ==========
+        function initSystemSettings() {
+            // 側邊欄顯示控制（全域設定）
+            const showSidebarToggle = document.getElementById('showSidebar');
+            const sidebar = document.getElementById('gcSidebar');
+            const gameContainer = document.getElementById('gameContainer');
+            
+            // 初始化無障礙屬性 + 鍵盤互動
+            function initToggleAccessibility(toggleEl, initialState) {
+                if (!toggleEl) return;
+                toggleEl.setAttribute('role', 'switch');
+                toggleEl.setAttribute('tabindex', '0');
+                toggleEl.setAttribute('aria-checked', initialState ? 'true' : 'false');
+                toggleEl.addEventListener('keydown', (e) => {
+                    if (e.key === ' ' || e.key === 'Enter') {
+                        e.preventDefault();
+                        toggleEl.classList.toggle('active');
+                        const isActive = toggleEl.classList.contains('active');
+                        toggleEl.setAttribute('aria-checked', isActive ? 'true' : 'false');
+                        toggleEl.click();
+                    }
+                });
+            }
+
+            // 從 localStorage 恢復設定（預設顯示）
+            const savedVisible = localStorage.getItem('showSidebar') !== 'false';
+            initToggleAccessibility(showSidebarToggle, savedVisible);
+
+            if (savedVisible) {
+                showSidebarToggle.classList.add('active');
+                showSidebarToggle.setAttribute('aria-checked', 'true');
+                sidebar.classList.remove('hidden');
+                gameContainer.classList.remove('sidebar-hidden');
+            } else {
+                showSidebarToggle.classList.remove('active');
+                showSidebarToggle.setAttribute('aria-checked', 'false');
+                sidebar.classList.add('hidden');
+                gameContainer.classList.add('sidebar-hidden');
+            }
+            
+            // 側邊欄顯示/隱藏切換（與其他頁面一致）
+            if (showSidebarToggle) {
+                showSidebarToggle.addEventListener('click', () => {
+                    // 使用延遲套用，與其他頁面保持一致
+                    setTimeout(() => {
+                        const isActive = showSidebarToggle.classList.contains('active');
+                        showSidebarToggle.setAttribute('aria-checked', isActive ? 'true' : 'false');
+                        if (isActive) {
+                            sidebar.classList.remove('hidden');
+                            gameContainer.classList.remove('sidebar-hidden');
+                            localStorage.setItem('showSidebar', 'true');
+                            const event = new CustomEvent('sidebarToggle', { detail: { visible: true } });
+                            window.dispatchEvent(event);
+                        } else {
+                            sidebar.classList.add('hidden');
+                            gameContainer.classList.add('sidebar-hidden');
+                            localStorage.setItem('showSidebar', 'false');
+                            const event = new CustomEvent('sidebarToggle', { detail: { visible: false } });
+                            window.dispatchEvent(event);
+                        }
+                    }, 50);
+                });
+            }
+
+            // 側邊欄 class 變更時自動同步設定面板的 showSidebar 開關
+            const sidebarObserver = new MutationObserver(() => {
+                const isHidden = sidebar.classList.contains('hidden');
+                if (showSidebarToggle) {
+                    if (isHidden) {
+                        showSidebarToggle.classList.remove('active');
+                        showSidebarToggle.setAttribute('aria-checked', 'false');
+                    } else {
+                        showSidebarToggle.classList.add('active');
+                        showSidebarToggle.setAttribute('aria-checked', 'true');
+                    }
+                }
+            });
+            if (sidebar) sidebarObserver.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+
+            // 側邊欄文字顯示切換
+            const sideNavTextToggle = document.getElementById('sideNavTextVisible');
+            const savedTextVisible = localStorage.getItem('sideNavTextVisible') !== 'false';
+            
+            // 側邊欄文字顯示切換（含無障礙支持）
+            initToggleAccessibility(sideNavTextToggle, savedTextVisible);
+            if (savedTextVisible) {
+                sideNavTextToggle.classList.add('active');
+                sideNavTextToggle.setAttribute('aria-checked', 'true');
+            } else {
+                sideNavTextToggle.classList.remove('active');
+                sideNavTextToggle.setAttribute('aria-checked', 'false');
+                sidebar.classList.add('hide-text');
+            }
+            
+            sideNavTextToggle.addEventListener('click', () => {
+                const isActive = sideNavTextToggle.classList.toggle('active');
+                sideNavTextToggle.setAttribute('aria-checked', isActive ? 'true' : 'false');
+                sidebar.classList.toggle('hide-text', !isActive);
+                localStorage.setItem('sideNavTextVisible', isActive);
+            });
+
+
+            // 主題模式切換
+            const themeModeSelect = document.getElementById('themeMode');
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            themeModeSelect.value = savedTheme;
+            
+            themeModeSelect.addEventListener('change', (e) => {
+                const theme = e.target.value;
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+            });
+
+            // 動畫強度控制
+            const animationStrength = document.getElementById('animationStrength');
+            const animationValue = document.getElementById('animationValue');
+            const savedAnimation = localStorage.getItem('animationStrength') || '2';
+            
+            animationStrength.value = savedAnimation;
+            const labels = ['關', '低', '強'];
+            animationValue.textContent = labels[savedAnimation];
+            
+            animationStrength.addEventListener('input', (e) => {
+                const value = e.target.value;
+                animationValue.textContent = labels[value];
+                localStorage.setItem('animationStrength', value);
+                document.documentElement.style.setProperty('--animation-speed', 
+                    value === '0' ? '0s' : value === '1' ? '2s' : '1s');
+            });
+
+            // 音效開關
+            const soundToggle = document.getElementById('soundEnabled');
+            const savedSound = localStorage.getItem('soundEnabled') !== 'false';
+            
+            // 音效開關（含無障礙支持）
+            initToggleAccessibility(soundToggle, savedSound);
+            if (savedSound) {
+                soundToggle.classList.add('active');
+                soundToggle.setAttribute('aria-checked', 'true');
+            } else {
+                soundToggle.classList.remove('active');
+                soundToggle.setAttribute('aria-checked', 'false');
+            }
+            
+            soundToggle.addEventListener('click', () => {
+                const isActive = soundToggle.classList.toggle('active');
+                soundToggle.setAttribute('aria-checked', isActive ? 'true' : 'false');
+                localStorage.setItem('soundEnabled', isActive);
+            });
+        }
+
+        // ========== 初始化 ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            // 禁用全域進場動畫（與 snake / cyberrace 保持一致）
+            // 標記 loader 已顯示過，Animations.init() 將不會建立 loader
+            try {
+                sessionStorage.setItem('loaderShown', 'true');
+                sessionStorage.setItem('skipEntranceAnimation', 'true');
+            } catch (e) {
+                // 在某些嵌入環境下 storage 可能不可用，忽略錯誤
+                console.warn('Unable to set session flags to skip entrance animation:', e);
+            }
+
+            // 初始化核心系統
+            Core.initBackground();
+            Core.initParticles(document.getElementById('particles'));
+            Navigation.init();
+            Animations.init();
+
+            // 初始化鋼琴合成器（設為全域以供 OSD 訪問）
+            window.pianoSynth = new CyberPianoSynth();
+            const piano = new CyberPiano(window.pianoSynth);
+
+            // 鍵盤輸入由 `CyberPiano` 類本身處理（包含大小寫容錯）
+
+            // 初始化波形顯示器
+            const waveformCanvas = document.getElementById('waveformCanvas');
+            const visualizer = new WaveformVisualizer(waveformCanvas, window.pianoSynth.analyser);
+            visualizer.start();
+
+            // 初始化側邊欄
+            initSidebarControls();
+
+            // 初始化系統設定
+            initSystemSettings();
+
+            // 初始化 FPS OSD
+            initFPSOSD();
+
+            // 主題切換時更新樣式
+            const currentTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+
+            console.log('🎹 Cyber Piano 已初始化');
+        });
+    </script>
+</body>
+</html>
