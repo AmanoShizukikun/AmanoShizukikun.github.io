@@ -1,0 +1,41 @@
+{
+  "message": {
+    "default": ["嗨～你好啊！有什麼我可以幫忙的嗎？"],
+    "console": "哈哈，你打開了控制台，是想要看看我的小秘密嗎？",
+    "copy": "你都複製了些什麼呀，轉載要記得加上出處哦！",
+    "visibilitychange": "哇，你終於回來了～",
+    "changeSuccess": "我的新衣服好看嘛？",
+    "changeFail": "我還沒有其他衣服呢！",
+    "photo": "照好了嘛，是不是很可愛呢？",
+    "goodbye": "願你有一天能與重要的人重逢。",
+    "hitokoto": [
+      "今天也是努力的一天，別忘了喝水～",
+      "別太擔心，慢慢來就好。",
+      "在小事上堅持，會讓你變成更好的人。"
+    ],
+    "welcome": "<span>歡迎閱讀 \"$1\"</span>",
+    "referrer": "Hello！來自 <span>$1</span> 的朋友",
+    "hoverBody": ["幹嘛呢你，快把手拿開～～", "鼠…鼠標放錯地方了！"],
+    "tapBody": ["是…是不小心碰到了吧…", "嗚哇！請小心別嚇到我～", "嗚…這是什麼感覺？", "你想幹嘛呀～", "咦？有人碰我嗎？"],
+    "animations": [
+      "/assets/live2d/animations/hiyori_m01.motion3.json",
+      "/assets/live2d/animations/hiyori_m02.motion3.json",
+      "/assets/live2d/animations/hiyori_m03.motion3.json",
+      "/assets/live2d/animations/hiyori_m04.motion3.json",
+      "/assets/live2d/animations/hiyori_m05.motion3.json",
+      "/assets/live2d/animations/hiyori_m06.motion3.json",
+      "/assets/live2d/animations/hiyori_m07.motion3.json",
+      "/assets/live2d/animations/hiyori_m08.motion3.json",
+      "/assets/live2d/animations/hiyori_m09.motion3.json",
+      "/assets/live2d/animations/hiyori_m10.motion3.json"
+    ]
+  },
+  "mouseover": [],
+  "click": [],
+  "seasons": [],
+  "time": [],
+  "models": [
+    { "name": "L2D-CMT-01", "paths": ["/assets/live2d/model/L2D-CMT-01ver2.3_vts/L2D-CMT-01.model3.json"], "message": "嗨，我是 L2D-CMT-01（本機模型）" },
+    { "name": "WL2D-01", "paths": ["/assets/live2d/model/WL2D-01_vts/WL2D-01.model3.json"], "message": "嗨，我是「三和音」有甚麼我可以為您服務的嗎? " }
+  ]
+}

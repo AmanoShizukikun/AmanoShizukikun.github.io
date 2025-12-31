@@ -13,26 +13,26 @@
     <link rel="stylesheet" href="../assets/css/animations.css">
     <style>
         /* ============================================
-           主要內容區域
+           關鍵修正：強制覆蓋可能影響 Sticky 的屬性
            ============================================ */
-        .page-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0;
-            position: relative;
-            z-index: 1;
+        html, body {
+            overflow-x: hidden;
+            overflow-y: auto; /* 確保垂直滾動正常 */
         }
 
-        /* Hero 區域後的內容區塊添加 padding */
-        .profile-grid,
-        .features-grid,
-        .skills-section,
-        .timeline-section {
-            padding: 0 2rem;
+        /* 確保內容容器不會隱藏溢出，否則 sticky 會失效 */
+        .page-content {
+            overflow: visible !important;
+            display: block !important;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            padding-bottom: 5rem;
         }
 
         /* ============================================
-           Hero 區域
+           1. Hero 區域 (保留原本首頁視覺)
            ============================================ */
         .hero-section {
             text-align: center;
@@ -67,10 +67,10 @@
         }
 
         .hero-subtitle {
-            font-size: clamp(1rem, 2vw, 1.5rem);
-            color: rgba(255, 255, 255, 0.7);
             font-family: var(--font-body);
+            font-size: clamp(1rem, 2vw, 1.5rem);
             letter-spacing: 0.3em;
+            color: rgba(255, 255, 255, 0.7);
             margin-bottom: 2rem;
         }
 
@@ -89,17 +89,7 @@
             margin-bottom: 6rem;
         }
 
-        .status-badge::after {
-            content: '';
-            position: absolute;
-            bottom: -160px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: 70px;
-            background: linear-gradient(to bottom, transparent, var(--primary-cyan));
-            animation: scanlineDown 2s ease-in-out infinite;
-        }
+        /* decorative scanline removed per request */
 
         .status-badge::before {
             content: '●';
@@ -117,544 +107,1178 @@
             100% { transform: translateY(50%); }
         }
 
-        /* ============================================
-           個人資料卡片區
-           ============================================ */
-        .profile-grid {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 2.5rem;
-            margin: 3rem 0;
+        /* 滾動提示標誌 */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 110px; /* nudged further up for clearer separation from hero */
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.7;
+            animation: float 2s ease-in-out infinite;
+            transition: bottom 260ms ease;
+        }
+        .scroll-text {
+            font-size: 0.8rem;
+            letter-spacing: 0.2em;
+            color: var(--primary-cyan);
+        }
+        .scroll-arrow {
+            width: 20px;
+            height: 20px;
+            border-right: 2px solid var(--primary-cyan);
+            border-bottom: 2px solid var(--primary-cyan);
+            transform: rotate(45deg);
         }
 
-        .profile-card {
+        /* Make only the arrow itself clickable */
+        .scroll-arrow-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+        .scroll-arrow-link:focus,
+        .scroll-arrow-link:hover {
+            background: rgba(0,212,255,0.06);
+            transform: translateY(-4px);
+            outline: none;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(-50%, 0); }
+            50% { transform: translate(-50%, 10px); }
+        }
+
+        /* ============================================
+           2. 雙欄佈局 (vCard 風格)
+           ============================================ */
+        .layout-container {
+            display: flex;
+            gap: 3rem;
+            padding: 0 2rem;
             position: relative;
-            padding: 1.5rem;
-            transition: transform var(--transition-normal);
+            /* 關鍵：align-items 必須是 flex-start，sidebar 才能固定 */
+            align-items: flex-start; 
+        }
+
+        /* 左側欄位 - 設定 Sticky */
+        .sidebar-wrapper {
+            width: 350px;
+            flex-shrink: 0;
+            /* 關鍵 Sticky 設定 */
+            position: -webkit-sticky;
+            position: sticky;
+            top: 100px; /* 距離視窗頂部的距離 */
+            z-index: 10;
+            /* 確保內容過長時也可以滾動 */
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-cyan) transparent;
+            border-radius: 12px;
+        }
+        .sidebar-wrapper::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar-wrapper::-webkit-scrollbar-thumb {
+            background: var(--primary-cyan);
+            border-radius: 2px;
+        }
+
+        /* 左側卡片樣式 */
+        .profile-card {
+            background: rgba(13, 17, 23, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* 裝飾頂部線條 */
+        .profile-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-cyan), var(--primary-magenta));
+            z-index: 2;
         }
 
         .profile-card:hover {
-            transform: translateY(-5px);
+            /* removed translateY to avoid upward shift on hover */
+            box-shadow: 0 15px 50px rgba(0, 212, 255, 0.15);
+            border-color: var(--primary-cyan);
         }
 
-        /* 頭像 hover 效果 - 僅在直接觸碰頭像時觸發 */
-        .profile-avatar:hover img {
-            transform: scale(1.05);
-        }
-
-        .profile-avatar {
-            width: 100%;
-            aspect-ratio: 1;
-            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(170, 0, 255, 0.2));
-            border: 2px solid var(--primary-cyan);
-            margin-bottom: 1.5rem;
-            position: relative;
-            overflow: hidden;
+        /* 右側內容欄位 */
+        .content-wrapper {
+            flex: 1;
+            min-width: 0; /* 防止 Flex 子元素溢出 */
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
+            gap: 2.5rem;
         }
 
-        .profile-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        /* 右側區塊通用樣式 */
+        .content-section {
+            background: rgba(13, 17, 23, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 3rem;
             position: relative;
-            z-index: 2;
-            transition: transform var(--transition-normal);
+            transition: border-color 0.3s ease;
+            overflow: hidden; /* keep accent stripe clipped to rounded corners */
+        }
+        
+        .content-section:hover {
+            border-color: rgba(0, 212, 255, 0.4);
         }
 
-        .profile-avatar::before {
+        /* Left accent stripe (borrowed from pages/c.html) */
+        .content-section::before {
             content: '';
             position: absolute;
-            inset: 0;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0, 212, 255, 0.1) 0px,
-                transparent 2px,
-                transparent 4px,
-                rgba(0, 212, 255, 0.1) 6px
-            );
-            animation: gridMove 20s linear infinite;
-            z-index: 1;
+            top: 0; /* flush to the very top */
+            left: 0; /* flush to the very left edge */
+            bottom: 0; /* span full height */
+            width: 4px;
+            background: linear-gradient(to bottom, var(--primary-cyan), transparent);
+            opacity: 0.5;
+            transition: opacity 260ms ease, transform 260ms ease;
+            pointer-events: none;
+            border-top-left-radius: 16px; /* match container radius for perfect rounding */
+            border-bottom-left-radius: 16px;
+            box-shadow: inset 6px 0 16px rgba(0,212,255,0.04); /* subtle inner glow */
         }
 
-        .info-list {
-            list-style: none;
-            padding: 0;
+        .content-section:hover::before {
+            opacity: 0.85;
         }
 
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.8rem 0;
-            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
-            font-family: var(--font-body);
-        }
-
-        .info-label {
-            color: var(--primary-cyan);
-            font-weight: 600;
-            font-family: var(--font-display);
-            font-size: 0.85rem;
-            letter-spacing: 0.1em;
-        }
-
-        .info-value {
-            color: rgba(255, 255, 255, 0.9);
-            text-align: right;
-            font-size: 0.95rem;
-        }
-
-        /* ============================================
-           關於區域
-           ============================================ */
-        .about-content {
-            position: relative;
-        }
-
+        /* 標題樣式 （恢復舊版配色：洋紅為主色） */
         .section-title {
             font-family: var(--font-display);
-            font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+            font-size: 2rem;
             color: var(--primary-magenta);
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: none;
             position: relative;
-            display: inline-block;
+            display: block;
+            overflow: hidden; /* clip ::after/::before effects inside title */
         }
 
+        /* main animated accent line (entrance animation, shifted half-width to the left) */
+        :root { --section-underline-w: 160px; }
         .section-title::after {
             content: '';
             position: absolute;
-            bottom: -8px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(to right, var(--primary-magenta), transparent);
-        }
-
-        .text-block {
-            margin-bottom: 1.2rem;
-            line-height: 1.8;
-            color: rgba(255, 255, 255, 0.85);
-            font-size: 1rem;
-            position: relative;
-            padding-left: 1.2rem;
-        }
-
-        .text-block::before {
-            content: '▸';
-            position: absolute;
-            left: 0;
-            color: var(--primary-cyan);
-            font-weight: bold;
-        }
-
-        /* ============================================
-           特色卡片網格
-           ============================================ */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            margin: 4rem 0;
-        }
-
-        .feature-card {
-            position: relative;
-            padding: 2.5rem;
-            background: rgba(13, 17, 23, 0.8);
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            bottom: 0; /* align with title bottom edge */
+            left: 0; /* anchor at left edge */
+            width: var(--section-underline-w);
             height: 3px;
-            background: linear-gradient(to right, var(--primary-cyan), var(--primary-magenta));
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
+            background: linear-gradient(90deg, var(--primary-magenta), transparent);
+            box-shadow: 0 0 12px rgba(204,0,102,0.10);
+            border-radius: 2px;
+            transform-origin: left center;
+            /* shift the whole bar left by half its width (translateX(-50%)) so it sits half-outside */
+            transform: translateX(-50%) scaleX(0.25);
+            opacity: 0;
+            transition: transform 720ms cubic-bezier(.22,1,.36,1), opacity 420ms ease;
         }
 
-        .feature-card:hover::before {
-            transform: scaleX(1);
+        /* shimmer removed: keep entrance underline and subtle hover only */
+        .section-title.is-active::after {
+            transform: translateX(-50%) scaleX(1);
+            opacity: 1;
         }
 
-        .feature-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary-cyan);
-            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.3);
+        /* keep hover as a gentle reinforcement but not the primary trigger */
+        .section-title:hover::after {
+            transform: translateX(-50%) scaleX(1);
+            opacity: 1;
         }
 
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            display: block;
-        }
-
-        .feature-title {
-            font-family: var(--font-display);
-            font-size: 1.5rem;
-            color: var(--primary-cyan);
-            margin-bottom: 1rem;
-        }
-
-        .feature-description {
-            color: rgba(255, 255, 255, 0.8);
-            line-height: 1.7;
-            font-size: 1rem;
-        }
-
-        /* ============================================
-           技能條區域
-           ============================================ */
-        .skills-section {
-            margin: 5rem 0;
-        }
-
-        .skills-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .skill-category {
-            padding: 2rem;
-            background: rgba(13, 17, 23, 0.6);
-            border: 1px solid rgba(0, 212, 255, 0.2);
-        }
-
-        .category-title {
-            font-family: var(--font-display);
-            font-size: 1.3rem;
-            color: var(--primary-magenta);
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .skill-bar-wrapper {
-            margin-bottom: 1.5rem;
-        }
-
-        .skill-name {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 0.95rem;
-        }
-
-        .skill-level {
-            color: var(--primary-cyan);
-            font-family: var(--font-display);
-            font-size: 0.85rem;
-        }
-
-        .skill-bar {
-            height: 8px;
-            background: rgba(0, 212, 255, 0.1);
+        /* --- 個人資料內部元素 --- */
+        .avatar-box {
+            width: 160px;
+            height: 160px;
+            margin: 0 auto 1.5rem;
+            border-radius: 20px;
+            padding: 5px;
+            background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(255,0,128,0.2));
+            border: 1px solid rgba(0,212,255,0.5);
             position: relative;
-            overflow: hidden;
         }
-
-        .skill-bar-fill {
+        
+        .avatar-box img {
+            width: 100%;
             height: 100%;
-            background: linear-gradient(to right, var(--primary-cyan), var(--primary-magenta));
-            position: relative;
-            transition: width 1.5s ease;
-            width: 0;
+            object-fit: cover;
+            border-radius: 15px;
+            filter: brightness(0.95);
+            transition: all 0.5s ease;
         }
 
-        .skill-bar-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            width: 20px;
-            background: rgba(255, 255, 255, 0.3);
-            filter: blur(10px);
-            animation: shimmer 2s ease-in-out infinite;
+        .profile-card:hover .avatar-box img {
+            transform: scale(1.05);
+            filter: brightness(1.1);
         }
 
-        @keyframes shimmer {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 1; }
-        }
-
-        /* ============================================
-           時間軸
-           ============================================ */
-        .timeline-section {
-            margin: 5rem 0;
-            position: relative;
-        }
-
-        .timeline {
-            position: relative;
-            padding-left: 3rem;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: linear-gradient(to bottom, var(--primary-cyan), var(--primary-magenta));
-        }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 3rem;
-            padding: 2rem;
-            background: rgba(13, 17, 23, 0.6);
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            border-left: 3px solid var(--primary-cyan);
-        }
-
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -3.6rem;
-            top: 2rem;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: var(--primary-cyan);
-            border: 3px solid var(--dark-bg);
-            box-shadow: 0 0 20px var(--primary-cyan);
-        }
-
-        .timeline-date {
+        .profile-name {
+            text-align: center;
             font-family: var(--font-display);
-            color: var(--primary-magenta);
-            font-size: 0.9rem;
+            font-size: 1.8rem;
+            color: #fff;
             margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .profile-badge {
+            text-align: center;
+            display: table;
+            margin: 0 auto 2rem;
+            padding: 0.3rem 1rem;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 50px;
+            color: var(--primary-cyan);
+            font-size: 0.8rem;
             letter-spacing: 0.1em;
         }
 
-        .timeline-title {
-            font-size: 1.5rem;
-            color: var(--primary-cyan);
-            margin-bottom: 1rem;
-            font-family: var(--font-display);
+        /* contact-list like styles from c.html */
+        .info-list, .contact-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
 
-        .timeline-content {
+        .info-item, .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem; /* 減少圖示與文字間距 */
+            margin-bottom: 1.2rem;
             color: rgba(255, 255, 255, 0.8);
-            line-height: 1.7;
+            font-size: 0.9rem;
         }
 
-        /* ============================================
-           響應式設計
-           ============================================ */
+        .info-item:last-child, .contact-item:last-child { margin-bottom: 0; }
+
+        .sidebar-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.3), transparent);
+            margin: 1.5rem 0;
+        }
+
+        .info-icon, .contact-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-cyan);
+            margin-right: 8px; /* 緊縮圖示與文字間距 */
+            flex-shrink: 0;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .info-text h4, .contact-text h4 {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin: 0 0 4px 0;
+            text-transform: uppercase;
+            font-family: var(--font-display);
+            letter-spacing: 0.05em;
+        }
+
+        .info-text span, .contact-text span {
+            font-family: var(--font-body);
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* use c.html social-row / social-btn sizing */
+        .social-grid, .social-row {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .social-link-btn, .social-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-cyan);
+            transition: all 0.3s ease;
+        }
+
+        .social-link-btn:hover, .social-btn:hover {
+            background: var(--primary-cyan);
+            color: #000;
+            box-shadow: 0 0 15px var(--primary-cyan);
+            transform: translateY(-3px);
+        }
+
+        /* Sidebar collapse toggle (for small screens) */
+        .sidebar-toggle {
+            display: none; /* shown only on small screens */
+            background: rgba(255,255,255,0.02);
+            color: var(--primary-cyan);
+            border: 1px solid rgba(255,255,255,0.06);
+            padding: 0.45rem 0.9rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            margin: 0 auto 1rem;
+        }
+
+
+
+        /* Collapsed profile layout: avatar left, meta (name+badge) center, toggle right */
+        .sidebar-wrapper.is-collapsed .profile-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            /* Keep horizontal padding identical to expanded state so width doesn't shift on toggle */
+            padding: 1rem 2.5rem;
+            max-height: none; /* let content define height for compact layout */
+            background: rgba(13,17,23,0.95);
+        }
+
+        /* Ensure sidebar-info never changes width when toggling collapsed/expanded */
+        .sidebar-wrapper .sidebar-info,
+        .sidebar-wrapper.is-collapsed .sidebar-info {
+            width: 100%;
+            box-sizing: border-box;
+            min-width: 0; /* prevent flex overflow from expanding the container */
+        }
+
+        .sidebar-wrapper.is-collapsed .avatar-box {
+            width: 72px;
+            height: 72px;
+            border-radius: 12px;
+            padding: 3px;
+            box-shadow: 0 6px 18px rgba(0,212,255,0.08);
+            flex: 0 0 72px;
+        }
+
+        .sidebar-wrapper.is-collapsed .profile-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center; /* keep vertically centered */
+            gap: 0.5rem; /* ensure consistent spacing between name & badge when collapsed */
+            transform: translateY(10px) !important; /* ensure collapsed also nudges down */
+            transition: transform 180ms ease !important;
+        }
+
+        .sidebar-wrapper.is-collapsed .profile-name {
+            /* ensure name remains the same size in collapsed state */
+            font-size: 1.8rem;
+            margin: 0 0 0.25rem 0;
+            line-height: 1.05;
+            font-weight: 700;
+        }
+
+        .sidebar-wrapper.is-collapsed .profile-badge {
+            /* match desktop "pilled" badge when collapsed */
+            display: table;
+            margin: 0 0 2rem 0;
+            padding: 0.3rem 1rem;
+            font-size: 0.8rem;
+            border-radius: 50px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: var(--primary-cyan);
+            letter-spacing: 0.1em;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .sidebar-wrapper.is-collapsed .sidebar-toggle {
+            /* Keep same visible styling as expanded state (no margin-left override) */
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            color: var(--primary-cyan);
+            padding: 0.35rem 0.6rem;
+            cursor: pointer;
+            font-weight: 600;
+            border-radius: 8px;
+        }
+
+        /* show toggle on narrow screens and adjust layout */
         @media (max-width: 1024px) {
-            .profile-grid {
-                grid-template-columns: 1fr;
+            .sidebar-toggle { display: block; }
+            /* make sure sidebar is relative (not sticky) on small viewports */
+            .sidebar-wrapper { position: relative; top: 0; }
+        }
+
+        /* show toggle on narrow screens and adjust layout */
+        @media (max-width: 1024px) {
+            .sidebar-toggle { display: block; }
+            /* make sure sidebar is relative (not sticky) on small viewports */
+            .sidebar-wrapper { position: relative; top: 0; }
+        }
+
+        /* --- 內容區細節 --- */
+        .about-text p {
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
+            font-size: 1.05rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-box:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--primary-cyan);
+            transform: translateY(-5px);
+        }
+
+        /* 技能條樣式修正 */
+        .skill-item {
+            margin-bottom: 1.5rem;
+        }
+        .skill-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+        .skill-track {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .skill-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-cyan), var(--primary-magenta));
+            width: 0;
+            transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+            border-radius: 4px;
+            position: relative;
+        }
+        .skill-progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+
+        /* 響應式調整 */
+
+        /* ---------- Desktop two-column vCard-like layout (single scrollbar) ---------- */
+        @media (min-width: 1250px) {
+            .layout-container {
+                max-width: 1400px; /* match original page width */
+                margin: 0 auto;
+                display: flex;
+                justify-content: flex-start;
+                align-items: flex-start;
+                gap: 25px;
+            }
+            .sidebar-wrapper {
+                position: sticky;
+                top: 100px; /* 與 header 高度對齊 */
+                flex: 0 0 350px;
+                /* 不限制高度或使用內部滾動，讓頁面本身捲動只有一條捲軸 */
+                height: auto;
+                max-height: none;
+                overflow: visible;
+                padding-top: 0; /* 與右側頂部對齊 */
             }
 
-            .features-grid {
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            /* JS fallback: 當原生 sticky 無法達成需求時，套用 .is-fixed 以 position:fixed 固定位置
+               NOTE: 對於 >=1025px 我們移除 sidebar 的過渡/動畫效果，改以右上角指示燈顯示狀態（is-fixed：青 / is-anchored：洋紅） */
+            .sidebar-wrapper.is-fixed {
+                position: fixed !important;
+                top: calc(var(--header-height, 75px) + 20px) !important; /* 與 header 保持一致 */
+                z-index: 1000 !important;
+                transform: none !important;
+                will-change: auto !important;
+                transition: none !important;
+                /* keep original visual background: do NOT change background when fixed */
+                background: transparent !important;
+                box-shadow: none !important; /* removed shadow, using indicator instead */
+            }
+
+            /* 當 Sidebar 被鎖定到 layout 底部（anchored）時，也不使用任何過渡效果；顯示指示燈以示狀態 */
+            .sidebar-wrapper.is-anchored {
+                position: absolute !important;
+                z-index: 1000 !important;
+                transform: none !important;
+                will-change: auto !important;
+                transition: none !important;
+                /* keep original visual background: do NOT change background when anchored */
+                background: transparent !important;
+                box-shadow: none !important;
+            }
+
+            /* indicator light shown when sidebar changes state (right-top corner) — fixed: cyan, anchored: magenta */
+            .sidebar-wrapper.is-fixed::after,
+            .sidebar-wrapper.is-anchored::after {
+                content: '';
+                position: absolute;
+                top: 12px;
+                right: 12px;
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                border: 1px solid rgba(255,255,255,0.06);
+                z-index: 1001;
+                pointer-events: none;
+                animation: indicatorPulse 2.4s ease-in-out infinite;
+            }
+            .sidebar-wrapper.is-fixed::after { background: var(--primary-cyan); box-shadow: 0 0 8px rgba(0,212,255,0.18); }
+            .sidebar-wrapper.is-anchored::after { background: var(--primary-magenta); box-shadow: 0 0 8px rgba(255,0,128,0.18); }
+
+            @keyframes indicatorPulse {
+                0% { box-shadow: 0 0 4px rgba(0,212,255,0.12); transform: scale(1); }
+                50% { box-shadow: 0 0 14px rgba(0,212,255,0.22); transform: scale(1.14); }
+                100% { box-shadow: 0 0 4px rgba(0,212,255,0.12); transform: scale(1); }
+            }
+
+            /* placeholder keeps the two-column layout when sidebar is removed from flow */
+            .sidebar-placeholder {
+                flex: 0 0 350px;
+                width: 350px;
+                display: none;
+            }
+
+            .content-wrapper {
+                flex: 1 1 auto;
+                min-width: 0;
+                width: auto; /* use flex sizing so placeholder reserves space */
+                /* 讓內容隨頁面 (body) 捲動，避免內容區產生第二個捲軸 */
+                max-height: none;
+                overflow: visible;
+                padding-right: 1rem;
             }
         }
 
-        @media (max-width: 768px) {
-            .page-content {
-                padding: 0;
+        /* Make 1025px–1249px use same spacing as >=1250px */
+        @media (min-width: 1025px) and (max-width: 1249px) {
+            .layout-container {
+                max-width: 1400px;
+                margin: 0 auto;
+                display: flex;
+                justify-content: flex-start;
+                align-items: flex-start;
+                gap: 25px;
+            }
+            .sidebar-wrapper {
+                position: sticky;
+                top: 100px; /* 與 header 高度對齊 */
+                flex: 0 0 350px;
+                /* 不限制高度或使用內部滾動，讓頁面本身捲動只有一條捲軸 */
+                height: auto;
+                max-height: none;
+                overflow: visible;
+                padding-top: 0; /* 與右側頂部對齊 */
             }
 
-            .hero-section {
-                min-height: auto;
-                padding: 6rem 1rem 4rem;
+            /* placeholder keeps the two-column layout when sidebar is removed from flow */
+            .sidebar-placeholder {
+                flex: 0 0 350px;
+                width: 350px;
+                display: none;
             }
 
-            .profile-grid,
-            .features-grid,
-            .skills-section,
-            .timeline-section {
-                padding: 0 1rem;
+            .content-wrapper {
+                padding-right: 1rem;
             }
 
-            .profile-avatar {
-                font-size: 5rem;
+            /* Remove any transition/animation on desktop sidebar state changes — use indicator only */
+            .sidebar-wrapper,
+            .sidebar-wrapper.is-fixed,
+            .sidebar-wrapper.is-anchored {
+                transition: none !important;
+                will-change: auto !important;
+                box-shadow: none !important;
             }
 
-            .skills-container {
-                grid-template-columns: 1fr;
+            /* Also show the right-top indicator for >=1025px so 1025-1249 displays correctly */
+            .sidebar-wrapper.is-fixed::after,
+            .sidebar-wrapper.is-anchored::after {
+                content: '';
+                position: absolute;
+                top: 12px;
+                right: 12px;
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                border: 1px solid rgba(255,255,255,0.06);
+                z-index: 1001;
+                pointer-events: none;
+                animation: indicatorPulse 2.4s ease-in-out infinite;
             }
+            .sidebar-wrapper.is-fixed::after { background: var(--primary-cyan); box-shadow: 0 0 8px rgba(0,212,255,0.18); }
+            .sidebar-wrapper.is-anchored::after { background: var(--primary-magenta); box-shadow: 0 0 8px rgba(255,0,128,0.18); }
 
-            .timeline {
-                padding-left: 2rem;
-            }
-
-            .timeline-item::before {
-                left: -2.6rem;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
+            @keyframes indicatorPulse {
+                0% { box-shadow: 0 0 4px rgba(0,212,255,0.12); transform: scale(1); }
+                50% { box-shadow: 0 0 14px rgba(0,212,255,0.22); transform: scale(1.14); }
+                100% { box-shadow: 0 0 4px rgba(0,212,255,0.12); transform: scale(1); }
             }
         }
 
-        @media (max-width: 480px) {
-            .hero-section {
-                padding: 5rem 0.8rem 3rem;
+        @media (max-width: 1024px) {
+            .layout-container {
+                flex-direction: column;
+                padding: 0 1.5rem;
             }
 
-            .profile-grid,
-            .features-grid,
-            .skills-section,
-            .timeline-section {
-                padding: 0 0.8rem;
+            /* 折疊/展開動畫容器：透過 max-height 控制高度並加上過渡，模仿 vCard 範例 */
+            .sidebar-wrapper {
+                width: 100%;
+                position: relative; /* 手機版取消 Sticky */
+                top: 0;
+                max-height: 200px; /* collapsed height — 提升以容納 160px 頭像 */
+                overflow: hidden;
+                transition: max-height 360ms ease, box-shadow 250ms ease;
             }
 
-            .glitch-title {
-                font-size: 2rem;
+            /* 展開時放寬上限，顯示 contact-list & social-row */
+            .sidebar-wrapper:not(.is-collapsed) {
+                max-height: 1000px;
             }
 
-            .hero-subtitle {
+            /* Force consistent header layout for mobile: avatar left, meta right - same in collapsed & expanded */
+            .profile-card {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 1rem;
+                padding: 0.9rem 1rem;
+            }
+
+            /* Ensure collapsed state uses the same horizontal padding on mobile so width remains consistent */
+            .sidebar-wrapper.is-collapsed .profile-card {
+                padding: 0.9rem 1rem;
+            }
+
+            /* Avatar and meta keep same size and position in both states */
+            .sidebar-wrapper .avatar-box {
+                margin: 0;
+                width: 160px;
+                height: 160px;
+                border-radius: 20px;
+                padding: 5px;
+                flex: 0 0 160px;
+            }
+
+            .sidebar-wrapper .profile-meta {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                justify-content: center; /* vertical center within header */
+                gap: 0.5rem; /* space between name and badge */
+                padding-left: 0.6rem;
+                flex: 1 1 auto;
+                min-width: 0;
+                transform: translateY(10px); /* nudge down slightly */
+                transition: transform 180ms ease;
+            }
+
+            .sidebar-wrapper .profile-name {
+                font-size: 1.8rem;
+                margin: 0 0 0.25rem 0;
+                line-height: 1.05;
+                text-align: left;
+                font-weight: 700;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .sidebar-wrapper .profile-badge {
+                /* preserve original pilled badge style used on desktop */
+                display: table;
+                margin: 0 0 2rem 0; /* same bottom spacing as desktop */
+                padding: 0.3rem 1rem;
                 font-size: 0.8rem;
-                letter-spacing: 0.2em;
+                border-radius: 50px;
+                background: rgba(0, 212, 255, 0.1);
+                border: 1px solid rgba(0, 212, 255, 0.3);
+                color: var(--primary-cyan);
+                letter-spacing: 0.1em;
+                text-align: center;
+                white-space: nowrap;
+                align-self: flex-start; /* keep left alignment in header */
             }
 
-            .section-title {
-                font-size: 1.5rem;
+            /* Place divider on its own row under the header (avatar/meta) */
+            .sidebar-wrapper .sidebar-divider {
+                order: 3;
+                flex-basis: 100%;
+                width: 100%;
+                margin: 1rem 0;
             }
 
-            .feature-card,
-            .skill-category,
-            .timeline-item {
-                padding: 1.5rem;
+            /* Ensure info_more sits below the divider */
+            .sidebar-wrapper .sidebar-info_more {
+                order: 4;
+                width: 100%;
             }
 
-            .text-block {
-                font-size: 1rem;
-                padding-left: 1rem;
+            /* make sidebar-info a vertical container with a header row */
+            .sidebar-wrapper .sidebar-info {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
             }
+
+            /* header row contains avatar, meta and toggle aligned horizontally */
+            .sidebar-wrapper .sidebar-header {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                width: 100%;
+                position: relative; /* so the absolute toggle aligns inside */
+            }
+
+            /* ensure collapsed state doesn't shrink avatar or name on mobile */
+            .sidebar-wrapper.is-collapsed .avatar-box {
+                width: 160px !important;
+                height: 160px !important;
+                flex: 0 0 160px !important;
+                border-radius: 20px !important;
+                padding: 5px !important;
+            }
+
+            .sidebar-wrapper.is-collapsed .profile-name {
+                font-size: 1.8rem !important;
+                margin: 0 0 0.25rem 0 !important;
+                font-weight: 700 !important;
+            }
+
+            .sidebar-wrapper.is-collapsed .profile-badge {
+                /* keep identical pilled badge on mobile collapsed state */
+                display: table !important;
+                margin: 0 0 2rem 0 !important;
+                padding: 0.3rem 1rem !important;
+                font-size: 0.8rem !important;
+                border-radius: 50px !important;
+                background: rgba(0, 212, 255, 0.1) !important;
+                border: 1px solid rgba(0, 212, 255, 0.3) !important;
+                color: var(--primary-cyan) !important;
+                letter-spacing: 0.1em !important;
+                text-align: center !important;
+                white-space: nowrap !important;
+                align-self: flex-start !important;
+            }
+
+            /* 把 toggle 改為絕對定位，靠右角並垂直置中，並維持與收合相同的邊框 */
+            .sidebar-wrapper .sidebar-toggle {
+                position: absolute;
+                top: 50%;
+                right: 12px;
+                transform: translateY(-50%);
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                background: rgba(255,255,255,0.02);
+                border: 1px solid rgba(255,255,255,0.06);
+                border-radius: 8px;
+                padding: 0.35rem 0.6rem;
+                color: var(--primary-cyan);
+            }
+
+            /* 小螢幕只顯示圖示（保持文字供輔助閱讀器使用） */
+            .sidebar-wrapper .sidebar-toggle .toggle-text { display: none; }
+
+            .sidebar-wrapper .toggle-chevron {
+                width: 18px;
+                height: 18px;
+                transition: transform 300ms ease;
+                color: var(--primary-cyan);
+            }
+
+            /* 展開時旋轉箭頭 */
+            .sidebar-wrapper:not(.is-collapsed) .toggle-chevron { transform: rotate(180deg); }
+
+            /* 使用過渡呈現 info_more 內的內容 (contact-list、social-row、divider) */
+            .sidebar-wrapper .sidebar-info_more,
+            .sidebar-wrapper .sidebar-info_more .contact-list,
+            .sidebar-wrapper .sidebar-info_more .social-row,
+            .sidebar-wrapper .sidebar-info_more .sidebar-divider {
+                opacity: 1;
+                max-height: 1000px;
+                transition: opacity 260ms ease, max-height 360ms ease;
+            }
+
+            /* subtle transition for the divider on mobile header */
+            .sidebar-wrapper .sidebar-divider {
+                transition: opacity 260ms ease, max-height 360ms ease, margin 260ms ease;
+            }
+
+            /* 折疊時隱藏整個 info_more 並禁用互動 */
+            .sidebar-wrapper.is-collapsed .sidebar-info_more {
+                opacity: 0;
+                max-height: 0;
+                overflow: hidden;
+                pointer-events: none;
+            }
+
+            /* 折疊時隱藏 header 下方的分隔線 */
+            .sidebar-wrapper.is-collapsed .sidebar-divider {
+                opacity: 0;
+                max-height: 0;
+                margin: 0;
+                overflow: hidden;
+                pointer-events: none;
+                display: block; /* keep DOM flow but collapse visual */
+            }
+
+            /* 展開時：contact-list 兩欄顯示，contact-item 內置樣式來模擬 vCard 的聯絡塊 */
+            .sidebar-wrapper:not(.is-collapsed) .sidebar-info_more .contact-list {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.6rem;
+                padding: 0.5rem; /* uniform padding on all sides */
+                margin: 0;
+            }
+
+            .sidebar-wrapper:not(.is-collapsed) .sidebar-info_more .contact-item {
+                display: flex;
+                align-items: center;
+                gap: 0.6rem;
+                padding: 0.5rem; /* uniform padding on all sides */
+                margin: 0; /* remove inherited bottom margin so grid gap controls spacing */
+                background: rgba(255,255,255,0.02);
+                border-radius: 10px;
+                border: 1px solid rgba(255,255,255,0.03);
+                min-height: 48px; /* enforce consistent block height for all items */
+                height: 48px; /* fixed height to avoid taller items */
+                box-sizing: border-box;
+                overflow: hidden;
+            }
+
+            /* Ensure icons don't add extra line-height or descender space */
+            .sidebar-wrapper:not(.is-collapsed) .sidebar-info_more .contact-icon {
+                width: 36px;
+                height: 36px;
+                flex: 0 0 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .sidebar-wrapper:not(.is-collapsed) .sidebar-info_more .contact-icon svg {
+                width: 20px;
+                height: 20px;
+                display: block;
+            }
+
+            .sidebar-wrapper:not(.is-collapsed) .sidebar-info_more .contact-text {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                line-height: 1.1;
+                margin: 0;
+            }
+
+            .sidebar-wrapper:not(.is-collapsed) .sidebar-info_more .contact-text h4 {
+                margin: 0;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+            }
+
+            .sidebar-wrapper:not(.is-collapsed) .sidebar-info_more .contact-text span {
+                display: block;
+                font-size: 0.9rem;
+                line-height: 1;
+                margin-top: 2px;
+            }
+
+            .sidebar-wrapper:not(.is-collapsed) .sidebar-info_more .social-row {
+                display: flex;
+                justify-content: center;
+                gap: 0.75rem;
+                margin-top: 0.6rem;
+            }
+
+            .info-item {
+                width: 100%;
+                max-width: 500px;
+            }
+            .hero-section {
+                min-height: 60vh;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .glitch-title { font-size: 3rem; }
+            .hero-subtitle { font-size: 0.9rem; letter-spacing: 0.2em; }
+            .content-section { padding: 1.5rem; }
+            .scroll-indicator { bottom: 18px; } /* keep it visible on small screens */
         }
 
         /* ============================================
-           淺色模式樣式
+           淺色模式：左右側欄與內容區 (Based on index/contact styles)
            ============================================ */
+        [data-theme="light"] .sidebar-wrapper {
+            /* keep wrapper transparent so card provides surface */
+            background: transparent;
+            scrollbar-color: rgba(0,153,204,0.35) transparent;
+        }
+        [data-theme="light"] .sidebar-wrapper::-webkit-scrollbar-thumb {
+            background: rgba(0,153,204,0.35);
+        }
+
         [data-theme="light"] .profile-card {
+            /* more transparent surface to match about_old feature-card */
             background: rgba(255, 255, 255, 0.65);
-            border: 2px solid rgba(0, 153, 204, 0.2);
+            border: 1px solid rgba(0, 153, 204, 0.18);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+            color: rgba(26,26,26,0.95);
         }
 
-        [data-theme="light"] .profile-avatar {
-            background: linear-gradient(135deg, rgba(0, 153, 204, 0.1), rgba(204, 0, 102, 0.1));
-            border-color: rgba(0, 153, 204, 0.4);
+        [data-theme="light"] .avatar-box {
+            background: linear-gradient(135deg, rgba(0,153,204,0.06), rgba(204,0,102,0.06));
+            border: 1px solid rgba(0,153,204,0.12);
         }
 
-        [data-theme="light"] .info-item {
-            border-bottom-color: rgba(0, 153, 204, 0.2);
+        [data-theme="light"] .profile-name {
+            color: #0099cc;
+            text-shadow: none;
         }
 
-        [data-theme="light"] .info-label {
+        [data-theme="light"] .profile-badge {
+            background: rgba(0,153,204,0.06);
+            border: 1px solid rgba(0,153,204,0.12);
             color: #0099cc;
         }
 
-        [data-theme="light"] .info-value {
-            color: rgba(26, 26, 26, 0.9);
+        [data-theme="light"] .info-item, [data-theme="light"] .contact-item {
+            color: rgba(26,26,26,0.85);
+        }
+
+        [data-theme="light"] .info-icon, [data-theme="light"] .contact-icon {
+            background: rgba(0,153,204,0.06);
+            color: #0099cc;
+            border: 1px solid rgba(0,153,204,0.12);
+        }
+
+        [data-theme="light"] .info-icon:hover, [data-theme="light"] .contact-icon:hover,
+        [data-theme="light"] .info-icon:focus, [data-theme="light"] .contact-icon:focus,
+        [data-theme="light"] .contact-icon:focus-within {
+            color: #cc0066; /* match nav red */
+            transform: scale(1.06);
+            filter: drop-shadow(0 6px 18px rgba(204,0,102,0.12));
+        }
+
+        [data-theme="light"] .info-text h4, [data-theme="light"] .contact-text h4 {
+            color: rgba(26,26,26,0.55);
+        }
+
+        [data-theme="light"] .info-text span, [data-theme="light"] .contact-text span {
+            color: rgba(26,26,26,0.9);
+        }
+
+        [data-theme="light"] .social-link-btn, [data-theme="light"] .social-btn {
+            background: rgba(0,153,204,0.06);
+            border: 1px solid rgba(0,153,204,0.12);
+            color: #0099cc;
+        }
+
+        [data-theme="light"] .social-link-btn:hover, [data-theme="light"] .social-btn:hover {
+            background: #0099cc;
+            color: #fff;
+            box-shadow: 0 8px 30px rgba(0,153,204,0.12);
+            transform: translateY(-3px);
+        }
+
+        [data-theme="light"] .sidebar-toggle {
+            background: rgba(255,255,255,0.9);
+            border: 1px solid rgba(0,153,204,0.08);
+            color: #0099cc;
+        }
+        [data-theme="light"] .sidebar-toggle:hover { background: rgba(255,255,255,0.95); }
+
+        /* Collapsed sidebar (light theme) - ensure profile-card and controls switch to light surface */
+        [data-theme="light"] .sidebar-wrapper.is-collapsed .profile-card {
+            /* match the same translucent surface when collapsed */
+            background: rgba(255,255,255,0.65);
+            border: 1px solid rgba(0,153,204,0.12);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+            color: rgba(26,26,26,0.95);
+        }
+
+        /* Ensure profile-badge retains identical styling in all states and themes */
+        /* Stronger selectors and !important to override any media/inline rules */
+        .sidebar-wrapper .profile-card .profile-badge,
+        .sidebar-wrapper.is-collapsed .profile-card .profile-badge,
+        .sidebar-wrapper.is-fixed .profile-card .profile-badge,
+        .sidebar-wrapper.is-anchored .profile-card .profile-badge {
+            background: rgba(0, 212, 255, 0.1) !important;
+            border: 1px solid rgba(0, 212, 255, 0.3) !important;
+            color: var(--primary-cyan) !important;
+            box-shadow: none !important;
+        }
+
+        /* Light theme equivalent (also enforced) */
+        [data-theme="light"] .sidebar-wrapper .profile-card .profile-badge,
+        [data-theme="light"] .sidebar-wrapper.is-collapsed .profile-card .profile-badge,
+        [data-theme="light"] .sidebar-wrapper.is-fixed .profile-card .profile-badge,
+        [data-theme="light"] .sidebar-wrapper.is-anchored .profile-card .profile-badge {
+            background: rgba(0,153,204,0.06) !important;
+            border: 1px solid rgba(0,153,204,0.12) !important;
+            color: #0099cc !important;
+            box-shadow: none !important;
+        }
+
+        [data-theme="light"] .sidebar-wrapper.is-collapsed .avatar-box {
+            background: linear-gradient(135deg, rgba(0,153,204,0.04), rgba(204,0,102,0.04));
+            border: 1px solid rgba(0,153,204,0.10);
+            box-shadow: 0 6px 18px rgba(0,153,204,0.06);
+        }
+
+        [data-theme="light"] .sidebar-wrapper.is-collapsed .sidebar-toggle {
+            background: rgba(255,255,255,0.95);
+            border: 1px solid rgba(0,153,204,0.08);
+            color: #0099cc;
+        }
+
+        /* content area */
+        [data-theme="light"] .content-section {
+            /* use more translucent white to better match the 'feature-card' surface */
+            background: rgba(255,255,255,0.65);
+            border-color: rgba(0,153,204,0.08);
+            color: rgba(26,26,26,0.92);
+        }
+        [data-theme="light"] .content-section:hover {
+            border-color: rgba(0,153,204,0.18);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.04);
         }
 
         [data-theme="light"] .section-title {
-            color: #cc0066;
-            text-shadow: none;
+            color: var(--primary-magenta);
+            text-shadow: none !important;
+            border-bottom-color: rgba(0,0,0,0.06);
+        }
+        [data-theme="light"] .section-title::after {
+            box-shadow: none !important;
+            background: linear-gradient(90deg, var(--primary-magenta), transparent) !important;
         }
 
-        [data-theme="light"] .text-block {
-            color: rgba(26, 26, 26, 0.85);
+        [data-theme="light"] .feature-box {
+            background: rgba(255,255,255,0.65);
+            border: 1px solid rgba(0,153,204,0.06);
         }
 
-        [data-theme="light"] .text-block::before {
-            color: #0099cc;
+        [data-theme="light"] .skill-track {
+            background: rgba(0,0,0,0.06);
         }
 
-        [data-theme="light"] .feature-card {
-            background: rgba(255, 255, 255, 0.65);
-            border-color: rgba(0, 153, 204, 0.2);
+        [data-theme="light"] .skill-progress {
+            background: linear-gradient(90deg, #0099cc, #cc0066);
+        }
+        [data-theme="light"] .skill-progress::after {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
         }
 
-        [data-theme="light"] .feature-card:hover {
-            border-color: rgba(0, 153, 204, 0.5);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        /* 文字可讀性修正 - 覆寫白色文字造成的可讀性問題 */
+        [data-theme="light"] body,
+        [data-theme="light"] .page-content {
+            color: rgba(26,26,26,0.95);
         }
 
-        [data-theme="light"] .feature-title {
-            color: #0099cc;
-            text-shadow: none;
-        }
-
-        [data-theme="light"] .feature-description {
-            color: rgba(26, 26, 26, 0.8);
-        }
-
-        [data-theme="light"] .skill-category {
-            background: rgba(255, 255, 255, 0.5);
-            border-color: rgba(0, 153, 204, 0.15);
-        }
-
-        [data-theme="light"] .category-title {
-            color: #0099cc;
-            text-shadow: none;
-        }
-
-        [data-theme="light"] .skill-name {
-            color: rgba(26, 26, 26, 0.9);
-        }
-
-        [data-theme="light"] .skill-bar {
-            background: rgba(0, 153, 204, 0.08);
-        }
-
-        [data-theme="light"] .skill-fill {
-            background: linear-gradient(90deg, rgba(0, 153, 204, 0.8), rgba(204, 0, 102, 0.8));
-            box-shadow: none;
-        }
-
-        [data-theme="light"] .timeline-item {
-            background: rgba(255, 255, 255, 0.6);
-            border-color: rgba(0, 153, 204, 0.2);
-        }
-
-        [data-theme="light"] .timeline-item:hover {
-            border-color: rgba(0, 153, 204, 0.5);
-            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
-        }
-
-        [data-theme="light"] .timeline-year {
-            background: linear-gradient(135deg, rgba(0, 153, 204, 0.08), rgba(204, 0, 102, 0.08));
-            color: #0099cc;
-        }
-
-        [data-theme="light"] .timeline-title {
-            color: #cc0066;
-            text-shadow: none;
-        }
-
-        [data-theme="light"] .timeline-description {
-            color: rgba(26, 26, 26, 0.8);
+        [data-theme="light"] .hero-subtitle {
+            color: rgba(26,26,26,0.75);
         }
 
         [data-theme="light"] .status-badge {
-            background: rgba(0, 153, 204, 0.05);
-            border-color: rgba(0, 153, 204, 0.3);
+            background: rgba(0,153,204,0.06);
+            border-color: rgba(0,153,204,0.12);
             color: #0099cc;
-            box-shadow: none;
+        }
+
+        /* 主要內容段落與標題 */
+        [data-theme="light"] .about-text p,
+        [data-theme="light"] .feature-box p {
+            color: rgba(26,26,26,0.92);
+        }
+
+        /* 覆寫內嵌 color="#fff" 的 h3（timeline 中常見） — exclude section titles so they keep magenta */
+        [data-theme="light"] .content-section h3,
+        [data-theme="light"] .content-section h2:not(.section-title),
+        [data-theme="light"] #timeline h3 {
+            color: rgba(26,26,26,0.92) !important;
+        }
+
+        [data-theme="light"] .skill-header {
+            color: rgba(26,26,26,0.9);
+        }
+
+        /* 微調分隔線與小元件 */
+        [data-theme="light"] .sidebar-divider {
+            background: linear-gradient(90deg, transparent, rgba(0,153,204,0.12), transparent);
+        }
+
+        [data-theme="light"] .section-title {
+            color: var(--primary-magenta);
+            text-shadow: none !important;
+            border-bottom-color: rgba(0,0,0,0.06);
+        }
+        [data-theme="light"] .section-title::after {
+            box-shadow: none !important;
+            background: linear-gradient(90deg, var(--primary-magenta), transparent) !important;
+        }
+
+        /* Ensure section titles in light theme are magenta (override earlier h2 !important rules) */
+        [data-theme="light"] .content-section h2.section-title,
+        [data-theme="light"] .section-title {
+            color: var(--primary-magenta) !important;
         }
     </style>
 </head>
 <body>
-    <!-- 背景系統 -->
     <div class="cyber-bg"></div>
     <div class="grid-overlay"></div>
     <div class="particles" id="particles"></div>
@@ -728,8 +1352,7 @@
                             Email
                         </a>
                     </li>
-                </div>
-            </ul>
+                </ul>
         </div>
         <div class="header-actions">
             <button class="settings-toggle" aria-label="Settings"></button>
@@ -779,7 +1402,7 @@
                     <span>側邊欄文字顯示</span>
                     <span class="setting-description">是否持續顯示側邊欄文字標題</span>
                 </div>
-                <div class="toggle-switch active" id="sideNavTextVisible"></div>
+                <div class="toggle-switch active" id="sideNavTextVisible" role="switch" tabindex="0" aria-label="側邊欄文字顯示"></div>
             </div>
 
             <div class="setting-item">
@@ -791,6 +1414,30 @@
                     <select id="themeMode">
                         <option value="dark">深色模式</option>
                         <option value="light">淺色模式</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>看板娘 (Live2D)</span>
+                    <span class="setting-description">啟用或停用頁面上的 Live2D 看板娘</span>
+                </div>
+                <div class="toggle-switch" id="live2dToggle" role="switch" aria-checked="false" tabindex="0" aria-label="看板娘 (Live2D)"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>背景樣式</span>
+                    <span class="setting-description">選擇背景動畫樣式</span>
+                </div>
+                <div class="select-control">
+                    <select id="backgroundStyle" title="背景樣式" aria-label="背景樣式">
+                        <option value="dom">粒子風暴</option>
+                        <option value="network">網格連線</option>
+                        <option value="magnet">磁力連線</option>
+                        <option value="star">宇宙星圜</option>
+                        <option value="off">關閉</option>
                     </select>
                 </div>
             </div>
@@ -840,279 +1487,259 @@
         </div>
     </div>
 
-    <!-- 主要內容 -->
+    <!-- Side Navigation -->
+    <div class="side-nav">
+        <a href="#hero" class="active" title="首頁" data-offset="80"></a>
+        <a href="#about-me" title="關於" data-offset="100"></a>
+        <a href="#values" title="理念" data-offset="100"></a>
+        <a href="#skills" title="技能" data-offset="100"></a>
+        <a href="#timeline" title="經歷" data-offset="100"></a>
+    </div>
+
     <main class="page-content">
-        <!-- Hero 區域 -->
-        <section class="hero-section fade-in-up-1">
+        <section id="hero" class="hero-section fade-in-up-1">
             <h1 class="glitch-title text-gradient-cyan">ABOUT ME</h1>
             <p class="hero-subtitle">個人檔案 / PERSONAL PROFILE</p>
             <div class="status-badge">SYSTEM ONLINE</div>
-        </section>
-
-        <!-- 個人資料卡片 -->
-        <section class="profile-grid">
-            <div class="profile-card card fade-in-left">
-                <div class="profile-avatar">
-                    <img src="../assets/images/avatar.jpg" alt="天野靜樹">
-                </div>
-                <ul class="info-list">
-                    <li class="info-item">
-                        <span class="info-label">NAME</span>
-                        <span class="info-value">天野靜樹</span>
-                    </li>
-                    <li class="info-item">
-                        <span class="info-label">MAJOR</span>
-                        <span class="info-value">資訊工程專業</span>
-                    </li>
-                    <li class="info-item">
-                        <span class="info-label">POSITION</span>
-                        <span class="info-value">學生</span>
-                    </li>
-                    <li class="info-item">
-                        <span class="info-label">MOTTO</span>
-                        <span class="info-value">今天的事能拖就拖，明天的事明天再說。</span>
-                    </li>
-                    <li class="info-item">
-                        <span class="info-label">STATUS</span>
-                        <span class="info-value" style="color: var(--primary-cyan);">Active</span>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="about-content card fade-in-right">
-                <h2 class="section-title">WHO AM I</h2>
-                <p class="text-block">
-                    我是天野靜樹，一位熱衷於探索人工智能邊界的開發者。在這個數據與代碼交織的賽博時代，我致力於創造能夠真正理解人類、服務人類的智能系統。
-                </p>
-                <p class="text-block">
-                    我相信技術不僅僅是冰冷的工具，而是連接現實與虛擬、人類與機器之間的溫暖橋樑。每一行代碼都承載著對未來的想像，每一個算法都蘊含著對世界的理解。
-                </p>
-                <p class="text-block">
-                    「長門櫻計畫」是我的代表作品，這個項目融合了自然語言處理、情感計算、深度學習等前沿技術，旨在打造一個真正懂你的 AI 助手。從 Discord Bot 到多模態交互系統，這個項目見證了我對 AI 技術的執著追求。
-                </p>
-                <p class="text-block">
-                    在這個充滿可能性的時代,我願意用技術點亮更多人的生活，讓 AI 不再是遙不可及的科幻概念，而是觸手可及的智能夥伴。
-                </p>
+            
+            <div class="scroll-indicator" aria-hidden="false">
+                <span class="scroll-text">SCROLL</span>
+                <a href="#about-me" class="scroll-arrow-link" data-offset="100" aria-label="Scroll to about section">
+                    <span class="scroll-arrow" aria-hidden="true"></span>
+                </a>
             </div>
         </section>
 
-        <!-- 核心特色 -->
-        <section class="fade-in-up-2">
-            <h2 class="section-title" style="text-align: center; display: block; margin: 3rem auto;">CORE VALUES</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <span class="feature-icon">⚡</span>
-                    <h3 class="feature-title">創新驅動</h3>
-                    <p class="feature-description">
-                        不斷探索前沿技術，將學術研究轉化為實際應用。從 ChatGLM 到多模態 AI，永遠走在技術的最前沿。
-                    </p>
-                </div>
-                <div class="feature-card">
-                    <span class="feature-icon">🎯</span>
-                    <h3 class="feature-title">實用主義</h3>
-                    <p class="feature-description">
-                        技術服務於人。注重用戶體驗，追求簡潔優雅的解決方案，讓複雜的技術變得觸手可及。
-                    </p>
-                </div>
-                <div class="feature-card">
-                    <span class="feature-icon">🌐</span>
-                    <h3 class="feature-title">開源精神</h3>
-                    <p class="feature-description">
-                        相信知識共享的力量。積極參與開源社群，將長門櫻計畫開源，讓更多人能夠學習和使用。
-                    </p>
-                </div>
-                <div class="feature-card">
-                    <span class="feature-icon">🚀</span>
-                    <h3 class="feature-title">持續進化</h3>
-                    <p class="feature-description">
-                        技術日新月異，保持學習熱情。從 Python 到深度學習框架，不斷擴展技術棧，追求卓越。
-                    </p>
-                </div>
+        <div class="layout-container fade-in-up-2">
+            
+            <aside class="sidebar-wrapper">
+                <div class="profile-card">
+                    <div class="sidebar-info">
+                        <div class="sidebar-header">
+                            <div class="avatar-box">
+                                <img src="../assets/images/avatar.jpg" alt="天野靜樹">
+                            </div>
+
+                            <div class="profile-meta">
+                                <h2 class="profile-name">天野靜樹</h2>
+                                <div class="profile-badge">AI ARCHITECT</div>
+                            </div>
+
+                            <button class="sidebar-toggle" aria-expanded="false" aria-controls="sidebar-info_more">
+                                <span class="toggle-text">展開</span>
+                                <svg class="toggle-chevron" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" d="M6 9l6 6 6-6"/></svg>
+                            </button>
+                        </div>
+
+                        
+
+                        <div class="sidebar-info_more" id="sidebar-info_more">
+                            <div class="sidebar-divider"></div>
+                            <ul class="contact-list">
+                                <li class="contact-item">
+                                    <div class="contact-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                                    </div>
+                                    <div class="contact-text">
+                                        <h4>Email</h4>
+                                        <span style="font-size: 0.8rem;">3b017128@gm.student.ncut.edu.tw</span>
+                                    </div>
+                                </li>
+                                <li class="contact-item">
+                                    <div class="contact-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                                    </div>
+                                    <div class="contact-text">
+                                        <h4>Major</h4>
+                                        <span>Computer Science</span>
+                                    </div>
+                                </li>
+                                <li class="contact-item">
+                                    <div class="contact-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                    </div>
+                                    <div class="contact-text">
+                                        <h4>Position</h4>
+                                        <span>Student / Developer</span>
+                                    </div>
+                                </li>
+                                <li class="contact-item">
+                                    <div class="contact-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                    </div>
+                                    <div class="contact-text">
+                                        <h4>Status</h4>
+                                        <span style="color: var(--primary-cyan);">Online</span>
+                                    </div>
+                                </li>
+                            </ul>
+
+                            <div class="sidebar-divider"></div>
+
+                            <div class="social-row">
+                                <a href="https://github.com/AmanoShizukikun" target="_blank" class="social-btn" title="GitHub">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                                </a>
+                                <a href="https://www.youtube.com/@Amano_Shizuki_Kun" target="_blank" class="social-btn" title="YouTube">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                                </a>
+                                <a href="https://discord.gg/jac8eAFzjz" target="_blank" class="social-btn" title="Discord">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+            <div class="content-wrapper">
+                
+                <section id="about-me" class="content-section">
+                    <h2 class="section-title">WHO AM I</h2>
+                    <div class="about-text">
+                        <p>
+                            我是天野靜樹，一位熱衷於探索人工智慧與網路世界的開發者。我喜歡解決問題並研究新的科技技術，享受將問題解決的感覺。在這個充滿人工智慧、數據與代碼交織的賽博時代，我致力於創造能夠真正理解人類、服務人類的數字生命體。
+                        </p>
+                        <p>
+                            我相信技術不僅僅是冰冷的工具，而是連接現實與虛擬、人類與機器之間的溫暖橋樑。每一行代碼都承載著對未來的想像，每一個算法都蘊含著對世界的理解。
+                        </p>
+                        <p>
+                            「長門櫻計畫」是我的代表作品，這個項目融合了深度學習等前沿技術，旨在打造一個實用的數字生命助手。
+                        </p>
+                    </div>
+                </section>
+
+                <section id="values" class="content-section">
+                    <h2 class="section-title">CORE VALUES</h2>
+                    <div class="features-grid">
+                        <div class="feature-box">
+                            <span style="font-size: 2rem; display:block; margin-bottom:1rem;">⚡</span>
+                            <h3 style="color: var(--primary-cyan); margin-bottom:0.5rem;">創新驅動</h3>
+                            <p>不斷探索前沿技術，將學術研究轉化為實際應用。</p>
+                        </div>
+                        <div class="feature-box">
+                            <span style="font-size: 2rem; display:block; margin-bottom:1rem;">🎯</span>
+                            <h3 style="color: var(--primary-cyan); margin-bottom:0.5rem;">實用主義</h3>
+                            <p>技術服務於人。注重用戶體驗，追求簡潔優雅的解決方案。</p>
+                        </div>
+                        <div class="feature-box">
+                            <span style="font-size: 2rem; display:block; margin-bottom:1rem;">🌐</span>
+                            <h3 style="color: var(--primary-cyan); margin-bottom:0.5rem;">開源精神</h3>
+                            <p>相信知識共享的力量。積極參與開源社群。</p>
+                        </div>
+                        <div class="feature-box">
+                            <span style="font-size: 2rem; display:block; margin-bottom:1rem;">🚀</span>
+                            <h3 style="color: var(--primary-cyan); margin-bottom:0.5rem;">持續進化</h3>
+                            <p>技術日新月異，保持學習熱情，不斷擴展技術棧。</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="skills" class="content-section">
+                    <h2 class="section-title">SKILLS</h2>
+                    
+                    <div style="margin-bottom: 2.5rem;">
+                        <h3 style="color: var(--primary-magenta); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🧠</span> AI & Machine Learning
+                        </h3>
+                        <div class="skill-item">
+                            <div class="skill-header"><span>Deep Learning</span><span style="color: var(--primary-cyan);">90%</span></div>
+                            <div class="skill-track"><div class="skill-progress" data-width="90"></div></div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-header"><span>NLP / LLM</span><span style="color: var(--primary-cyan);">85%</span></div>
+                            <div class="skill-track"><div class="skill-progress" data-width="85"></div></div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-header"><span>PyTorch / TensorFlow</span><span style="color: var(--primary-cyan);">88%</span></div>
+                            <div class="skill-track"><div class="skill-progress" data-width="88"></div></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 style="color: var(--primary-magenta); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>💻</span> Programming
+                        </h3>
+                        <div class="skill-item">
+                            <div class="skill-header"><span>Python</span><span style="color: var(--primary-cyan);">95%</span></div>
+                            <div class="skill-track"><div class="skill-progress" data-width="95"></div></div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-header"><span>JavaScript / Web</span><span style="color: var(--primary-cyan);">80%</span></div>
+                            <div class="skill-track"><div class="skill-progress" data-width="80"></div></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="timeline" class="content-section">
+                    <h2 class="section-title">TIMELINE</h2>
+                    <div style="border-left: 2px solid var(--primary-cyan); padding-left: 2rem; margin-left: 10px;">
+                        <div style="position: relative; margin-bottom: 3rem;">
+                            <div style="position: absolute; left: -2.7rem; top: 0; width: 14px; height: 14px; background: var(--primary-cyan); border-radius: 50%; box-shadow: 0 0 10px var(--primary-cyan);"></div>
+                            <div style="color: var(--primary-magenta); font-family: var(--font-display); margin-bottom: 0.5rem;">2024 - PRESENT</div>
+                            <h3 style="color: #fff; margin-bottom: 0.5rem;">長門櫻計畫 2.0</h3>
+                            <p>重構整個系統架構，實現工具調用。</p>
+                        </div>
+                        <div style="position: relative; margin-bottom: 3rem;">
+                            <div style="position: absolute; left: -2.7rem; top: 0; width: 14px; height: 14px; background: var(--primary-cyan); border-radius: 50%; box-shadow: 0 0 10px var(--primary-cyan);"></div>
+                            <div style="color: var(--primary-magenta); font-family: var(--font-display); margin-bottom: 0.5rem;">2023 - 2024</div>
+                            <h3 style="color: #fff; margin-bottom: 0.5rem;">AI 技術深化</h3>
+                            <p>深入研究大型語言模型。</p>
+                        </div>
+                        <div style="position: relative;">
+                            <div style="position: absolute; left: -2.7rem; top: 0; width: 14px; height: 14px; background: var(--primary-cyan); border-radius: 50%; box-shadow: 0 0 10px var(--primary-cyan);"></div>
+                            <div style="color: var(--primary-magenta); font-family: var(--font-display); margin-bottom: 0.5rem;">2021 - 2022</div>
+                            <h3 style="color: #fff; margin-bottom: 0.5rem;">長門櫻計畫 1.0</h3>
+                            <p>學習 Python 與深度學習基礎，接觸 PyTorch 等框架，以 Discord 機器人為基礎建立 長門櫻1.0。</p>
+                        </div>
+                    </div>
+                </section>
+
             </div>
-        </section>
-
-        <!-- 技能體系 -->
-        <section class="skills-section fade-in-up-3">
-            <h2 class="section-title" style="text-align: center; display: block; margin: 0 auto 3rem;">SKILL MATRIX</h2>
-            <div class="skills-container">
-                <div class="skill-category card">
-                    <h3 class="category-title">
-                        <span>🧠</span>
-                        <span>AI & Machine Learning</span>
-                    </h3>
-                    <div class="skill-bar-wrapper">
-                        <div class="skill-name">
-                            <span>Deep Learning</span>
-                            <span class="skill-level">90%</span>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-bar-fill" data-width="90"></div>
-                        </div>
-                    </div>
-                    <div class="skill-bar-wrapper">
-                        <div class="skill-name">
-                            <span>NLP / LLM</span>
-                            <span class="skill-level">85%</span>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-bar-fill" data-width="85"></div>
-                        </div>
-                    </div>
-                    <div class="skill-bar-wrapper">
-                        <div class="skill-name">
-                            <span>PyTorch / TensorFlow</span>
-                            <span class="skill-level">88%</span>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-bar-fill" data-width="88"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="skill-category card">
-                    <h3 class="category-title">
-                        <span>💻</span>
-                        <span>Programming</span>
-                    </h3>
-                    <div class="skill-bar-wrapper">
-                        <div class="skill-name">
-                            <span>Python</span>
-                            <span class="skill-level">95%</span>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-bar-fill" data-width="95"></div>
-                        </div>
-                    </div>
-                    <div class="skill-bar-wrapper">
-                        <div class="skill-name">
-                            <span>JavaScript / Node.js</span>
-                            <span class="skill-level">80%</span>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-bar-fill" data-width="80"></div>
-                        </div>
-                    </div>
-                    <div class="skill-bar-wrapper">
-                        <div class="skill-name">
-                            <span>C++ / CUDA</span>
-                            <span class="skill-level">75%</span>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-bar-fill" data-width="75"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="skill-category card">
-                    <h3 class="category-title">
-                        <span>🛠️</span>
-                        <span>DevOps & Tools</span>
-                    </h3>
-                    <div class="skill-bar-wrapper">
-                        <div class="skill-name">
-                            <span>Docker / Kubernetes</span>
-                            <span class="skill-level">82%</span>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-bar-fill" data-width="82"></div>
-                        </div>
-                    </div>
-                    <div class="skill-bar-wrapper">
-                        <div class="skill-name">
-                            <span>Git / CI/CD</span>
-                            <span class="skill-level">88%</span>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-bar-fill" data-width="88"></div>
-                        </div>
-                    </div>
-                    <div class="skill-bar-wrapper">
-                        <div class="skill-name">
-                            <span>Linux / Shell</span>
-                            <span class="skill-level">85%</span>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-bar-fill" data-width="85"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 發展時間軸 -->
-        <section class="timeline-section fade-in-up-4">
-            <h2 class="section-title" style="text-align: center; display: block; margin: 0 auto 3rem;">DEVELOPMENT TIMELINE</h2>
-            <div class="timeline">
-                <div class="timeline-item">
-                    <div class="timeline-date">2024 - PRESENT</div>
-                    <h3 class="timeline-title">長門櫻計畫 2.0</h3>
-                    <p class="timeline-content">
-                        重構整個系統架構，升級至 GLM4 模型，實現多模態交互。添加語音識別、圖像生成等功能，打造真正的全能 AI 助手。
-                    </p>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-date">2023 - 2024</div>
-                    <h3 class="timeline-title">AI 技術深化</h3>
-                    <p class="timeline-content">
-                        深入研究大型語言模型，掌握 ChatGLM 系列模型的微調與部署。開發多個基於深度學習的應用項目，積累豐富的工程經驗。
-                    </p>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-date">2022 - 2023</div>
-                    <h3 class="timeline-title">長門櫻計畫啟動</h3>
-                    <p class="timeline-content">
-                        正式啟動長門櫻計畫，以 Discord Bot 為起點，開始探索 AI 助手系統的開發。實現基礎的對話、音樂播放等功能。
-                    </p>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-date">2021 - 2022</div>
-                    <h3 class="timeline-title">技術探索期</h3>
-                    <p class="timeline-content">
-                        學習 Python 與深度學習基礎，接觸 TensorFlow、PyTorch 等框架。開始關注自然語言處理領域，為未來的項目打下基礎。
-                    </p>
-                </div>
-            </div>
-        </section>
+        </div>
     </main>
 
-    <!-- 腳本 -->
     <script src="../assets/js/core.js"></script>
+    <script src="../assets/js/live2d-manager.js"></script>
     <script src="../assets/js/navigation.js"></script>
     <script src="../assets/js/animations.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // 初始化核心系統
             Core.initBackground();
-            Core.initParticles(document.getElementById('particles'), 70);
             Navigation.init();
             Animations.init();
+            Core.initSmoothScroll();
 
             // 技能條動畫
-            const observerOptions = {
-                threshold: 0.5,
-                rootMargin: '0px'
-            };
-
+            const observerOptions = { threshold: 0.3 };
             const skillObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        const skillBars = entry.target.querySelectorAll('.skill-bar-fill');
+                        // animate skill bars (existing behavior)
+                        const skillBars = entry.target.querySelectorAll('.skill-progress');
                         skillBars.forEach(bar => {
-                            const width = bar.getAttribute('data-width');
                             setTimeout(() => {
-                                bar.style.width = width + '%';
+                                bar.style.width = bar.getAttribute('data-width') + '%';
                             }, 100);
                         });
+
+                        // add .is-active to the section title to trigger the entrance underline + shimmer
+                        const title = entry.target.querySelector('.section-title');
+                        if (title && !title.classList.contains('is-active')) {
+                            // small stagger so the title animation feels natural with skill bars
+                            setTimeout(() => title.classList.add('is-active'), 120);
+                        }
+
+                        // unobserve so animations only play once per section
                         skillObserver.unobserve(entry.target);
                     }
                 });
             }, observerOptions);
 
-            document.querySelectorAll('.skill-category').forEach(category => {
-                skillObserver.observe(category);
+            document.querySelectorAll('.content-section').forEach(section => {
+                skillObserver.observe(section);
             });
 
-            // 添加故障效果到標題
+            // 故障效果
             const glitchTitle = document.querySelector('.glitch-title');
             if (glitchTitle) {
                 setInterval(() => {
@@ -1121,6 +1748,422 @@
                     }
                 }, 3000);
             }
+
+            // -------- Sidebar JS fallback: robust fix + anchor behavior --------
+            (function() {
+                const sidebar = document.querySelector('.sidebar-wrapper');
+                const layout = document.querySelector('.layout-container');
+                const header = document.querySelector('header');
+                if (!sidebar || !layout) return;
+
+                let sidebarAbsTop = 0; // absolute top of sidebar in document
+                let baseSidebarAbsTop = null; // stable reference when sidebar is in normal flow
+                let layoutTop = 0;
+                let layoutBottom = 0;
+                let baseLayoutBottom = null; // stable layout bottom when in normal flow
+                let sidebarHeight = 0;
+                let sidebarLeftWithinLayout = 0;
+                let baseSidebarLeftWithinLayout = null; // stable left when in normal flow
+                let resizeTimer = null;
+
+                function recalc() {
+                    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+                    const lRect = layout.getBoundingClientRect();
+                    layoutTop = lRect.top + scrollY;
+                    layoutBottom = layoutTop + lRect.height;
+
+                    // Use offsetTop/offsetLeft so we get stable positions regardless of current CSS positioning
+                    sidebarHeight = sidebar.offsetHeight;
+                    const sidebarOffsetTopWithinLayout = sidebar.offsetTop;
+                    sidebarAbsTop = layoutTop + sidebarOffsetTopWithinLayout;
+                    sidebarLeftWithinLayout = sidebar.offsetLeft;
+
+                    // If sidebar is currently in the normal flow (neither fixed nor anchored) capture stable base positions
+                    if (!sidebar.classList.contains('is-fixed') && !sidebar.classList.contains('is-anchored')) {
+                        baseSidebarAbsTop = sidebarAbsTop;
+                        baseSidebarLeftWithinLayout = sidebarLeftWithinLayout;
+                        baseLayoutBottom = layoutBottom; // capture base layout bottom as well to avoid placeholder-affecting triggers
+                    }
+
+                    // If a placeholder exists (we may be mid-transition), prefer its current position as the authoritative base
+                    const placeholder = layout.querySelector('.sidebar-placeholder');
+                    if (placeholder) {
+                        const pRect = placeholder.getBoundingClientRect();
+                        const lRect = layout.getBoundingClientRect();
+                        // store left offset relative to layout and update base values so triggers remain stable
+                        baseSidebarLeftWithinLayout = Math.round(pRect.left - lRect.left);
+                        baseLayoutBottom = layoutTop + layout.offsetHeight;
+                    }
+
+                    // If we don't have a base left (e.g., page loaded scrolled to anchor), compute a reasonable fallback
+                    if (baseSidebarLeftWithinLayout === null) {
+                        const rect = sidebar.getBoundingClientRect();
+                        const lRect = layout.getBoundingClientRect();
+                        baseSidebarLeftWithinLayout = rect.left - lRect.left;
+                    }
+
+                    // NOTE: Don't forcibly remove inline styles or classes here — let update() decide state transitions.
+                    if (window.__SIDEBAR_DEBUG__) {
+                        console.debug('[sidebar] recalc:', { sidebarAbsTop, baseSidebarAbsTop, sidebarHeight, layoutTop, layoutBottom, sidebarLeftWithinLayout, baseSidebarLeftWithinLayout });
+                    }
+                }
+
+                function syncFixedPosition() {
+                    // Sync sidebar left/width/top using placeholder as single source of truth.
+                    const placeholder = layout.querySelector('.sidebar-placeholder');
+                    const lRect = layout.getBoundingClientRect();
+
+                    if (placeholder) {
+                        const pRect = placeholder.getBoundingClientRect();
+                        // compute left within layout (rounded once) and reuse for both fixed & anchored to avoid 1px mismatch
+                        const leftWithinLayout = Math.round(pRect.left - lRect.left);
+                        const absLeft = Math.round(lRect.left) + leftWithinLayout; // absolute viewport-left for fixed
+                        const width = Math.round(pRect.width);
+
+                        // keep placeholder sizing accurate
+                        placeholder.style.width = width + 'px';
+                        placeholder.style.height = Math.round(sidebar.getBoundingClientRect().height) + 'px';
+
+                        if (sidebar.classList.contains('is-fixed')) {
+                            sidebar.style.left = absLeft + 'px';
+                            sidebar.style.width = width + 'px';
+                        }
+
+                        if (sidebar.classList.contains('is-anchored')) {
+                            // anchored left is relative to layout
+                            sidebar.style.left = leftWithinLayout + 'px';
+                            sidebar.style.width = width + 'px';
+                            // Recompute anchored top based on current layout height so changes in right column reflow update position
+                            const topWithinLayout = Math.max(0, layout.offsetHeight - Math.round(sidebar.getBoundingClientRect().height));
+                            sidebar.style.top = topWithinLayout + 'px';
+                        }
+
+                        return;
+                    }
+
+                    // Fallbacks when no placeholder exists
+                    if (sidebar.classList.contains('is-fixed')) {
+                        if (typeof baseSidebarLeftWithinLayout === 'number' && baseSidebarLeftWithinLayout !== null) {
+                            const absLeft = Math.round(lRect.left + baseSidebarLeftWithinLayout);
+                            sidebar.style.left = absLeft + 'px';
+                        }
+                    }
+
+                    if (sidebar.classList.contains('is-anchored')) {
+                        if (typeof baseSidebarLeftWithinLayout === 'number' && baseSidebarLeftWithinLayout !== null) {
+                            sidebar.style.left = baseSidebarLeftWithinLayout + 'px';
+                            const topWithinLayout = Math.max(0, layout.offsetHeight - Math.round(sidebar.getBoundingClientRect().height));
+                            sidebar.style.top = topWithinLayout + 'px';
+                        }
+                    }
+                }
+
+                function update() {
+                    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+                    const headerHeight = header ? header.offsetHeight : 0;
+                    const margin = 20;
+                    if (window.__SIDEBAR_DEBUG__) {
+                        const fixTrigger = sidebarAbsTop - headerHeight - margin;
+                        const anchorTrigger = layoutBottom - sidebarHeight - headerHeight - margin;
+                        console.debug('[sidebar] update', { scrollY, headerHeight, sidebarHeight, fixTrigger, anchorTrigger });
+                    }
+
+                    // If user collapsed the sidebar, do not create placeholder or change state
+                    if (sidebar.classList.contains('is-collapsed')) {
+                        // Ensure no fixed/anchored remnants and hide placeholder
+                        sidebar.classList.remove('is-fixed', 'is-anchored');
+                        sidebar.style.left = '';
+                        sidebar.style.width = '';
+                        sidebar.style.position = '';
+                        sidebar.style.top = '';
+                        const placeholder = layout.querySelector('.sidebar-placeholder');
+                        if (placeholder) {
+                            placeholder.style.display = 'none';
+                            placeholder.style.width = '';
+                            placeholder.style.height = '';
+                        }
+                        return;
+                    }
+
+                    // disable for small screens
+                    if (window.innerWidth < 1024) {
+                        if (sidebar.classList.contains('is-fixed') || sidebar.classList.contains('is-anchored')) {
+                            sidebar.classList.remove('is-fixed', 'is-anchored');
+                            sidebar.style.left = '';
+                            sidebar.style.width = '';
+                            sidebar.style.position = '';
+                            sidebar.style.top = '';
+                        }
+                        return;
+                    }
+
+                    // Use stable base values for triggers if available
+                    const baseTop = (typeof baseSidebarAbsTop === 'number' && baseSidebarAbsTop !== null) ? baseSidebarAbsTop : sidebarAbsTop;
+                    const fixTrigger = baseTop - headerHeight - margin;
+                    // For anchor trigger, prefer current layoutBottom when we are already anchored (so dynamic right-column changes apply)
+                    // Otherwise use baseLayoutBottom when available to avoid mid-interruption changes due to placeholder insertion
+                    let effectiveLayoutBottom;
+                    if (sidebar.classList.contains('is-anchored')) {
+                        effectiveLayoutBottom = layoutBottom; // live value to handle content height changes while anchored
+                    } else {
+                        effectiveLayoutBottom = (typeof baseLayoutBottom === 'number' && baseLayoutBottom !== null) ? baseLayoutBottom : layoutBottom;
+                    }
+                    const anchorTrigger = effectiveLayoutBottom - sidebarHeight - headerHeight - margin;
+
+                    if (scrollY >= fixTrigger && scrollY < anchorTrigger) {
+                        // fixed in viewport
+                        if (!sidebar.classList.contains('is-fixed')) {
+                            // capture rect before changing position
+                            const rect = sidebar.getBoundingClientRect();
+                            // create or show placeholder to reserve space
+                            let placeholder = layout.querySelector('.sidebar-placeholder');
+                            if (!placeholder) {
+                                placeholder = document.createElement('div');
+                                placeholder.className = 'sidebar-placeholder';
+                                sidebar.parentNode.insertBefore(placeholder, sidebar.nextSibling);
+                            }
+                            placeholder.style.display = 'block';
+                            placeholder.style.width = rect.width + 'px';
+                            placeholder.style.height = rect.height + 'px';
+
+                            // set fixed state
+                            sidebar.classList.add('is-fixed');
+                            sidebar.classList.remove('is-anchored');
+                            sidebar.style.position = 'fixed';
+                            // clear any anchored top (important!) so CSS .is-fixed top applies and the element won't be placed off-screen
+                            sidebar.style.top = '';
+                            // Prefer placeholder left/width immediately after creation to avoid jumps during reflow
+                            const placeholderAfter = layout.querySelector('.sidebar-placeholder');
+                            if (placeholderAfter) {
+                                const pRectAfter = placeholderAfter.getBoundingClientRect();
+                                const lRectAfter = layout.getBoundingClientRect();
+                                const leftWithinLayoutAfter = Math.round(pRectAfter.left - lRectAfter.left);
+                                const absLeftAfter = Math.round(lRectAfter.left) + leftWithinLayoutAfter;
+                                sidebar.style.left = absLeftAfter + 'px';
+                                sidebar.style.width = Math.round(pRectAfter.width) + 'px';
+                            } else {
+                                const leftForFixed = (typeof baseSidebarLeftWithinLayout === 'number' && baseSidebarLeftWithinLayout !== null)
+                                    ? Math.round(layout.getBoundingClientRect().left + baseSidebarLeftWithinLayout)
+                                    : rect.left;
+                                sidebar.style.left = leftForFixed + 'px';
+                                sidebar.style.width = rect.width + 'px';
+                            }
+                            // Ensure placeholder sizing remains accurate (in case rect changed during layout shift)
+                            const placeholderSync = layout.querySelector('.sidebar-placeholder');
+                            if (placeholderSync) {
+                                placeholderSync.style.width = sidebar.style.width;
+                                placeholderSync.style.height = Math.round(sidebar.getBoundingClientRect().height) + 'px';
+                            }
+                            // ensure final sync after any reflows
+                            requestAnimationFrame(syncFixedPosition);
+                        }
+                    } else if (scrollY >= anchorTrigger) {
+                        // anchor at bottom of layout (absolute within layout)
+                        if (!sidebar.classList.contains('is-anchored')) {
+                            const rect = sidebar.getBoundingClientRect();
+                            // ensure placeholder exists and is visible
+                            let placeholder = layout.querySelector('.sidebar-placeholder');
+                            if (!placeholder) {
+                                placeholder = document.createElement('div');
+                                placeholder.className = 'sidebar-placeholder';
+                                sidebar.parentNode.insertBefore(placeholder, sidebar.nextSibling);
+                            }
+                            placeholder.style.display = 'block';
+                            placeholder.style.width = rect.width + 'px';
+                            placeholder.style.height = rect.height + 'px';
+
+                            sidebar.classList.remove('is-fixed');
+                            sidebar.classList.add('is-anchored');
+                            sidebar.style.position = 'absolute';
+                            // place it at the bottom of layout (relative to .layout-container)
+                            // use baseLayoutBottom if available to avoid placeholder influence
+                            const effectiveLayoutH = (typeof baseLayoutBottom === 'number' && baseLayoutBottom !== null) ? (baseLayoutBottom - layoutTop) : layout.offsetHeight;
+                            const topWithinLayout = Math.max(0, effectiveLayoutH - sidebarHeight);
+                            sidebar.style.top = topWithinLayout + 'px';
+
+                            // compute left relative to layout using placeholder or base left to avoid jumps
+                            const placeholderForAnchor = layout.querySelector('.sidebar-placeholder');
+                            if (placeholderForAnchor) {
+                                const pRectAnchor = placeholderForAnchor.getBoundingClientRect();
+                                const lRect = layout.getBoundingClientRect();
+                                const leftWithinLayout = Math.round(pRectAnchor.left - lRect.left);
+                                sidebar.style.left = leftWithinLayout + 'px';
+                                sidebar.style.width = Math.round(pRectAnchor.width) + 'px';
+                                // keep placeholder sizing accurate
+                                placeholderForAnchor.style.width = Math.round(pRectAnchor.width) + 'px';
+                                placeholderForAnchor.style.height = Math.round(rect.height) + 'px';
+                            }
+                            // ensure final sync
+                            requestAnimationFrame(syncFixedPosition);
+
+                            if (window.__SIDEBAR_DEBUG__) {
+                                console.debug('[sidebar] anchored', { topWithinLayout, leftWithinLayout, rectWidth: rect.width });
+                            }
+                        }
+                    } else {
+                        // normal flow
+                        if (sidebar.classList.contains('is-fixed') || sidebar.classList.contains('is-anchored')) {
+                            sidebar.classList.remove('is-fixed', 'is-anchored');
+                            sidebar.style.left = '';
+                            sidebar.style.width = '';
+                            sidebar.style.position = '';
+                            sidebar.style.top = '';
+                            // hide placeholder if present
+                            const placeholder = layout.querySelector('.sidebar-placeholder');
+                            if (placeholder) {
+                                placeholder.style.display = 'none';
+                                placeholder.style.width = '';
+                                placeholder.style.height = '';
+                            }
+                        }
+                    }
+                }
+
+                // observe layout and sidebar changes
+                const ro = new ResizeObserver(() => { recalc(); update(); requestAnimationFrame(syncFixedPosition); });
+                ro.observe(layout);
+                ro.observe(sidebar);
+                // also observe the right-side content wrapper to catch text-wrap / height changes
+                const contentWrapperEl = document.querySelector('.content-wrapper');
+                if (contentWrapperEl) ro.observe(contentWrapperEl);
+
+                // initial
+                recalc();
+                update();
+                requestAnimationFrame(syncFixedPosition);
+
+                window.addEventListener('scroll', update, { passive: true });
+                window.addEventListener('resize', () => {
+                    // Recalculate layout metrics immediately so we start from fresh values
+                    recalc();
+
+                    setCollapsedOnResize();
+
+                    // Use requestAnimationFrame to let layout settle (CSS reflows across breakpoints)
+                    // then update sidebar left/width/top using the placeholder (if present) which follows the document flow.
+                    requestAnimationFrame(() => {
+                        const placeholder = layout.querySelector('.sidebar-placeholder');
+
+                        if (sidebar.classList.contains('is-fixed')) {
+                            const lRect = layout.getBoundingClientRect();
+                            if (placeholder) {
+                                const pRect = placeholder.getBoundingClientRect();
+                                const leftWithinLayout = Math.round(pRect.left - lRect.left);
+                                const absLeft = Math.round(lRect.left) + leftWithinLayout;
+                                const widthForFixed = Math.round(pRect.width);
+                                sidebar.style.left = absLeft + 'px';
+                                sidebar.style.width = widthForFixed + 'px';
+                                // keep placeholder sizing in sync
+                                placeholder.style.width = widthForFixed + 'px';
+                                placeholder.style.height = Math.round(sidebar.getBoundingClientRect().height) + 'px';
+                            } else {
+                                // fallback: compute from layout left + base offset
+                                const rect = sidebar.getBoundingClientRect();
+                                const lRect2 = layout.getBoundingClientRect();
+                                const leftForFixed = (typeof baseSidebarLeftWithinLayout === 'number' && baseSidebarLeftWithinLayout !== null)
+                                    ? Math.round(lRect2.left + baseSidebarLeftWithinLayout)
+                                    : rect.left;
+                                sidebar.style.left = leftForFixed + 'px';
+                                sidebar.style.width = rect.width + 'px';
+                            }
+                        } else if (sidebar.classList.contains('is-anchored')) {
+                            // For anchored state, set left/width AND top immediately to avoid transient misplacement during resize.
+                            const layoutRect = layout.getBoundingClientRect();
+                            if (placeholder) {
+                                const pRect = placeholder.getBoundingClientRect();
+                                const leftWithinLayout = Math.round(pRect.left - layoutRect.left);
+                                sidebar.style.left = leftWithinLayout + 'px';
+                                sidebar.style.width = Math.round(pRect.width) + 'px';
+                                // ensure placeholder sizing remains accurate
+                                placeholder.style.width = Math.round(pRect.width) + 'px';
+                                placeholder.style.height = Math.round(sidebar.getBoundingClientRect().height) + 'px';
+                            } else {
+                                const rect = sidebar.getBoundingClientRect();
+                                const leftWithinLayout = (typeof baseSidebarLeftWithinLayout === 'number' && baseSidebarLeftWithinLayout !== null)
+                                    ? baseSidebarLeftWithinLayout
+                                    : (rect.left - layoutRect.left);
+                                sidebar.style.left = leftWithinLayout + 'px';
+                                sidebar.style.width = rect.width + 'px';
+                            }
+
+                            // compute anchored top based on current layout height so changes in right column reflow update position
+                            const topWithinLayout = Math.max(0, layout.offsetHeight - Math.round(sidebar.getBoundingClientRect().height));
+                            sidebar.style.top = topWithinLayout + 'px';
+
+                            // final sync in next frame to ensure any reflow has settled
+                            requestAnimationFrame(syncFixedPosition);
+                        }
+                        // final global sync to ensure fixed and anchored align perfectly after resize
+                        requestAnimationFrame(syncFixedPosition);
+                    });
+
+                    // debounce full recalc/update to avoid rapid toggles during continuous resize
+                    if (resizeTimer) clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(() => { recalc(); update(); resizeTimer = null; }, 120);
+                });
+                window.addEventListener('load', () => { setCollapsedOnResize(); recalc(); update(); });
+
+                // Collapsible sidebar handlers for ≤1024px
+                const toggleBtn = document.querySelector('.sidebar-toggle');
+                function setCollapsedOnResize() {
+                    if (!toggleBtn) return;
+                    const textSpan = toggleBtn.querySelector('.toggle-text');
+                    if (window.innerWidth <= 1024) {
+                        // start collapsed on small screens
+                        sidebar.classList.add('is-collapsed');
+                        toggleBtn.setAttribute('aria-expanded', 'false');
+                        if (textSpan) textSpan.textContent = '展開';
+
+                        // ensure we don't leave placeholder or fixed/anchored state when collapsed
+                        sidebar.classList.remove('is-fixed', 'is-anchored');
+                        sidebar.style.left = '';
+                        sidebar.style.width = '';
+                        sidebar.style.position = '';
+                        sidebar.style.top = '';
+                        const placeholder = layout.querySelector('.sidebar-placeholder');
+                        if (placeholder) {
+                            placeholder.style.display = 'none';
+                            placeholder.style.width = '';
+                            placeholder.style.height = '';
+                        }
+                    } else {
+                        // expanded: restore normal behavior
+                        sidebar.classList.remove('is-collapsed');
+                        toggleBtn.setAttribute('aria-expanded', 'true');
+                        if (textSpan) textSpan.textContent = '收起';
+                        // recalc/update to re-establish base positions
+                        setTimeout(() => { recalc(); update(); }, 60);
+                    }
+                }
+
+                if (toggleBtn) {
+                    toggleBtn.addEventListener('click', (e) => {
+                        const collapsed = sidebar.classList.toggle('is-collapsed');
+                        toggleBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                        const textSpan = toggleBtn.querySelector('.toggle-text');
+                        if (textSpan) textSpan.textContent = collapsed ? '展開' : '收起';
+
+                        if (collapsed) {
+                            // Immediately clear any fixed/anchored state and hide placeholder when collapsed
+                            sidebar.classList.remove('is-fixed', 'is-anchored');
+                            sidebar.style.left = '';
+                            sidebar.style.width = '';
+                            sidebar.style.position = '';
+                            sidebar.style.top = '';
+                            const placeholder = layout.querySelector('.sidebar-placeholder');
+                            if (placeholder) {
+                                placeholder.style.display = 'none';
+                                placeholder.style.width = '';
+                                placeholder.style.height = '';
+                            }
+                        } else {
+                            // Recalculate layout after toggle (allow CSS transition partially complete)
+                            setTimeout(() => { recalc(); update(); }, 330);
+                        }
+                    });
+                }
+
+            })();
         });
     </script>
 </body>

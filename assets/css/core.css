@@ -576,3 +576,127 @@ body.no-animations *::after {
         display: none;
     }
 }
+
+/* ============================================
+   星球背景 - 宇宙星圜（從 star.html 精確還原）
+   ============================================ */
+.star-bg {
+    /* 透過 CSS 變數在這個區域提供色板（僅在 star-bg 內部使用） */
+    --dark-color: rgb(0, 0, 0, 0.5);
+    --glossy-red: rgb(0, 255, 255);
+    --light-red: rgba(0, 255, 255, 0.5);
+    --very-light-red: rgba(0, 255, 255, 0.25);
+    --planets-theme: var(--light-red) var(--light-red) var(--light-red) var(--glossy-red);
+    --paths-theme: var(--very-light-red) var(--glossy-red);
+
+    /* 星圖縮放：調整此變數可以整體放大/縮小星球與軌道 */
+    --star-scale: 1.5; /* Default: 1 = 原始大小；可改成 1.5 / 1.8 做更大視覺 */
+
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    z-index: -8; /* 放在 grid 之上（grid -9），但由 BackgroundManager 隱藏 grid 以避免衝突 */
+    overflow: hidden;
+}
+
+/* 幫助類別：需要時可以在 HTML 上加入 .star-bg--xlarge 以快速放大 */
+.star-bg--xlarge { --star-scale: 1.6; }
+
+#solar-system {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    /* 同時套用 skew 與 scale：使用 CSS 變數 --star-scale 可動態調整整體大小 */
+    -webkit-transform: skewX(-45deg) scale(var(--star-scale, 1));
+    -moz-transform: skewX(-45deg) scale(var(--star-scale, 1));
+    -ms-transform: skewX(-45deg) scale(var(--star-scale, 1));
+    -o-transform: skewX(-45deg) scale(var(--star-scale, 1));
+    transform: skewX(-45deg) scale(var(--star-scale, 1));
+    transform-origin: center;
+    justify-content: center;
+    align-items: center;
+}
+
+#sun {
+    position: fixed;
+    z-index: 100;
+
+    width: 174.085px;
+    height: 174.085px;
+
+    -webkit-transform: skewX(45deg);
+    -moz-transform: skewX(45deg);
+    -ms-transform: skewX(45deg);
+    -o-transform: skewX(45deg);
+    transform: skewX(45deg);
+
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--glossy-red) 20%, transparent 100%);
+    filter: drop-shadow(0 0 2rem var(--glossy-red)) blur(1px);
+}
+
+#mercury, #venus, #earth, #mars {
+    position: fixed;
+    display: flex;
+    border-width: 2px;
+    border-style: solid;
+    border-color: var(--planets-theme);
+    border-radius: 50%;
+    background: transparent;
+    justify-content: center;
+    align-items: center;
+}
+
+#mercury { top: 36px; width: 24.397px; height: 24.397px; -webkit-animation: planets-rotation 29s linear infinite; animation: planets-rotation 29s linear infinite; }
+#venus { top: 11px; width: 60.518px; height: 60.518px; -webkit-animation: planets-rotation 121.5s linear infinite; animation: planets-rotation 121.5s linear infinite; }
+#earth { top: 30px; width: 63.71px; height: 63.71px; /* animation-duration: .5s = 1 day on earth */ -webkit-animation: planets-rotation 0.5s linear infinite; animation: planets-rotation 0.5s linear infinite; }
+#mars { top: 118px; width: 33.895px; height: 33.895px; -webkit-animation: planets-rotation 0.5s linear infinite; animation: planets-rotation 0.5s linear infinite; }
+
+#mercury::after, #venus::after, #earth::after, #mars::after {
+    position: absolute;
+
+    width: 40%; /* <-- set to 10% for the real planet size*/
+    height: 40%;
+
+    content: '';
+
+    border-radius: 50%;
+    background: var(--glossy-red);
+
+    -webkit-filter: drop-shadow(0 0 0.3rem var(--light-red)) blur(0.5px);
+    filter: drop-shadow(0 0 0.3rem var(--light-red)) blur(0.5px);
+}
+
+/* 只有被標記為 .blink 的行星才會閃爍（不同持續時間與延遲用 CSS 變數控制） */
+.planet.blink::after {
+    animation: blink-earth var(--blink-duration, 2s) linear infinite;
+    animation-delay: var(--blink-delay, 0s);
+}
+
+/* 預設快慢類別（可選） */
+.planet.blink.fast::after { --blink-duration: 1.2s; }
+.planet.blink.slow::after { --blink-duration: 3.2s; }
+
+#mercury-wrapper, #venus-wrapper, #earth-wrapper, #mars-wrapper {
+    position: fixed;
+
+    width: auto;
+    height: auto;
+
+    border-width: 2px;
+    border-style: solid;
+    border-color: var(--paths-theme);
+    border-radius: 50%;
+}
+
+#mercury-wrapper { width: 203.085px; height: 203.085px; -webkit-animation: solar-revolution 43.98s linear infinite; animation: solar-revolution 43.98s linear infinite; }
+#venus-wrapper { width: 257.085px; height: 257.085px; -webkit-animation: solar-revolution 112.345s linear infinite; animation: solar-revolution 112.345s linear infinite; }
+#earth-wrapper { width: 332.085px; height: 332.085px; -webkit-animation: solar-revolution 182.625s linear infinite; animation: solar-revolution 182.625s linear infinite; }
+#mars-wrapper { width: 446.085px; height: 446.085px; -webkit-animation: solar-revolution 343.485s linear infinite; animation: solar-revolution 343.485s linear infinite; }
+
+@keyframes solar-revolution { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes planets-rotation { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes blink-earth { from { background-color: var(--glossy-red); -webkit-filter: drop-shadow(0 0 0.3rem var(--light-red)) blur(0.5px); filter: drop-shadow(0 0 0.3rem var(--light-red)) blur(0.5px); } to { background-color: var(--dark-color); -webkit-filter: drop-shadow(0 0 0 var(--light-red)) blur(0); filter: drop-shadow(0 0 0 var(--light-red)) blur(0); } }

@@ -1,0 +1,28 @@
+{
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "WL2D-01.moc3",
+		"Textures": [
+			"WL2D-01.4096/texture_00.png"
+		],
+		"Physics": "WL2D-01.physics3.json",
+		"DisplayInfo": "WL2D-01.cdi3.json"
+	},
+	"Groups": [
+		{
+			"Target": "Parameter",
+			"Name": "LipSync",
+			"Ids": [
+				"ParamMouthOpenY"
+			]
+		},
+		{
+			"Target": "Parameter",
+			"Name": "EyeBlink",
+			"Ids": [
+				"ParamEyeLclozop",
+				"ParamEyeRclozop"
+			]
+		}
+	]
+}

@@ -19,6 +19,11 @@ const Animations = {
             this.triggerPageEntrance();
             setTimeout(() => {
                 loader.remove();
+                // Notify that entry animations have completed so other modules (e.g., Live2D) can start safely
+                try {
+                    window.entryAnimationsCompleted = true;
+                    window.dispatchEvent(new CustomEvent('animations:entryComplete'));
+                } catch (e) {}
             }, 800);
         }, 2200);
     },
@@ -258,6 +263,7 @@ const Animations = {
                     let poll = setInterval(() => {
                         try {
                             if (el.textContent.length >= expectedText.length) {
+
                                 clearInterval(poll);
                                 // 等待一段時間再切換狀態，讓使用者看到完成狀態
                                 setTimeout(() => {
@@ -274,6 +280,16 @@ const Animations = {
             }
         } catch (e) {
             console.error('Typewriter init error:', e);
+        }
+
+        // 如果啟動時已經跳過 loader（例如 sessionStorage 已標記），則發出 entry 完成事件
+        if (!showLoader) {
+            setTimeout(() => {
+                try {
+                    window.entryAnimationsCompleted = true;
+                    window.dispatchEvent(new CustomEvent('animations:entryComplete'));
+                } catch (e) {}
+            }, 0);
         }
     }
 };

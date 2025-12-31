@@ -1,0 +1,294 @@
+#waifu-toggle {
+	background-color: #fa0;
+	border-radius: 5px;
+	bottom: 66px;
+	cursor: pointer;
+	display: flex;
+	justify-content: flex-end;
+	left: 0;
+	margin-left: -100px;
+	padding: 5px;
+	position: fixed;
+	transition: margin-left 1s;
+	width: 60px;
+}
+
+#waifu-toggle.waifu-toggle-active {
+	margin-left: -50px;
+}
+
+#waifu-toggle.waifu-toggle-active:hover {
+	margin-left: -30px;
+}
+
+#waifu-toggle svg {
+	fill: #fff;
+	height: 25px;
+}
+
+#waifu {
+	bottom: -500px;
+	left: 0;
+	position: fixed;
+	transform: translateY(25px);
+	transition: transform .3s ease-in-out, bottom 3s ease-in-out;
+	z-index: 1;
+}
+
+#waifu.waifu-active {
+	bottom: 0;
+}
+
+#waifu.waifu-hidden {
+	display: none;
+}
+
+#waifu:hover {
+	transform: translateY(20px);
+}
+
+#waifu-tips {
+	/* 風格改為賽博霓虹：深色半透明 + 霓虹邊框 + 細微浮動 */
+	animation: waifu-shake 50s ease-in-out 5s infinite;
+	background: linear-gradient(180deg, rgba(10,10,15,0.95), rgba(15,15,22,0.9));
+	border: 1px solid rgba(0, 212, 255, 0.12);
+	border-radius: 12px;
+	box-shadow: 0 0 18px var(--accent-cyan), 0 3px 18px rgba(0,0,0,0.6);
+	color: #e6fbff;
+	font-family: var(--font-body);
+	font-size: 14px;
+	line-height: 1.5;
+	margin: -36px 20px;
+	min-height: 70px;
+	opacity: 0;
+	overflow: hidden;
+	padding: 12px 14px;
+	position: absolute;
+	text-overflow: ellipsis;
+	transition: opacity .2s, transform .25s var(--transition-fast);
+	width: 260px;
+	word-break: break-word;
+	transform-origin: left bottom;
+	will-change: transform, opacity;
+}
+
+#waifu-tips.waifu-tips-active {
+	opacity: 1;
+	transform: translateY(-6px) scale(1);
+}
+
+/* 小尖角指向模型 */
+#waifu-tips::after {
+	content: "";
+	position: absolute;
+	left: 22px;
+	bottom: -10px;
+	width: 0;
+	height: 0;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	border-top: 10px solid rgba(10,10,15,0.98);
+	filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+}
+
+/* 細微掃描線效果增加賽博感 */
+#waifu-tips::before {
+	content: "";
+	position: absolute;
+	left: -50%;
+	top: 0;
+	width: 200%;
+	height: 40px;
+	background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0) 100%);
+	mix-blend-mode: overlay;
+	pointer-events: none;
+	transform: translateY(-20px);
+	animation: waifu-scan 4s linear infinite;
+	opacity: 0.8;
+}
+
+@keyframes waifu-scan {
+	0% { transform: translateX(-50%) translateY(-20px); }
+	100% { transform: translateX(50%) translateY(-20px); }
+}
+
+/* 內容強調色 */
+#waifu-tips span { color: var(--accent-cyan); font-weight: 600; }
+
+/* 淺色主題下的調整 */
+[data-theme="light"] #waifu-tips {
+	background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(250,250,250,0.9));
+	color: #0a0a0f;
+	border: 1px solid rgba(0,0,0,0.06);
+	box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+}
+
+/* 淺色模式工具按鈕 */
+[data-theme="light"] #waifu-tool span {
+    background: rgba(0, 153, 204, 0.08);
+    border: 1px solid rgba(0, 153, 204, 0.4);
+    box-shadow: none;
+}
+
+[data-theme="light"] #waifu-tool span:hover {
+    background: rgba(0, 153, 204, 0.15);
+    border-color: #0099cc;
+}
+
+[data-theme="light"] #waifu-tool svg {
+    fill: #0099cc;
+}
+
+[data-theme="light"] #waifu-tool span:hover svg {
+    fill: #cc0066;
+    filter: none;
+}
+
+
+#live2d {
+	cursor: grab;
+	height: 300px;
+	position: relative;
+	width: 300px;
+}
+
+#live2d:active { cursor: grabbing; }
+
+/* 工具列：預設為隱藏的縮放 / 旋轉狀態，並使用更順暢的 timing 函數（略慢一些） */
+#waifu-tool {
+	align-items: center;
+	display: flex;
+	flex-direction: column;
+	gap: 8px; /* 稍微增加間距，讓按鈕更分明 */
+	opacity: 0;
+	position: absolute;
+	right: -10px;
+	top: 42px; /* 上移一點，讓視覺更協調 */
+	bottom: auto;
+	max-height: calc(100% - 16px); /* 確保按鈕容器不會溢出 #waifu 高度 */
+	pointer-events: none;
+	transform: translateY(14px) scale(0.94) rotate(-4deg);
+	transition: transform 460ms cubic-bezier(.22,.9,.31,1), opacity 320ms ease-in-out, filter 320ms ease;
+	will-change: transform, opacity;
+}
+
+/* 顯示狀態：整組浮現並加上柔和光暈 */
+#waifu:hover #waifu-tool,
+#waifu[data-force-tools-visible="true"] #waifu-tool {
+	opacity: 1;
+	transform: translateY(0) scale(1) rotate(0);
+	pointer-events: auto;
+}
+
+/* 單顆按鈕的預設動畫初始狀態（隱藏） */
+#waifu-tool span {
+    width: 32px;
+    height: 32px;
+    background: rgba(0, 212, 255, 0.08);
+    border: 1px solid var(--primary-cyan);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 460ms cubic-bezier(.22,.9,.31,1), opacity 360ms ease, box-shadow 320ms;
+    opacity: 0;
+    transform: translateY(10px) scale(0.94) rotate(-4deg);
+}
+
+/* 顯示時給予 stagger 進場（使用 transition-delay） */
+#waifu:hover #waifu-tool span,
+#waifu[data-force-tools-visible="true"] #waifu-tool span {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0);
+}
+#waifu:hover #waifu-tool span:nth-child(1) { transition-delay: 80ms; }
+#waifu:hover #waifu-tool span:nth-child(2) { transition-delay: 140ms; }
+#waifu:hover #waifu-tool span:nth-child(3) { transition-delay: 200ms; }
+#waifu:hover #waifu-tool span:nth-child(4) { transition-delay: 260ms; }
+#waifu:hover #waifu-tool span:nth-child(5) { transition-delay: 320ms; }
+#waifu:hover #waifu-tool span:nth-child(6) { transition-delay: 380ms; }
+
+#waifu[data-force-tools-visible="true"] #waifu-tool span:nth-child(1) { transition-delay: 80ms; }
+#waifu[data-force-tools-visible="true"] #waifu-tool span:nth-child(2) { transition-delay: 140ms; }
+#waifu[data-force-tools-visible="true"] #waifu-tool span:nth-child(3) { transition-delay: 200ms; }
+#waifu[data-force-tools-visible="true"] #waifu-tool span:nth-child(4) { transition-delay: 260ms; }
+#waifu[data-force-tools-visible="true"] #waifu-tool span:nth-child(5) { transition-delay: 320ms; }
+#waifu[data-force-tools-visible="true"] #waifu-tool span:nth-child(6) { transition-delay: 380ms; }
+
+/* 懸停單一按鈕時的強化效果 */
+#waifu-tool span:hover {
+    background: rgba(0, 212, 255, 0.25);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 6px 18px rgba(0, 212, 255, 0.2);
+    transform: translateY(-6px) scale(1.08) rotate(3deg);
+}
+
+/* SVG 圖示本身的樣式 */
+#waifu-tool svg {
+    fill: var(--primary-cyan);
+    height: 16px;
+    width: 16px;
+    transition: all var(--transition-normal);
+    display: block; /* 確保為塊級元素 */
+}
+
+#waifu-tool span:hover svg {
+    fill: #ffffff;
+    filter: drop-shadow(0 0 5px #ffffff);
+}
+
+#waifu[data-force-tools-visible="true"] #waifu-tool { opacity: 1 !important; pointer-events: auto !important; }
+
+@keyframes waifu-shake {
+	2% { transform: translate(.5px, -1.5px) rotate(-.5deg); }
+	4% { transform: translate(.5px, 1.5px) rotate(1.5deg); }
+	6% { transform: translate(1.5px, 1.5px) rotate(1.5deg); }
+	8% { transform: translate(2.5px, 1.5px) rotate(.5deg); }
+	10% { transform: translate(.5px, 2.5px) rotate(.5deg); }
+	12% { transform: translate(1.5px, 1.5px) rotate(.5deg); }
+	14% { transform: translate(.5px, .5px) rotate(.5deg); }
+	16% { transform: translate(-1.5px, -.5px) rotate(1.5deg); }
+	18% { transform: translate(.5px, .5px) rotate(1.5deg); }
+	20% { transform: translate(2.5px, 2.5px) rotate(1.5deg); }
+	22% { transform: translate(.5px, -1.5px) rotate(1.5deg); }
+	24% { transform: translate(-1.5px, 1.5px) rotate(-.5deg); }
+	26% { transform: translate(1.5px, .5px) rotate(1.5deg); }
+	28% { transform: translate(-.5px, -.5px) rotate(-.5deg); }
+	30% { transform: translate(1.5px, -.5px) rotate(-.5deg); }
+	32% { transform: translate(2.5px, -1.5px) rotate(1.5deg); }
+	34% { transform: translate(2.5px, 2.5px) rotate(-.5deg); }
+	36% { transform: translate(.5px, -1.5px) rotate(.5deg); }
+	38% { transform: translate(2.5px, -.5px) rotate(.5deg); }
+	40% { transform: translate(-.5px, 2.5px) rotate(.5deg); }
+	42% { transform: translate(-1.5px, 2.5px) rotate(.5deg); }
+	44% { transform: translate(-1.5px, 1.5px) rotate(.5deg); }
+	46% { transform: translate(1.5px, -.5px) rotate(-.5deg); }
+	48% { transform: translate(2.5px, -.5px) rotate(.5deg); }
+	50% { transform: translate(-1.5px, 1.5px) rotate(.5deg); }
+	52% { transform: translate(-.5px, 1.5px) rotate(.5deg); }
+	54% { transform: translate(-1.5px, 1.5px) rotate(.5deg); }
+	56% { transform: translate(.5px, 2.5px) rotate(1.5deg); }
+	58% { transform: translate(2.5px, 2.5px) rotate(.5deg); }
+	60% { transform: translate(2.5px, -1.5px) rotate(1.5deg); }
+	62% { transform: translate(-1.5px, .5px) rotate(1.5deg); }
+	64% { transform: translate(-1.5px, 1.5px) rotate(1.5deg); }
+	66% { transform: translate(.5px, 2.5px) rotate(1.5deg); }
+	68% { transform: translate(2.5px, -1.5px) rotate(1.5deg); }
+	70% { transform: translate(2.5px, 2.5px) rotate(.5deg); }
+	72% { transform: translate(-.5px, -1.5px) rotate(1.5deg); }
+	74% { transform: translate(-1.5px, 2.5px) rotate(1.5deg); }
+	76% { transform: translate(-1.5px, 2.5px) rotate(.5deg); }
+	78% { transform: translate(-1.5px, 2.5px) rotate(.5deg); }
+	80% { transform: translate(-1.5px, .5px) rotate(-.5deg); }
+	82% { transform: translate(-1.5px, .5px) rotate(-.5deg); }
+	84% { transform: translate(-.5px, .5px) rotate(1.5deg); }
+	86% { transform: translate(2.5px, 1.5px) rotate(.5deg); }
+	88% { transform: translate(-1.5px, .5px) rotate(1.5deg); }
+	90% { transform: translate(-1.5px, -.5px) rotate(-.5deg); }
+	92% { transform: translate(-1.5px, -1.5px) rotate(1.5deg); }
+	94% { transform: translate(.5px, .5px) rotate(-.5deg); }
+	96% { transform: translate(2.5px, -.5px) rotate(-.5deg); }
+	98% { transform: translate(-1.5px, -1.5px) rotate(-.5deg); }
+	0%, 100% { transform: translate(0, 0) rotate(0); }
+}

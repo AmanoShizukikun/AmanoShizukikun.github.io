@@ -460,7 +460,7 @@
                     <span>側邊欄文字顯示</span>
                     <span class="setting-description">是否持續顯示側邊欄文字標題</span>
                 </div>
-                <div class="toggle-switch active" id="sideNavTextVisible"></div>
+                <div class="toggle-switch active" id="sideNavTextVisible" role="switch" tabindex="0" aria-label="側邊欄文字顯示"></div>
             </div>
 
             <div class="setting-item">
@@ -472,6 +472,30 @@
                     <select id="themeMode">
                         <option value="dark">深色模式</option>
                         <option value="light">淺色模式</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>看板娘 (Live2D)</span>
+                    <span class="setting-description">啟用或停用頁面上的 Live2D 看板娘</span>
+                </div>
+                <div class="toggle-switch" id="live2dToggle" role="switch" aria-checked="false" tabindex="0" aria-label="看板娘 (Live2D)"></div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>背景樣式</span>
+                    <span class="setting-description">選擇背景動畫樣式</span>
+                </div>
+                <div class="select-control">
+                    <select id="backgroundStyle" title="背景樣式" aria-label="背景樣式">
+                        <option value="dom">粒子風暴</option>
+                        <option value="network">網格連線</option>
+                        <option value="magnet">磁力連線</option>
+                        <option value="star">宇宙星圜</option>
+                        <option value="off">關閉</option>
                     </select>
                 </div>
             </div>
@@ -657,6 +681,7 @@
 
     <!-- 腳本 -->
     <script src="../assets/js/core.js"></script>
+    <script src="../assets/js/live2d-manager.js"></script>
     <script src="../assets/js/navigation.js"></script>
     <script src="../assets/js/animations.js"></script>
     <script>

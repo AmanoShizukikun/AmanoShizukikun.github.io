@@ -14,35 +14,59 @@ const Navigation = {
 
         let currentActive = null;
 
-        // 更新活動狀態
+        // 更新活動狀態（支援每個錨點的 data-offset 覆蓋）
         const updateActive = () => {
             const sections = document.querySelectorAll('section[id]');
-            const scrollY = window.pageYOffset + 150; // 添加偏移量，標記視口中心為基準
+            const vh = window.innerHeight;
+            const headerEl = document.querySelector('header');
+            const defaultHeaderOffset = headerEl ? headerEl.offsetHeight : 80; // 與 Core.initSmoothScroll 保持一致
 
             let foundActive = null;
-            let closestDistance = Infinity;
+            let maxVisible = 0; // 以可見高度選擇最明顯的 section
+            let closestDistance = Infinity; // fallback
 
+            // 預計算視窗有效可見區間（top 由 offset 校正）
             sections.forEach(section => {
                 const sectionId = section.getAttribute('id');
                 const navLink = sideNav.querySelector(`a[href="#${sectionId}"]`);
-                
                 if (!navLink) return;
 
-                const sectionTop = section.offsetTop;
-                const sectionBottom = sectionTop + section.offsetHeight;
-                const sectionCenter = (sectionTop + sectionBottom) / 2;
+                // 允許每個錨點使用 data-offset（像 Core.initSmoothScroll 一樣，以 px 為單位）
+                const anchorOffset = parseInt(navLink.getAttribute('data-offset'), 10);
+                const offset = !isNaN(anchorOffset) ? anchorOffset : defaultHeaderOffset;
 
-                // 計算滾動位置到章節中心的距離
-                const distance = Math.abs(scrollY - sectionCenter);
+                // 使用 getBoundingClientRect 更準確地計算可見高度（以視窗為參考），並將 header offset 視為「視窗頂部的內邊界」
+                const rect = section.getBoundingClientRect();
+                const effectiveTop = offset; // pixels from viewport top
+                const effectiveBottom = vh; // viewport bottom
 
-                // 如果當前滾動位置在該 section 內，或距離最近
-                if (scrollY >= sectionTop && scrollY < sectionBottom) {
+                const visibleTop = Math.max(rect.top, effectiveTop);
+                const visibleBottom = Math.min(rect.bottom, effectiveBottom);
+                const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+
+                // contact 特殊處理：如果接近頁面底部，優先選中
+                const isNearBottom = (window.pageYOffset + vh) >= (document.body.scrollHeight - 20);
+                if (sectionId === 'contact' && (visibleHeight > 0 || isNearBottom)) {
                     foundActive = navLink;
-                } else if (distance < closestDistance) {
-                    closestDistance = distance;
-                    // 只有在沒有找到精確匹配時，才使用最近的
-                    if (!foundActive) {
-                        foundActive = navLink;
+                    maxVisible = Number.POSITIVE_INFINITY; // highest priority
+                    return; // 直接確定
+                }
+
+                // 優先選擇可見高度最大的 section
+                if (visibleHeight > maxVisible) {
+                    maxVisible = visibleHeight;
+                    foundActive = navLink;
+                } else if (visibleHeight === 0) {
+                    // fallback：當全部 visibleHeight 為 0 時，使用與視窗中心距離最近的章節
+                    const sectionTopPage = section.offsetTop - offset;
+                    const sectionBottomPage = sectionTopPage + section.offsetHeight;
+                    const sectionCenterPage = (sectionTopPage + sectionBottomPage) / 2;
+                    const viewportCenterPage = window.pageYOffset + (vh / 2);
+                    const distance = Math.abs(viewportCenterPage - sectionCenterPage);
+
+                    if (distance < closestDistance) {
+                        closestDistance = distance;
+                        if (!foundActive) foundActive = navLink;
                     }
                 }
             });
@@ -385,8 +409,11 @@ const Navigation = {
             toggleSettings(false);
         });
 
-        // 點擊頁面其他地方關閉設定面板
+        // 點擊頁面其他地方關閉設定面板（僅對使用者直接互動生效）
         document.addEventListener('click', (e) => {
+            // 避免程式性事件（例如 Live2D widget 內使用 quitEl.click()）意外關閉設定面板
+            if (!e.isTrusted) return;
+
             if (!settingsToggle.contains(e.target) && 
                 !settingsPanel.contains(e.target) && 
                 settingsPanel.classList.contains('active')) {
@@ -423,7 +450,11 @@ const Navigation = {
                 sideNavTextVisible: localStorage.getItem('sideNavTextVisible') !== 'false',
                 theme: localStorage.getItem('theme') || 'dark',
                 animationStrength: animationStrength, // 0=關, 1=低, 2=強
-                soundEnabled: localStorage.getItem('soundEnabled') === 'true' // 預設關閉音效
+                soundEnabled: localStorage.getItem('soundEnabled') === 'true', // 預設關閉音效
+                // Live2D 看板娘（預設關閉，需手動啟用）
+                live2dEnabled: localStorage.getItem('live2dEnabled') === 'true',
+                // 背景滑鼠效果（預設啟用）
+                backgroundMouseEnabled: (localStorage.getItem('backgroundMouseEnabled') === null) ? true : (localStorage.getItem('backgroundMouseEnabled') !== 'false')
             };
         };
 
@@ -435,6 +466,10 @@ const Navigation = {
             localStorage.setItem('theme', settings.theme);
             localStorage.setItem('animationStrength', settings.animationStrength);
             localStorage.setItem('soundEnabled', settings.soundEnabled);
+            // Live2D 開關
+            localStorage.setItem('live2dEnabled', settings.live2dEnabled);
+            // 背景滑鼠效果
+            localStorage.setItem('backgroundMouseEnabled', settings.backgroundMouseEnabled);
         };
 
         // 應用設定
@@ -540,6 +575,13 @@ const Navigation = {
                     }
                     particle.style.opacity = '0.6';
                 });
+
+                // 如果使用 canvas-based dom 粒子，重新初始化以套用新的色票
+                if (Core.BackgroundManager && Core.BackgroundManager.current === 'dom' && typeof Core.BackgroundManager.startDomCanvas === 'function') {
+                    const w = window.innerWidth; const h = window.innerHeight; const baseCount = Math.max(30, Math.floor((w * h) / 10000));
+                    const count = (settings.animationStrength === 1) ? Math.ceil(baseCount / 2) : baseCount;
+                    Core.BackgroundManager.startDomCanvas({ count });
+                }
             } else {
                 // 深色模式 - 恢復原始設定
                 html.style.setProperty('--dark-bg', '#0a0a0f');
@@ -598,6 +640,17 @@ const Navigation = {
             }
 
             // 動畫強度 (0=關閉, 1=低, 2=強)
+            // 將設置傳遞給 BackgroundManager (即時控制 Canvas 網格連線速度/開關)
+            if (Core.BackgroundManager && typeof Core.BackgroundManager.setStrength === 'function') {
+                Core.BackgroundManager.setStrength(settings.animationStrength);
+            }
+
+            // 傳遞滑鼠互動設定給 BackgroundManager（若存在）
+            if (Core.BackgroundManager && typeof Core.BackgroundManager.setMouseEnabled === 'function') {
+                Core.BackgroundManager.setMouseEnabled(settings.backgroundMouseEnabled);
+            }
+
+            // 處理 DOM 粒子 (Particle Storm)
             const particlesContainer = document.querySelector('.particles');
             
             if (settings.animationStrength === 0) {
@@ -609,12 +662,16 @@ const Navigation = {
                 if (particlesContainer) {
                     particlesContainer.style.display = 'none';
                 }
+                // 如果有 canvas-based dom 粒子一併停止
+                if (Core.BackgroundManager && typeof Core.BackgroundManager.stopDomCanvas === 'function') {
+                    Core.BackgroundManager.stopDomCanvas();
+                }
             } else if (settings.animationStrength === 1) {
                 // 低強度
                 document.body.classList.remove('no-animations');
                 document.body.classList.add('low-animations');
                 
-                // 顯示粒子但減半
+                // 顯示粒子但減半 (針對 DOM 粒子)
                 if (particlesContainer) {
                     particlesContainer.style.display = 'block';
                     const particles = particlesContainer.querySelectorAll('.particle');
@@ -688,11 +745,21 @@ const Navigation = {
             // 使用已載入的 settings 中的值，而不是重新讀取 localStorage
             animationSlider.value = settings.animationStrength;
             animationValue.textContent = labels[settings.animationStrength];
+            // ARIA initial state for slider
+            animationSlider.setAttribute('role', 'slider');
+            animationSlider.setAttribute('aria-valuemin', animationSlider.min);
+            animationSlider.setAttribute('aria-valuemax', animationSlider.max);
+            animationSlider.setAttribute('aria-valuenow', settings.animationStrength);
+            animationSlider.setAttribute('aria-valuetext', labels[settings.animationStrength]);
             
             // 添加事件監聽器
             animationSlider.addEventListener('input', (e) => {
                 const value = parseInt(e.target.value);
                 animationValue.textContent = labels[value];
+                // update ARIA
+                animationSlider.setAttribute('aria-valuenow', value);
+                animationSlider.setAttribute('aria-valuetext', labels[value]);
+
                 settings.animationStrength = value;
                 saveSettings(settings);
                 // 設定面板打開時跳過 header 固定狀態應用
@@ -736,16 +803,204 @@ const Navigation = {
             });
         }
 
+        // 背景滑鼠效果開關 (動態注入 UI 若不存在)
+        (function () {
+            let bgMouseToggle = document.getElementById('backgroundMouseToggle');
+            const settingsPanel = document.querySelector('.settings-panel');
+
+            // 若不存在就建立一個設定項 (嘗試插入到「背景樣式」設定項之後，若找不到則放到設定面板末端)
+            if (!bgMouseToggle && settingsPanel) {
+                const item = document.createElement('div');
+                item.className = 'setting-item';
+                item.innerHTML = `
+                    <div class="setting-label">
+                        <span>背景滑鼠效果</span>
+                        <span class="setting-description">滑鼠是否影響背景動畫（網格/磁力）</span>
+                    </div>
+                    <div class="toggle-switch" id="backgroundMouseToggle" role="switch" aria-checked="true" tabindex="0" aria-label="背景滑鼠效果"></div>
+                `;
+
+                // 優先將此設定插到 背景樣式 的設定項之後
+                const bgStyleEl = settingsPanel.querySelector('#backgroundStyle');
+                if (bgStyleEl) {
+                    const parentItem = bgStyleEl.closest('.setting-item');
+                    if (parentItem && parentItem.parentNode) {
+                        parentItem.parentNode.insertBefore(item, parentItem.nextSibling);
+                    } else {
+                        settingsPanel.appendChild(item);
+                    }
+                } else {
+                    // fallback: 插在設定面板的末端
+                    const lastSection = settingsPanel.querySelector('.settings-section:last-of-type');
+                    if (lastSection && lastSection.parentNode) lastSection.parentNode.insertBefore(item, lastSection.nextSibling);
+                    else settingsPanel.appendChild(item);
+                }
+
+                bgMouseToggle = document.getElementById('backgroundMouseToggle');
+            }
+
+            if (!bgMouseToggle) return;
+
+            // 初始化狀態
+            bgMouseToggle.classList.toggle('active', settings.backgroundMouseEnabled);
+            bgMouseToggle.setAttribute('aria-checked', settings.backgroundMouseEnabled ? 'true' : 'false');
+
+            // 切換行為
+            bgMouseToggle.addEventListener('click', () => {
+                settings.backgroundMouseEnabled = !settings.backgroundMouseEnabled;
+                bgMouseToggle.classList.toggle('active', settings.backgroundMouseEnabled);
+                bgMouseToggle.setAttribute('aria-checked', settings.backgroundMouseEnabled ? 'true' : 'false');
+                saveSettings(settings);
+                const settingsPanel = document.querySelector('.settings-panel');
+                const skipHeaderFixed = settingsPanel && settingsPanel.classList.contains('active');
+                applySettings(settings, skipHeaderFixed);
+            });
+
+            // also support keyboard toggle (space/enter)
+            bgMouseToggle.addEventListener('keydown', (e) => {
+                if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    bgMouseToggle.click();
+                }
+            });
+        })();
+
+        // Live2D 看板娘 開關（使用全域 live2dManager，容錯設計）
+        const live2dToggle = document.getElementById('live2dToggle');
+        if (live2dToggle) {
+            // Ensure ARIA role + keyboard focusability
+            live2dToggle.setAttribute('role', 'switch');
+            live2dToggle.setAttribute('tabindex', live2dToggle.getAttribute('tabindex') || '0');
+            live2dToggle.setAttribute('aria-checked', settings.live2dEnabled ? 'true' : 'false');
+
+            // Helper: load resources and show only after entry animations complete
+            const ensureLive2dReadyAndShow = async () => {
+                if (!window.live2dManager) return false;
+                const ok = await window.live2dManager.load();
+                if (!ok) { console.warn('Live2D 資源缺失或載入失敗。'); return false; }
+                if (window.entryAnimationsCompleted) {
+                    window.live2dManager.show();
+                } else {
+                    window.addEventListener('animations:entryComplete', () => {
+                        if (settings.live2dEnabled) window.live2dManager.show();
+                    }, { once: true });
+                }
+                return true;
+            };
+
+            // 初始化 UI 狀態
+            live2dToggle.classList.toggle('active', settings.live2dEnabled);
+            live2dToggle.setAttribute('aria-checked', settings.live2dEnabled ? 'true' : 'false');
+
+            // 點擊處理：阻止事件冒泡以避免全域點擊處理器意外關閉設定面板，並確保遮罩/面板維持開啟
+            live2dToggle.addEventListener('click', async (e) => {
+                if (e && e.stopPropagation) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                }
+
+                settings.live2dEnabled = !settings.live2dEnabled;
+                live2dToggle.classList.toggle('active', settings.live2dEnabled);
+                live2dToggle.setAttribute('aria-checked', settings.live2dEnabled ? 'true' : 'false');
+                saveSettings(settings);
+
+                // 確保設定面板與遮罩保持開啟狀態（有些全域處理器可能會關閉面板）
+                const settingsPanel = document.querySelector('.settings-panel');
+                const overlay = document.querySelector('.nav-overlay');
+                if (settingsPanel && !settingsPanel.classList.contains('active')) {
+                    settingsPanel.classList.add('active');
+                }
+                if (overlay) {
+                    overlay.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+
+                if (settings.live2dEnabled) {
+                    await ensureLive2dReadyAndShow();
+                } else {
+                    if (window.live2dManager) window.live2dManager.hide();
+                }
+            });
+
+            // 支援鍵盤操作（Enter / Space）以保持可及性，同時阻止事件冒泡
+            live2dToggle.addEventListener('keydown', (e) => {
+                if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // 直接呼叫 click handler（保持同樣的流程）
+                    live2dToggle.click();
+                }
+            });
+
+            // 初始狀態：若啟用則嘗試載入並顯示（非阻塞），但會在進場動畫完成後才顯示
+            if (settings.live2dEnabled && window.live2dManager) {
+                ensureLive2dReadyAndShow();
+            }
+
+            // 當 widget 自行 quit 時（例如工具列的 quit），同步 settings UI
+            window.addEventListener('live2d:quit', () => {
+                settings.live2dEnabled = false;
+                if (live2dToggle) live2dToggle.classList.remove('active');
+                live2dToggle.setAttribute('aria-checked', 'false');
+                saveSettings(settings);
+            });
+
+            // 當 localStorage 在其他分頁或程式中被改變時，同步 UI 與 manager 行為
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'live2dEnabled') {
+                    const enabled = e.newValue !== 'false';
+                    settings.live2dEnabled = enabled;
+                    if (live2dToggle) {
+                        live2dToggle.classList.toggle('active', enabled);
+                        live2dToggle.setAttribute('aria-checked', enabled ? 'true' : 'false');
+                    }
+                    if (enabled) {
+                        if (window.live2dManager) ensureLive2dReadyAndShow();
+                    } else {
+                        if (window.live2dManager) window.live2dManager.hide();
+                    }
+                }
+            });
+
+            // 背景樣式控制（全域）
+            (function () {
+                const el = document.getElementById('backgroundStyle');
+                if (!el) return;
+                const saved = Core.storage.get('backgroundStyle') || 'dom';
+                el.value = saved;
+                el.addEventListener('change', function (e) {
+                    const val = e.target.value;
+                    Core.storage.set('backgroundStyle', val);
+                    if (Core.BackgroundManager && typeof Core.BackgroundManager.apply === 'function') {
+                        Core.BackgroundManager.apply(val, { container: document.querySelector('.particles') });
+                    } else {
+                        // fallback: re-init background
+                        Core.initBackground();
+                    }
+                });
+            })();
+        }
+
         // Header 高度調整
         const headerHeightSlider = document.getElementById('headerHeight');
         const headerHeightValue = document.getElementById('headerHeightValue');
         if (headerHeightSlider && headerHeightValue) {
             headerHeightSlider.value = settings.headerHeight;
             headerHeightValue.textContent = settings.headerHeight + 'px';
+            // ARIA initial state
+            headerHeightSlider.setAttribute('role', 'slider');
+            headerHeightSlider.setAttribute('aria-valuemin', headerHeightSlider.min);
+            headerHeightSlider.setAttribute('aria-valuemax', headerHeightSlider.max);
+            headerHeightSlider.setAttribute('aria-valuenow', settings.headerHeight);
+            headerHeightSlider.setAttribute('aria-valuetext', settings.headerHeight + 'px');
             
             headerHeightSlider.addEventListener('input', (e) => {
                 const value = parseInt(e.target.value);
                 headerHeightValue.textContent = value + 'px';
+                // update ARIA
+                headerHeightSlider.setAttribute('aria-valuenow', value);
+                headerHeightSlider.setAttribute('aria-valuetext', value + 'px');
+
                 settings.headerHeight = value;
                 saveSettings(settings);
                 
@@ -791,15 +1046,32 @@ const Navigation = {
         // 側邊欄文字顯示切換
         const sideNavTextToggle = document.getElementById('sideNavTextVisible');
         if (sideNavTextToggle) {
+            // Ensure ARIA role/state and keyboard focusability
+            sideNavTextToggle.setAttribute('role', 'switch');
+            sideNavTextToggle.setAttribute('tabindex', sideNavTextToggle.getAttribute('tabindex') || '0');
+
+            // Apply initial visual + ARIA state
             sideNavTextToggle.classList.toggle('active', settings.sideNavTextVisible);
+            sideNavTextToggle.setAttribute('aria-checked', settings.sideNavTextVisible ? 'true' : 'false');
+
             sideNavTextToggle.addEventListener('click', () => {
                 settings.sideNavTextVisible = !settings.sideNavTextVisible;
                 sideNavTextToggle.classList.toggle('active', settings.sideNavTextVisible);
+                sideNavTextToggle.setAttribute('aria-checked', settings.sideNavTextVisible ? 'true' : 'false');
                 saveSettings(settings);
                 // 設定面板打開時跳過 header 固定狀態應用
                 const settingsPanel = document.querySelector('.settings-panel');
                 const skipHeaderFixed = settingsPanel && settingsPanel.classList.contains('active');
                 applySettings(settings, skipHeaderFixed);
+            });
+
+            // Keyboard accessibility: Space / Enter toggles
+            sideNavTextToggle.addEventListener('keydown', (e) => {
+                if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    sideNavTextToggle.click();
+                }
             });
         }
 

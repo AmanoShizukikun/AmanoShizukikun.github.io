@@ -1,0 +1,23 @@
+{
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "L2D-CMT-01.moc3",
+		"Textures": [
+			"L2D-CMT-01.8192/texture_00.png"
+		],
+		"Physics": "L2D-CMT-01.physics3.json",
+		"DisplayInfo": "L2D-CMT-01.cdi3.json"
+	},
+	"Groups": [
+		{
+			"Target": "Parameter",
+			"Name": "EyeBlink",
+			"Ids": []
+		},
+		{
+			"Target": "Parameter",
+			"Name": "LipSync",
+			"Ids": []
+		}
+	]
+}
