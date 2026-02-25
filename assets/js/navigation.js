@@ -94,9 +94,12 @@ const Navigation = {
         const header = document.querySelector('header');
         if (!header) return;
 
-        // 滾動時添加陰影
+        // 滾動時添加陰影（淺色模式下不顯示）
         const handleScroll = Core.throttle(() => {
-            if (window.scrollY > 50) {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            if (isLight) {
+                header.style.boxShadow = 'none';
+            } else if (window.scrollY > 50) {
                 header.style.boxShadow = '0 5px 20px rgba(0, 0, 0, 0.3)';
             } else {
                 header.style.boxShadow = 'none';
@@ -454,7 +457,9 @@ const Navigation = {
                 // Live2D 看板娘（預設關閉，需手動啟用）
                 live2dEnabled: localStorage.getItem('live2dEnabled') === 'true',
                 // 背景滑鼠效果（預設啟用）
-                backgroundMouseEnabled: (localStorage.getItem('backgroundMouseEnabled') === null) ? true : (localStorage.getItem('backgroundMouseEnabled') !== 'false')
+                backgroundMouseEnabled: (localStorage.getItem('backgroundMouseEnabled') === null) ? true : (localStorage.getItem('backgroundMouseEnabled') !== 'false'),
+                // 自定義鼠標效果（預設關閉）
+                cursorEffectEnabled: localStorage.getItem('cursorEffectEnabled') === 'true'
             };
         };
 
@@ -470,6 +475,8 @@ const Navigation = {
             localStorage.setItem('live2dEnabled', settings.live2dEnabled);
             // 背景滑鼠效果
             localStorage.setItem('backgroundMouseEnabled', settings.backgroundMouseEnabled);
+            // 自定義鼠標效果
+            localStorage.setItem('cursorEffectEnabled', settings.cursorEffectEnabled);
         };
 
         // 應用設定
@@ -652,6 +659,8 @@ const Navigation = {
 
             // 處理 DOM 粒子 (Particle Storm)
             const particlesContainer = document.querySelector('.particles');
+            // 如果目前是 star（宇宙星圖）或 bubble（氣泡派對）模式，由 BackgroundManager 自行管理粒子容器，此處不覆蓋
+            const isStarMode = Core.BackgroundManager && ['star', 'bubble', 'circuit', 'sakura', 'glitch', 'laser', 'fleet'].includes(Core.BackgroundManager.current);
             
             if (settings.animationStrength === 0) {
                 // 關閉所有動畫
@@ -671,8 +680,8 @@ const Navigation = {
                 document.body.classList.remove('no-animations');
                 document.body.classList.add('low-animations');
                 
-                // 顯示粒子但減半 (針對 DOM 粒子)
-                if (particlesContainer) {
+                // 顯示粒子但減半 (針對 DOM 粒子) — star 模式下跳過
+                if (particlesContainer && !isStarMode) {
                     particlesContainer.style.display = 'block';
                     const particles = particlesContainer.querySelectorAll('.particle');
                     particles.forEach((particle, index) => {
@@ -684,8 +693,8 @@ const Navigation = {
                 document.body.classList.remove('no-animations');
                 document.body.classList.remove('low-animations');
                 
-                // 顯示所有粒子
-                if (particlesContainer) {
+                // 顯示所有粒子 — star 模式下跳過
+                if (particlesContainer && !isStarMode) {
                     particlesContainer.style.display = 'block';
                     const particles = particlesContainer.querySelectorAll('.particle');
                     particles.forEach(particle => {
@@ -693,6 +702,9 @@ const Navigation = {
                     });
                 }
             }
+
+            // 自定義鼠標效果
+            Navigation._applyCursorEffect(settings.cursorEffectEnabled);
 
             // 聲音開關 (預留,可在其他功能中使用)
             window.soundEnabled = settings.soundEnabled;
@@ -861,6 +873,77 @@ const Navigation = {
                 if (e.key === ' ' || e.key === 'Enter') {
                     e.preventDefault();
                     bgMouseToggle.click();
+                }
+            });
+        })();
+
+        // 自定義鼠標效果開關（動態注入 UI）
+        (function () {
+            let cursorToggle = document.getElementById('cursorEffectToggle');
+            const settingsPanel = document.querySelector('.settings-panel');
+
+            if (!cursorToggle && settingsPanel) {
+                const item = document.createElement('div');
+                item.className = 'setting-item';
+                item.innerHTML = `
+                    <div class="setting-label">
+                        <span>鼠標特效</span>
+                        <span class="setting-description">啟用自定義鼠標圓點與跟隨圓環效果</span>
+                    </div>
+                    <div class="toggle-switch" id="cursorEffectToggle" role="switch" aria-checked="false" tabindex="0" aria-label="鼠標特效"></div>
+                `;
+
+                // 插到「背景滑鼠效果」設定項之後
+                const bgMouseEl = settingsPanel.querySelector('#backgroundMouseToggle');
+                if (bgMouseEl) {
+                    const parentItem = bgMouseEl.closest('.setting-item');
+                    if (parentItem && parentItem.parentNode) {
+                        parentItem.parentNode.insertBefore(item, parentItem.nextSibling);
+                    } else {
+                        settingsPanel.appendChild(item);
+                    }
+                } else {
+                    // fallback: 插到「背景樣式」之後
+                    const bgStyleEl = settingsPanel.querySelector('#backgroundStyle');
+                    if (bgStyleEl) {
+                        const parentItem = bgStyleEl.closest('.setting-item');
+                        if (parentItem && parentItem.parentNode) {
+                            parentItem.parentNode.insertBefore(item, parentItem.nextSibling);
+                        } else {
+                            settingsPanel.appendChild(item);
+                        }
+                    } else {
+                        const lastSection = settingsPanel.querySelector('.settings-section:last-of-type');
+                        if (lastSection && lastSection.parentNode) lastSection.parentNode.insertBefore(item, lastSection.nextSibling);
+                        else settingsPanel.appendChild(item);
+                    }
+                }
+
+                cursorToggle = document.getElementById('cursorEffectToggle');
+            }
+
+            if (!cursorToggle) return;
+
+            // 初始化狀態
+            cursorToggle.classList.toggle('active', settings.cursorEffectEnabled);
+            cursorToggle.setAttribute('aria-checked', settings.cursorEffectEnabled ? 'true' : 'false');
+
+            // 切換行為
+            cursorToggle.addEventListener('click', () => {
+                settings.cursorEffectEnabled = !settings.cursorEffectEnabled;
+                cursorToggle.classList.toggle('active', settings.cursorEffectEnabled);
+                cursorToggle.setAttribute('aria-checked', settings.cursorEffectEnabled ? 'true' : 'false');
+                saveSettings(settings);
+                const settingsPanel = document.querySelector('.settings-panel');
+                const skipHeaderFixed = settingsPanel && settingsPanel.classList.contains('active');
+                applySettings(settings, skipHeaderFixed);
+            });
+
+            // keyboard toggle
+            cursorToggle.addEventListener('keydown', (e) => {
+                if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    cursorToggle.click();
                 }
             });
         })();
@@ -1293,6 +1376,140 @@ const Navigation = {
 
         // 啟動 FPS 監控
         requestAnimationFrame(updateFPS);
+    },
+
+    /**
+     * 自定義鼠標效果（R5 風格圓點 + 跟隨圓環）
+     * 碰到互動元素只放大不變色，圓環跟隨速度 0.12（與 R4 相同）
+     */
+    _cursorState: { active: false, animId: null, mx: 0, my: 0, rx: 0, ry: 0, hoverEls: [] },
+
+    _applyCursorEffect(enabled) {
+        const state = this._cursorState;
+
+        if (enabled) {
+            // 建立 DOM 元素（若不存在）
+            if (!document.getElementById('custom-cursor')) {
+                const dot = document.createElement('div');
+                dot.id = 'custom-cursor';
+                document.body.appendChild(dot);
+            }
+            if (!document.getElementById('custom-cursor-ring')) {
+                const ring = document.createElement('div');
+                ring.id = 'custom-cursor-ring';
+                document.body.appendChild(ring);
+            }
+
+            const cursor = document.getElementById('custom-cursor');
+            const cursorRing = document.getElementById('custom-cursor-ring');
+
+            cursor.style.display = 'block';
+            cursorRing.style.display = 'block';
+            document.body.classList.add('custom-cursor-active');
+
+            // 滑鼠移動追蹤
+            if (!state._mouseMoveHandler) {
+                state._mouseMoveHandler = (e) => {
+                    state.mx = e.clientX;
+                    state.my = e.clientY;
+                    cursor.style.left = (state.mx - 6) + 'px';
+                    cursor.style.top = (state.my - 6) + 'px';
+                };
+            }
+            document.addEventListener('mousemove', state._mouseMoveHandler);
+
+            // 圓環跟隨動畫（easing 0.12，與 R4 一致）
+            if (!state.animId) {
+                const animRing = () => {
+                    state.rx += (state.mx - state.rx) * 0.12;
+                    state.ry += (state.my - state.ry) * 0.12;
+                    cursorRing.style.left = (state.rx - 18) + 'px';
+                    cursorRing.style.top = (state.ry - 18) + 'px';
+                    state.animId = requestAnimationFrame(animRing);
+                };
+                animRing();
+            }
+
+            // 互動元素 hover 效果（只放大，不變色）
+            if (state.hoverEls.length === 0) {
+                const interactiveSelector = 'a, button, [role="button"], .toggle-switch, .select-control select, input, .card, .skill-card, .project-card, .nav-links a, .settings-toggle, .menu-toggle';
+                const enterHandler = () => {
+                    cursorRing.classList.add('hover');
+                };
+                const leaveHandler = () => {
+                    cursorRing.classList.remove('hover');
+                };
+
+                // 使用事件委託，避免大量綁定
+                document.addEventListener('mouseover', (e) => {
+                    if (e.target.closest(interactiveSelector)) enterHandler();
+                });
+                document.addEventListener('mouseout', (e) => {
+                    if (e.target.closest(interactiveSelector)) leaveHandler();
+                });
+                state.hoverEls.push(true); // 標記已綁定
+            }
+
+            // 點擊漣漪效果（R5 風格）
+            if (!state._clickRippleHandler) {
+                // 注入 ripple keyframes（只需一次）
+                if (!document.getElementById('cursor-ripple-style')) {
+                    const rippleStyle = document.createElement('style');
+                    rippleStyle.id = 'cursor-ripple-style';
+                    rippleStyle.textContent = `@keyframes cursor-ripple-out {
+                        from { width: 0; height: 0; opacity: 1; }
+                        to { width: 100px; height: 100px; opacity: 0; }
+                    }`;
+                    document.head.appendChild(rippleStyle);
+                }
+                state._clickRippleHandler = (e) => {
+                    if (!Navigation._cursorState.active) return;
+                    const ripple = document.createElement('div');
+                    const themeColor = document.documentElement.getAttribute('data-theme') === 'light'
+                        ? 'var(--primary-magenta, #ff00c8)'
+                        : 'var(--primary-cyan, #00d4ff)';
+                    ripple.style.cssText = `
+                        position: fixed;
+                        left: ${e.clientX}px;
+                        top: ${e.clientY}px;
+                        width: 0; height: 0;
+                        border: 1px solid ${themeColor};
+                        border-radius: 50%;
+                        transform: translate(-50%, -50%);
+                        pointer-events: none;
+                        z-index: 99997;
+                        animation: cursor-ripple-out 0.6s ease-out forwards;
+                    `;
+                    document.body.appendChild(ripple);
+                    setTimeout(() => ripple.remove(), 600);
+                };
+                document.addEventListener('click', state._clickRippleHandler);
+            }
+
+            state.active = true;
+        } else {
+            // 停用
+            const cursor = document.getElementById('custom-cursor');
+            const cursorRing = document.getElementById('custom-cursor-ring');
+
+            if (cursor) cursor.style.display = 'none';
+            if (cursorRing) cursorRing.style.display = 'none';
+            document.body.classList.remove('custom-cursor-active');
+
+            if (state._mouseMoveHandler) {
+                document.removeEventListener('mousemove', state._mouseMoveHandler);
+            }
+            if (state._clickRippleHandler) {
+                document.removeEventListener('click', state._clickRippleHandler);
+                state._clickRippleHandler = null;
+            }
+            if (state.animId) {
+                cancelAnimationFrame(state.animId);
+                state.animId = null;
+            }
+
+            state.active = false;
+        }
     },
 
     /**

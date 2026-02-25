@@ -30,7 +30,45 @@
       "/assets/live2d/animations/hiyori_m10.motion3.json"
     ]
   },
-  "mouseover": [],
+  "mouseover": [
+    { "selector": "a.btn[href='#projects']", "text": ["要看看天野靜樹的專案嗎？", "這裡有天野靜樹精心打造的專案哦～"] },
+    { "selector": "a.btn-secondary[href='#contact']", "text": ["要聯絡天野靜樹看看嗎？", "想跟天野靜樹說點什麼嗎？"] },
+
+    { "selector": ".nav-links a[href='pages/about.html']", "text": "想更了解天野靜樹嗎？點進去看看吧！" },
+    { "selector": ".nav-links a[href='pages/experience.html']", "text": "來看看天野靜樹的經歷吧！" },
+    { "selector": ".nav-links a[href='pages/skills.html']", "text": "想知道天野靜樹會什麼技能嗎？" },
+    { "selector": ".nav-links a[href*='game-center']", "text": ["要去遊戲中心玩玩嗎？好多遊戲等你來挑戰！", "遊戲時間到囉～要去玩嗎？"] },
+    { "selector": ".nav-links a[href*='nagato-sakura-webos']", "text": "要試試 Web OS 嗎？很酷的哦！" },
+    { "selector": ".nav-links a[href*='music-player']", "text": ["想聽音樂嗎？去音樂播放器看看吧～", "來點音樂放鬆一下吧♪"] },
+    { "selector": ".nav-links a[href*='youtube']", "text": "去 YouTube 訂閱天野靜樹的頻道吧！" },
+    { "selector": ".nav-links a[href*='github']", "text": "去 GitHub 看看天野靜樹的開源專案吧！" },
+    { "selector": ".nav-links a[href*='discord']", "text": "來 Discord 一起聊天吧～" },
+    { "selector": ".nav-links a[href^='mailto:']", "text": "要寫封郵件給天野靜樹嗎？" },
+
+    { "selector": ".project-card[data-project='nagato-sakura']", "text": ["長門櫻計畫是天野靜樹最重要的專案哦！要來了解一下嗎？", "仿生電子狐娘女僕…聽起來就很厲害呢！"] },
+    { "selector": ".project-card[data-project='gitHub-repository']", "text": ["這裡是天野靜樹的 GitHub，集結了各種開源專案呢！", "想看看天野靜樹寫了什麼程式碼嗎？"] },
+    { "selector": ".project-card[data-project='live2d-portal']", "text": ["Live2D 教學平台！想學習 Live2D 技術嗎？", "想知道像我這樣的看板娘是怎麼做出來的嗎？"] },
+
+    { "selector": ".contact-section a[href^='mailto:']", "text": "要寫封郵件給天野靜樹嗎？他會盡快回覆的哦！" },
+    { "selector": ".contact-section a[href*='discord']", "text": "來 Discord 伺服器跟大家一起交流吧～" },
+    { "selector": ".contact-section a[href*='youtube']", "text": "去 YouTube 看看天野靜樹的影片吧！記得訂閱哦～" },
+    { "selector": ".contact-section a[href*='github']", "text": "去 GitHub 看看天野靜樹的程式碼和專案吧！" },
+
+    { "selector": ".avatar-container", "text": ["這就是天野靜樹本人哦！", "天野靜樹看起來就是這個模樣的呢～", "點一下窗簾試試看？會有驚喜哦！"] },
+    { "selector": ".profile-name", "text": "天野靜樹，是這個網站的主人哦！" },
+    { "selector": ".profile-stats", "text": ["哇，好多厲害的數據呢！", "天野靜樹的實力可不容小覷呢！"] },
+    { "selector": ".contact-link[data-email]", "text": "點一下可以複製郵件地址哦～" },
+
+    { "selector": ".settings-toggle", "text": "想調整一下系統設定嗎？" },
+    { "selector": ".menu-toggle", "text": "點這裡可以打開選單導航哦！" },
+    { "selector": "header > a", "text": ["歡迎來到天野靜樹的個人網站！", "點這裡可以回到首頁哦～"] },
+
+    { "selector": ".side-nav a[href='#hero']", "text": "回到最上面吧～" },
+    { "selector": ".side-nav a[href='#projects']", "text": "快速跳到專案區域！" },
+    { "selector": ".side-nav a[href='#contact']", "text": "快速跳到聯絡資訊！" },
+
+    { "selector": "#live2d", "text": ["你在看我嗎？", "嘿嘿，被你發現了～", "不要一直盯著我看啦！"] }
+  ],
   "click": [],
   "seasons": [],
   "time": [],

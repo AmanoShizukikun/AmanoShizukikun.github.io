@@ -109,7 +109,9 @@ const Core = {
                         const baseCount = Math.max(30, Math.floor((w * h) / 10000));
                         const count = (this._strength === 1) ? Math.ceil(baseCount / 2) : baseCount;
                         // 停掉其他 canvas 背景以避免衝突
-                        try { this.stopNetwork(); this.stopMagnet(); if (typeof this.stopStar === 'function') this.stopStar(); } catch (e) {}
+                        try { this.stopNetwork(); } catch (e) {}
+                        try { this.stopMagnet(); } catch (e) {}
+                        try { if (typeof this.stopStar === 'function') this.stopStar(); } catch (e) {}
                         // 隱藏 legacy DOM 粒子容器（保留以便套用樣式或備援）
                         try { container.style.display = 'none'; container.innerHTML = ''; } catch (e) {}
                         // 啟動 canvas-based 的 dom 粒子
@@ -128,8 +130,29 @@ const Core = {
                     if (container) try { container.style.display = 'none'; } catch (e) {}
                     this.startMagnet(opts);
                 } else if (style === 'star') {
-                    // 特殊背景 - 宇宙星圜
+                    // 宇宙星圖：canvas-based 深空星空 + 閃爍星 + 流星 + 星雲
                     this.startStar(opts);
+                } else if (style === 'bubble') {
+                    // 氣泡派對：空心圓環粒子隨機出現、淡入放大、隨機漂移、漸變色、淡出縮小
+                    if (container) try { container.style.display = 'none'; } catch (e) {}
+                    this.startBubble(opts);
+                    // 保留原本的漸層背景與網格線
+                    const grid = document.querySelector('.grid-overlay'); if (grid) grid.style.display = '';
+                } else if (style === 'circuit') {
+                    // 電路脈衝：PCB電路板流光
+                    this.startCircuit(opts);
+                } else if (style === 'sakura') {
+                    // 櫻花飄落：賽博風格櫻花
+                    this.startSakura(opts);
+                } else if (style === 'glitch') {
+                    // 故障雜訊：數位故障效果
+                    this.startGlitch(opts);
+                } else if (style === 'laser') {
+                    // 雷射禁地：交叉雷射光束
+                    this.startLaser(opts);
+                } else if (style === 'fleet') {
+                    // 宇宙戰艦：太空戰艦群穿梭
+                    this.startFleet(opts);
                 } else if (style === 'off') {
                     // nothing to show
                     if (container) try { container.style.display = 'none'; } catch (e) {}
@@ -200,7 +223,8 @@ const Core = {
                 const resize = () => {
                     const w = window.innerWidth;
                     const h = window.innerHeight;
-                    this.dpr = Math.max(1, window.devicePixelRatio || 1);
+                    // 限制 DPR 上限以減少高 DPI 螢幕的 GPU 負載
+                    this.dpr = Math.min(1.5, Math.max(1, window.devicePixelRatio || 1));
                     this.canvas.width = Math.round(w * this.dpr);
                     this.canvas.height = Math.round(h * this.dpr);
                     this.canvas.style.width = w + 'px';
@@ -364,7 +388,8 @@ const Core = {
                 const resize = () => {
                     const w = window.innerWidth;
                     const h = window.innerHeight;
-                    this.dpr = Math.max(1, window.devicePixelRatio || 1);
+                    // 限制 DPR 上限以減少高 DPI 螢幕的 GPU 負載
+                    this.dpr = Math.min(1.5, Math.max(1, window.devicePixelRatio || 1));
                     this.canvas.width = Math.round(w * this.dpr);
                     this.canvas.height = Math.round(h * this.dpr);
                     this.canvas.style.width = w + 'px';
@@ -600,7 +625,8 @@ const Core = {
                     const resize = () => {
                         const w = window.innerWidth;
                         const h = window.innerHeight;
-                        this.domDpr = Math.max(1, window.devicePixelRatio || 1);
+                        // 與初始化一致：限制 DPR 上限以減少高 DPI 螢幕的 GPU 負載
+                        this.domDpr = Math.min(1.5, Math.max(1, window.devicePixelRatio || 1));
                         this.domCanvas.width = Math.round(w * this.domDpr);
                         this.domCanvas.height = Math.round(h * this.domDpr);
                         this.domCanvas.style.width = w + 'px';
@@ -697,6 +723,8 @@ const Core = {
                                 this.domSkipFrames = Math.max(0, (this.domSkipFrames || 0) - 1);
                             }
 
+                            // 重置合成模式，避免狀態洩漏到其他繪製操作
+                            ctx.globalCompositeOperation = 'source-over';
                         } catch (e) {
                             console.warn('dom particle loop error', e);
                         }
@@ -713,7 +741,8 @@ const Core = {
             stopDomCanvas() {
                 if (this.domRaf) { cancelAnimationFrame(this.domRaf); this.domRaf = null; }
                 window.removeEventListener('resize', this._domResize);
-                if (this._mouseEnabled) window.removeEventListener('mousemove', this._domMouse);
+                // 無論目前 _mouseEnabled 狀態如何，都移除監聽器以避免洩漏
+                try { window.removeEventListener('mousemove', this._domMouse); } catch (e) {}
                 if (this._domVisibilityHandler) document.removeEventListener('visibilitychange', this._domVisibilityHandler);
                 if (this.domCanvas) { try { this.domCanvas.remove(); } catch (e) {} this.domCanvas = null; this.domCtx = null; }
                 // remove sprite caches
@@ -721,90 +750,2142 @@ const Core = {
                 this.domParticles = [];
             },
             startStar(opts = {}) {
-                // 創建或顯示宇宙星圜背景
+                // === 超酷宇宙星圖 v2 ===
+                // 多層視差星場 + 呼吸星雲 + 星座連線 + 能量脈衝 + 戲劇化流星 + 滑鼠視差
+                // 保留 cyber-bg 漸層 & grid-overlay 網格（canvas 以透明 + lighter 混合疊加）
                 if (this._starActive) return;
 
-                const grid = document.querySelector('.grid-overlay');
-                const particles = document.querySelector('.particles');
+                // 防禦性停止其他 canvas 動畫
+                try { this.stopNetwork(); } catch (e) {}
+                try { this.stopMagnet(); } catch (e) {}
+                try { if (typeof this.stopDomCanvas === 'function') this.stopDomCanvas(); } catch (e) {}
+                try { if (typeof this.stopBubble === 'function') this.stopBubble(); } catch (e) {}
 
-                // 隱藏僅粒子容器（保留網格以便與星圖同時顯示）
+                // 隱藏 DOM 粒子容器（避免與 canvas 衝突）
+                const particles = document.querySelector('.particles');
                 this._prevParticlesDisplay = particles ? particles.style.display : null;
                 if (particles) particles.style.display = 'none';
 
-                // 保存並套用 body 背景（讓整體看起來像 star.html）
-                this._prevBodyBg = document.body.style.background || '';
-                document.body.style.background = 'rgb(0,0,0)';
+                // ★ 保留 grid-overlay & cyber-bg — 不再隱藏
 
-                // 建立 star DOM
-                let starBg = document.getElementById('star-bg');
-                if (!starBg) {
-                    starBg = document.createElement('div');
-                    starBg.id = 'star-bg';
-                    starBg.className = 'star-bg';
-                    starBg.setAttribute('aria-hidden', 'true');
-                    starBg.innerHTML = `
-                        <div id="solar-system">
-                            <div id="sun"></div>
-                            <div id="mercury-wrapper"><div id="mercury" class="planet"></div></div>
-                            <div id="venus-wrapper"><div id="venus" class="planet"></div></div>
-                            <div id="earth-wrapper"><div id="earth" class="planet"></div></div>
-                            <div id="mars-wrapper"><div id="mars" class="planet"></div></div>
-                        </div>
-                    `;
-                    document.body.insertBefore(starBg, document.body.firstChild);
-                } else {
-                    starBg.style.display = '';
+                // 建立 canvas
+                if (!this.starCanvas) {
+                    this.starCanvas = document.createElement('canvas');
+                    this.starCanvas.id = 'bg-star-canvas';
+                    this.starCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-7;pointer-events:none;';
+                    this.starCanvas.setAttribute('aria-hidden', 'true');
+                    document.body.insertBefore(this.starCanvas, document.body.firstChild);
+                }
+                this.starCtx = this.starCanvas.getContext('2d');
+                this.starDpr = Math.min(1.5, Math.max(1, window.devicePixelRatio || 1));
+
+                // ═══════════════════════════════════════
+                // 色彩方案 — 與網站青/洋紅/紫主題一致
+                // ═══════════════════════════════════════
+                const starColors = [
+                    { r: 220, g: 235, b: 255 },  // 冰藍白
+                    { r: 255, g: 245, b: 240 },  // 暖白
+                    { r: 160, g: 200, b: 255 },  // 天青
+                    { r: 0, g: 212, b: 255 },    // 青 (primary-cyan)
+                    { r: 255, g: 0, b: 128 },    // 洋紅 (primary-magenta)
+                    { r: 139, g: 92, b: 246 },   // 紫 (accent-purple)
+                    { r: 255, g: 180, b: 220 },  // 淡粉
+                    { r: 100, g: 160, b: 255 },  // 電藍
+                    { r: 0, g: 255, b: 200 },    // 青綠
+                    { r: 255, g: 120, b: 60 },   // 琥珀（稀有暖星）
+                ];
+
+                // 星雲色彩 — 更鮮豔
+                const nebulaColors = [
+                    { r: 0, g: 80, b: 160, a: 0.06 },    // 深藍
+                    { r: 120, g: 0, b: 160, a: 0.05 },   // 紫
+                    { r: 0, g: 140, b: 130, a: 0.04 },   // 青
+                    { r: 180, g: 0, b: 80, a: 0.045 },   // 洋紅
+                    { r: 60, g: 0, b: 200, a: 0.035 },   // 靛藍
+                    { r: 0, g: 200, b: 180, a: 0.03 },   // 螢光青
+                ];
+
+                // ═══════════════════════════════════════
+                // 粒子工廠
+                // ═══════════════════════════════════════
+
+                // 3 層視差星星（深/中/淺）
+                const LAYERS = [
+                    { speed: 0.2, sizeMin: 0.2, sizeMax: 0.6, alphaMin: 0.1, alphaMax: 0.35, brightChance: 0.02 },
+                    { speed: 0.6, sizeMin: 0.4, sizeMax: 1.2, alphaMin: 0.2, alphaMax: 0.55, brightChance: 0.08 },
+                    { speed: 1.0, sizeMin: 0.8, sizeMax: 2.4, alphaMin: 0.5, alphaMax: 1.0, brightChance: 0.18 },
+                ];
+
+                const createStar = (w, h, layerIdx) => {
+                    const L = LAYERS[layerIdx];
+                    const color = starColors[Math.floor(Math.random() * starColors.length)];
+                    const isBright = Math.random() < L.brightChance;
+                    const size = isBright
+                        ? (L.sizeMax + Math.random() * 1.5)
+                        : (L.sizeMin + Math.random() * (L.sizeMax - L.sizeMin));
+                    return {
+                        x: Math.random() * w,
+                        y: Math.random() * h,
+                        size,
+                        baseAlpha: isBright
+                            ? (0.7 + Math.random() * 0.3)
+                            : (L.alphaMin + Math.random() * (L.alphaMax - L.alphaMin)),
+                        alpha: 0,
+                        color,
+                        twinkleSpeed: 0.2 + Math.random() * 2.5,
+                        twinklePhase: Math.random() * Math.PI * 2,
+                        isBright,
+                        layer: layerIdx,
+                        layerSpeed: L.speed,
+                        vx: (Math.random() - 0.5) * 0.02 * L.speed,
+                        vy: (Math.random() - 0.5) * 0.015 * L.speed,
+                    };
+                };
+
+                // 流星 — 更戲劇化
+                const createShootingStar = (w, h) => {
+                    const edge = Math.random();
+                    let x, y, angle;
+                    if (edge < 0.4) {
+                        x = Math.random() * w * 1.3 - w * 0.15;
+                        y = -20;
+                        angle = Math.PI * (0.12 + Math.random() * 0.4);
+                    } else if (edge < 0.8) {
+                        x = w + 20;
+                        y = Math.random() * h * 0.5;
+                        angle = Math.PI * (0.55 + Math.random() * 0.3);
+                    } else {
+                        x = -20;
+                        y = Math.random() * h * 0.3;
+                        angle = Math.PI * (0.05 + Math.random() * 0.2);
+                    }
+                    const speed = 6 + Math.random() * 12;
+                    const ci = Math.floor(Math.random() * 4);
+                    const color = starColors[ci];
+                    return {
+                        x, y, angle, speed,
+                        length: 60 + Math.random() * 120,
+                        life: 0,
+                        maxLife: 50 + Math.random() * 80,
+                        alpha: 0.7 + Math.random() * 0.3,
+                        thickness: 1.2 + Math.random() * 2,
+                        color,
+                        active: true,
+                        sparks: [],
+                        sparkTimer: 0,
+                    };
+                };
+
+                // 能量脈衝環
+                const createPulseRing = (w, h) => {
+                    const ci = Math.floor(Math.random() * 6);
+                    const c = [starColors[3], starColors[4], starColors[5], starColors[8], starColors[2], starColors[7]][ci];
+                    return {
+                        x: Math.random() * w,
+                        y: Math.random() * h,
+                        radius: 0,
+                        maxRadius: 80 + Math.random() * 200,
+                        speed: 0.6 + Math.random() * 1.5,
+                        alpha: 0.15 + Math.random() * 0.2,
+                        color: c,
+                        life: 0,
+                        active: true,
+                    };
+                };
+
+                // ═══════════════════════════════════════
+                // Sprite 預繪快取
+                // ═══════════════════════════════════════
+                const createStarSprite = (radius, color, glow) => {
+                    const s = Math.ceil(radius * 8);
+                    const sc = document.createElement('canvas');
+                    sc.width = s; sc.height = s;
+                    const sctx = sc.getContext('2d');
+                    const cx = s / 2, cy = s / 2;
+                    if (glow) {
+                        const grad = sctx.createRadialGradient(cx, cy, 0, cx, cy, s / 2);
+                        grad.addColorStop(0, `rgba(${color.r},${color.g},${color.b},1)`);
+                        grad.addColorStop(0.08, `rgba(${color.r},${color.g},${color.b},0.85)`);
+                        grad.addColorStop(0.25, `rgba(${color.r},${color.g},${color.b},0.35)`);
+                        grad.addColorStop(0.5, `rgba(${color.r},${color.g},${color.b},0.08)`);
+                        grad.addColorStop(1, `rgba(${color.r},${color.g},${color.b},0)`);
+                        sctx.fillStyle = grad;
+                        sctx.fillRect(0, 0, s, s);
+                    } else {
+                        const grad = sctx.createRadialGradient(cx, cy, 0, cx, cy, radius * 2);
+                        grad.addColorStop(0, `rgba(${color.r},${color.g},${color.b},1)`);
+                        grad.addColorStop(0.4, `rgba(${color.r},${color.g},${color.b},0.5)`);
+                        grad.addColorStop(1, `rgba(${color.r},${color.g},${color.b},0)`);
+                        sctx.fillStyle = grad;
+                        sctx.beginPath();
+                        sctx.arc(cx, cy, radius * 2, 0, Math.PI * 2);
+                        sctx.fill();
+                    }
+                    return sc;
+                };
+
+                this._starSprites = {};
+                starColors.forEach((c, i) => {
+                    this._starSprites['dot_' + i] = createStarSprite(2, c, false);
+                    this._starSprites['glow_' + i] = createStarSprite(8, c, true);
+                });
+
+                // 星雲 sprites — 更大、更鮮豔、會呼吸
+                const createNebulaSprite = (size) => {
+                    const nc = document.createElement('canvas');
+                    nc.width = size; nc.height = size;
+                    const nctx = nc.getContext('2d');
+                    const blobs = 4 + Math.floor(Math.random() * 4);
+                    for (let i = 0; i < blobs; i++) {
+                        const cx = size * (0.2 + Math.random() * 0.6);
+                        const cy = size * (0.2 + Math.random() * 0.6);
+                        const r = size * (0.15 + Math.random() * 0.35);
+                        const nc2 = nebulaColors[Math.floor(Math.random() * nebulaColors.length)];
+                        const grad = nctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+                        grad.addColorStop(0, `rgba(${nc2.r},${nc2.g},${nc2.b},${nc2.a * 2})`);
+                        grad.addColorStop(0.3, `rgba(${nc2.r},${nc2.g},${nc2.b},${nc2.a * 1.2})`);
+                        grad.addColorStop(0.6, `rgba(${nc2.r},${nc2.g},${nc2.b},${nc2.a * 0.4})`);
+                        grad.addColorStop(1, `rgba(${nc2.r},${nc2.g},${nc2.b},0)`);
+                        nctx.fillStyle = grad;
+                        nctx.fillRect(0, 0, size, size);
+                    }
+                    return nc;
+                };
+
+                this._nebulaSprites = [];
+                const nebulaCount = 4 + Math.floor(Math.random() * 3);
+                for (let i = 0; i < nebulaCount; i++) {
+                    const size = 300 + Math.random() * 500;
+                    this._nebulaSprites.push({
+                        sprite: createNebulaSprite(Math.round(size)),
+                        x: Math.random(),
+                        y: Math.random(),
+                        size,
+                        breathSpeed: 0.15 + Math.random() * 0.3,
+                        breathPhase: Math.random() * Math.PI * 2,
+                        driftVx: (Math.random() - 0.5) * 0.003,
+                        driftVy: (Math.random() - 0.5) * 0.002,
+                    });
                 }
 
-                // 隨機決定哪些行星會閃爍（earth 機率較高），並為其設置隨機持續時間與延遲，避免同步閃爍
-                (function assignPlanetBlinks() {
-                    try {
-                        const chances = { earth: 0.9, venus: 0.4, mercury: 0.3, mars: 0.2 };
-                        ['mercury','venus','earth','mars'].forEach(name => {
-                            const el = document.getElementById(name);
-                            if (!el) return;
-                            const chance = chances[name] || 0.3;
-                            if (Math.random() < chance) {
-                                el.classList.add('blink');
-                                // small chance to prefer slow or fast
-                                if (Math.random() < 0.25) el.classList.add('slow');
-                                else if (Math.random() < 0.25) el.classList.add('fast');
-                                // set random duration and delay to de-sync
-                                const dur = (1.2 + Math.random() * 2.4).toFixed(2) + 's'; // 1.2 - 3.6s
-                                const delay = (Math.random() * 3).toFixed(2) + 's';
-                                el.style.setProperty('--blink-duration', dur);
-                                el.style.setProperty('--blink-delay', delay);
-                            } else {
-                                el.classList.remove('blink','slow','fast');
-                                el.style.removeProperty('--blink-duration');
-                                el.style.removeProperty('--blink-delay');
-                            }
+                // ═══════════════════════════════════════
+                // 滑鼠視差追蹤
+                // ═══════════════════════════════════════
+                this._starMouse = { x: 0.5, y: 0.5, targetX: 0.5, targetY: 0.5 };
+                this._starMouseHandler = (e) => {
+                    this._starMouse.targetX = e.clientX / window.innerWidth;
+                    this._starMouse.targetY = e.clientY / window.innerHeight;
+                };
+                if (this._mouseEnabled !== false) {
+                    window.addEventListener('mousemove', this._starMouseHandler);
+                }
+
+                // ═══════════════════════════════════════
+                // 初始化 resize
+                // ═══════════════════════════════════════
+                const resize = () => {
+                    const w = window.innerWidth;
+                    const h = window.innerHeight;
+                    this.starDpr = Math.min(1.5, Math.max(1, window.devicePixelRatio || 1));
+                    this.starCanvas.width = Math.round(w * this.starDpr);
+                    this.starCanvas.height = Math.round(h * this.starDpr);
+                    this.starCanvas.style.width = w + 'px';
+                    this.starCanvas.style.height = h + 'px';
+                    this.starCtx.setTransform(this.starDpr, 0, 0, this.starDpr, 0, 0);
+
+                    // 每層星星數量
+                    const area = w * h;
+                    const layerCounts = [
+                        Math.min(300, Math.max(40, Math.floor(area / 5000))),   // 深層：多而暗
+                        Math.min(200, Math.max(30, Math.floor(area / 8000))),   // 中層
+                        Math.min(100, Math.max(15, Math.floor(area / 15000))),  // 近層：少而亮
+                    ];
+
+                    if (!this.starLayers) this.starLayers = [[], [], []];
+                    for (let li = 0; li < 3; li++) {
+                        const desired = layerCounts[li];
+                        while (this.starLayers[li].length < desired) this.starLayers[li].push(createStar(w, h, li));
+                        if (this.starLayers[li].length > desired) this.starLayers[li].length = desired;
+                        this.starLayers[li].forEach(s => {
+                            if (s.x > w) s.x = Math.random() * w;
+                            if (s.y > h) s.y = Math.random() * h;
                         });
-                    } catch (e) { console.warn('assignPlanetBlinks error', e); }
-                })();
+                    }
+                };
+
+                this._starResize = Core.debounce(resize, 120);
+                window.addEventListener('resize', this._starResize);
+
+                // 流星、脈衝環
+                this.shootingStars = [];
+                this._starShootTimer = 0;
+                this.pulseRings = [];
+                this._pulseTimer = 0;
+                this._starSpeedMult = (this._strength === 0) ? 0 : (this._strength === 1) ? 0.4 : 1;
+
+                // 可見性處理
+                this._starVisibility = () => {
+                    if (document.hidden) {
+                        if (this.starRaf) { cancelAnimationFrame(this.starRaf); this.starRaf = null; }
+                    } else {
+                        if (!this.starRaf && this._starActive) starTick();
+                    }
+                };
+                document.addEventListener('visibilitychange', this._starVisibility);
+
+                resize();
+
+                // ═══════════════════════════════════════
+                // 主渲染循環
+                // ═══════════════════════════════════════
+                const self = this;
+
+                const starTick = () => {
+                    const w = window.innerWidth;
+                    const h = window.innerHeight;
+                    const ctx = self.starCtx;
+                    const t = performance.now() / 1000;
+                    const spd = self._starSpeedMult;
+
+                    // 透明清除 — 讓 cyber-bg 漸層 + grid-overlay 透出
+                    ctx.clearRect(0, 0, w, h);
+
+                    // 使用 lighter 混合模式 — 星光疊加在背景上閃耀
+                    ctx.globalCompositeOperation = 'lighter';
+
+                    // 平滑滑鼠追蹤
+                    const mx = self._starMouse;
+                    mx.x += (mx.targetX - mx.x) * 0.03;
+                    mx.y += (mx.targetY - mx.y) * 0.03;
+                    const parallaxX = (mx.x - 0.5);
+                    const parallaxY = (mx.y - 0.5);
+
+                    // ─── 繪製星雲（呼吸動畫 + 緩慢漂移）───
+                    if (self._nebulaSprites) {
+                        self._nebulaSprites.forEach(n => {
+                            const breathScale = 1 + Math.sin(t * n.breathSpeed + n.breathPhase) * 0.08;
+                            const breathAlpha = 0.6 + Math.sin(t * n.breathSpeed * 0.7 + n.breathPhase) * 0.3;
+                            if (spd > 0) {
+                                n.x += n.driftVx * spd * 0.016;
+                                n.y += n.driftVy * spd * 0.016;
+                                if (n.x < -0.3) n.x = 1.3;
+                                if (n.x > 1.3) n.x = -0.3;
+                                if (n.y < -0.3) n.y = 1.3;
+                                if (n.y > 1.3) n.y = -0.3;
+                            }
+                            const drawSize = n.size * breathScale;
+                            const px = n.x * w - drawSize / 2 + parallaxX * 8;
+                            const py = n.y * h - drawSize / 2 + parallaxY * 8;
+                            ctx.globalAlpha = breathAlpha;
+                            ctx.drawImage(n.sprite, px, py, drawSize, drawSize);
+                        });
+                    }
+
+                    // ─── 繪製 3 層視差星場 ───
+                    const allBrightStars = [];
+                    for (let li = 0; li < 3; li++) {
+                        const layer = self.starLayers[li];
+                        if (!layer) continue;
+                        const pOffsetX = parallaxX * (li === 0 ? 4 : li === 1 ? 15 : 35);
+                        const pOffsetY = parallaxY * (li === 0 ? 3 : li === 1 ? 10 : 25);
+
+                        for (let i = 0; i < layer.length; i++) {
+                            const s = layer[i];
+
+                            // 閃爍
+                            const twinkle = Math.sin(t * s.twinkleSpeed + s.twinklePhase);
+                            const flickerRange = s.isBright ? 0.4 : 0.2;
+                            s.alpha = s.baseAlpha + twinkle * flickerRange;
+                            s.alpha = Math.max(0.03, Math.min(1, s.alpha));
+
+                            // 漂移
+                            if (spd > 0) {
+                                s.x += s.vx * spd;
+                                s.y += s.vy * spd;
+                                if (s.x < -10) s.x = w + 10;
+                                if (s.x > w + 10) s.x = -10;
+                                if (s.y < -10) s.y = h + 10;
+                                if (s.y > h + 10) s.y = -10;
+                            }
+
+                            const drawX = s.x + pOffsetX;
+                            const drawY = s.y + pOffsetY;
+
+                            ctx.globalAlpha = s.alpha;
+                            const ci = starColors.indexOf(s.color);
+                            const key = ci >= 0 ? ci : 0;
+
+                            if (s.isBright) {
+                                const sprite = self._starSprites['glow_' + key];
+                                if (sprite) {
+                                    const ds = s.size * 7;
+                                    ctx.drawImage(sprite, drawX - ds / 2, drawY - ds / 2, ds, ds);
+                                }
+                                // 十字星芒 — 旋轉動畫
+                                if (s.size > 1.8) {
+                                    const armLen = s.size * 5;
+                                    const rot = t * 0.15 + s.twinklePhase;
+                                    ctx.save();
+                                    ctx.translate(drawX, drawY);
+                                    ctx.rotate(rot);
+                                    ctx.strokeStyle = `rgba(${s.color.r},${s.color.g},${s.color.b},${(s.alpha * 0.35).toFixed(3)})`;
+                                    ctx.lineWidth = 0.6;
+                                    ctx.beginPath();
+                                    ctx.moveTo(-armLen, 0);
+                                    ctx.lineTo(armLen, 0);
+                                    ctx.moveTo(0, -armLen);
+                                    ctx.lineTo(0, armLen);
+                                    const armLen2 = armLen * 0.5;
+                                    ctx.moveTo(-armLen2, -armLen2);
+                                    ctx.lineTo(armLen2, armLen2);
+                                    ctx.moveTo(armLen2, -armLen2);
+                                    ctx.lineTo(-armLen2, armLen2);
+                                    ctx.stroke();
+                                    ctx.restore();
+                                }
+                                if (li >= 1) allBrightStars.push({ x: drawX, y: drawY, color: s.color, alpha: s.alpha });
+                            } else {
+                                const sprite = self._starSprites['dot_' + key];
+                                if (sprite) {
+                                    const ds = Math.max(1.5, s.size * 2.5);
+                                    ctx.drawImage(sprite, drawX - ds / 2, drawY - ds / 2, ds, ds);
+                                }
+                            }
+                        }
+                    }
+
+                    // ─── 星座連線（亮星之間的脈衝連線）───
+                    if (allBrightStars.length > 1) {
+                        const maxConnDist = 200;
+                        const maxConnDist2 = maxConnDist * maxConnDist;
+                        ctx.lineWidth = 0.6;
+                        for (let i = 0; i < allBrightStars.length; i++) {
+                            let connections = 0;
+                            const a = allBrightStars[i];
+                            for (let j = i + 1; j < allBrightStars.length && connections < 2; j++) {
+                                const b = allBrightStars[j];
+                                const dx = a.x - b.x;
+                                const dy = a.y - b.y;
+                                const d2 = dx * dx + dy * dy;
+                                if (d2 < maxConnDist2) {
+                                    const dist = Math.sqrt(d2);
+                                    const distAlpha = 1 - dist / maxConnDist;
+                                    const pulse = 0.5 + Math.sin(t * 1.5 + i * 0.7 + j * 0.3) * 0.5;
+                                    const lineAlpha = distAlpha * pulse * Math.min(a.alpha, b.alpha) * 0.25;
+                                    if (lineAlpha < 0.01) continue;
+                                    const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+                                    grad.addColorStop(0, `rgba(${a.color.r},${a.color.g},${a.color.b},${lineAlpha.toFixed(3)})`);
+                                    grad.addColorStop(1, `rgba(${b.color.r},${b.color.g},${b.color.b},${lineAlpha.toFixed(3)})`);
+                                    ctx.strokeStyle = grad;
+                                    ctx.beginPath();
+                                    ctx.moveTo(a.x, a.y);
+                                    ctx.lineTo(b.x, b.y);
+                                    ctx.stroke();
+                                    connections++;
+                                }
+                            }
+                        }
+                    }
+
+                    // ─── 能量脈衝環 ───
+                    if (spd > 0) {
+                        self._pulseTimer += spd;
+                        if (self._pulseTimer > 300 + Math.random() * 400) {
+                            self._pulseTimer = 0;
+                            if (self.pulseRings.length < 3) {
+                                self.pulseRings.push(createPulseRing(w, h));
+                            }
+                        }
+                    }
+                    for (let i = self.pulseRings.length - 1; i >= 0; i--) {
+                        const ring = self.pulseRings[i];
+                        if (!ring.active) { self.pulseRings.splice(i, 1); continue; }
+                        ring.radius += ring.speed * spd;
+                        if (ring.radius >= ring.maxRadius) { ring.active = false; continue; }
+                        const progress = ring.radius / ring.maxRadius;
+                        const ringAlpha = ring.alpha * (1 - progress) * (1 - progress);
+                        if (ringAlpha < 0.005) { ring.active = false; continue; }
+                        ctx.globalAlpha = ringAlpha;
+                        ctx.strokeStyle = `rgba(${ring.color.r},${ring.color.g},${ring.color.b},1)`;
+                        ctx.lineWidth = 1.5 * (1 - progress * 0.5);
+                        ctx.beginPath();
+                        ctx.arc(ring.x, ring.y, ring.radius, 0, Math.PI * 2);
+                        ctx.stroke();
+                        if (progress < 0.4) {
+                            const innerGrad = ctx.createRadialGradient(ring.x, ring.y, 0, ring.x, ring.y, ring.radius);
+                            innerGrad.addColorStop(0, `rgba(${ring.color.r},${ring.color.g},${ring.color.b},${(ringAlpha * 0.3).toFixed(3)})`);
+                            innerGrad.addColorStop(1, `rgba(${ring.color.r},${ring.color.g},${ring.color.b},0)`);
+                            ctx.fillStyle = innerGrad;
+                            ctx.beginPath();
+                            ctx.arc(ring.x, ring.y, ring.radius, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+
+                    // ─── 流星 + 火花尾跡 ───
+                    if (spd > 0) {
+                        self._starShootTimer += spd;
+                        if (self._starShootTimer > 120 + Math.random() * 200) {
+                            self._starShootTimer = 0;
+                            if (self.shootingStars.length < 4) {
+                                self.shootingStars.push(createShootingStar(w, h));
+                            }
+                        }
+                    }
+
+                    for (let i = self.shootingStars.length - 1; i >= 0; i--) {
+                        const m = self.shootingStars[i];
+                        if (!m.active) { self.shootingStars.splice(i, 1); continue; }
+                        m.life += spd;
+                        if (m.life >= m.maxLife) { m.active = false; continue; }
+                        const progress = m.life / m.maxLife;
+                        const fadeAlpha = progress < 0.1 ? (progress / 0.1) : (progress > 0.65 ? (1 - (progress - 0.65) / 0.35) : 1);
+                        const ma = m.alpha * fadeAlpha;
+
+                        const mvx = Math.cos(m.angle) * m.speed * spd;
+                        const mvy = Math.sin(m.angle) * m.speed * spd;
+                        m.x += mvx;
+                        m.y += mvy;
+
+                        // 產生火花
+                        m.sparkTimer += spd;
+                        if (m.sparkTimer > 2 && ma > 0.2) {
+                            m.sparkTimer = 0;
+                            m.sparks.push({
+                                x: m.x, y: m.y,
+                                vx: (Math.random() - 0.5) * 1.5,
+                                vy: (Math.random() - 0.5) * 1.5 + 0.3,
+                                life: 0,
+                                maxLife: 15 + Math.random() * 20,
+                                size: 0.5 + Math.random() * 1,
+                            });
+                        }
+                        if (m.sparks.length > 30) m.sparks.splice(0, m.sparks.length - 30);
+
+                        // 繪製火花
+                        for (let si = m.sparks.length - 1; si >= 0; si--) {
+                            const sp = m.sparks[si];
+                            sp.life += spd;
+                            if (sp.life >= sp.maxLife) { m.sparks.splice(si, 1); continue; }
+                            sp.x += sp.vx * spd * 0.5;
+                            sp.y += sp.vy * spd * 0.5;
+                            const sparkAlpha = ma * (1 - sp.life / sp.maxLife) * 0.5;
+                            ctx.globalAlpha = sparkAlpha;
+                            ctx.fillStyle = `rgba(${m.color.r},${m.color.g},${m.color.b},1)`;
+                            ctx.beginPath();
+                            ctx.arc(sp.x, sp.y, sp.size * (1 - sp.life / sp.maxLife), 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+
+                        // 流星主體 — 漸層尾巴
+                        const tailLen = m.length * (1 - progress * 0.3);
+                        const tailX = m.x - Math.cos(m.angle) * tailLen;
+                        const tailY = m.y - Math.sin(m.angle) * tailLen;
+
+                        const grad = ctx.createLinearGradient(m.x, m.y, tailX, tailY);
+                        grad.addColorStop(0, `rgba(255,255,255,${(ma).toFixed(3)})`);
+                        grad.addColorStop(0.1, `rgba(${m.color.r},${m.color.g},${m.color.b},${(ma * 0.9).toFixed(3)})`);
+                        grad.addColorStop(0.4, `rgba(${m.color.r},${m.color.g},${m.color.b},${(ma * 0.4).toFixed(3)})`);
+                        grad.addColorStop(1, `rgba(${m.color.r},${m.color.g},${m.color.b},0)`);
+
+                        ctx.globalAlpha = 1;
+                        ctx.strokeStyle = grad;
+                        ctx.lineWidth = m.thickness;
+                        ctx.lineCap = 'round';
+                        ctx.beginPath();
+                        ctx.moveTo(m.x, m.y);
+                        ctx.lineTo(tailX, tailY);
+                        ctx.stroke();
+
+                        // 頭部爆發光暈
+                        ctx.globalAlpha = ma;
+                        const headGrad = ctx.createRadialGradient(m.x, m.y, 0, m.x, m.y, m.thickness * 4);
+                        headGrad.addColorStop(0, `rgba(255,255,255,${(ma * 0.9).toFixed(3)})`);
+                        headGrad.addColorStop(0.3, `rgba(${m.color.r},${m.color.g},${m.color.b},${(ma * 0.5).toFixed(3)})`);
+                        headGrad.addColorStop(1, `rgba(${m.color.r},${m.color.g},${m.color.b},0)`);
+                        ctx.fillStyle = headGrad;
+                        ctx.beginPath();
+                        ctx.arc(m.x, m.y, m.thickness * 4, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        if (m.x < -150 || m.x > w + 150 || m.y > h + 150) m.active = false;
+                    }
+
+                    // 重置混合模式
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.globalAlpha = 1;
+
+                    self.starRaf = requestAnimationFrame(starTick);
+                };
 
                 this._starActive = true;
+                starTick();
             },
 
-
+            // 控制星圖速度：0=凍結、1=慢速、2=正常
+            _setStarSpeed(strength) {
+                if (strength === 0) this._starSpeedMult = 0;
+                else if (strength === 1) this._starSpeedMult = 0.4;
+                else this._starSpeedMult = 1;
+            },
 
             stopStar() {
-                const starBg = document.getElementById('star-bg');
-                if (starBg) {
-                    try { starBg.remove(); } catch (e) {}
-                }
-                // restore previous display (只恢復粒子容器，網格保持不變)
+                if (this.starRaf) { cancelAnimationFrame(this.starRaf); this.starRaf = null; }
+                if (this._starResize) { window.removeEventListener('resize', this._starResize); }
+                if (this._starVisibility) { document.removeEventListener('visibilitychange', this._starVisibility); }
+                try { window.removeEventListener('mousemove', this._starMouseHandler); } catch (e) {}
+                if (this.starCanvas) { try { this.starCanvas.remove(); } catch (e) {} this.starCanvas = null; this.starCtx = null; }
+                this._starSprites = null;
+                this._nebulaSprites = null;
+                this.starLayers = null;
+                this.shootingStars = null;
+                this.pulseRings = null;
+                this._starMouse = null;
+                // 恢復粒子容器可見性
                 const particles = document.querySelector('.particles');
                 if (particles) particles.style.display = (this._prevParticlesDisplay === null || this._prevParticlesDisplay === undefined) ? '' : this._prevParticlesDisplay;
-
-                // 恢復 body 背景
-                if (typeof this._prevBodyBg !== 'undefined') {
-                    document.body.style.background = this._prevBodyBg || '';
-                    delete this._prevBodyBg;
-                }
-
                 delete this._prevParticlesDisplay;
                 this._starActive = false;
+            },
+
+            // ============================================
+            // 電路脈衝 (circuit) — PCB 電路板流光
+            // ============================================
+            startCircuit(opts = {}) {
+                if (this._circuitActive) return;
+
+                // 防禦性停止其他背景
+                try { this.stopNetwork(); } catch (e) {}
+                try { this.stopMagnet(); } catch (e) {}
+                try { if (typeof this.stopDomCanvas === 'function') this.stopDomCanvas(); } catch (e) {}
+                try { if (typeof this.stopStar === 'function') this.stopStar(); } catch (e) {}
+                try { if (typeof this.stopBubble === 'function') this.stopBubble(); } catch (e) {}
+
+                const particles = document.querySelector('.particles');
+                this._prevParticlesDisplay_circuit = particles ? particles.style.display : null;
+                if (particles) particles.style.display = 'none';
+
+                if (!this.circuitCanvas) {
+                    this.circuitCanvas = document.createElement('canvas');
+                    this.circuitCanvas.id = 'bg-circuit-canvas';
+                    this.circuitCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-7;pointer-events:none;';
+                    this.circuitCanvas.setAttribute('aria-hidden', 'true');
+                    document.body.appendChild(this.circuitCanvas);
+                }
+                const canvas = this.circuitCanvas;
+                const ctx = canvas.getContext('2d');
+                this.circuitCtx = ctx;
+
+                const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+                let W, H;
+
+                // CSS 色彩
+                const css = getComputedStyle(document.documentElement);
+                const colors = [
+                    (css.getPropertyValue('--primary-cyan') || '#00d4ff').trim(),
+                    (css.getPropertyValue('--primary-magenta') || '#ff0080').trim(),
+                    (css.getPropertyValue('--accent-purple') || '#8b5cf6').trim(),
+                    '#00ff88', '#ffaa00'
+                ];
+
+                function hexToRGB(hex) {
+                    hex = hex.replace('#', '');
+                    if (hex.length === 3) hex = hex.split('').map(h => h + h).join('');
+                    const n = parseInt(hex, 16);
+                    return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+                }
+                const rgbColors = colors.map(hexToRGB);
+
+                // 速度倍率
+                this._circuitSpeedMult = (this._strength === 0) ? 0 : (this._strength === 1) ? 0.4 : 1;
+
+                // 電路節點與路徑
+                let nodes = [];
+                let paths = [];
+                let pulses = [];
+                let mouseRipples = [];
+
+                const GRID = 90; // 增大網格間距以降低密度
+
+                function generateCircuit() {
+                    nodes = [];
+                    paths = [];
+                    pulses = [];
+
+                    const cols = Math.ceil(W / GRID) + 1;
+                    const rows = Math.ceil(H / GRID) + 1;
+
+                    // 建立網格節點（較低密度 + 較大偏移讓佈局更自然）
+                    for (let r = 0; r < rows; r++) {
+                        for (let c = 0; c < cols; c++) {
+                            if (Math.random() < 0.22) { // 22% 機率放節點
+                                const x = c * GRID + (Math.random() - 0.5) * GRID * 0.6;
+                                const y = r * GRID + (Math.random() - 0.5) * GRID * 0.6;
+                                const color = rgbColors[Math.floor(Math.random() * rgbColors.length)];
+                                nodes.push({
+                                    x, y,
+                                    size: 1.5 + Math.random() * 2,
+                                    color,
+                                    pulse: Math.random() * Math.PI * 2,
+                                    pulseSpeed: 0.02 + Math.random() * 0.03
+                                });
+                            }
+                        }
+                    }
+
+                    // 連線：自然曲線路徑（貝茲曲線或斜線而非直角）
+                    for (let i = 0; i < nodes.length; i++) {
+                        const a = nodes[i];
+                        let connections = 0;
+                        for (let j = i + 1; j < nodes.length && connections < 2; j++) {
+                            const b = nodes[j];
+                            const dx = b.x - a.x;
+                            const dy = b.y - a.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            if (dist < GRID * 2.2 && dist > GRID * 0.4) {
+                                const color = rgbColors[Math.floor(Math.random() * rgbColors.length)];
+                                // 自然路徑：直線或帶控制點的貝茲曲線
+                                const style = Math.random();
+                                let cp1, cp2; // 控制點
+                                if (style < 0.35) {
+                                    // 直線（直接連接）
+                                    cp1 = cp2 = null;
+                                } else if (style < 0.7) {
+                                    // 單控制點二次曲線
+                                    const perpX = -dy * (0.15 + Math.random() * 0.25) * (Math.random() < 0.5 ? 1 : -1);
+                                    const perpY = dx * (0.15 + Math.random() * 0.25) * (Math.random() < 0.5 ? 1 : -1);
+                                    cp1 = { x: (a.x + b.x) / 2 + perpX, y: (a.y + b.y) / 2 + perpY };
+                                    cp2 = null;
+                                } else {
+                                    // 雙控制點三次曲線
+                                    const off1 = (Math.random() - 0.5) * dist * 0.3;
+                                    const off2 = (Math.random() - 0.5) * dist * 0.3;
+                                    cp1 = { x: a.x + dx * 0.33 + (-dy / dist) * off1, y: a.y + dy * 0.33 + (dx / dist) * off1 };
+                                    cp2 = { x: a.x + dx * 0.66 + (-dy / dist) * off2, y: a.y + dy * 0.66 + (dx / dist) * off2 };
+                                }
+                                paths.push({
+                                    ax: a.x, ay: a.y,
+                                    bx: b.x, by: b.y,
+                                    cp1, cp2,
+                                    color,
+                                    alpha: 0.08 + Math.random() * 0.12,
+                                    width: 0.5 + Math.random() * 1
+                                });
+                                connections++;
+                            }
+                        }
+                    }
+
+                    // 生成初始脈衝
+                    const maxInit = Math.min(paths.length, 20);
+                    for (let i = 0; i < maxInit; i++) {
+                        if (Math.random() < 0.5) {
+                            spawnPulse(i);
+                        }
+                    }
+                }
+
+                // 沿路徑取得位置（支援直線 / 二次 / 三次曲線）
+                function getPointOnPath(p, t) {
+                    if (!p.cp1) {
+                        // 直線
+                        return { x: p.ax + (p.bx - p.ax) * t, y: p.ay + (p.by - p.ay) * t };
+                    } else if (!p.cp2) {
+                        // 二次貝茲
+                        const s = 1 - t;
+                        return {
+                            x: s * s * p.ax + 2 * s * t * p.cp1.x + t * t * p.bx,
+                            y: s * s * p.ay + 2 * s * t * p.cp1.y + t * t * p.by
+                        };
+                    } else {
+                        // 三次貝茲
+                        const s = 1 - t;
+                        return {
+                            x: s * s * s * p.ax + 3 * s * s * t * p.cp1.x + 3 * s * t * t * p.cp2.x + t * t * t * p.bx,
+                            y: s * s * s * p.ay + 3 * s * s * t * p.cp1.y + 3 * s * t * t * p.cp2.y + t * t * t * p.by
+                        };
+                    }
+                }
+
+                function spawnPulse(pathIdx) {
+                    if (pathIdx >= paths.length) return;
+                    const p = paths[pathIdx];
+                    const color = p.color;
+                    pulses.push({
+                        pathIdx,
+                        progress: 0,
+                        speed: 0.003 + Math.random() * 0.007,
+                        size: 2 + Math.random() * 3,
+                        color,
+                        trail: []
+                    });
+                }
+
+                // 滑鼠互動
+                this._circuitMouse = { x: -1000, y: -1000 };
+                this._circuitMouseHandler = (e) => {
+                    this._circuitMouse.x = e.clientX * dpr;
+                    this._circuitMouse.y = e.clientY * dpr;
+                    // 生成波紋
+                    if (mouseRipples.length < 5) {
+                        mouseRipples.push({
+                            x: e.clientX * dpr,
+                            y: e.clientY * dpr,
+                            radius: 0,
+                            maxRadius: 80 + Math.random() * 60,
+                            alpha: 0.6,
+                            color: rgbColors[Math.floor(Math.random() * rgbColors.length)]
+                        });
+                    }
+                };
+                if (this._mouseEnabled !== false) {
+                    window.addEventListener('mousemove', this._circuitMouseHandler);
+                }
+
+                const resize = () => {
+                    W = Math.round(window.innerWidth * dpr);
+                    H = Math.round(window.innerHeight * dpr);
+                    canvas.width = W;
+                    canvas.height = H;
+                    generateCircuit();
+                };
+
+                this._circuitResize = resize;
+                window.addEventListener('resize', resize);
+
+                this._circuitVisibility = () => {
+                    if (document.hidden) {
+                        if (this.circuitRaf) { cancelAnimationFrame(this.circuitRaf); this.circuitRaf = null; }
+                    } else if (!this.circuitRaf && this._circuitActive) {
+                        circuitTick();
+                    }
+                };
+                document.addEventListener('visibilitychange', this._circuitVisibility);
+
+                // 主動畫循環
+                const circuitTick = () => {
+                    this.circuitRaf = requestAnimationFrame(circuitTick);
+                    const sm = this._circuitSpeedMult;
+                    if (sm === 0) return; // 凍結
+
+                    ctx.clearRect(0, 0, W, H);
+                    ctx.globalCompositeOperation = 'lighter';
+
+                    // 繪製路徑（自然曲線電路線）— 批量繪製減少狀態切換
+                    for (const path of paths) {
+                        const c = path.color;
+                        ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},${path.alpha})`;
+                        ctx.lineWidth = path.width;
+                        ctx.beginPath();
+                        ctx.moveTo(path.ax, path.ay);
+                        if (!path.cp1) {
+                            ctx.lineTo(path.bx, path.by);
+                        } else if (!path.cp2) {
+                            ctx.quadraticCurveTo(path.cp1.x, path.cp1.y, path.bx, path.by);
+                        } else {
+                            ctx.bezierCurveTo(path.cp1.x, path.cp1.y, path.cp2.x, path.cp2.y, path.bx, path.by);
+                        }
+                        ctx.stroke();
+                    }
+
+                    // 繪製節點（無 shadowBlur，改用多層圓圈模擬光暈提升效能）
+                    for (const node of nodes) {
+                        node.pulse += node.pulseSpeed * sm;
+                        const glow = 0.3 + 0.4 * Math.sin(node.pulse);
+                        const c = node.color;
+
+                        // 外層光暈（大半透明圓）
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${glow * 0.15})`;
+                        ctx.beginPath();
+                        ctx.arc(node.x, node.y, node.size * 3, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        // 核心亮點
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${glow})`;
+                        ctx.beginPath();
+                        ctx.arc(node.x, node.y, node.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    // 更新與繪製脈衝
+                    for (let i = pulses.length - 1; i >= 0; i--) {
+                        const pulse = pulses[i];
+                        pulse.progress += pulse.speed * sm;
+
+                        if (pulse.progress >= 1) {
+                            pulses.splice(i, 1);
+                            if (paths.length > 0 && Math.random() < 0.7) {
+                                spawnPulse(Math.floor(Math.random() * paths.length));
+                            }
+                            continue;
+                        }
+
+                        const path = paths[pulse.pathIdx];
+                        if (!path) { pulses.splice(i, 1); continue; }
+
+                        // 計算脈衝在曲線路徑上的位置
+                        const pt = getPointOnPath(path, pulse.progress);
+                        const px = pt.x, py = pt.y;
+
+                        // 記錄軌跡
+                        pulse.trail.push({ x: px, y: py });
+                        if (pulse.trail.length > 8) pulse.trail.shift();
+
+                        const c = pulse.color;
+
+                        // 用單一漸層路徑繪製軌跡（減少 stroke 次數）
+                        if (pulse.trail.length > 1) {
+                            ctx.beginPath();
+                            ctx.moveTo(pulse.trail[0].x, pulse.trail[0].y);
+                            for (let t2 = 1; t2 < pulse.trail.length; t2++) {
+                                ctx.lineTo(pulse.trail[t2].x, pulse.trail[t2].y);
+                            }
+                            ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},0.35)`;
+                            ctx.lineWidth = pulse.size * 0.8;
+                            ctx.stroke();
+                        }
+
+                        // 脈衝頭（無 shadowBlur，改用雙層圓）
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},0.3)`;
+                        ctx.beginPath();
+                        ctx.arc(px, py, pulse.size * 2.5, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},0.9)`;
+                        ctx.beginPath();
+                        ctx.arc(px, py, pulse.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    // 控制脈衝數量
+                    const desiredPulses = (this._strength === 1) ? 10 : 25;
+                    if (pulses.length < desiredPulses && paths.length > 0 && Math.random() < 0.05 * sm) {
+                        spawnPulse(Math.floor(Math.random() * paths.length));
+                    }
+
+                    // 滑鼠互動：鄰近節點增亮（無 shadowBlur）
+                    const mx = this._circuitMouse.x;
+                    const my = this._circuitMouse.y;
+                    for (const node of nodes) {
+                        const dx2 = node.x - mx;
+                        const dy2 = node.y - my;
+                        const md = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+                        if (md < 120) {
+                            const bright = (1 - md / 120) * 0.7;
+                            const c = node.color;
+                            ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${bright * 0.2})`;
+                            ctx.beginPath();
+                            ctx.arc(node.x, node.y, node.size * 4, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${bright})`;
+                            ctx.beginPath();
+                            ctx.arc(node.x, node.y, node.size * 1.8, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+
+                    // 波紋效果
+                    for (let i = mouseRipples.length - 1; i >= 0; i--) {
+                        const rp = mouseRipples[i];
+                        rp.radius += 1.5 * sm;
+                        rp.alpha -= 0.008 * sm;
+                        if (rp.alpha <= 0 || rp.radius >= rp.maxRadius) {
+                            mouseRipples.splice(i, 1); continue;
+                        }
+                        const c = rp.color;
+                        ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},${rp.alpha})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.arc(rp.x, rp.y, rp.radius, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                };
+
+                resize();
+                this._circuitActive = true;
+                circuitTick();
+            },
+
+            _setCircuitSpeed(strength) {
+                if (strength === 0) this._circuitSpeedMult = 0;
+                else if (strength === 1) this._circuitSpeedMult = 0.4;
+                else this._circuitSpeedMult = 1;
+            },
+
+            stopCircuit() {
+                if (this.circuitRaf) { cancelAnimationFrame(this.circuitRaf); this.circuitRaf = null; }
+                if (this._circuitResize) window.removeEventListener('resize', this._circuitResize);
+                if (this._circuitVisibility) document.removeEventListener('visibilitychange', this._circuitVisibility);
+                try { window.removeEventListener('mousemove', this._circuitMouseHandler); } catch (e) {}
+                if (this.circuitCanvas) { try { this.circuitCanvas.remove(); } catch (e) {} this.circuitCanvas = null; this.circuitCtx = null; }
+                this._circuitMouse = null;
+                const particles = document.querySelector('.particles');
+                if (particles) particles.style.display = (this._prevParticlesDisplay_circuit === null || this._prevParticlesDisplay_circuit === undefined) ? '' : this._prevParticlesDisplay_circuit;
+                delete this._prevParticlesDisplay_circuit;
+                this._circuitActive = false;
+            },
+
+            // ============================================
+            // 櫻花飄落 (sakura) — 賽博龐克風格櫻花
+            // ============================================
+            startSakura(opts = {}) {
+                if (this._sakuraActive) return;
+
+                try { this.stopNetwork(); } catch (e) {}
+                try { this.stopMagnet(); } catch (e) {}
+                try { if (typeof this.stopDomCanvas === 'function') this.stopDomCanvas(); } catch (e) {}
+                try { if (typeof this.stopStar === 'function') this.stopStar(); } catch (e) {}
+                try { if (typeof this.stopBubble === 'function') this.stopBubble(); } catch (e) {}
+                try { if (typeof this.stopCircuit === 'function') this.stopCircuit(); } catch (e) {}
+
+                const particlesEl = document.querySelector('.particles');
+                this._prevParticlesDisplay_sakura = particlesEl ? particlesEl.style.display : null;
+                if (particlesEl) particlesEl.style.display = 'none';
+
+                if (!this.sakuraCanvas) {
+                    this.sakuraCanvas = document.createElement('canvas');
+                    this.sakuraCanvas.id = 'bg-sakura-canvas';
+                    this.sakuraCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-7;pointer-events:none;';
+                    this.sakuraCanvas.setAttribute('aria-hidden', 'true');
+                    document.body.appendChild(this.sakuraCanvas);
+                }
+                const canvas = this.sakuraCanvas;
+                const ctx = canvas.getContext('2d');
+                this.sakuraCtx = ctx;
+
+                const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+                let W, H;
+
+                // 賽博櫻花色彩 — 純粉色系
+                const petalColors = [
+                    { r: 255, g: 120, b: 180 },  // 粉紅
+                    { r: 255, g: 80, b: 150 },   // 深粉
+                    { r: 255, g: 160, b: 200 },  // 淺粉
+                    { r: 255, g: 140, b: 190 },  // 中粉
+                    { r: 255, g: 200, b: 220 },  // 淡粉
+                    { r: 255, g: 100, b: 170 },  // 櫻粉
+                    { r: 240, g: 130, b: 190 }   // 柔粉
+                ];
+
+                this._sakuraSpeedMult = (this._strength === 0) ? 0 : (this._strength === 1) ? 0.4 : 1;
+
+                let petals = [];
+                let glowParticles = [];
+
+                const createPetal = (forceTop) => {
+                    const color = petalColors[Math.floor(Math.random() * petalColors.length)];
+                    const size = 4 + Math.random() * 10;
+                    return {
+                        x: Math.random() * W,
+                        y: forceTop ? -size * 2 : Math.random() * H,
+                        size,
+                        color,
+                        rotation: Math.random() * Math.PI * 2,
+                        rotSpeed: (Math.random() - 0.5) * 0.04,
+                        fallSpeed: 0.3 + Math.random() * 0.8,
+                        swayAmp: 30 + Math.random() * 50,
+                        swaySpeed: 0.005 + Math.random() * 0.01,
+                        swayPhase: Math.random() * Math.PI * 2,
+                        alpha: 0.4 + Math.random() * 0.5,
+                        type: Math.random() < 0.7 ? 'petal' : 'leaf', // 花瓣或葉片
+                        flipPhase: Math.random() * Math.PI * 2,
+                        flipSpeed: 0.02 + Math.random() * 0.03
+                    };
+                };
+
+                const createGlow = () => ({
+                    x: Math.random() * W,
+                    y: Math.random() * H,
+                    size: 1 + Math.random() * 2,
+                    color: petalColors[Math.floor(Math.random() * petalColors.length)],
+                    alpha: 0.2 + Math.random() * 0.4,
+                    pulse: Math.random() * Math.PI * 2,
+                    pulseSpeed: 0.02 + Math.random() * 0.04,
+                    drift: { x: (Math.random() - 0.5) * 0.2, y: 0.1 + Math.random() * 0.3 }
+                });
+
+                // 滑鼠：靠近花瓣會被吹散
+                this._sakuraMouse = { x: -1000, y: -1000 };
+                this._sakuraMouseHandler = (e) => {
+                    this._sakuraMouse.x = e.clientX * dpr;
+                    this._sakuraMouse.y = e.clientY * dpr;
+                };
+                if (this._mouseEnabled !== false) {
+                    window.addEventListener('mousemove', this._sakuraMouseHandler);
+                }
+
+                const resize = () => {
+                    W = Math.round(window.innerWidth * dpr);
+                    H = Math.round(window.innerHeight * dpr);
+                    canvas.width = W;
+                    canvas.height = H;
+                    const baseCount = Math.max(25, Math.floor((W * H) / 22000));
+                    const count = (this._strength === 1) ? Math.ceil(baseCount * 0.5) : baseCount;
+                    petals = [];
+                    for (let i = 0; i < count; i++) petals.push(createPetal(false));
+                    glowParticles = [];
+                    for (let i = 0; i < Math.ceil(count * 0.35); i++) glowParticles.push(createGlow());
+                };
+
+                this._sakuraResize = resize;
+                window.addEventListener('resize', resize);
+
+                this._sakuraVisibility = () => {
+                    if (document.hidden) {
+                        if (this.sakuraRaf) { cancelAnimationFrame(this.sakuraRaf); this.sakuraRaf = null; }
+                    } else if (!this.sakuraRaf && this._sakuraActive) {
+                        sakuraTick();
+                    }
+                };
+                document.addEventListener('visibilitychange', this._sakuraVisibility);
+
+                // 繪製花瓣（心形+葉形）— 無 shadowBlur，改用多層模擬光暈
+                const drawPetal = (p) => {
+                    const c = p.color;
+                    const flipScale = Math.cos(p.flipPhase); // 3D 翻轉效果
+                    const absFlip = Math.abs(flipScale);
+                    if (absFlip < 0.05) return; // 幾乎垂直時跳過繪製
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rotation);
+                    ctx.scale(flipScale, 1);
+
+                    if (p.type === 'petal') {
+                        const s = p.size;
+                        // 外層光暈（大半透明版本代替 shadowBlur）
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${p.alpha * 0.12 * absFlip})`;
+                        ctx.beginPath();
+                        ctx.moveTo(0, -s * 1.6);
+                        ctx.bezierCurveTo(s * 1.3, -s * 1.3, s * 1.6, s * 0.5, 0, s * 1.6);
+                        ctx.bezierCurveTo(-s * 1.6, s * 0.5, -s * 1.3, -s * 1.3, 0, -s * 1.6);
+                        ctx.fill();
+                        // 核心花瓣
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${p.alpha * absFlip})`;
+                        ctx.beginPath();
+                        ctx.moveTo(0, -s);
+                        ctx.bezierCurveTo(s * 0.8, -s * 0.8, s, s * 0.3, 0, s);
+                        ctx.bezierCurveTo(-s, s * 0.3, -s * 0.8, -s * 0.8, 0, -s);
+                        ctx.fill();
+                    } else {
+                        const s = p.size * 0.6;
+                        // 外層光暈
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${p.alpha * 0.1 * absFlip})`;
+                        ctx.beginPath();
+                        ctx.ellipse(0, 0, s * 1.8, s * 0.8, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        // 核心葉片
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${p.alpha * 0.7 * absFlip})`;
+                        ctx.beginPath();
+                        ctx.ellipse(0, 0, s, s * 0.4, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                };
+
+                const sakuraTick = () => {
+                    this.sakuraRaf = requestAnimationFrame(sakuraTick);
+                    const sm = this._sakuraSpeedMult;
+                    if (sm === 0) return;
+
+                    ctx.clearRect(0, 0, W, H);
+                    ctx.globalCompositeOperation = 'lighter';
+
+                    const mx = this._sakuraMouse.x;
+                    const my = this._sakuraMouse.y;
+
+                    // 更新花瓣
+                    for (let i = 0; i < petals.length; i++) {
+                        const p = petals[i];
+                        p.swayPhase += p.swaySpeed * sm;
+                        p.y += p.fallSpeed * sm;
+                        p.x += Math.sin(p.swayPhase) * p.swayAmp * 0.01 * sm;
+                        p.rotation += p.rotSpeed * sm;
+                        p.flipPhase += p.flipSpeed * sm;
+
+                        // 滑鼠吹散
+                        if (this._mouseEnabled !== false) {
+                            const dx = p.x - mx;
+                            const dy = p.y - my;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            if (dist < 100 && dist > 0) {
+                                const force = (1 - dist / 100) * 3 * sm;
+                                p.x += (dx / dist) * force;
+                                p.y += (dy / dist) * force * 0.5;
+                                p.rotSpeed += (Math.random() - 0.5) * 0.01;
+                            }
+                        }
+
+                        // 超出畫面回收
+                        if (p.y > H + p.size * 2) {
+                            petals[i] = createPetal(true);
+                            petals[i].x = Math.random() * W;
+                        }
+                        if (p.x < -50) p.x = W + 50;
+                        if (p.x > W + 50) p.x = -50;
+
+                        drawPetal(p);
+                    }
+
+                    // 發光微粒（花粉般的光點）— 無 shadowBlur，多層圓模擬
+                    for (let i = 0; i < glowParticles.length; i++) {
+                        const g = glowParticles[i];
+                        g.pulse += g.pulseSpeed * sm;
+                        g.x += g.drift.x * sm;
+                        g.y += g.drift.y * sm;
+
+                        if (g.y > H + 10) {
+                            glowParticles[i] = createGlow();
+                            glowParticles[i].y = -5;
+                        }
+                        if (g.x < -10 || g.x > W + 10) {
+                            glowParticles[i] = createGlow();
+                        }
+
+                        const a = g.alpha * (0.5 + 0.5 * Math.sin(g.pulse));
+                        const c = g.color;
+                        // 外層光暈
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${a * 0.15})`;
+                        ctx.beginPath();
+                        ctx.arc(g.x, g.y, g.size * 4, 0, Math.PI * 2);
+                        ctx.fill();
+                        // 核心亮點
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${a})`;
+                        ctx.beginPath();
+                        ctx.arc(g.x, g.y, g.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                };
+
+                resize();
+                this._sakuraActive = true;
+                sakuraTick();
+            },
+
+            _setSakuraSpeed(strength) {
+                if (strength === 0) this._sakuraSpeedMult = 0;
+                else if (strength === 1) this._sakuraSpeedMult = 0.4;
+                else this._sakuraSpeedMult = 1;
+            },
+
+            stopSakura() {
+                if (this.sakuraRaf) { cancelAnimationFrame(this.sakuraRaf); this.sakuraRaf = null; }
+                if (this._sakuraResize) window.removeEventListener('resize', this._sakuraResize);
+                if (this._sakuraVisibility) document.removeEventListener('visibilitychange', this._sakuraVisibility);
+                try { window.removeEventListener('mousemove', this._sakuraMouseHandler); } catch (e) {}
+                if (this.sakuraCanvas) { try { this.sakuraCanvas.remove(); } catch (e) {} this.sakuraCanvas = null; this.sakuraCtx = null; }
+                this._sakuraMouse = null;
+                const particles = document.querySelector('.particles');
+                if (particles) particles.style.display = (this._prevParticlesDisplay_sakura === null || this._prevParticlesDisplay_sakura === undefined) ? '' : this._prevParticlesDisplay_sakura;
+                delete this._prevParticlesDisplay_sakura;
+                this._sakuraActive = false;
+            },
+
+            // ============================================
+            // 故障雜訊 (glitch) — 數位故障/掃描線效果
+            // ============================================
+            startGlitch(opts = {}) {
+                if (this._glitchActive) return;
+
+                try { this.stopNetwork(); } catch (e) {}
+                try { this.stopMagnet(); } catch (e) {}
+                try { if (typeof this.stopDomCanvas === 'function') this.stopDomCanvas(); } catch (e) {}
+                try { if (typeof this.stopStar === 'function') this.stopStar(); } catch (e) {}
+                try { if (typeof this.stopBubble === 'function') this.stopBubble(); } catch (e) {}
+                try { if (typeof this.stopCircuit === 'function') this.stopCircuit(); } catch (e) {}
+                try { if (typeof this.stopSakura === 'function') this.stopSakura(); } catch (e) {}
+
+                const particlesEl = document.querySelector('.particles');
+                this._prevParticlesDisplay_glitch = particlesEl ? particlesEl.style.display : null;
+                if (particlesEl) particlesEl.style.display = 'none';
+
+                if (!this.glitchCanvas) {
+                    this.glitchCanvas = document.createElement('canvas');
+                    this.glitchCanvas.id = 'bg-glitch-canvas';
+                    this.glitchCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-7;pointer-events:none;';
+                    this.glitchCanvas.setAttribute('aria-hidden', 'true');
+                    document.body.appendChild(this.glitchCanvas);
+                }
+                const canvas = this.glitchCanvas;
+                const ctx = canvas.getContext('2d');
+                this.glitchCtx = ctx;
+
+                const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+                let W, H;
+
+                const css = getComputedStyle(document.documentElement);
+                const glitchColors = [
+                    { r: 0, g: 212, b: 255 },     // cyan
+                    { r: 255, g: 0, b: 128 },      // magenta
+                    { r: 139, g: 92, b: 246 },     // purple
+                    { r: 0, g: 255, b: 136 },      // green
+                    { r: 255, g: 255, b: 255 }     // white (static)
+                ];
+
+                this._glitchSpeedMult = (this._strength === 0) ? 0 : (this._strength === 1) ? 0.4 : 1;
+
+                let scanlines = [];
+                let glitchBlocks = [];
+                let dataStreams = [];
+                let hexCodes = [];
+                let frame = 0;
+
+                // 故障區塊
+                const createGlitchBlock = () => {
+                    const color = glitchColors[Math.floor(Math.random() * glitchColors.length)];
+                    return {
+                        x: Math.random() * W,
+                        y: Math.random() * H,
+                        w: 20 + Math.random() * 200,
+                        h: 2 + Math.random() * 15,
+                        color,
+                        alpha: 0.05 + Math.random() * 0.15,
+                        life: 0.5 + Math.random() * 1.5,
+                        age: 0,
+                        offsetX: (Math.random() - 0.5) * 30,
+                        flickerRate: 0.1 + Math.random() * 0.3
+                    };
+                };
+
+                // 數據流（垂直下落的字符）
+                const createDataStream = () => {
+                    const color = glitchColors[Math.floor(Math.random() * 3)]; // cyan/magenta/purple
+                    return {
+                        x: Math.floor(Math.random() * (W / 14)) * 14,
+                        y: -Math.random() * H,
+                        speed: 1 + Math.random() * 3,
+                        chars: [],
+                        charCount: 5 + Math.floor(Math.random() * 15),
+                        color,
+                        alpha: 0.15 + Math.random() * 0.3,
+                        charSize: 10 + Math.random() * 4
+                    };
+                };
+
+                // HEX 碼
+                const hexChars = '0123456789ABCDEF';
+                const createHexCode = () => {
+                    const color = glitchColors[Math.floor(Math.random() * glitchColors.length)];
+                    let code = '0x';
+                    for (let i = 0; i < 4; i++) code += hexChars[Math.floor(Math.random() * 16)];
+                    return {
+                        x: Math.random() * W,
+                        y: Math.random() * H,
+                        code,
+                        color,
+                        alpha: 0,
+                        maxAlpha: 0.15 + Math.random() * 0.25,
+                        fadeIn: true,
+                        life: 1 + Math.random() * 3,
+                        age: 0,
+                        size: 8 + Math.random() * 4
+                    };
+                };
+
+                // 滑鼠：點擊製造故障區域
+                this._glitchMouse = { x: -1000, y: -1000, active: false };
+                this._glitchMouseHandler = (e) => {
+                    this._glitchMouse.x = e.clientX * dpr;
+                    this._glitchMouse.y = e.clientY * dpr;
+                    this._glitchMouse.active = true;
+                    // 在點擊位置附近製造故障
+                    if (glitchBlocks.length < 30) {
+                        for (let i = 0; i < 5; i++) {
+                            const b = createGlitchBlock();
+                            b.x = e.clientX * dpr + (Math.random() - 0.5) * 150;
+                            b.y = e.clientY * dpr + (Math.random() - 0.5) * 80;
+                            b.alpha *= 2;
+                            glitchBlocks.push(b);
+                        }
+                    }
+                };
+                if (this._mouseEnabled !== false) {
+                    window.addEventListener('click', this._glitchMouseHandler);
+                }
+
+                const resize = () => {
+                    W = Math.round(window.innerWidth * dpr);
+                    H = Math.round(window.innerHeight * dpr);
+                    canvas.width = W;
+                    canvas.height = H;
+                    glitchBlocks = [];
+                    dataStreams = [];
+                    const streamCount = (this._strength === 1) ? 8 : 15;
+                    for (let i = 0; i < streamCount; i++) dataStreams.push(createDataStream());
+                    hexCodes = [];
+                    for (let i = 0; i < 12; i++) hexCodes.push(createHexCode());
+                };
+
+                this._glitchResize = resize;
+                window.addEventListener('resize', resize);
+
+                this._glitchVisibility = () => {
+                    if (document.hidden) {
+                        if (this.glitchRaf) { cancelAnimationFrame(this.glitchRaf); this.glitchRaf = null; }
+                    } else if (!this.glitchRaf && this._glitchActive) {
+                        glitchTick();
+                    }
+                };
+                document.addEventListener('visibilitychange', this._glitchVisibility);
+
+                const glitchTick = () => {
+                    this.glitchRaf = requestAnimationFrame(glitchTick);
+                    const sm = this._glitchSpeedMult;
+                    if (sm === 0) return;
+                    frame++;
+
+                    ctx.clearRect(0, 0, W, H);
+                    ctx.globalCompositeOperation = 'lighter';
+
+                    // 故障區塊
+                    for (let i = glitchBlocks.length - 1; i >= 0; i--) {
+                        const b = glitchBlocks[i];
+                        b.age += 0.016 * sm;
+                        if (b.age >= b.life) { glitchBlocks.splice(i, 1); continue; }
+                        const flicker = Math.sin(b.age * b.flickerRate * 60) > 0;
+                        if (!flicker) continue;
+                        const c = b.color;
+                        const fadeAlpha = b.alpha * (1 - b.age / b.life);
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${fadeAlpha})`;
+                        ctx.fillRect(b.x + b.offsetX * Math.sin(b.age * 5), b.y, b.w, b.h);
+                    }
+
+                    // 隨機產生故障區塊
+                    if (glitchBlocks.length < 15 && Math.random() < 0.03 * sm) {
+                        glitchBlocks.push(createGlitchBlock());
+                    }
+
+                    // 數據流
+                    ctx.font = '12px monospace';
+                    for (let i = 0; i < dataStreams.length; i++) {
+                        const ds = dataStreams[i];
+                        ds.y += ds.speed * sm;
+                        const c = ds.color;
+                        for (let j = 0; j < ds.charCount; j++) {
+                            const charY = ds.y - j * ds.charSize;
+                            if (charY < -20 || charY > H + 20) continue;
+                            const a = ds.alpha * (1 - j / ds.charCount);
+                            ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${a})`;
+                            // 隨機字元（數字+符號）
+                            const ch = (Math.random() < 0.1) ?
+                                String.fromCharCode(0x30A0 + Math.floor(Math.random() * 96)) : // 片假名
+                                hexChars[Math.floor(Math.random() * 16)];
+                            ctx.fillText(ch, ds.x, charY);
+                        }
+                        if (ds.y - ds.charCount * ds.charSize > H) {
+                            dataStreams[i] = createDataStream();
+                        }
+                    }
+
+                    // HEX 碼浮動顯示
+                    ctx.font = '10px monospace';
+                    for (let i = 0; i < hexCodes.length; i++) {
+                        const h = hexCodes[i];
+                        h.age += 0.016 * sm;
+                        if (h.fadeIn && h.alpha < h.maxAlpha) {
+                            h.alpha += 0.005 * sm;
+                            if (h.alpha >= h.maxAlpha) h.fadeIn = false;
+                        }
+                        if (h.age >= h.life) {
+                            h.alpha -= 0.01 * sm;
+                            if (h.alpha <= 0) { hexCodes[i] = createHexCode(); continue; }
+                        }
+                        // 隨機更新碼值
+                        if (Math.random() < 0.02 * sm) {
+                            h.code = '0x';
+                            for (let k = 0; k < 4; k++) h.code += hexChars[Math.floor(Math.random() * 16)];
+                        }
+                        const c = h.color;
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${h.alpha})`;
+                        ctx.fillText(h.code, h.x, h.y);
+                    }
+
+                };
+
+                resize();
+                this._glitchActive = true;
+                glitchTick();
+            },
+
+            _setGlitchSpeed(strength) {
+                if (strength === 0) this._glitchSpeedMult = 0;
+                else if (strength === 1) this._glitchSpeedMult = 0.4;
+                else this._glitchSpeedMult = 1;
+            },
+
+            stopGlitch() {
+                if (this.glitchRaf) { cancelAnimationFrame(this.glitchRaf); this.glitchRaf = null; }
+                if (this._glitchResize) window.removeEventListener('resize', this._glitchResize);
+                if (this._glitchVisibility) document.removeEventListener('visibilitychange', this._glitchVisibility);
+                try { window.removeEventListener('click', this._glitchMouseHandler); } catch (e) {}
+                if (this.glitchCanvas) { try { this.glitchCanvas.remove(); } catch (e) {} this.glitchCanvas = null; this.glitchCtx = null; }
+                this._glitchMouse = null;
+                const particles = document.querySelector('.particles');
+                if (particles) particles.style.display = (this._prevParticlesDisplay_glitch === null || this._prevParticlesDisplay_glitch === undefined) ? '' : this._prevParticlesDisplay_glitch;
+                delete this._prevParticlesDisplay_glitch;
+                this._glitchActive = false;
+            },
+
+            // ============================================
+            // 雷射禁地 (laser) — 交叉雷射光束
+            // ============================================
+            startLaser(opts = {}) {
+                if (this._laserActive) return;
+
+                try { this.stopNetwork(); } catch (e) {}
+                try { this.stopMagnet(); } catch (e) {}
+                try { if (typeof this.stopDomCanvas === 'function') this.stopDomCanvas(); } catch (e) {}
+                try { if (typeof this.stopStar === 'function') this.stopStar(); } catch (e) {}
+                try { if (typeof this.stopBubble === 'function') this.stopBubble(); } catch (e) {}
+                try { if (typeof this.stopCircuit === 'function') this.stopCircuit(); } catch (e) {}
+                try { if (typeof this.stopSakura === 'function') this.stopSakura(); } catch (e) {}
+                try { if (typeof this.stopGlitch === 'function') this.stopGlitch(); } catch (e) {}
+
+                const particlesEl = document.querySelector('.particles');
+                this._prevParticlesDisplay_laser = particlesEl ? particlesEl.style.display : null;
+                if (particlesEl) particlesEl.style.display = 'none';
+
+                if (!this.laserCanvas) {
+                    this.laserCanvas = document.createElement('canvas');
+                    this.laserCanvas.id = 'bg-laser-canvas';
+                    this.laserCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-7;pointer-events:none;';
+                    this.laserCanvas.setAttribute('aria-hidden', 'true');
+                    document.body.appendChild(this.laserCanvas);
+                }
+                const canvas = this.laserCanvas;
+                const ctx = canvas.getContext('2d');
+                this.laserCtx = ctx;
+
+                const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+                let W, H;
+
+                const laserColors = [
+                    { r: 0, g: 150, b: 255 },      // 藍
+                    { r: 0, g: 212, b: 255 },      // 淺藍
+                    { r: 255, g: 30, b: 30 },       // 紅
+                    { r: 255, g: 0, b: 80 }         // 深紅
+                ];
+
+                this._laserSpeedMult = (this._strength === 0) ? 0 : (this._strength === 1) ? 0.4 : 1;
+
+                let beams = [];
+                let sparks = [];
+                let sweepBeams = [];
+                let fogPatches = [];
+
+                // 靜態雷射束
+                const createBeam = () => {
+                    const color = laserColors[Math.floor(Math.random() * laserColors.length)];
+                    const dir = Math.random();
+                    let startX, startY, angle;
+                    if (dir < 0.25) {
+                        startX = 0; startY = Math.random() * H; angle = (Math.random() - 0.5) * 0.6;
+                    } else if (dir < 0.5) {
+                        startX = W; startY = Math.random() * H; angle = Math.PI + (Math.random() - 0.5) * 0.6;
+                    } else if (dir < 0.75) {
+                        startX = Math.random() * W; startY = 0; angle = Math.PI / 2 + (Math.random() - 0.5) * 0.6;
+                    } else {
+                        startX = Math.random() * W; startY = H; angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.6;
+                    }
+                    const length = Math.max(W, H) * 1.5;
+                    return {
+                        x1: startX, y1: startY,
+                        x2: startX + Math.cos(angle) * length,
+                        y2: startY + Math.sin(angle) * length,
+                        color, width: 0.5 + Math.random() * 2,
+                        alpha: 0, maxAlpha: 0.1 + Math.random() * 0.2,
+                        pulse: Math.random() * Math.PI * 2,
+                        pulseSpeed: 0.008 + Math.random() * 0.015,
+                        life: 8 + Math.random() * 12,
+                        age: 0,
+                        fadeInTime: 1.2 + Math.random() * 1.5
+                    };
+                };
+
+                // 掃描/旋轉雷射
+                const createSweepBeam = () => {
+                    const color = laserColors[Math.floor(Math.random() * laserColors.length)];
+                    return {
+                        cx: Math.random() * W,
+                        cy: Math.random() * H,
+                        angle: Math.random() * Math.PI * 2,
+                        rotSpeed: (Math.random() - 0.5) * 0.002,
+                        length: Math.max(W, H) * 0.8,
+                        color,
+                        width: 0.5 + Math.random() * 1.5,
+                        alpha: 0.08 + Math.random() * 0.14,
+                        pulse: Math.random() * Math.PI * 2,
+                        pulseSpeed: 0.01 + Math.random() * 0.02
+                    };
+                };
+
+                // 火花（雷射交叉處）
+                const createSpark = (x, y) => {
+                    const color = laserColors[Math.floor(Math.random() * laserColors.length)];
+                    return {
+                        x, y,
+                        vx: (Math.random() - 0.5) * 1.2,
+                        vy: (Math.random() - 0.5) * 1.2,
+                        size: 1 + Math.random() * 2.5,
+                        color, alpha: 0.7,
+                        life: 1.0 + Math.random() * 2.5,
+                        age: 0
+                    };
+                };
+
+                // 氛圍霧氣
+                const createFogPatch = () => {
+                    const color = laserColors[Math.floor(Math.random() * laserColors.length)];
+                    return {
+                        x: Math.random() * W,
+                        y: Math.random() * H,
+                        radius: 150 + Math.random() * 350,
+                        color,
+                        alpha: 0.012 + Math.random() * 0.02,
+                        vx: (Math.random() - 0.5) * 0.2,
+                        vy: (Math.random() - 0.5) * 0.2,
+                        pulse: Math.random() * Math.PI * 2,
+                        pulseSpeed: 0.003 + Math.random() * 0.006
+                    };
+                };
+
+                // 滑鼠：從滑鼠位置發射雷射
+                this._laserMouse = { x: W / 2, y: H / 2 };
+                this._laserMouseHandler = (e) => {
+                    this._laserMouse.x = e.clientX * dpr;
+                    this._laserMouse.y = e.clientY * dpr;
+                };
+                if (this._mouseEnabled !== false) {
+                    window.addEventListener('mousemove', this._laserMouseHandler);
+                }
+
+                const resize = () => {
+                    W = Math.round(window.innerWidth * dpr);
+                    H = Math.round(window.innerHeight * dpr);
+                    canvas.width = W;
+                    canvas.height = H;
+                    beams = [];
+                    const beamCount = (this._strength === 1) ? 6 : 12;
+                    for (let i = 0; i < beamCount; i++) beams.push(createBeam());
+                    sweepBeams = [];
+                    const sweepCount = (this._strength === 1) ? 2 : 4;
+                    for (let i = 0; i < sweepCount; i++) sweepBeams.push(createSweepBeam());
+                    sparks = [];
+                    fogPatches = [];
+                    const fogCount = (this._strength === 1) ? 4 : 7;
+                    for (let i = 0; i < fogCount; i++) fogPatches.push(createFogPatch());
+                };
+
+                this._laserResize = resize;
+                window.addEventListener('resize', resize);
+
+                this._laserVisibility = () => {
+                    if (document.hidden) {
+                        if (this.laserRaf) { cancelAnimationFrame(this.laserRaf); this.laserRaf = null; }
+                    } else if (!this.laserRaf && this._laserActive) {
+                        laserTick();
+                    }
+                };
+                document.addEventListener('visibilitychange', this._laserVisibility);
+
+                const laserTick = () => {
+                    this.laserRaf = requestAnimationFrame(laserTick);
+                    const sm = this._laserSpeedMult;
+                    if (sm === 0) return;
+
+                    ctx.clearRect(0, 0, W, H);
+                    ctx.globalCompositeOperation = 'lighter';
+
+                    // 氛圍霧氣層
+                    for (const fog of fogPatches) {
+                        fog.x += fog.vx * sm;
+                        fog.y += fog.vy * sm;
+                        fog.pulse += fog.pulseSpeed * sm;
+                        if (fog.x < -fog.radius) fog.x = W + fog.radius;
+                        if (fog.x > W + fog.radius) fog.x = -fog.radius;
+                        if (fog.y < -fog.radius) fog.y = H + fog.radius;
+                        if (fog.y > H + fog.radius) fog.y = -fog.radius;
+                        const fa = fog.alpha * (0.6 + 0.4 * Math.sin(fog.pulse));
+                        const fc = fog.color;
+                        const grd = ctx.createRadialGradient(fog.x, fog.y, 0, fog.x, fog.y, fog.radius);
+                        grd.addColorStop(0, `rgba(${fc.r},${fc.g},${fc.b},${fa})`);
+                        grd.addColorStop(1, `rgba(${fc.r},${fc.g},${fc.b},0)`);
+                        ctx.fillStyle = grd;
+                        ctx.beginPath();
+                        ctx.arc(fog.x, fog.y, fog.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    // 靜態雷射束（會出現/消失）
+                    for (let i = beams.length - 1; i >= 0; i--) {
+                        const b = beams[i];
+                        b.age += 0.016 * sm;
+                        b.pulse += b.pulseSpeed * sm;
+
+                        // 淡入
+                        if (b.age < b.fadeInTime) {
+                            b.alpha = b.maxAlpha * (b.age / b.fadeInTime);
+                        } else if (b.age > b.life - 2.0) {
+                            b.alpha = b.maxAlpha * ((b.life - b.age) / 2.0);
+                        } else {
+                            b.alpha = b.maxAlpha * (0.7 + 0.3 * Math.sin(b.pulse));
+                        }
+
+                        if (b.age >= b.life) {
+                            beams[i] = createBeam();
+                            continue;
+                        }
+
+                        if (b.alpha <= 0) continue;
+
+                        const c = b.color;
+                        // 外層光暈（寬而半透明）
+                        ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},${b.alpha * 0.15})`;
+                        ctx.lineWidth = b.width * 6;
+                        ctx.beginPath();
+                        ctx.moveTo(b.x1, b.y1);
+                        ctx.lineTo(b.x2, b.y2);
+                        ctx.stroke();
+                        // 中層光束
+                        ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},${b.alpha})`;
+                        ctx.lineWidth = b.width;
+                        ctx.beginPath();
+                        ctx.moveTo(b.x1, b.y1);
+                        ctx.lineTo(b.x2, b.y2);
+                        ctx.stroke();
+                        // 核心光（更亮更細）
+                        ctx.strokeStyle = `rgba(255,255,255,${b.alpha * 0.4})`;
+                        ctx.lineWidth = b.width * 0.3;
+                        ctx.beginPath();
+                        ctx.moveTo(b.x1, b.y1);
+                        ctx.lineTo(b.x2, b.y2);
+                        ctx.stroke();
+
+                        // 起點光暈
+                        const gs = b.width * 5;
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${b.alpha * 0.5})`;
+                        ctx.beginPath();
+                        ctx.arc(b.x1, b.y1, gs, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = `rgba(255,255,255,${b.alpha * 0.25})`;
+                        ctx.beginPath();
+                        ctx.arc(b.x1, b.y1, gs * 0.35, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    // 掃描旋轉雷射
+                    for (const sw of sweepBeams) {
+                        sw.angle += sw.rotSpeed * sm;
+                        sw.pulse += sw.pulseSpeed * sm;
+                        const a = sw.alpha * (0.5 + 0.5 * Math.sin(sw.pulse));
+                        const c = sw.color;
+                        const ex = sw.cx + Math.cos(sw.angle) * sw.length;
+                        const ey = sw.cy + Math.sin(sw.angle) * sw.length;
+                        const ex2 = sw.cx - Math.cos(sw.angle) * sw.length;
+                        const ey2 = sw.cy - Math.sin(sw.angle) * sw.length;
+
+                        // 掃描軌跡殘影
+                        const trailSpan = sw.rotSpeed * sm * 15;
+                        if (Math.abs(trailSpan) > 0.0001) {
+                            ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${a * 0.035})`;
+                            ctx.beginPath();
+                            ctx.moveTo(sw.cx, sw.cy);
+                            ctx.arc(sw.cx, sw.cy, sw.length, sw.angle - trailSpan, sw.angle, sw.rotSpeed < 0);
+                            ctx.closePath();
+                            ctx.fill();
+                            ctx.beginPath();
+                            ctx.moveTo(sw.cx, sw.cy);
+                            ctx.arc(sw.cx, sw.cy, sw.length, sw.angle + Math.PI - trailSpan, sw.angle + Math.PI, sw.rotSpeed < 0);
+                            ctx.closePath();
+                            ctx.fill();
+                        }
+
+                        // 外層光暈
+                        ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},${a * 0.12})`;
+                        ctx.lineWidth = sw.width * 5;
+                        ctx.beginPath();
+                        ctx.moveTo(ex2, ey2);
+                        ctx.lineTo(ex, ey);
+                        ctx.stroke();
+                        // 核心雷射
+                        ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},${a})`;
+                        ctx.lineWidth = sw.width;
+                        ctx.beginPath();
+                        ctx.moveTo(ex2, ey2);
+                        ctx.lineTo(ex, ey);
+                        ctx.stroke();
+
+                        // 旋轉軸心光暈
+                        const ps = sw.width * 4;
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${a * 0.5})`;
+                        ctx.beginPath();
+                        ctx.arc(sw.cx, sw.cy, ps, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = `rgba(255,255,255,${a * 0.2})`;
+                        ctx.beginPath();
+                        ctx.arc(sw.cx, sw.cy, ps * 0.3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    // 滑鼠雷射（從滑鼠發射4條雷射到角落）
+                    if (this._mouseEnabled !== false) {
+                        const mx = this._laserMouse.x;
+                        const my = this._laserMouse.y;
+                        const corners = [[0, 0], [W, 0], [W, H], [0, H]];
+                        for (let ci = 0; ci < corners.length; ci++) {
+                            const [cx, cy] = corners[ci];
+                            const c = laserColors[ci % laserColors.length];
+                            // 外層光暈
+                            ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},0.04)`;
+                            ctx.lineWidth = 4;
+                            ctx.beginPath();
+                            ctx.moveTo(mx, my);
+                            ctx.lineTo(cx, cy);
+                            ctx.stroke();
+                            // 核心線
+                            ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},0.1)`;
+                            ctx.lineWidth = 0.5;
+                            ctx.beginPath();
+                            ctx.moveTo(mx, my);
+                            ctx.lineTo(cx, cy);
+                            ctx.stroke();
+                        }
+                    }
+
+                    // 火花更新
+                    for (let i = sparks.length - 1; i >= 0; i--) {
+                        const s = sparks[i];
+                        s.age += 0.016 * sm;
+                        s.x += s.vx * sm;
+                        s.y += s.vy * sm;
+                        s.alpha = 0.8 * (1 - s.age / s.life);
+                        if (s.age >= s.life) { sparks.splice(i, 1); continue; }
+                        const c = s.color;
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${s.alpha})`;
+                        ctx.beginPath();
+                        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    // 隨機產生火花在雷射交叉處
+                    if (sparks.length < 20 && Math.random() < 0.02 * sm) {
+                        const rx = Math.random() * W;
+                        const ry = Math.random() * H;
+                        for (let i = 0; i < 3; i++) sparks.push(createSpark(rx, ry));
+                    }
+                };
+
+                resize();
+                this._laserActive = true;
+                laserTick();
+            },
+
+            _setLaserSpeed(strength) {
+                if (strength === 0) this._laserSpeedMult = 0;
+                else if (strength === 1) this._laserSpeedMult = 0.4;
+                else this._laserSpeedMult = 1;
+            },
+
+            stopLaser() {
+                if (this.laserRaf) { cancelAnimationFrame(this.laserRaf); this.laserRaf = null; }
+                if (this._laserResize) window.removeEventListener('resize', this._laserResize);
+                if (this._laserVisibility) document.removeEventListener('visibilitychange', this._laserVisibility);
+                try { window.removeEventListener('mousemove', this._laserMouseHandler); } catch (e) {}
+                if (this.laserCanvas) { try { this.laserCanvas.remove(); } catch (e) {} this.laserCanvas = null; this.laserCtx = null; }
+                this._laserMouse = null;
+                const particles = document.querySelector('.particles');
+                if (particles) particles.style.display = (this._prevParticlesDisplay_laser === null || this._prevParticlesDisplay_laser === undefined) ? '' : this._prevParticlesDisplay_laser;
+                delete this._prevParticlesDisplay_laser;
+                this._laserActive = false;
+            },
+
+            // ============================================
+            // 宇宙戰艦 (fleet) — 太空戰艦群穿梭飛行
+            // ============================================
+            startFleet(opts = {}) {
+                if (this._fleetActive) return;
+
+                try { this.stopNetwork(); } catch (e) {}
+                try { this.stopMagnet(); } catch (e) {}
+                try { if (typeof this.stopDomCanvas === 'function') this.stopDomCanvas(); } catch (e) {}
+                try { if (typeof this.stopStar === 'function') this.stopStar(); } catch (e) {}
+                try { if (typeof this.stopBubble === 'function') this.stopBubble(); } catch (e) {}
+                try { if (typeof this.stopCircuit === 'function') this.stopCircuit(); } catch (e) {}
+                try { if (typeof this.stopSakura === 'function') this.stopSakura(); } catch (e) {}
+                try { if (typeof this.stopGlitch === 'function') this.stopGlitch(); } catch (e) {}
+                try { if (typeof this.stopLaser === 'function') this.stopLaser(); } catch (e) {}
+
+                const particlesEl = document.querySelector('.particles');
+                this._prevParticlesDisplay_fleet = particlesEl ? particlesEl.style.display : null;
+                if (particlesEl) particlesEl.style.display = 'none';
+
+                if (!this.fleetCanvas) {
+                    this.fleetCanvas = document.createElement('canvas');
+                    this.fleetCanvas.id = 'bg-fleet-canvas';
+                    this.fleetCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-7;pointer-events:none;';
+                    this.fleetCanvas.setAttribute('aria-hidden', 'true');
+                    document.body.appendChild(this.fleetCanvas);
+                }
+                const canvas = this.fleetCanvas;
+                const ctx = canvas.getContext('2d');
+                this.fleetCtx = ctx;
+
+                const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+                let W, H;
+
+                const fleetColors = [
+                    { r: 0, g: 212, b: 255 },
+                    { r: 255, g: 0, b: 128 },
+                    { r: 139, g: 92, b: 246 },
+                    { r: 0, g: 255, b: 136 },
+                    { r: 255, g: 170, b: 0 }
+                ];
+
+                this._fleetSpeedMult = (this._strength === 0) ? 0 : (this._strength === 1) ? 0.4 : 1;
+
+                let ships = [];
+                let stars = []; // 背景高速星星（速度線）
+                let exhaustParticles = [];
+
+                // 戰艦造型繪製器
+                const drawShip = (ship) => {
+                    const c = ship.color;
+                    const s = ship.size;
+                    ctx.save();
+                    ctx.translate(ship.x, ship.y);
+                    ctx.rotate(ship.angle);
+
+                    ctx.shadowColor = `rgba(${c.r},${c.g},${c.b},0.6)`;
+                    ctx.shadowBlur = 10;
+
+                    if (ship.type === 0) {
+                        // 三角戰機
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${ship.alpha})`;
+                        ctx.beginPath();
+                        ctx.moveTo(s, 0);
+                        ctx.lineTo(-s * 0.7, -s * 0.5);
+                        ctx.lineTo(-s * 0.4, 0);
+                        ctx.lineTo(-s * 0.7, s * 0.5);
+                        ctx.closePath();
+                        ctx.fill();
+                        // 引擎光
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${ship.alpha * 0.8})`;
+                        ctx.beginPath();
+                        ctx.ellipse(-s * 0.6, 0, s * 0.15, s * 0.25, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (ship.type === 1) {
+                        // 菱形巡洋艦
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${ship.alpha * 0.8})`;
+                        ctx.beginPath();
+                        ctx.moveTo(s * 1.2, 0);
+                        ctx.lineTo(0, -s * 0.35);
+                        ctx.lineTo(-s * 0.8, 0);
+                        ctx.lineTo(0, s * 0.35);
+                        ctx.closePath();
+                        ctx.fill();
+                        // 頂部裝甲線
+                        ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},${ship.alpha * 0.5})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(s * 0.6, 0);
+                        ctx.lineTo(0, -s * 0.2);
+                        ctx.lineTo(-s * 0.4, 0);
+                        ctx.lineTo(0, s * 0.2);
+                        ctx.closePath();
+                        ctx.stroke();
+                    } else {
+                        // 小型無人機
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${ship.alpha})`;
+                        ctx.beginPath();
+                        ctx.moveTo(s * 0.5, 0);
+                        ctx.lineTo(-s * 0.3, -s * 0.3);
+                        ctx.lineTo(-s * 0.3, s * 0.3);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                };
+
+                const createShip = () => {
+                    const color = fleetColors[Math.floor(Math.random() * fleetColors.length)];
+                    const type = Math.floor(Math.random() * 3);
+                    const size = type === 1 ? 8 + Math.random() * 6 : type === 0 ? 5 + Math.random() * 5 : 3 + Math.random() * 3;
+                    // 從左邊出發向右飛行（可有輕微角度偏移）
+                    const angle = (Math.random() - 0.5) * 0.3;
+                    return {
+                        x: -size * 3,
+                        y: Math.random() * H,
+                        size, color, type, angle,
+                        speed: 0.5 + Math.random() * 2,
+                        alpha: 0.3 + Math.random() * 0.5,
+                        wobble: Math.random() * Math.PI * 2,
+                        wobbleSpeed: 0.01 + Math.random() * 0.02,
+                        wobbleAmp: 0.5 + Math.random() * 1.5
+                    };
+                };
+
+                const createSpeedStar = () => ({
+                    x: W + 5,
+                    y: Math.random() * H,
+                    length: 10 + Math.random() * 40,
+                    speed: 3 + Math.random() * 8,
+                    alpha: 0.1 + Math.random() * 0.3,
+                    width: 0.5 + Math.random()
+                });
+
+                // 滑鼠：船隻迴避或跟隨
+                this._fleetMouse = { x: -1000, y: -1000 };
+                this._fleetMouseHandler = (e) => {
+                    this._fleetMouse.x = e.clientX * dpr;
+                    this._fleetMouse.y = e.clientY * dpr;
+                };
+                if (this._mouseEnabled !== false) {
+                    window.addEventListener('mousemove', this._fleetMouseHandler);
+                }
+
+                const resize = () => {
+                    W = Math.round(window.innerWidth * dpr);
+                    H = Math.round(window.innerHeight * dpr);
+                    canvas.width = W;
+                    canvas.height = H;
+                    ships = [];
+                    const shipCount = (this._strength === 1) ? 8 : 16;
+                    for (let i = 0; i < shipCount; i++) {
+                        const s = createShip();
+                        s.x = Math.random() * W; // 初始散佈在畫面中
+                        ships.push(s);
+                    }
+                    stars = [];
+                    const starCount = (this._strength === 1) ? 20 : 50;
+                    for (let i = 0; i < starCount; i++) {
+                        const st = createSpeedStar();
+                        st.x = Math.random() * W;
+                        stars.push(st);
+                    }
+                    exhaustParticles = [];
+                };
+
+                this._fleetResize = resize;
+                window.addEventListener('resize', resize);
+
+                this._fleetVisibility = () => {
+                    if (document.hidden) {
+                        if (this.fleetRaf) { cancelAnimationFrame(this.fleetRaf); this.fleetRaf = null; }
+                    } else if (!this.fleetRaf && this._fleetActive) {
+                        fleetTick();
+                    }
+                };
+                document.addEventListener('visibilitychange', this._fleetVisibility);
+
+                const fleetTick = () => {
+                    this.fleetRaf = requestAnimationFrame(fleetTick);
+                    const sm = this._fleetSpeedMult;
+                    if (sm === 0) return;
+
+                    ctx.clearRect(0, 0, W, H);
+                    ctx.globalCompositeOperation = 'lighter';
+
+                    // 背景速度星線
+                    for (let i = 0; i < stars.length; i++) {
+                        const st = stars[i];
+                        st.x -= st.speed * sm;
+                        if (st.x + st.length < 0) {
+                            stars[i] = createSpeedStar();
+                        }
+                        ctx.strokeStyle = `rgba(200,220,255,${st.alpha})`;
+                        ctx.lineWidth = st.width;
+                        ctx.beginPath();
+                        ctx.moveTo(st.x, st.y);
+                        ctx.lineTo(st.x + st.length, st.y);
+                        ctx.stroke();
+                    }
+
+                    // 更新與繪製戰艦
+                    const mx = this._fleetMouse.x;
+                    const my = this._fleetMouse.y;
+                    for (let i = 0; i < ships.length; i++) {
+                        const ship = ships[i];
+                        ship.wobble += ship.wobbleSpeed * sm;
+                        const wy = Math.sin(ship.wobble) * ship.wobbleAmp * sm;
+                        ship.x += ship.speed * sm;
+                        ship.y += wy;
+
+                        // 滑鼠互動：靠近時微微閃避
+                        if (this._mouseEnabled !== false) {
+                            const dx = ship.x - mx;
+                            const dy = ship.y - my;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            if (dist < 120 && dist > 0) {
+                                const force = (1 - dist / 120) * 1.5 * sm;
+                                ship.y += (dy / dist) * force;
+                            }
+                        }
+
+                        // 超出畫面
+                        if (ship.x > W + ship.size * 4) {
+                            ships[i] = createShip();
+                        }
+                        if (ship.y < -50) ship.y = H + 50;
+                        if (ship.y > H + 50) ship.y = -50;
+
+                        drawShip(ship);
+
+                        // 引擎排氣
+                        if (exhaustParticles.length < 200 && Math.random() < 0.3 * sm) {
+                            const c = ship.color;
+                            exhaustParticles.push({
+                                x: ship.x - Math.cos(ship.angle) * ship.size,
+                                y: ship.y - Math.sin(ship.angle) * ship.size,
+                                vx: -ship.speed * 0.5 + (Math.random() - 0.5),
+                                vy: (Math.random() - 0.5) * 0.5,
+                                size: ship.size * 0.2 + Math.random() * 1.5,
+                                color: c,
+                                alpha: 0.4 + Math.random() * 0.3,
+                                life: 0.3 + Math.random() * 0.5,
+                                age: 0
+                            });
+                        }
+                    }
+
+                    // 排氣粒子
+                    for (let i = exhaustParticles.length - 1; i >= 0; i--) {
+                        const ep = exhaustParticles[i];
+                        ep.age += 0.016 * sm;
+                        ep.x += ep.vx * sm;
+                        ep.y += ep.vy * sm;
+                        ep.alpha *= 0.96;
+                        if (ep.age >= ep.life || ep.alpha < 0.01) {
+                            exhaustParticles.splice(i, 1); continue;
+                        }
+                        const c = ep.color;
+                        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${ep.alpha})`;
+                        ctx.beginPath();
+                        ctx.arc(ep.x, ep.y, ep.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                };
+
+                resize();
+                this._fleetActive = true;
+                fleetTick();
+            },
+
+            _setFleetSpeed(strength) {
+                if (strength === 0) this._fleetSpeedMult = 0;
+                else if (strength === 1) this._fleetSpeedMult = 0.4;
+                else this._fleetSpeedMult = 1;
+            },
+
+            stopFleet() {
+                if (this.fleetRaf) { cancelAnimationFrame(this.fleetRaf); this.fleetRaf = null; }
+                if (this._fleetResize) window.removeEventListener('resize', this._fleetResize);
+                if (this._fleetVisibility) document.removeEventListener('visibilitychange', this._fleetVisibility);
+                try { window.removeEventListener('mousemove', this._fleetMouseHandler); } catch (e) {}
+                if (this.fleetCanvas) { try { this.fleetCanvas.remove(); } catch (e) {} this.fleetCanvas = null; this.fleetCtx = null; }
+                this._fleetMouse = null;
+                const particles = document.querySelector('.particles');
+                if (particles) particles.style.display = (this._prevParticlesDisplay_fleet === null || this._prevParticlesDisplay_fleet === undefined) ? '' : this._prevParticlesDisplay_fleet;
+                delete this._prevParticlesDisplay_fleet;
+                this._fleetActive = false;
             },
 
             setStrength(value) {
@@ -812,11 +2893,21 @@ const Core = {
                 this._strength = value;
                 
                 if (value === 0) {
-                    // 關閉所有 background 動畫並移除相關 Canvas
+                    // 關閉 canvas 類動畫並移除相關 Canvas
                     this._speedMult = 0;
                     this.stopNetwork();
                     if (typeof this.stopDomCanvas === 'function') this.stopDomCanvas();
-                    if (typeof this.stopStar === 'function') this.stopStar();
+                    if (typeof this.stopBubble === 'function') this.stopBubble();
+                    // 星圖不停止，僅暫停動畫（保留視覺效果在當前幀凍結）
+                    if (this.current === 'star' && this._starActive) {
+                        this._setStarSpeed(0);
+                    }
+                    // 新主題：凍結但不停止
+                    if (this.current === 'circuit' && this._circuitActive) this._setCircuitSpeed(0);
+                    if (this.current === 'sakura' && this._sakuraActive) this._setSakuraSpeed(0);
+                    if (this.current === 'glitch' && this._glitchActive) this._setGlitchSpeed(0);
+                    if (this.current === 'laser' && this._laserActive) this._setLaserSpeed(0);
+                    if (this.current === 'fleet' && this._fleetActive) this._setFleetSpeed(0);
                     return;
                 }
 
@@ -858,24 +2949,333 @@ const Core = {
                     }
                 }
 
-                // 如果不是 dom 模式，不做額外處理（network/magnet 已由 _speedMult 調整）
+                // 如果目前是 star 模式，更新動畫速度/暫停狀態
+                if (this.current === 'star') {
+                    if (!this._starActive) {
+                        this.startStar();
+                    } else {
+                        this._setStarSpeed(value);
+                    }
+                }
+
+                // 如果目前是 bubble 模式但 canvas 不存在（被 strength=0 關閉了），重新啟動
+                if (this.current === 'bubble' && !this.bubbleCanvas) {
+                    const bw = window.innerWidth, bh = window.innerHeight;
+                    const baseC = Math.max(25, Math.floor((bw * bh) / 45000));
+                    const bCount = (value === 1) ? Math.ceil(baseC * 0.6) : baseC;
+                    this.startBubble({ count: bCount });
+                } else if (this.current === 'bubble' && this.bubbleParticles) {
+                    // 調整粒子數量
+                    const bw = window.innerWidth, bh = window.innerHeight;
+                    const baseC = Math.max(25, Math.floor((bw * bh) / 45000));
+                    const bCount = (value === 1) ? Math.ceil(baseC * 0.6) : baseC;
+                    this.bubbleDesiredCount = bCount;
+                    if (this.bubbleParticles.length < bCount) {
+                        for (let i = this.bubbleParticles.length; i < bCount; i++)
+                            this.bubbleParticles.push(this._createBubble(true));
+                    } else if (this.bubbleParticles.length > bCount) {
+                        this.bubbleParticles.length = bCount;
+                    }
+                }
+
+                // 如果不是以上模式，不做額外處理（network/magnet 已由 _speedMult 調整）
+
+                // 電路脈衝
+                if (this.current === 'circuit') {
+                    if (!this._circuitActive) { this.startCircuit(); }
+                    else { this._setCircuitSpeed(value); }
+                }
+                // 櫻花飄落
+                if (this.current === 'sakura') {
+                    if (!this._sakuraActive) { this.startSakura(); }
+                    else { this._setSakuraSpeed(value); }
+                }
+                // 故障雜訊
+                if (this.current === 'glitch') {
+                    if (!this._glitchActive) { this.startGlitch(); }
+                    else { this._setGlitchSpeed(value); }
+                }
+                // 雷射禁地
+                if (this.current === 'laser') {
+                    if (!this._laserActive) { this.startLaser(); }
+                    else { this._setLaserSpeed(value); }
+                }
+                // 宇宙戰艦
+                if (this.current === 'fleet') {
+                    if (!this._fleetActive) { this.startFleet(); }
+                    else { this._setFleetSpeed(value); }
+                }
             },
 
 
 
             setMouseEnabled(enabled) {
                 this._mouseEnabled = !!enabled;
-                // if disabling, clear mouse and remove listener
                 if (!this._mouseEnabled) {
+                    // 移除所有模式的滑鼠監聽器
                     try { window.removeEventListener('mousemove', this._mouseHandler); } catch (e) {}
+                    try { window.removeEventListener('mousemove', this._starMouseHandler); } catch (e) {}
+                    try { window.removeEventListener('mousemove', this._domMouse); } catch (e) {}
+                    try { window.removeEventListener('mousemove', this._circuitMouseHandler); } catch (e) {}
+                    try { window.removeEventListener('mousemove', this._sakuraMouseHandler); } catch (e) {}
+                    try { window.removeEventListener('click', this._glitchMouseHandler); } catch (e) {}
+                    try { window.removeEventListener('mousemove', this._laserMouseHandler); } catch (e) {}
+                    try { window.removeEventListener('mousemove', this._fleetMouseHandler); } catch (e) {}
                     this.mouse = { x: -10000, y: -10000 };
+                    // 重置星圖視差位置到中心
+                    if (this._starMouse) {
+                        this._starMouse.x = 0.5; this._starMouse.y = 0.5;
+                        this._starMouse.targetX = 0.5; this._starMouse.targetY = 0.5;
+                    }
+                    // 重置各模式滑鼠座標
+                    if (this._circuitMouse) { this._circuitMouse.x = -1000; this._circuitMouse.y = -1000; }
+                    if (this._sakuraMouse) { this._sakuraMouse.x = -1000; this._sakuraMouse.y = -1000; }
+                    if (this._glitchMouse) { this._glitchMouse.x = -1000; this._glitchMouse.y = -1000; this._glitchMouse.active = false; }
+                    if (this._laserMouse) { this._laserMouse.x = -1000; this._laserMouse.y = -1000; }
+                    if (this._fleetMouse) { this._fleetMouse.x = -1000; this._fleetMouse.y = -1000; }
                 } else {
-                    // reattach handler if in a running canvas mode
-                    if (this._mouseHandler && (this.current === 'network' || this.current === 'magnet')) {
-                        try { window.addEventListener('mousemove', this._mouseHandler); } catch (e) {}
+                    // 重新掛載目前運行模式的滑鼠監聽器
+                    if (this.current === 'network' || this.current === 'magnet') {
+                        if (this._mouseHandler) {
+                            try { window.addEventListener('mousemove', this._mouseHandler); } catch (e) {}
+                        }
+                    } else if (this.current === 'star') {
+                        if (this._starMouseHandler) {
+                            try { window.addEventListener('mousemove', this._starMouseHandler); } catch (e) {}
+                        }
+                    } else if (this.current === 'dom') {
+                        if (this._domMouse) {
+                            try { window.addEventListener('mousemove', this._domMouse); } catch (e) {}
+                        }
+                    } else if (this.current === 'circuit') {
+                        if (this._circuitMouseHandler) {
+                            try { window.addEventListener('mousemove', this._circuitMouseHandler); } catch (e) {}
+                        }
+                    } else if (this.current === 'sakura') {
+                        if (this._sakuraMouseHandler) {
+                            try { window.addEventListener('mousemove', this._sakuraMouseHandler); } catch (e) {}
+                        }
+                    } else if (this.current === 'glitch') {
+                        if (this._glitchMouseHandler) {
+                            try { window.addEventListener('click', this._glitchMouseHandler); } catch (e) {}
+                        }
+                    } else if (this.current === 'laser') {
+                        if (this._laserMouseHandler) {
+                            try { window.addEventListener('mousemove', this._laserMouseHandler); } catch (e) {}
+                        }
+                    } else if (this.current === 'fleet') {
+                        if (this._fleetMouseHandler) {
+                            try { window.addEventListener('mousemove', this._fleetMouseHandler); } catch (e) {}
+                        }
                     }
                 }
                 return this._mouseEnabled;
+            },
+
+            // ============================================
+            // 氣泡派對 (bubble) — 空心圓環粒子
+            // ============================================
+            startBubble(opts = {}) {
+                try {
+                    // 停止其他 canvas 動畫
+                    if (typeof this.stopBubble === 'function') this.stopBubble();
+                    try { this.stopNetwork(); } catch (e) {}
+                    try { this.stopMagnet(); } catch (e) {}
+                    try { if (typeof this.stopDomCanvas === 'function') this.stopDomCanvas(); } catch (e) {}
+                    try { if (typeof this.stopStar === 'function') this.stopStar(); } catch (e) {}
+
+                    // 建立 canvas
+                    if (!this.bubbleCanvas) {
+                        this.bubbleCanvas = document.getElementById('bg-bubble-canvas') || document.createElement('canvas');
+                        this.bubbleCanvas.id = 'bg-bubble-canvas';
+                        this.bubbleCanvas.style.position = 'fixed';
+                        this.bubbleCanvas.style.inset = '0';
+                        this.bubbleCanvas.style.width = '100%';
+                        this.bubbleCanvas.style.height = '100%';
+                        this.bubbleCanvas.style.display = 'block';
+                        this.bubbleCanvas.style.zIndex = '-7';
+                        this.bubbleCanvas.style.pointerEvents = 'none';
+                        this.bubbleCanvas.setAttribute('aria-hidden', 'true');
+                        document.body.insertBefore(this.bubbleCanvas, document.body.firstChild);
+                    }
+                    this.bubbleCtx = this.bubbleCanvas.getContext('2d');
+                    this.bubbleDpr = Math.min(1.5, Math.max(1, window.devicePixelRatio || 1));
+
+                    // 讀取主題色（僅藍、紫、粉紅三色系）
+                    const css = getComputedStyle(document.documentElement || document.body);
+                    const cyanHex = (css.getPropertyValue('--primary-cyan') || '#00d4ff').trim();
+                    const magentaHex = (css.getPropertyValue('--primary-magenta') || '#ff0080').trim();
+                    const accentHex = (css.getPropertyValue('--accent-purple') || '#8b5cf6').trim();
+
+                    function hexToRgb(hex) {
+                        hex = (hex || '').replace('#', '').trim();
+                        if (hex.length === 3) hex = hex.split('').map(h => h + h).join('');
+                        const n = parseInt(hex, 16);
+                        return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+                    }
+
+                    this._bubbleColors = [
+                        hexToRgb(cyanHex),      // 藍
+                        hexToRgb(magentaHex),    // 粉紅
+                        hexToRgb(accentHex)      // 紫
+                    ];
+
+                    // 粒子建立（數量適中，避免過多）
+                    const w = window.innerWidth;
+                    const h = window.innerHeight;
+                    const baseCount = Math.max(25, Math.floor((w * h) / 45000));
+                    const count = opts.count || ((this._strength === 1) ? Math.ceil(baseCount * 0.6) : baseCount);
+                    this.bubbleDesiredCount = count;
+
+                    const colors = this._bubbleColors;
+                    const lerpRgb = (a, b, t) => ({
+                        r: Math.round(a.r + (b.r - a.r) * t),
+                        g: Math.round(a.g + (b.g - a.g) * t),
+                        b: Math.round(a.b + (b.b - a.b) * t)
+                    });
+
+                    const createBubble = (isInitial) => {
+                        const angle = Math.random() * Math.PI * 2;
+                        const speed = 0.3 + Math.random() * 1.2;
+                        const colorIdx = Math.floor(Math.random() * colors.length);
+                        const nextColorIdx = (colorIdx + 1 + Math.floor(Math.random() * (colors.length - 1))) % colors.length;
+                        const maxLife = 200 + Math.random() * 250;
+                        return {
+                            x: Math.random() * w,
+                            y: Math.random() * h,
+                            vx: Math.cos(angle) * speed,
+                            vy: Math.sin(angle) * speed,
+                            baseSize: 10 + Math.random() * 25,
+                            size: 0,
+                            lineWidth: 1 + Math.random() * 3,
+                            maxAlpha: 0.55 + Math.random() * 0.4,
+                            alpha: 0,
+                            colorFrom: colors[colorIdx],
+                            colorTo: colors[nextColorIdx],
+                            colorProgress: 0,
+                            colorSpeed: 0.003 + Math.random() * 0.008, // 漸變速度
+                            maxLife: maxLife,
+                            life: isInitial ? Math.random() * maxLife : 0
+                        };
+                    };
+
+                    this.bubbleParticles = [];
+                    for (let i = 0; i < count; i++) {
+                        this.bubbleParticles.push(createBubble(true));
+                    }
+                    this._createBubble = createBubble;
+
+                    // resize handler
+                    const resize = () => {
+                        const rw = window.innerWidth;
+                        const rh = window.innerHeight;
+                        this.bubbleDpr = Math.min(1.5, Math.max(1, window.devicePixelRatio || 1));
+                        this.bubbleCanvas.width = Math.round(rw * this.bubbleDpr);
+                        this.bubbleCanvas.height = Math.round(rh * this.bubbleDpr);
+                        this.bubbleCanvas.style.width = rw + 'px';
+                        this.bubbleCanvas.style.height = rh + 'px';
+                        this.bubbleCtx.setTransform(this.bubbleDpr, 0, 0, this.bubbleDpr, 0, 0);
+
+                        const newCount = opts.count || ((this._strength === 1)
+                            ? Math.ceil(Math.max(25, Math.floor((rw * rh) / 45000)) * 0.6)
+                            : Math.max(25, Math.floor((rw * rh) / 45000)));
+                        this.bubbleDesiredCount = newCount;
+                        if (this.bubbleParticles.length < newCount) {
+                            for (let i = this.bubbleParticles.length; i < newCount; i++)
+                                this.bubbleParticles.push(createBubble(true));
+                        } else if (this.bubbleParticles.length > newCount) {
+                            this.bubbleParticles.length = newCount;
+                        }
+                    };
+
+                    this._bubbleResize = Core.debounce(resize, 120);
+                    window.addEventListener('resize', this._bubbleResize);
+
+                    // 動畫迴圈
+                    const loop = () => {
+                        try {
+                            const ctx = this.bubbleCtx;
+                            const cw = this.bubbleCanvas.width / this.bubbleDpr;
+                            const ch = this.bubbleCanvas.height / this.bubbleDpr;
+
+                            // 完全清除畫布（透明背景，保留原有漸層+網格可見）
+                            ctx.clearRect(0, 0, cw, ch);
+                            ctx.globalCompositeOperation = 'source-over';
+
+                            for (const p of this.bubbleParticles) {
+                                // 位移
+                                p.x += p.vx;
+                                p.y += p.vy;
+                                p.life++;
+
+                                const progress = p.life / p.maxLife;
+
+                                // 淡入+放大 (前 20%) / 淡出+縮小 (後 20%) / 維持
+                                if (progress < 0.2) {
+                                    const ratio = progress / 0.2;
+                                    p.alpha = p.maxAlpha * ratio;
+                                    p.size = p.baseSize * ratio;
+                                } else if (progress > 0.8) {
+                                    const ratio = (1 - progress) / 0.2;
+                                    p.alpha = Math.max(0, p.maxAlpha * ratio);
+                                    p.size = Math.max(0, p.baseSize * ratio);
+                                } else {
+                                    p.alpha = p.maxAlpha;
+                                    p.size = p.baseSize;
+                                }
+
+                                // 顏色漸變（慢慢漸變，非瞬間切換）
+                                p.colorProgress += p.colorSpeed;
+                                if (p.colorProgress >= 1) {
+                                    p.colorProgress = 0;
+                                    p.colorFrom = p.colorTo;
+                                    const nextIdx = (colors.indexOf(p.colorTo) + 1 + Math.floor(Math.random() * (colors.length - 1))) % colors.length;
+                                    p.colorTo = colors[nextIdx];
+                                }
+                                const c = lerpRgb(p.colorFrom, p.colorTo, p.colorProgress);
+
+                                // 生命結束 → 重置
+                                if (p.life >= p.maxLife) {
+                                    Object.assign(p, createBubble(false));
+                                    p.x = Math.random() * cw;
+                                    p.y = Math.random() * ch;
+                                    continue;
+                                }
+
+                                // 繪製空心圓環（帶霓虹光暈）
+                                if (p.size <= 0.5 || p.alpha <= 0.01) continue;
+                                ctx.save();
+                                ctx.shadowColor = `rgba(${c.r},${c.g},${c.b},${(p.alpha * 0.7).toFixed(3)})`;
+                                ctx.shadowBlur = 12 + p.size * 0.4;
+                                ctx.beginPath();
+                                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                                ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},${p.alpha.toFixed(3)})`;
+                                ctx.lineWidth = p.lineWidth;
+                                ctx.stroke();
+                                ctx.restore();
+                            }
+                        } catch (e) {
+                            console.warn('bubble loop error', e);
+                        }
+                        this.bubbleRaf = requestAnimationFrame(loop);
+                    };
+
+                    resize();
+                    loop();
+                } catch (e) {
+                    console.warn('startBubble error', e);
+                }
+            },
+
+            stopBubble() {
+                if (this.bubbleRaf) { cancelAnimationFrame(this.bubbleRaf); this.bubbleRaf = null; }
+                window.removeEventListener('resize', this._bubbleResize);
+                if (this.bubbleCanvas) {
+                    try { this.bubbleCanvas.remove(); } catch (e) {}
+                    this.bubbleCanvas = null; this.bubbleCtx = null;
+                }
+                this.bubbleParticles = [];
+                this._createBubble = null;
             },
 
             stopNetwork() {
@@ -890,12 +3290,25 @@ const Core = {
                 this.mouse = { x: -10000, y: -10000 };
             },
 
+            // magnet 與 network 共用相同的 canvas / rafId，清理邏輯一致
+            stopMagnet() {
+                this.stopNetwork();
+            },
+
             stop() {
                 // 停止 network 並清除 DOM 粒子 / canvas
                 this.stopNetwork();
                 if (typeof this.stopDomCanvas === 'function') this.stopDomCanvas();
                 // 停止 star 背景（若存在）
                 if (typeof this.stopStar === 'function') this.stopStar();
+                // 停止 bubble 背景（若存在）
+                if (typeof this.stopBubble === 'function') this.stopBubble();
+                // 停止新增主題背景
+                if (typeof this.stopCircuit === 'function') this.stopCircuit();
+                if (typeof this.stopSakura === 'function') this.stopSakura();
+                if (typeof this.stopGlitch === 'function') this.stopGlitch();
+                if (typeof this.stopLaser === 'function') this.stopLaser();
+                if (typeof this.stopFleet === 'function') this.stopFleet();
                 const c = document.querySelector('.particles');
                 if (c) c.innerHTML = '';
             }

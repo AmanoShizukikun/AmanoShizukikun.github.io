@@ -10,497 +10,1027 @@
     <link rel="stylesheet" href="../../assets/css/core.css">
     <link rel="stylesheet" href="../../assets/css/components.css">
     <link rel="stylesheet" href="../../assets/css/animations.css">
-    
-    <!-- Markdown 渲染 -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/tokyo-night-dark.min.css">
-    
+
     <style>
+        /* ======== ENTRY ANIMATION — SAKURA GENESIS (Canvas) ======== */
+        .ns-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: #030308;
+            overflow: hidden;
+        }
+        .ns-loader canvas { display: block; width: 100%; height: 100%; }
+        [data-theme="light"] .ns-loader { background: #f5f5f7; }
+
         .project-hero {
-            min-height: 60vh;
+            position: relative;
+            margin-top: calc(-1 * var(--header-height));
+            padding-top: var(--header-height);
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            text-align: center;
-            padding: 270px 2rem 4rem;
-            position: relative;
+            z-index: 1;
+            overflow: hidden;
         }
 
-        .project-hero::before {
-            content: '';
+        .hero-grid {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at center, rgba(255, 105, 180, 0.2) 0%, transparent 70%);
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255, 105, 180, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 105, 180, 0.15) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 60% at center, black 30%, transparent 80%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 60% at center, black 30%, transparent 80%);
+            animation: grid-drift 20s linear infinite;
+        }
+        @keyframes grid-drift {
+            0% { background-position: 0 0; }
+            100% { background-position: 60px 60px; }
+        }
+
+        .hex-ring {
+            position: absolute;
+            border: 1px solid rgba(255, 105, 180, 0.2);
+            border-radius: 50%;
             pointer-events: none;
         }
+        .hex-ring-1 {
+            width: 500px; height: 500px;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            animation: heroRotate 30s linear infinite;
+            border-style: dashed;
+        }
+        .hex-ring-2 {
+            width: 700px; height: 700px;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            animation: heroRotate 50s linear infinite reverse;
+            border-color: rgba(0, 212, 255, 0.12);
+        }
+        .hex-ring-3 {
+            width: 300px; height: 300px;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            animation: heroRotate 20s linear infinite;
+            border-color: rgba(255, 105, 180, 0.25);
+        }
+        @keyframes heroRotate { to { transform: translate(-50%, -50%) rotate(360deg); } }
 
-        .project-icon-large {
-            font-size: 8rem;
-            margin-bottom: 2rem;
-            animation: iconFloat 3s ease-in-out infinite;
+        .hero-corner {
+            position: absolute;
+            width: 60px; height: 60px;
+            pointer-events: none;
+        }
+        .hero-corner-tl { top: calc(var(--header-height) + 25px); left: 40px; border-top: 2px solid var(--accent-pink); border-left: 2px solid var(--accent-pink); }
+        .hero-corner-tr { top: calc(var(--header-height) + 25px); right: 40px; border-top: 2px solid var(--accent-pink); border-right: 2px solid var(--accent-pink); }
+        .hero-corner-bl { bottom: 25px; left: 40px; border-bottom: 2px solid var(--accent-pink); border-left: 2px solid var(--accent-pink); }
+        .hero-corner-br { bottom: 25px; right: 40px; border-bottom: 2px solid var(--accent-pink); border-right: 2px solid var(--accent-pink); }
+
+        .hero-content {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            padding: 20px;
+            margin-top: -60px;
+        }
+
+        .hero-eyebrow {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.5em;
+            color: var(--accent-pink);
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: hero-fade-up 0.8s 0.5s forwards;
         }
 
         .project-hero-title {
             font-family: var(--font-display);
-            font-size: clamp(3rem, 6vw, 5rem);
+            font-size: clamp(3rem, 10vw, 9rem);
             font-weight: 900;
-            margin-bottom: 1rem;
+            line-height: 0.9;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            opacity: 0;
+            animation: hero-fade-up 0.8s 0.7s forwards;
+        }
+        .project-hero-title .line1 {
+            display: block;
+            background: linear-gradient(135deg, #ffffff 0%, #ffb6d9 50%, #ff69b4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-top: 25px;
+        }
+        .project-hero-title .line2 {
+            display: block;
+            color: transparent;
+            -webkit-text-stroke: 2px var(--accent-pink);
+            text-shadow: none;
+            position: relative;
+            font-size: 0.7em;
+            letter-spacing: 0.15em;
+            margin-top: 15px;
+        }
+        .project-hero-title .line2::after {
+            content: attr(data-text);
+            position: absolute;
+            left: 0; top: 0;
+            color: var(--accent-pink);
+            filter: blur(15px);
+            opacity: 0.5;
+        }
+        .project-hero-title .line3 {
+            display: block;
+            font-size: 0.25em;
+            letter-spacing: 0.5em;
+            color: var(--primary-cyan);
+            font-weight: 400;
+            margin-top: 15px;
+            -webkit-text-stroke: 0;
+            -webkit-text-fill-color: var(--primary-cyan);
         }
 
         .project-hero-subtitle {
-            font-size: clamp(1.2rem, 2vw, 1.5rem);
-            color: var(--accent-cyan);
-            margin-bottom: 2rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 30px;
+            line-height: 1.8;
+            opacity: 0;
+            animation: hero-fade-up 0.8s 0.9s forwards;
         }
 
-        .project-meta {
-            display: flex;
-            gap: 2rem;
+        .hero-cta {
+            margin-top: 60px;
+            display: inline-flex;
+            gap: 20px;
             justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 2rem;
+            opacity: 0;
+            animation: hero-fade-up 0.8s 1.1s forwards;
         }
-
-        .project-meta-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: rgba(0, 212, 255, 0.1);
-            border: 1px solid var(--primary-cyan);
-            border-radius: 20px;
-        }
-
-        .project-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem 4rem;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid rgba(0, 212, 255, 0.2);
-            flex-wrap: wrap;
-        }
-
-        .tab {
-            padding: 1rem 2rem;
-            background: transparent;
-            border: none;
-            color: rgba(255, 255, 255, 0.6);
+        .hero-btn-primary {
             font-family: var(--font-display);
-            font-size: 1.1rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            padding: 14px 40px;
+            min-width: 200px;
+            box-sizing: border-box;
+            text-align: center;
+            background: linear-gradient(135deg, #ff69b4, #cc0066);
+            color: #fff;
+            border: 1px solid transparent;
             cursor: pointer;
-            transition: all var(--transition-normal);
             position: relative;
+            overflow: hidden;
+            clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+            transition: all 0.3s;
+            text-decoration: none;
         }
-
-        .tab::after {
+        .hero-btn-primary::before {
             content: '';
             position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--primary-cyan);
-            transition: width var(--transition-normal);
+            inset: 0;
+            background: #fff;
+            opacity: 0;
+            transform: translateX(-100%);
+            transition: transform 0.3s, opacity 0.3s;
         }
-
-        .tab.active {
-            color: var(--primary-cyan);
+        .hero-btn-primary:hover {
+            box-shadow: 0 0 30px rgba(255, 105, 180, 0.6);
+            transform: translateY(-2px);
         }
+        .hero-btn-primary:hover::before { transform: translateX(0); opacity: 0.2; }
 
-        .tab.active::after {
-            width: 100%;
-        }
-
-        .tab:hover {
-            color: var(--primary-cyan);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeInUp 0.5s ease;
-        }
-
-        /* Markdown 內容樣式 */
-        .markdown-content {
-            color: rgba(255, 255, 255, 0.9);
-            line-height: 1.8;
-        }
-
-        .markdown-content h1,
-        .markdown-content h2,
-        .markdown-content h3 {
+        .hero-btn-secondary {
             font-family: var(--font-display);
-            color: var(--primary-cyan);
-            margin: 2rem 0 1rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            padding: 14px 40px;
+            min-width: 200px;
+            box-sizing: border-box;
+            text-align: center;
+            background: transparent;
+            color: var(--accent-pink);
+            border: 1px solid var(--accent-pink);
+            cursor: pointer;
+            clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        .hero-btn-secondary:hover {
+            background: rgba(255, 105, 180, 0.15);
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.5), inset 0 0 20px rgba(255, 105, 180, 0.1);
+            transform: translateY(-2px);
         }
 
-        .markdown-content h1 { font-size: 2.5rem; }
-        .markdown-content h2 { font-size: 2rem; }
-        .markdown-content h3 { font-size: 1.5rem; }
+        .hero-panels {
+            position: absolute;
+            bottom: 60px;
+            left: 0; right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 60px;
+            animation: hero-fade-up 1s 1.3s forwards;
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        .hero-panel-item {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .hero-panel-item .val {
+            display: block;
+            font-family: var(--font-display);
+            font-size: 20px;
+            color: var(--accent-pink);
+            text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+            margin-bottom: 4px;
+        }
 
-        .markdown-content p {
+        .scroll-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.3em;
+            color: rgba(255, 105, 180, 0.4);
+            animation: hero-fade-up 1s 1.5s both;
+        }
+        .scroll-line {
+            width: 1px;
+            height: 40px;
+            background: linear-gradient(var(--accent-pink), transparent);
+            animation: heroScrollLine 2s ease-in-out infinite;
+        }
+        @keyframes heroScrollLine {
+            0% { transform: scaleY(0); transform-origin: top; }
+            50% { transform: scaleY(1); transform-origin: top; }
+            50.01% { transform: scaleY(1); transform-origin: bottom; }
+            100% { transform: scaleY(0); transform-origin: bottom; }
+        }
+
+        @keyframes hero-fade-up {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ======== GALLERY STRIP (R6 Style) ======== */
+        .gallery-strip {
+            padding: 40px 0;
+            overflow: hidden;
+            border-top: 1px solid rgba(255, 105, 180, 0.1);
+            border-bottom: 1px solid rgba(255, 105, 180, 0.1);
+            position: relative;
+            z-index: 2;
+        }
+        .gallery-track {
+            display: flex;
+            gap: 20px;
+            animation: galleryScroll 35s linear infinite;
+            width: max-content;
+        }
+        .gallery-track:hover { animation-play-state: paused; }
+        @keyframes galleryScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-25%); }
+        }
+        .gallery-card {
+            width: 280px; height: 160px; flex-shrink: 0;
+            border: 1px solid rgba(255, 105, 180, 0.15);
+            background: rgba(10, 10, 15, 0.85);
+            border-radius: 6px;
+            overflow: hidden; position: relative;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        .gallery-card:hover {
+            border-color: rgba(255, 105, 180, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(255, 105, 180, 0.15);
+        }
+        .gallery-card-img {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            image-rendering: auto;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            transition: transform 0.4s ease;
+        }
+        .gallery-card:hover .gallery-card-img {
+            transform: scale(1.05);
+        }
+        .gallery-card-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.25) 50%, transparent 100%);
+            transition: background 0.3s;
+        }
+        .gallery-card:hover .gallery-card-overlay {
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, rgba(255,105,180,0.05) 100%);
+        }
+        .gallery-card-tag {
+            position: absolute; bottom: 12px; left: 12px; right: 12px;
+            font-family: 'Share Tech Mono', monospace; font-size: 9px;
+            letter-spacing: 2px; color: #fff;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .gallery-card-repo {
+            position: absolute; top: 10px; right: 10px;
+            font-family: 'Share Tech Mono', monospace; font-size: 8px;
+            letter-spacing: 1px; color: var(--accent-pink);
+            background: rgba(0,0,0,0.6); padding: 3px 8px;
+            border-radius: 3px; border: 1px solid rgba(255,105,180,0.3);
+        }
+        .gallery-card-line {
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-pink), transparent);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .gallery-card:hover .gallery-card-line { opacity: 1; }
+
+        /* ======== SECTION COMMON ======== */
+        .section-block {
+            position: relative;
+            padding: 100px 0;
+            z-index: 2;
+        }
+        .section-block:nth-child(even) {
+            background: transparent;
+        }
+        .section-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 3rem;
+        }
+        .section-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.5em;
+            color: var(--accent-pink);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .section-heading {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #ffffff 0%, #ffb6d9 60%, #ff69b4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 1rem;
         }
-
-        .markdown-content code {
-            background: rgba(0, 212, 255, 0.1);
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            color: var(--primary-cyan);
+        .section-desc {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.5);
+            max-width: 600px;
+            line-height: 1.8;
+            margin-bottom: 3rem;
+        }
+        .section-divider {
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-pink), transparent);
+            margin-bottom: 2rem;
         }
 
-        .markdown-content pre {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 1.5rem;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin: 1.5rem 0;
-            border: 1px solid rgba(0, 212, 255, 0.2);
+        /* ======== ABOUT SECTION ======== */
+        .section-block.about-fullscreen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0;
+        }
+        .section-block.about-fullscreen .section-inner {
+            width: 100%;
+            max-width: 1400px;
+        }
+        .about-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        .about-icon-side {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             position: relative;
         }
-
-        .markdown-content pre code {
-            background: none;
-            padding: 0;
-            color: inherit;
+        .about-icon-wrapper {
+            position: relative;
+            width: 340px;
+            height: 340px;
         }
-
-        .markdown-content blockquote {
-            border-left: 4px solid var(--primary-cyan);
-            padding-left: 1.5rem;
-            margin: 1.5rem 0;
-            color: rgba(255, 255, 255, 0.7);
-            font-style: italic;
-        }
-
-        .markdown-content ul,
-        .markdown-content ol {
-            padding-left: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        .markdown-content li {
-            margin-bottom: 0.5rem;
-        }
-
-        .markdown-content a {
-            color: var(--primary-cyan);
-            text-decoration: none;
-            border-bottom: 1px solid transparent;
-            transition: border-color var(--transition-fast);
-        }
-
-        .markdown-content a:hover {
-            border-bottom-color: var(--primary-cyan);
-        }
-
-        .markdown-content img {
-            max-width: 100%;
-            border-radius: 8px;
-            margin: 1.5rem 0;
-        }
-
-        .markdown-content table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1.5rem 0;
-        }
-
-        .markdown-content th,
-        .markdown-content td {
-            padding: 0.75rem;
-            border: 1px solid rgba(0, 212, 255, 0.2);
-        }
-
-        .markdown-content th {
-            background: rgba(0, 212, 255, 0.1);
-            color: var(--primary-cyan);
-            font-weight: 600;
-        }
-
-        /* 代碼複製按鈕 */
-        .copy-code-btn {
+        .about-icon-wrapper::before {
+            content: '';
             position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            padding: 0.4rem 0.8rem;
-            background: rgba(0, 212, 255, 0.2);
-            border: 1px solid var(--primary-cyan);
-            color: var(--primary-cyan);
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all var(--transition-fast);
-        }
-
-        .copy-code-btn:hover {
-            background: var(--primary-cyan);
-            color: var(--dark-bg);
-        }
-
-        .copy-code-btn.copied {
-            background: #00ff00;
-            border-color: #00ff00;
-            color: #000;
-        }
-
-        /* 載入動畫 */
-        .loading-spinner {
-            text-align: center;
-            padding: 4rem 2rem;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(0, 212, 255, 0.2);
-            border-top-color: var(--primary-cyan);
+            inset: -15px;
+            border: 1px dashed rgba(255,105,180,0.25);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
+            animation: heroRotate 25s linear infinite;
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .about-icon-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: -35px;
+            border: 1px solid rgba(0,212,255,0.1);
+            border-radius: 50%;
+            animation: heroRotate 40s linear infinite reverse;
         }
-
-        /* 錯誤訊息 */
-        .error-message {
+        .about-icon-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 50%;
+            border: 2px solid rgba(255,105,180,0.3);
+            box-shadow: 0 0 40px rgba(255,105,180,0.15), 0 0 80px rgba(255,105,180,0.05);
+            transition: all 0.5s;
+        }
+        .about-icon-img:hover {
+            border-color: rgba(255,105,180,0.6);
+            box-shadow: 0 0 60px rgba(255,105,180,0.25), 0 0 120px rgba(255,105,180,0.08);
+            transform: scale(1.03);
+        }
+        .about-icon-label {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.4em;
+            color: rgba(255,105,180,0.5);
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .about-text-side {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .about-text p {
+            color: rgba(255,255,255,0.75);
+            line-height: 2;
+            margin-bottom: 0;
+            font-size: 1.08rem;
+        }
+        .about-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        .about-stat-card {
+            padding: 1.5rem;
+            background: rgba(255,105,180,0.05);
+            border: 1px solid rgba(255,105,180,0.15);
+            border-radius: 8px;
             text-align: center;
-            padding: 4rem 2rem;
-            color: #ff6b6b;
+            transition: all 0.3s;
         }
-
-        .error-message h3 {
+        .about-stat-card:hover {
+            border-color: rgba(255,105,180,0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255,105,180,0.1);
+        }
+        .about-stat-value {
             font-family: var(--font-display);
             font-size: 2rem;
+            font-weight: 900;
+            color: var(--accent-pink);
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        .about-stat-label {
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+        }
+
+        /* ======== FEATURES SECTION (R4 Style) ======== */
+        .features-section {
+            padding: 100px 0;
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(180deg, transparent, rgba(255,105,180,0.02), transparent);
+        }
+        .features-section:nth-child(even) {
+            background: transparent;
+        }
+        .feature-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto 100px;
+            padding: 0 3rem;
+        }
+        .feature-row:last-child { margin-bottom: 0; }
+        .feature-row.reverse { direction: rtl; }
+        .feature-row.reverse > * { direction: ltr; }
+
+        .feature-visual {
+            position: relative;
+            aspect-ratio: 4 / 3;
+            border: 1px solid rgba(255,105,180,0.15);
+            background: rgba(8,15,30,0.6);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+        .feature-visual::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,105,180,0.03) 0%, transparent 60%);
+        }
+        .feature-visual .vis-label {
+            position: absolute;
+            bottom: 14px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 9px;
+            color: rgba(255,105,180,0.4);
+            letter-spacing: 2px;
+        }
+        .feature-visual .vis-label.left { left: 14px; }
+        .feature-visual .vis-label.right { right: 14px; }
+
+        .feature-info { padding: 20px 0; }
+        .feature-number {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: rgba(255,105,180,0.4);
+            letter-spacing: 4px;
+            margin-bottom: 16px;
+        }
+        .feature-title {
+            font-family: var(--font-display);
+            font-size: clamp(22px, 3vw, 36px);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff, var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .feature-body {
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.9;
+            letter-spacing: 0.5px;
+            margin-bottom: 28px;
+        }
+        .feature-stats {
+            display: flex;
+            gap: 32px;
+        }
+        .feat-stat .val {
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-pink);
+            text-shadow: 0 0 15px rgba(255,105,180,0.4);
+        }
+        .feat-stat .lbl {
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.3);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        /* Reveal scroll animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ======== TECH SECTION ======== */
+        .tech-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+        .tech-category {
+            padding: 2rem;
+            background: rgba(10,10,15,0.5);
+            border: 1px solid rgba(0,212,255,0.1);
+            border-radius: 10px;
+        }
+        .tech-cat-title {
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            color: var(--primary-cyan);
+            margin-bottom: 1.2rem;
+            text-transform: uppercase;
+        }
+        .tech-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+        .tech-tag {
+            padding: 0.4rem 0.8rem;
+            background: rgba(0,212,255,0.08);
+            border: 1px solid rgba(0,212,255,0.15);
+            border-radius: 4px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.7);
+            letter-spacing: 0.05em;
+            transition: all 0.3s;
+        }
+        .tech-tag:hover {
+            border-color: var(--primary-cyan);
+            color: var(--primary-cyan);
+            background: rgba(0,212,255,0.15);
+        }
+
+        /* ======== ECOSYSTEM SECTION ======== */
+        .ecosystem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.5rem;
+        }
+        .eco-card {
+            background: rgba(10,10,15,0.7);
+            border: 1px solid rgba(255,105,180,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.4s;
+            text-decoration: none;
+            display: block;
+        }
+        .eco-card:hover {
+            border-color: rgba(255,105,180,0.4);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(255,105,180,0.12);
+        }
+        .eco-card-preview {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+        }
+        .eco-card-preview img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        .eco-card:hover .eco-card-preview img {
+            transform: scale(1.05);
+        }
+        .eco-card-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(10,10,15,0.9) 0%, transparent 60%);
+        }
+        .eco-card-status {
+            position: absolute;
+            top: 10px; right: 10px;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        .eco-card-status.active {
+            background: rgba(0,255,100,0.2);
+            border: 1px solid rgba(0,255,100,0.4);
+            color: #00ff64;
+        }
+        .eco-card-status.dev {
+            background: rgba(255,200,0,0.2);
+            border: 1px solid rgba(255,200,0,0.4);
+            color: #ffc800;
+        }
+        .eco-card-status.archive {
+            background: rgba(150,150,150,0.2);
+            border: 1px solid rgba(150,150,150,0.4);
+            color: #999;
+        }
+        .eco-card-body {
+            padding: 1.2rem 1.5rem 1.5rem;
+        }
+        .eco-card-name {
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.03em;
+        }
+        .eco-card-desc {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.55);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .eco-card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
             margin-bottom: 1rem;
         }
-
-        .error-detail {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.5);
-            font-family: monospace;
+        .eco-tag {
+            padding: 2px 8px;
+            background: rgba(255,105,180,0.08);
+            border: 1px solid rgba(255,105,180,0.15);
+            border-radius: 3px;
+            font-size: 0.65rem;
+            color: var(--accent-pink);
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 0.05em;
+        }
+        .eco-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .eco-card-link {
+            font-family: var(--font-display);
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            color: var(--accent-pink);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .eco-card-link:hover {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255,105,180,0.5);
+        }
+        .eco-card-stars {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.4);
         }
 
+        /* ======== DEMO SECTION ======== */
+        .section-block.demo-fullscreen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0;
+        }
+        .section-block.demo-fullscreen .section-inner {
+            width: 100%;
+            max-width: 1400px;
+        }
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        .demo-video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 10px;
+            border: 1px solid rgba(255,105,180,0.15);
+        }
+        .demo-video-container iframe {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+        }
+
+        /* ======== TIMELINE SECTION ======== */
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0; bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent-pink), rgba(255,105,180,0.1));
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 3rem;
+            padding-left: 30px;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: -34px;
+            top: 5px;
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: var(--accent-pink);
+            border: 2px solid var(--dark-bg);
+            box-shadow: 0 0 15px rgba(255,105,180,0.4);
+        }
+        .timeline-dot.major {
+            width: 16px; height: 16px;
+            left: -36px;
+            top: 3px;
+        }
+        .timeline-date {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            color: var(--accent-pink);
+            margin-bottom: 0.5rem;
+        }
+        .timeline-version {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+        .timeline-changes {
+            list-style: none;
+            padding: 0;
+        }
+        .timeline-changes li {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.8;
+            padding-left: 1.2rem;
+            position: relative;
+        }
+        .timeline-changes li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--accent-pink);
+        }
+        .timeline-tag {
+            display: inline-block;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 0.65rem;
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 0.05em;
+            margin-right: 4px;
+        }
+        .timeline-tag.breaking {
+            background: rgba(255,50,50,0.15);
+            border: 1px solid rgba(255,50,50,0.3);
+            color: #ff5555;
+        }
+        .timeline-tag.feature {
+            background: rgba(0,200,100,0.15);
+            border: 1px solid rgba(0,200,100,0.3);
+            color: #00c864;
+        }
+        .timeline-tag.fix {
+            background: rgba(255,200,0,0.15);
+            border: 1px solid rgba(255,200,0,0.3);
+            color: #ffc800;
+        }
+
+        /* ======== RESPONSIVE ======== */
         @media (max-width: 768px) {
-            .project-hero {
-                padding: 4rem 1rem 3rem;
-                min-height: 50vh;
-            }
-
-            .project-icon-large {
-                font-size: 4rem;
-            }
-
-            .project-hero-title {
-                font-size: 2rem;
-            }
-
-            .project-hero-subtitle {
-                font-size: 1rem;
-            }
-
-            .project-meta {
-                flex-direction: column;
-                gap: 0.8rem;
-                align-items: center;
-            }
-
-            .project-meta-item {
-                font-size: 0.85rem;
-            }
-
-            .project-content {
-                padding: 2rem 1rem;
-            }
-
-            .tabs {
-                overflow-x: auto;
-                flex-wrap: nowrap;
-                gap: 0.5rem;
-                padding-bottom: 0.5rem;
-            }
-
-            .tab {
-                flex-shrink: 0;
-                font-size: 0.85rem;
-                padding: 0.6rem 1rem;
-            }
-
-            .markdown-content {
-                padding: 1rem;
-            }
-
-            .markdown-content h1 {
-                font-size: 1.8rem;
-            }
-
-            .markdown-content h2 {
-                font-size: 1.5rem;
-            }
-
-            .markdown-content h3 {
-                font-size: 1.2rem;
-            }
-
-            .markdown-content pre {
-                font-size: 0.85rem;
-            }
-
-            .copy-button {
-                padding: 0.4rem 0.8rem;
-                font-size: 0.75rem;
-            }
+            .project-hero { min-height: 100vh; margin-top: calc(-1 * var(--header-height)); padding-top: var(--header-height); }
+            .project-hero-title { font-size: clamp(2.5rem, 8vw, 4rem); }
+            .project-hero-subtitle { font-size: 0.7rem; }
+            .hero-panels { display: none; }
+            .hero-corner-tl, .hero-corner-tr, .hero-corner-bl, .hero-corner-br { width: 40px; height: 40px; }
+            .hero-corner-tl { left: 15px; } .hero-corner-tr { right: 15px; }
+            .hero-corner-bl { left: 15px; } .hero-corner-br { right: 15px; }
+            .hero-cta { flex-direction: column; align-items: center; }
+            .hero-btn-primary, .hero-btn-secondary { padding: 12px 30px; font-size: 0.65rem; }
+            .gallery-card { width: 220px; height: 130px; }
+            .section-block { padding: 60px 0; }
+            .section-inner { padding: 0 1.5rem; }
+            .about-layout { grid-template-columns: 1fr; gap: 2rem; }
+            .about-icon-wrapper { width: 240px; height: 240px; }
+            .section-block.about-fullscreen { min-height: auto; padding: 60px 0; }
+            .section-block.demo-fullscreen { min-height: auto; padding: 60px 0; }
+            .feature-row { grid-template-columns: 1fr; gap: 40px; padding: 0 1.5rem; }
+            .feature-row.reverse { direction: ltr; }
+            .features-section { padding: 60px 0; }
+            .ecosystem-grid { grid-template-columns: 1fr; }
+            .tech-categories { grid-template-columns: 1fr; }
         }
-
         @media (max-width: 480px) {
-            .project-hero {
-                padding: 3rem 0.8rem 2rem;
-            }
-
-            .project-icon-large {
-                font-size: 3rem;
-            }
-
-            .project-hero-title {
-                font-size: 1.5rem;
-            }
-
-            .project-hero-subtitle {
-                font-size: 0.85rem;
-            }
-
-            .tab {
-                font-size: 0.75rem;
-                padding: 0.5rem 0.8rem;
-            }
-
-            .markdown-content {
-                padding: 0.8rem;
-            }
-
-            .markdown-content h1 {
-                font-size: 1.5rem;
-            }
-
-            .markdown-content h2 {
-                font-size: 1.3rem;
-            }
+            .project-hero-title { font-size: clamp(2rem, 7vw, 3rem); }
+            .project-hero-subtitle { font-size: 0.65rem; }
+            .hero-eyebrow { font-size: 0.55rem; letter-spacing: 0.3em; }
+            .about-stats { grid-template-columns: 1fr 1fr; }
+            .about-icon-wrapper { width: 180px; height: 180px; }
         }
 
         /* ============================================
            淺色模式樣式
            ============================================ */
-        [data-theme="light"] .project-hero::before {
-            background: radial-gradient(circle at 50% 50%, rgba(0, 153, 204, 0.12), transparent 70%);
-        }
-
-        [data-theme="light"] .project-hero-title {
-            color: #cc0066;
-            text-shadow: none;
-        }
-
-        [data-theme="light"] .project-hero-subtitle {
-            color: rgba(26, 26, 26, 0.8);
-        }
-
-        [data-theme="light"] .project-meta-item {
-            color: #0099cc;
-            background: rgba(0, 153, 204, 0.03);
-            border-color: rgba(0, 153, 204, 0.15);
-        }
-
-        [data-theme="light"] .tab {
-            background: rgba(255, 255, 255, 0.5);
-            color: rgba(26, 26, 26, 0.8);
-            border-color: rgba(0, 153, 204, 0.15);
-        }
-
-        [data-theme="light"] .tab:hover {
-            background: rgba(0, 153, 204, 0.05);
-            color: #0099cc;
-        }
-
-        [data-theme="light"] .tab.active {
-            background: rgba(0, 153, 204, 0.08);
-            color: #0099cc;
-            border-color: rgba(0, 153, 204, 0.4);
-        }
-
-        [data-theme="light"] .markdown-content {
-            color: rgba(26, 26, 26, 0.9);
-        }
-
-        [data-theme="light"] .markdown-content h1,
-        [data-theme="light"] .markdown-content h2,
-        [data-theme="light"] .markdown-content h3 {
-            color: #0099cc;
-        }
-
-        [data-theme="light"] .markdown-content a {
-            color: #0099cc;
-        }
-
-        [data-theme="light"] .markdown-content a:hover {
-            color: #cc0066;
-            border-bottom-color: #cc0066;
-        }
-
-        [data-theme="light"] .markdown-content code {
-            background: rgba(0, 153, 204, 0.05);
-            color: #cc0066;
-        }
-
-        [data-theme="light"] .markdown-content pre {
-            background: rgba(26, 26, 26, 0.92);
-        }
-
-        [data-theme="light"] .markdown-content blockquote {
-            border-left-color: rgba(0, 153, 204, 0.5);
-            background: rgba(0, 153, 204, 0.03);
-            color: rgba(26, 26, 26, 0.85);
-        }
-
-        [data-theme="light"] .markdown-content table th {
-            background: rgba(0, 153, 204, 0.08);
-            color: #0099cc;
-            border-color: rgba(0, 153, 204, 0.15);
-        }
-
-        [data-theme="light"] .markdown-content table td {
-            border-color: rgba(0, 153, 204, 0.1);
-        }
-
-        [data-theme="light"] .markdown-content table tr:hover {
-            background: rgba(0, 153, 204, 0.03);
-        }
-
-        [data-theme="light"] .copy-button {
-            background: rgba(0, 153, 204, 0.05);
-            color: #0099cc;
-        }
-
-        [data-theme="light"] .copy-button:hover {
-            background: rgba(0, 153, 204, 0.1);
-        }
+        [data-theme="light"] .project-hero { background: linear-gradient(135deg, rgba(255,240,245,0.3), transparent); }
+        [data-theme="light"] .hero-grid { background-image: linear-gradient(rgba(204,0,102,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(204,0,102,0.08) 1px, transparent 1px); }
+        [data-theme="light"] .hex-ring { border-color: rgba(204,0,102,0.15); }
+        [data-theme="light"] .hero-eyebrow { color: #cc0066; }
+        [data-theme="light"] .project-hero-title .line1 { background: linear-gradient(135deg, #1a1a1a 0%, #cc0066 50%, #ff69b4 100%); -webkit-background-clip: text; background-clip: text; }
+        [data-theme="light"] .project-hero-title .line2 { -webkit-text-stroke-color: #cc0066; }
+        [data-theme="light"] .project-hero-title .line2::after { display: none; }
+        [data-theme="light"] .project-hero-title .line3 { color: #0099cc; -webkit-text-fill-color: #0099cc; }
+        [data-theme="light"] .project-hero-subtitle { color: rgba(26,26,26,0.6); }
+        [data-theme="light"] .hero-corner-tl, [data-theme="light"] .hero-corner-tr, [data-theme="light"] .hero-corner-bl, [data-theme="light"] .hero-corner-br { border-color: rgba(204,0,102,0.3); }
+        [data-theme="light"] .hero-panel-item { color: rgba(26,26,26,0.5); }
+        [data-theme="light"] .hero-panel-item .val { color: #cc0066; text-shadow: none; }
+        [data-theme="light"] .scroll-indicator { color: rgba(204,0,102,0.4); }
+        [data-theme="light"] .scroll-line { background: linear-gradient(#cc0066, transparent); }
+        [data-theme="light"] .gallery-strip { border-color: rgba(204,0,102,0.1); }
+        [data-theme="light"] .gallery-card { background: rgba(255,255,255,0.8); border-color: rgba(204,0,102,0.12); }
+        [data-theme="light"] .gallery-card:hover { border-color: rgba(204,0,102,0.4); box-shadow: 0 10px 40px rgba(204,0,102,0.1); }
+        [data-theme="light"] .gallery-card-overlay { background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 50%, transparent 100%); }
+        [data-theme="light"] .gallery-card-tag { color: #cc0066; background: rgba(255,255,255,0.9); }
+        [data-theme="light"] .gallery-card-line { background: linear-gradient(90deg, transparent, #cc0066, transparent); }
+        /* Light theme: sections */
+        [data-theme="light"] .section-block:nth-child(even) { background: transparent; }
+        [data-theme="light"] .section-heading { background: linear-gradient(135deg, #1a1a1a 0%, #cc0066 60%, #ff69b4 100%); -webkit-background-clip: text; background-clip: text; }
+        [data-theme="light"] .section-label { color: #cc0066; }
+        [data-theme="light"] .section-desc { color: rgba(26,26,26,0.6); }
+        [data-theme="light"] .section-divider { background: linear-gradient(90deg, #cc0066, transparent); }
+        [data-theme="light"] .about-text p { color: rgba(26,26,26,0.75); }
+        [data-theme="light"] .about-icon-wrapper::before { border-color: rgba(204,0,102,0.2); }
+        [data-theme="light"] .about-icon-wrapper::after { border-color: rgba(0,153,204,0.1); }
+        [data-theme="light"] .about-icon-img { border-color: rgba(204,0,102,0.25); box-shadow: 0 0 40px rgba(204,0,102,0.08); }
+        [data-theme="light"] .about-icon-label { color: rgba(204,0,102,0.4); }
+        [data-theme="light"] .about-stat-card { background: rgba(204,0,102,0.03); border-color: rgba(204,0,102,0.12); }
+        [data-theme="light"] .about-stat-card:hover { border-color: rgba(204,0,102,0.3); box-shadow: 0 10px 30px rgba(204,0,102,0.05); }
+        [data-theme="light"] .about-stat-value { color: #cc0066; }
+        [data-theme="light"] .about-stat-label { color: rgba(26,26,26,0.5); }
+        [data-theme="light"] .feature-visual { background: rgba(245,240,248,0.6); border-color: rgba(204,0,102,0.1); }
+        [data-theme="light"] .feature-title { background: linear-gradient(135deg, #1a1a1a, #cc0066); -webkit-background-clip: text; background-clip: text; }
+        [data-theme="light"] .feature-body { color: rgba(26,26,26,0.55); }
+        [data-theme="light"] .feature-number { color: rgba(204,0,102,0.4); }
+        [data-theme="light"] .feat-stat .val { color: #cc0066; text-shadow: none; }
+        [data-theme="light"] .feat-stat .lbl { color: rgba(26,26,26,0.35); }
+        [data-theme="light"] .feature-visual .vis-label { color: rgba(204,0,102,0.35); }
+        [data-theme="light"] .tech-category { background: rgba(255,255,255,0.5); border-color: rgba(0,153,204,0.08); }
+        [data-theme="light"] .tech-cat-title { color: #0099cc; }
+        [data-theme="light"] .tech-tag { background: rgba(0,153,204,0.05); border-color: rgba(0,153,204,0.12); color: rgba(26,26,26,0.7); }
+        [data-theme="light"] .tech-tag:hover { border-color: #0099cc; color: #0099cc; }
+        [data-theme="light"] .eco-card { background: rgba(255,255,255,0.7); border-color: rgba(204,0,102,0.08); }
+        [data-theme="light"] .eco-card:hover { border-color: rgba(204,0,102,0.3); box-shadow: 0 20px 50px rgba(204,0,102,0.06); }
+        [data-theme="light"] .eco-card-name { color: #1a1a1a; }
+        [data-theme="light"] .eco-card-desc { color: rgba(26,26,26,0.6); }
+        [data-theme="light"] .eco-tag { background: rgba(204,0,102,0.05); border-color: rgba(204,0,102,0.12); color: #cc0066; }
+        [data-theme="light"] .eco-card-link { color: #cc0066; }
+        [data-theme="light"] .eco-card-stars { color: rgba(26,26,26,0.4); }
+        [data-theme="light"] .eco-card-status.active { background: rgba(0,180,80,0.1); border-color: rgba(0,180,80,0.3); color: #00aa44; }
+        [data-theme="light"] .timeline::before { background: linear-gradient(to bottom, #cc0066, rgba(204,0,102,0.1)); }
+        [data-theme="light"] .timeline-dot { background: #cc0066; border-color: #f5f5f7; }
+        [data-theme="light"] .timeline-date { color: #cc0066; }
+        [data-theme="light"] .timeline-version { color: #1a1a1a; }
+        [data-theme="light"] .timeline-changes li { color: rgba(26,26,26,0.6); }
+        [data-theme="light"] .timeline-changes li::before { color: #cc0066; }
+        [data-theme="light"] .demo-video-container { border-color: rgba(204,0,102,0.1); }
     </style>
 </head>
 <body>
+    <!-- Nagato Sakura Entry Animation — Sakura Genesis (Canvas) -->
+    <div class="ns-loader" id="nsLoader">
+        <canvas id="nsCanvas"></canvas>
+    </div>
+    <script>
+        if (sessionStorage.getItem('nsLoaderShown') === 'true') {
+            document.getElementById('nsLoader').remove();
+        }
+    </script>
+
     <div class="cyber-bg"></div>
     <div class="grid-overlay"></div>
     <div class="particles" id="particles"></div>
@@ -527,16 +1057,17 @@
                 
                 <div class="nav-section">
                     <h3 class="nav-section-title">主要頁面</h3>
+                    <li><a href="../../index.html">◆ HOME</a></li>
                     <li><a href="../../pages/about.html">◆ ABOUT</a></li>
                     <li><a href="../../pages/experience.html">◆ EXPERIENCE</a></li>
                     <li><a href="../../pages/skills.html">◆ SKILLS</a></li>
-                    <li><a href="../../pages/contact.html">◆ CONTACT</a></li>
                 </div>
                 
                 <div class="nav-section">
                     <h3 class="nav-section-title">特別內容</h3>
                     <li><a href="../game-center/game-center.html">◆ GAME CENTER</a></li>
-                    <li><a href="nagato-sakura-webos.html" class="active">◆ WEB OS</a></li>
+                    <li><a href="../nagato-sakura-webos/nagato-sakura-webos.html" class="active">◆ WEB OS</a></li>
+                    <li><a href="../music-player/music-player.html">◆ MUSIC PLAYER</a></li>
                 </div>
 
                 <div class="nav-section">
@@ -659,7 +1190,13 @@
                         <option value="dom">粒子風暴</option>
                         <option value="network">網格連線</option>
                         <option value="magnet">磁力連線</option>
-                        <option value="star">宇宙星圜</option>
+                        <option value="star">宇宙星圖</option>
+                        <option value="bubble">氣泡派對</option>
+                        <option value="circuit">電路脈衝</option>
+                        <option value="sakura">櫻花飄落</option>
+                        <option value="glitch">故障雜訊</option>
+                        <option value="laser">雷射禁地</option>
+                        <option value="fleet">宇宙戰艦</option>
                         <option value="off">關閉</option>
                     </select>
                 </div>
@@ -710,110 +1247,277 @@
         </div>
     </div>
 
+    <!-- Side Navigation -->
+    <div class="side-nav">
+        <a href="#hero" class="active" title="首頁" data-offset="80"></a>
+        <a href="#about" title="關於" data-offset="40"></a>
+        <a href="#features" title="功能" data-offset="40"></a>
+        <a href="#demo" title="演示" data-offset="80"></a>
+        <a href="#ecosystem" title="生態" data-offset="40"></a>
+    </div>
+
     <main>
-        <!-- Hero Section -->
-        <section class="project-hero">
-            <div>
-                <div class="project-icon-large">🌸</div>
-                <h1 class="project-hero-title text-gradient-magenta">長門櫻計畫</h1>
-                <p class="project-hero-subtitle">Nagato Sakura Project</p>
-                <div class="project-meta">
-                    <span class="project-meta-item">
-                        <span>📅</span>
-                        <span>2024</span>
-                    </span>
-                    <span class="project-meta-item">
-                        <span>🔧</span>
-                        <span>Python / TensorFlow</span>
-                    </span>
-                    <span class="project-meta-item">
-                        <span>⚡</span>
-                        <span>AI / NLP</span>
-                    </span>
+        <!-- Hero Section (R5 Style) -->
+        <section class="project-hero" id="hero">
+            <div class="hero-grid"></div>
+            <div class="hex-ring hex-ring-1"></div>
+            <div class="hex-ring hex-ring-2"></div>
+            <div class="hex-ring hex-ring-3"></div>
+            <div class="hero-corner hero-corner-tl"></div>
+            <div class="hero-corner hero-corner-tr"></div>
+            <div class="hero-corner hero-corner-bl"></div>
+            <div class="hero-corner hero-corner-br"></div>
+
+            <div class="hero-content">
+                <div class="hero-eyebrow">// NAGATO SAKURA PROJECT — NEXT GEN AI SYSTEM</div>
+                <h1 class="project-hero-title">
+                    <span class="line1">長門櫻</span>
+                    <span class="line2" data-text="NAGATO SAKURA">NAGATO SAKURA</span>
+                    <span class="line3">NEXT GEN ASSITANT // 2026</span>
+                </h1>
+                <p class="project-hero-subtitle">
+                    TECH: PYTHON / PYTORCH &nbsp;|&nbsp; DOMAIN: AGI &nbsp;|&nbsp; STATUS: ACTIVE<br>
+                    // 創造理想的智能女僕
+                </p>
+                <div class="hero-cta">
+                    <a href="https://github.com/stars/AmanoShizukikun/lists/nagato-sakura-project" target="_blank" class="hero-btn-primary">GITHUB</a>
+                    <button class="hero-btn-secondary" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">EXPLORE</button>
+                </div>
+            </div>
+
+            <div class="hero-panels">
+                <div class="hero-panel-item">
+                    <span class="val">v2.0</span>
+                    VERSION
+                </div>
+                <div class="hero-panel-item" style="text-align:right;">
+                    <span class="val">NLP</span>
+                    DOMAIN
+                </div>
+            </div>
+
+            <div class="scroll-indicator">
+                <div class="scroll-line"></div>
+                SCROLL
+            </div>
+        </section>
+
+        <!-- Gallery Strip (R6 Style) -->
+        <div class="gallery-strip">
+            <div class="gallery-track" id="gallery-track"></div>
+        </div>
+
+        <!-- About Section -->
+        <section class="section-block about-fullscreen" id="about">
+            <div class="section-inner">
+                <div class="section-label">// ABOUT THE PROJECT</div>
+                <h2 class="section-heading">關於計畫</h2>
+                <div class="section-divider"></div>
+                <div class="about-layout">
+                    <div class="about-icon-side">
+                        <div class="about-icon-wrapper">
+                            <img class="about-icon-img" src="../nagato-sakura-webos/assets/apps/icon/NS-V2.png" alt="長門櫻 Icon">
+                            <div class="about-icon-label">Nagato Sakura · AI Maid</div>
+                        </div>
+                    </div>
+                    <div class="about-text-side">
+                        <div class="about-text">
+                            <p>「長門櫻計畫」以大型語言模型 (LLM) 為核心，透過工具調用技術串接多個衍生 AI 工具——從影像增強、品質評估到安全偵測，將分散的 AI 能力統合為一個類通用人工智能系統。</p>
+                            <p>你可以透過自然語言與長門櫻對話，她會自動判斷意圖並調用對應的專業工具完成任務。無論是圖片超分辨率還原、JPEG 壓縮修復、影像品質評分，還是詐騙簡訊偵測，一句話即可驅動整個生態系統。</p>
+                        </div>
+                        <div class="about-stats">
+                            <div class="about-stat-card fade-in-up">
+                                <span class="about-stat-value">7+</span>
+                                <span class="about-stat-label">衍生工具</span>
+                            </div>
+                            <div class="about-stat-card fade-in-up">
+                                <span class="about-stat-value">LLM</span>
+                                <span class="about-stat-label">推理核心</span>
+                            </div>
+                            <div class="about-stat-card fade-in-up">
+                                <span class="about-stat-value">2021</span>
+                                <span class="about-stat-label">始於</span>
+                            </div>
+                            <div class="about-stat-card fade-in-up">
+                                <span class="about-stat-value">Active</span>
+                                <span class="about-stat-label">狀態</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Content Section -->
-        <section class="project-content">
-            <div class="tabs">
-                <button class="tab active" data-tab="overview">專案概述</button>
-                <button class="tab" data-tab="features">功能特色</button>
-                <button class="tab" data-tab="docs">技術文檔</button>
-                <button class="tab" data-tab="demo">示範演示</button>
-                <button class="tab" data-tab="derivatives">衍生項目</button>
+        <!-- Features Section (R4 Style) -->
+        <section class="features-section" id="features">
+            <div class="section-inner">
+                <div class="section-label">// CORE CAPABILITIES</div>
+                <h2 class="section-heading">核心功能</h2>
+                <div class="section-divider"></div>
             </div>
 
-            <div class="tab-content active" id="overview">
-                <div class="card">
-                    <h2 style="color: var(--primary-cyan); margin-bottom: 1.5rem;">專案簡介</h2>
-                    <p>
-                        長門櫻計畫是一個新一代 AI 助手系統，旨在創造能夠真正理解人類情感和意圖的智能助手。
-                        該項目結合了最先進的自然語言處理、情感計算和深度學習技術。
-                    </p>
-                    <p>
-                        項目名稱"長門櫻"靈感來自於日本櫻花的美麗與短暫，象徵著 AI 與人類互動中的每一刻都應該被珍惜。
-                    </p>
+            <!-- Feature 1: LLM Reasoning Core -->
+            <div class="feature-row reveal">
+                <div class="feature-visual">
+                    <canvas id="feat-canvas-1" style="width:100%;height:100%;display:block"></canvas>
+                    <div class="vis-label right">NEURAL.LLM</div>
                 </div>
-
-                <div class="content-grid" style="margin-top: 1rem;">
-                    <div class="card" style="margin-top: 1rem;">
-                        <h3 style="color: var(--primary-magenta); margin-bottom: 1rem;">🎯 項目目標</h3>
-                        <ul>
-                            <li>開發情感感知能力</li>
-                            <li>實現自然對話交互</li>
-                            <li>提供個性化服務</li>
-                            <li>保護用戶隱私</li>
-                        </ul>
-                    </div>
-                    <div class="card" style="margin-top: 1rem;">
-                        <h3 style="color: var(--primary-magenta); margin-bottom: 1rem;">🚀 技術棧</h3>
-                        <ul>
-                            <li>Python 3.10+</li>
-                            <li>TensorFlow / PyTorch</li>
-                            <li>Transformers</li>
-                            <li>FastAPI</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <div class="tab-content" id="features">
-                <div class="card">
-                    <h2 style="color: var(--primary-cyan); margin-bottom: 1.5rem;">核心功能</h2>
-                    <div class="content-grid">
-                        <div style="padding: 1.5rem; background: rgba(0, 212, 255, 0.05); border-radius: 8px;">
-                            <h4 style="color: var(--primary-cyan); margin-bottom: 0.5rem;">💬 自然對話</h4>
-                            <p>基於先進的語言模型，實現流暢自然的對話體驗。</p>
+                <div class="feature-info">
+                    <div class="feature-number">01 // LLM REASONING CORE</div>
+                    <h3 class="feature-title">大型語言模型<br>推理核心</h3>
+                    <p class="feature-body">以 GLM4、Qwen3 等大型語言模型為推理核心，支援多輪對話、上下文記憶與角色人格設定。作為整個生態系統的大腦，負責理解使用者意圖並決策調用哪些工具來完成任務。</p>
+                    <div class="feature-stats">
+                        <div class="feat-stat">
+                            <div class="val">Multi</div>
+                            <div class="lbl">LLM BACKENDS</div>
                         </div>
-                        <div style="padding: 1.5rem; background: rgba(255, 0, 128, 0.05); border-radius: 8px;">
-                            <h4 style="color: var(--primary-magenta); margin-bottom: 0.5rem;">❤️ 情感識別</h4>
-                            <p>通過情感計算技術，理解用戶的情緒狀態。</p>
-                        </div>
-                        <div style="padding: 1.5rem; background: rgba(0, 212, 255, 0.05); border-radius: 8px;">
-                            <h4 style="color: var(--primary-cyan); margin-bottom: 0.5rem;">🧠 上下文記憶</h4>
-                            <p>記住對話歷史，提供連貫的交互體驗。</p>
-                        </div>
-                        <div style="padding: 1.5rem; background: rgba(255, 0, 128, 0.05); border-radius: 8px;">
-                            <h4 style="color: var(--primary-magenta); margin-bottom: 0.5rem;">🎨 個性化</h4>
-                            <p>根據用戶偏好調整回應風格和內容。</p>
+                        <div class="feat-stat">
+                            <div class="val">∞</div>
+                            <div class="lbl">CONTEXT DEPTH</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="tab-content" id="docs">
-                <div class="card markdown-content" id="docsContent">
-                    <p>載入文檔中...</p>
+            <!-- Feature 2: Tool Calling Framework -->
+            <div class="feature-row reverse reveal">
+                <div class="feature-visual">
+                    <canvas id="feat-canvas-2" style="width:100%;height:100%;display:block"></canvas>
+                    <div class="vis-label left">TOOL.CALL</div>
+                </div>
+                <div class="feature-info">
+                    <div class="feature-number">02 // TOOL CALLING FRAMEWORK</div>
+                    <h3 class="feature-title">工具調用<br>協作框架</h3>
+                    <p class="feature-body">透過工具調用 (Tool Calling) 技術，LLM 能自動判斷意圖並調度對應的衍生項目工具——影像增強、品質評估、安全偵測等，讓多個專精 AI 模組協同運作，形成類通用人工智能的完整能力鏈。</p>
+                    <div class="feature-stats">
+                        <div class="feat-stat">
+                            <div class="val">7+</div>
+                            <div class="lbl">TOOL MODULES</div>
+                        </div>
+                        <div class="feat-stat">
+                            <div class="val">Auto</div>
+                            <div class="lbl">ORCHESTRATION</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="tab-content" id="demo">
-                <div class="card">
-                    <h2 style="color: var(--primary-cyan); margin-bottom: 1.5rem;">演示影片與範例</h2>
-                    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; margin-top: 1.5rem;">
-                        <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px;" src="https://www.youtube.com/embed/LSTw9uEcpqg?si=ZtgQ_FzpknLAnXLi" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            <!-- Feature 3: Image Enhancement Engine -->
+            <div class="feature-row reveal">
+                <div class="feature-visual">
+                    <canvas id="feat-canvas-3" style="width:100%;height:100%;display:block"></canvas>
+                    <div class="vis-label right">IMG.ENHANCE</div>
+                </div>
+                <div class="feature-info">
+                    <div class="feature-number">03 // IMAGE ENHANCEMENT</div>
+                    <h3 class="feature-title">影像增強<br>引擎</h3>
+                    <p class="feature-body">「影像魅影 (Image-Charm)」是核心影像工具，搭載鏡花 (Kyouka)、界律 (Kairitsu)、斷律 (Ritsuka) 三大模型系列，支援動漫 / 寫實 JPEG 壓縮還原、馬賽克修復與 AI 超分辨率增強，並提供 GUI 訓練器與擴充插件系統。</p>
+                    <div class="feature-stats">
+                        <div class="feat-stat">
+                            <div class="val">3</div>
+                            <div class="lbl">MODEL SERIES</div>
+                        </div>
+                        <div class="feat-stat">
+                            <div class="val">25K</div>
+                            <div class="lbl">TRAIN PARAMS</div>
+                        </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Feature 4: Computer Vision -->
+            <div class="feature-row reverse reveal">
+                <div class="feature-visual">
+                    <canvas id="feat-canvas-4" style="width:100%;height:100%;display:block"></canvas>
+                    <div class="vis-label left">VISION.CV</div>
+                </div>
+                <div class="feature-info">
+                    <div class="feature-number">04 // COMPUTER VISION</div>
+                    <h3 class="feature-title">計算機視覺<br>分析系統</h3>
+                    <p class="feature-body">整合圖像品質評估 (NS-IQA)、自動分類 (NS-C) 與美學評分等多項計算機視覺能力。模型推薦系統能根據圖片特徵自動建議最佳處理模型，支援 CUDA / MPS 跨平台硬體加速推理。</p>
+                    <div class="feature-stats">
+                        <div class="feat-stat">
+                            <div class="val">NS-IQA</div>
+                            <div class="lbl">QUALITY SCORE</div>
+                        </div>
+                        <div class="feat-stat">
+                            <div class="val">NS-C</div>
+                            <div class="lbl">AUTO CLASSIFY</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 5: Community Platform -->
+            <div class="feature-row reveal">
+                <div class="feature-visual">
+                    <canvas id="feat-canvas-5" style="width:100%;height:100%;display:block"></canvas>
+                    <div class="vis-label right">AUDIO.WAVE</div>
+                </div>
+                <div class="feature-info">
+                    <div class="feature-number">05 // COMMUNITY PLATFORM</div>
+                    <h3 class="feature-title">社群互動<br>多媒體平台</h3>
+                    <p class="feature-body">透過 Discord Bot 提供 24/7 即時互動介面，支援文字聊天、語音通話、音樂串流播放與伺服器管理等完整功能。使用者可在群組中直接調用長門櫻的所有 AI 能力，將日常社群變成智慧工作站。</p>
+                    <div class="feature-stats">
+                        <div class="feat-stat">
+                            <div class="val">24/7</div>
+                            <div class="lbl">ONLINE</div>
+                        </div>
+                        <div class="feat-stat">
+                            <div class="val">50+</div>
+                            <div class="lbl">COMMANDS</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 6: Security Detection -->
+            <div class="feature-row reverse reveal">
+                <div class="feature-visual">
+                    <canvas id="feat-canvas-6" style="width:100%;height:100%;display:block"></canvas>
+                    <div class="vis-label left">SHIELD.SEC</div>
+                </div>
+                <div class="feature-info">
+                    <div class="feature-number">06 // SECURITY SYSTEM</div>
+                    <h3 class="feature-title">安全偵測<br>防護系統</h3>
+                    <p class="feature-body">SMS-Checker 運用 NLP 技術即時識別詐騙簡訊與惡意資訊，守護使用者的數位生活安全。結合持續學習機制與社群回饋不斷優化模型，偵測準確率持續提升。</p>
+                    <div class="feature-stats">
+                        <div class="feat-stat">
+                            <div class="val">NLP</div>
+                            <div class="lbl">DETECTION</div>
+                        </div>
+                        <div class="feat-stat">
+                            <div class="val">99%</div>
+                            <div class="lbl">ACCURACY</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Section -->
+        <section class="section-block demo-fullscreen" id="demo">
+            <div class="section-inner">
+                <div class="section-label">// DEMONSTRATION</div>
+                <h2 class="section-heading">演示展示</h2>
+                <div class="section-divider"></div>
+                <div class="demo-grid">
+                    <div class="demo-video-container">
+                        <iframe src="https://www.youtube-nocookie.com/embed/LSTw9uEcpqg?si=ZtgQ_FzpknLAnXLi" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ecosystem Section -->
+        <section class="section-block" id="ecosystem">
+            <div class="section-inner">
+                <div class="section-label">// PROJECT ECOSYSTEM</div>
+                <h2 class="section-heading">生態系統</h2>
+                <div class="section-divider"></div>
+                <div class="section-desc">長門櫻計畫由多個專精子項目組成，每個項目專注於特定的 AI 應用領域。</div>
+                <div class="ecosystem-grid" id="ecosystem-grid">
+                    <!-- Populated by JavaScript -->
                 </div>
             </div>
         </section>
@@ -823,61 +1527,1200 @@
     <script src="../../assets/js/live2d-manager.js"></script>
     <script src="../../assets/js/navigation.js"></script>
     <script src="../../assets/js/animations.js"></script>
-    <script src="../../assets/js/markdown.js"></script>
 
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Prevent default CYBER NEXUS loader on this page
+            sessionStorage.setItem('loaderShown', 'true');
+
             // 初始化基礎功能
             Core.initBackground();
             Navigation.init();
             Animations.init();
             Core.initSmoothScroll();
-            
-            // 初始化 Markdown 渲染器
-            MarkdownRenderer.init();
 
-            // 標籤切換
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
+            // ======== CUSTOM NS ENTRY ANIMATION — SAKURA GENESIS (Canvas) ========
+            const nsLoader = document.getElementById('nsLoader');
+            if (nsLoader) {
+                sessionStorage.setItem('nsLoaderShown', 'true');
+                sessionStorage.setItem('loaderShown', 'true');
 
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const targetId = tab.getAttribute('data-tab');
-                    
-                    // 移除所有活動狀態
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(c => c.classList.remove('active'));
-                    
-                    // 添加活動狀態
-                    tab.classList.add('active');
-                    document.getElementById(targetId).classList.add('active');
+                const canvas = document.getElementById('nsCanvas');
+                const ctx = canvas.getContext('2d');
 
-                    // 如果切換到文檔標籤且尚未載入，則載入文檔
-                    if (targetId === 'docs' && !document.getElementById('docsContent').hasAttribute('data-loaded')) {
-                        loadDocumentation();
+                let cw, ch;
+                const isLight = document.documentElement.dataset.theme === 'light';
+                const BG    = isLight ? '#f5f5f7' : '#030308';
+                const PINK  = isLight ? '#cc0066' : '#ff69b4';
+                const CYAN  = isLight ? '#0099cc' : '#00d4ff';
+                const WHITE = isLight ? '#1a1a1a' : '#ffffff';
+
+                // --- Sakura petal polygons (5 petals) ---
+                const sakuraPolys = [];
+                for (let i = 0; i < 5; i++) {
+                    const a = (i * 72 - 90) * Math.PI / 180;
+                    const w = 28 * Math.PI / 180;
+                    sakuraPolys.push([
+                        [Math.cos(a-w)*14, Math.sin(a-w)*14],
+                        [Math.cos(a-w*0.6)*50, Math.sin(a-w*0.6)*50],
+                        [Math.cos(a-w*0.22)*72, Math.sin(a-w*0.22)*72],
+                        [Math.cos(a)*58, Math.sin(a)*58],
+                        [Math.cos(a+w*0.22)*72, Math.sin(a+w*0.22)*72],
+                        [Math.cos(a+w*0.6)*50, Math.sin(a+w*0.6)*50],
+                        [Math.cos(a+w)*14, Math.sin(a+w)*14]
+                    ]);
+                }
+
+                function easeOutExpo(x) { return x === 1 ? 1 : 1 - Math.pow(2, -10 * x); }
+
+                function nsResize() {
+                    cw = canvas.width = Math.max(1, window.innerWidth);
+                    ch = canvas.height = Math.max(1, window.innerHeight);
+                }
+                window.addEventListener('resize', nsResize);
+                nsResize();
+
+                // Timeline (ms)
+                const T1 = 1000;           // End HUD
+                const T2 = 2000;           // End HUD expand + sakura trace
+                const T3 = 2700;           // End sakura spin-scale-fade
+                const T_EXIT = 2500;       // Start loader fade (overlaps Phase 3)
+
+                const nsStart = performance.now();
+                let exitTriggered = false;
+
+                function nsAnimate(time) {
+                    const elapsed = time - nsStart;
+
+                    // Exit: fade out loader (starts while Phase 3 still running)
+                    if (elapsed >= T_EXIT && !exitTriggered) {
+                        exitTriggered = true;
+                        nsLoader.style.transition = 'opacity 0.3s ease';
+                        requestAnimationFrame(() => { nsLoader.style.opacity = '0'; });
+                        setTimeout(() => { window.removeEventListener('resize', nsResize); nsLoader.remove(); }, 400);
                     }
-                });
-            });
+                    if (elapsed >= T3) return;
 
-            // 載入技術文檔（示例）
-            async function loadDocumentation() {
-                const docsContent = document.getElementById('docsContent');
-                docsContent.setAttribute('data-loaded', 'true');
-                
-                // 這裡可以載入真實的 Markdown 文件
-                await MarkdownRenderer.renderFile('docs/README.md', docsContent);
-                
+                    // Background
+                    ctx.fillStyle = BG;
+                    ctx.fillRect(0, 0, cw, ch);
+                    // Scanlines
+                    ctx.fillStyle = isLight ? 'rgba(0,0,0,0.01)' : 'rgba(0,212,255,0.015)';
+                    for (let y = 0; y < ch; y += 4) ctx.fillRect(0, y, cw, 1);
+                    // Vignette
+                    const vig = ctx.createRadialGradient(cw/2, ch/2, ch/5, cw/2, ch/2, ch);
+                    vig.addColorStop(0, 'transparent');
+                    vig.addColorStop(1, isLight ? 'rgba(245,245,247,0.5)' : 'rgba(0,0,0,0.85)');
+                    ctx.fillStyle = vig; ctx.fillRect(0, 0, cw, ch);
 
-                MarkdownRenderer.addCopyButtons(docsContent);
+                    if (elapsed < T1) {
+                        // Phase 1: HUD rings
+                        nsDrawHUD(elapsed);
+                    } else if (elapsed < T2) {
+                        // Phase 2: HUD expand + sakura trace
+                        nsExpandHUD(elapsed, T1, T2);
+                        nsDrawLogo(elapsed, 'trace', T1, T2);
+                    } else {
+                        // Phase 3: Sakura spin + scale up + fade out
+                        nsDrawLogoExit(elapsed, T2, T3);
+                    }
+
+                    requestAnimationFrame(nsAnimate);
+                }
+
+                // --- Drawing functions ---
+
+                // Rotating HUD rings + center hexagon
+                function nsDrawHUD(elapsed) {
+                    ctx.save();
+                    ctx.translate(cw/2, ch/2 - 40);
+                    ctx.strokeStyle = PINK; ctx.lineWidth = 2;
+                    ctx.setLineDash([15, 20, 50, 20]); ctx.lineDashOffset = -elapsed * 0.08;
+                    ctx.beginPath(); ctx.arc(0, 0, 155, 0, Math.PI*2); ctx.stroke();
+                    ctx.strokeStyle = CYAN; ctx.lineWidth = 1;
+                    ctx.setLineDash([5, 10]); ctx.lineDashOffset = elapsed * 0.05;
+                    ctx.beginPath(); ctx.arc(0, 0, 105, 0, Math.PI*2); ctx.stroke();
+                    ctx.strokeStyle = WHITE; ctx.setLineDash([]); ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    const hr = 38 + Math.sin(elapsed * 0.008) * 5;
+                    for (let i = 0; i < 6; i++) {
+                        const ang = i * Math.PI / 3 + elapsed * 0.002;
+                        i === 0 ? ctx.moveTo(Math.cos(ang)*hr, Math.sin(ang)*hr) : ctx.lineTo(Math.cos(ang)*hr, Math.sin(ang)*hr);
+                    }
+                    ctx.closePath(); ctx.stroke();
+                    ctx.restore();
+                }
+
+                // HUD expanding outward and fading
+                function nsExpandHUD(elapsed, start, end) {
+                    const p = Math.min((elapsed - start) / (end - start), 1);
+                    const e = easeOutExpo(p);
+                    ctx.save();
+                    ctx.translate(cw/2, ch/2 - 40);
+                    ctx.globalAlpha = Math.max(1 - p, 0);
+                    ctx.strokeStyle = PINK; ctx.lineWidth = 2; ctx.setLineDash([15, 20, 50, 20]);
+                    ctx.beginPath(); ctx.arc(0, 0, 155 + e*400, 0, Math.PI*2); ctx.stroke();
+                    ctx.strokeStyle = CYAN; ctx.lineWidth = 1; ctx.setLineDash([5, 10]);
+                    ctx.beginPath(); ctx.arc(0, 0, 105 + e*300, 0, Math.PI*2); ctx.stroke();
+                    ctx.restore();
+                }
+
+                // Sakura logo: trace outline
+                function nsDrawLogo(elapsed, mode, start, end) {
+                    ctx.save();
+                    ctx.translate(cw/2, ch/2 - 40);
+                    const sc = Math.min(cw, ch) * 0.003;
+                    ctx.scale(sc, sc);
+                    const prog = easeOutExpo((elapsed - start) / (end - start));
+                    ctx.strokeStyle = PINK; ctx.lineWidth = 2.5 / sc;
+                    ctx.shadowColor = PINK; ctx.shadowBlur = 18 / sc;
+                    ctx.setLineDash([1200]); ctx.lineDashOffset = 1200 * (1 - prog);
+                    for (const poly of sakuraPolys) {
+                        ctx.beginPath(); ctx.moveTo(poly[0][0], poly[0][1]);
+                        for (let j = 1; j < poly.length; j++) ctx.lineTo(poly[j][0], poly[j][1]);
+                        ctx.closePath(); ctx.stroke();
+                    }
+                    ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI*2); ctx.stroke();
+                    ctx.restore();
+                }
+
+                // Sakura logo exit: rotate 144° + scale up + fade out (outline only)
+                function nsDrawLogoExit(elapsed, start, end) {
+                    const p = Math.min((elapsed - start) / (end - start), 1);
+                    const ep = p * p * p;  // ease-in cubic: 逐漸加快
+                    const alpha = Math.max(1 - p * 1.5, 0);
+                    const scale = 1 + ep * 8;
+                    const rot = ep * Math.PI * 1.2;  // 216°
+
+                    ctx.save();
+                    ctx.translate(cw/2, ch/2 - 40);
+                    ctx.rotate(rot);
+                    const sc = Math.min(cw, ch) * 0.003 * scale;
+                    ctx.scale(sc, sc);
+                    ctx.globalAlpha = alpha;
+
+                    // Stroke-only sakura
+                    ctx.strokeStyle = PINK;
+                    ctx.lineWidth = 2.5 / sc;
+                    ctx.shadowColor = PINK;
+                    ctx.shadowBlur = 18 / sc;
+                    ctx.setLineDash([]);
+                    for (const poly of sakuraPolys) {
+                        ctx.beginPath(); ctx.moveTo(poly[0][0], poly[0][1]);
+                        for (let j = 1; j < poly.length; j++) ctx.lineTo(poly[j][0], poly[j][1]);
+                        ctx.closePath(); ctx.stroke();
+                    }
+                    // Center circle
+                    ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI*2); ctx.stroke();
+
+                    ctx.restore();
+                }
+
+                requestAnimationFrame(nsAnimate);
             }
 
-            // 添加櫻花特效
-            setInterval(() => {
-                if (Math.random() > 0.95) {
-                    Animations.createSakuraEffect(5000);
+            // ======== REVEAL SCROLL ANIMATION ========
+            const revealObs = new IntersectionObserver((entries) => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) {
+                        setTimeout(() => e.target.classList.add('visible'), 100);
+                    }
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+            // ======== FEATURE CANVAS ANIMATIONS (R4 Style) ========
+
+            // Canvas 1: Neural Network — LLM Reasoning Core (R4 Canvas 9 style)
+            (function() {
+                const el = document.getElementById('feat-canvas-1');
+                if (!el) return;
+                const parent = el.parentElement;
+                el.width = parent.clientWidth || 600;
+                el.height = parent.clientHeight || 400;
+                const ctx = el.getContext('2d');
+                let frame = 0;
+                const W = el.width, H = el.height;
+
+                const layers = [3, 5, 7, 7, 5, 3];
+                const neuronPositions = [];
+                const layerSpacing = W / (layers.length + 1);
+                layers.forEach((count, li) => {
+                    const x = layerSpacing * (li + 1);
+                    const neurons = [];
+                    for (let i = 0; i < count; i++) {
+                        const y = (H / (count + 1)) * (i + 1);
+                        neurons.push({ x, y, activation: 0, phase: Math.random() * Math.PI * 2 });
+                    }
+                    neuronPositions.push(neurons);
+                });
+
+                const pulses = [];
+
+                function draw() {
+                    ctx.clearRect(0, 0, W, H);
+                    frame++;
+
+                    // Draw connections
+                    for (let li = 0; li < neuronPositions.length - 1; li++) {
+                        const layer = neuronPositions[li];
+                        const nextLayer = neuronPositions[li + 1];
+                        layer.forEach((n, ni) => {
+                            nextLayer.forEach((nn, nni) => {
+                                const weight = Math.sin(frame * 0.01 + ni * 0.5 + nni * 0.3 + li) * 0.5 + 0.5;
+                                ctx.strokeStyle = `rgba(0,212,255,${0.03 + weight * 0.08})`;
+                                ctx.lineWidth = 0.5 + weight * 0.5;
+                                ctx.beginPath();
+                                ctx.moveTo(n.x, n.y);
+                                ctx.lineTo(nn.x, nn.y);
+                                ctx.stroke();
+                            });
+                        });
+                    }
+
+                    // Generate pulses
+                    if (frame % 6 === 0) {
+                        const sn = Math.floor(Math.random() * neuronPositions[0].length);
+                        const tn = Math.floor(Math.random() * neuronPositions[1].length);
+                        const from = neuronPositions[0][sn];
+                        const to = neuronPositions[1][tn];
+                        pulses.push({
+                            fromX: from.x, fromY: from.y, toX: to.x, toY: to.y,
+                            t: 0, speed: 0.025 + Math.random() * 0.02,
+                            nextLayer: 1, nextNeuron: tn,
+                            hue: Math.random() > 0.5 ? 220 : 190
+                        });
+                    }
+
+                    // Update pulses
+                    for (let pi = pulses.length - 1; pi >= 0; pi--) {
+                        const p = pulses[pi];
+                        p.t += p.speed;
+                        const x = p.fromX + (p.toX - p.fromX) * p.t;
+                        const y = p.fromY + (p.toY - p.fromY) * p.t;
+
+                        ctx.fillStyle = `hsla(${p.hue}, 100%, 70%, ${0.9 - p.t * 0.5})`;
+                        ctx.shadowColor = `hsla(${p.hue}, 100%, 60%, 0.6)`;
+                        ctx.shadowBlur = 10;
+                        ctx.beginPath();
+                        ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+
+                        // Trail
+                        for (let t = 1; t <= 4; t++) {
+                            const tt = Math.max(0, p.t - t * 0.04);
+                            const tx = p.fromX + (p.toX - p.fromX) * tt;
+                            const ty = p.fromY + (p.toY - p.fromY) * tt;
+                            ctx.fillStyle = `hsla(${p.hue}, 100%, 70%, ${0.25 - t * 0.05})`;
+                            ctx.beginPath();
+                            ctx.arc(tx, ty, 2, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+
+                        if (p.t >= 1) {
+                            neuronPositions[p.nextLayer][p.nextNeuron].activation = 1;
+                            if (p.nextLayer < neuronPositions.length - 1) {
+                                const nl = p.nextLayer + 1;
+                                const nn = Math.floor(Math.random() * neuronPositions[nl].length);
+                                const nFrom = neuronPositions[p.nextLayer][p.nextNeuron];
+                                const nTo = neuronPositions[nl][nn];
+                                pulses.push({
+                                    fromX: nFrom.x, fromY: nFrom.y, toX: nTo.x, toY: nTo.y,
+                                    t: 0, speed: 0.025 + Math.random() * 0.02,
+                                    nextLayer: nl, nextNeuron: nn, hue: p.hue
+                                });
+                            }
+                            pulses.splice(pi, 1);
+                        }
+                    }
+                    while (pulses.length > 60) pulses.shift();
+
+                    // Draw neurons
+                    neuronPositions.forEach((layer, li) => {
+                        layer.forEach(n => {
+                            n.phase += 0.03;
+                            n.activation *= 0.94;
+                            const glow = Math.sin(n.phase) * 0.2 + 0.3 + n.activation * 0.5;
+                            const r = 5 + n.activation * 5;
+
+                            if (n.activation > 0.1) {
+                                const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, r * 3);
+                                grad.addColorStop(0, `rgba(0,212,255,${n.activation * 0.2})`);
+                                grad.addColorStop(1, 'transparent');
+                                ctx.fillStyle = grad;
+                                ctx.beginPath();
+                                ctx.arc(n.x, n.y, r * 3, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+
+                            ctx.fillStyle = `rgba(0,212,255,${glow})`;
+                            ctx.beginPath();
+                            ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.strokeStyle = `rgba(0,212,255,${glow * 0.5})`;
+                            ctx.lineWidth = 1;
+                            ctx.stroke();
+                        });
+
+                        if (layer.length > 0) {
+                            const labelX = layer[0].x;
+                            ctx.fillStyle = 'rgba(0,212,255,0.2)';
+                            ctx.font = "8px 'Share Tech Mono', monospace";
+                            ctx.textAlign = 'center';
+                            const labels = ['INPUT', 'EMBED', 'ATTN.1', 'ATTN.2', 'FFN', 'OUTPUT'];
+                            ctx.fillText(labels[li] || `L${li}`, labelX, H - 8);
+                        }
+                    });
+
+                    // Stats overlay
+                    ctx.fillStyle = 'rgba(0,212,255,0.4)';
+                    ctx.font = "10px 'Share Tech Mono', monospace";
+                    ctx.textAlign = 'left';
+                    const tps = (42 + Math.sin(frame * 0.02) * 8).toFixed(0);
+                    ctx.fillText(`TOKEN/S: ${tps}`, 10, 18);
+                    ctx.fillText(`INFER: ${(12 + Math.sin(frame * 0.03) * 3).toFixed(1)}ms`, 10, 32);
+
+                    requestAnimationFrame(draw);
                 }
-            }, 3000);
+                draw();
+            })();
+
+            // Canvas 2: Tool Calling — Hub & Spoke Orchestration
+            (function() {
+                const el = document.getElementById('feat-canvas-2');
+                if (!el) return;
+                const parent = el.parentElement;
+                el.width = parent.clientWidth || 600;
+                el.height = parent.clientHeight || 400;
+                const ctx = el.getContext('2d');
+                let frame = 0;
+                const W = el.width, H = el.height;
+                const cx = W / 2, cy = H / 2;
+
+                const tools = [
+                    { label: 'NS-IC', angle: 0, color: '255,105,180' },
+                    { label: 'NS-IQA', angle: Math.PI * 2 / 7, color: '0,212,255' },
+                    { label: 'NS-C', angle: Math.PI * 2 / 7 * 2, color: '0,255,136' },
+                    { label: 'SMS-CHK', angle: Math.PI * 2 / 7 * 3, color: '255,189,46' },
+                    { label: 'DISCORD', angle: Math.PI * 2 / 7 * 4, color: '138,105,255' },
+                    { label: 'NS-IQE', angle: Math.PI * 2 / 7 * 5, color: '0,212,255' },
+                    { label: 'NS-YT', angle: Math.PI * 2 / 7 * 6, color: '255,105,180' }
+                ];
+
+                const dataStreams = [];
+
+                function draw() {
+                    ctx.clearRect(0, 0, W, H);
+                    frame++;
+
+                    const orbitR = Math.min(W, H) * 0.34;
+
+                    // Background concentric rings
+                    for (let r = 1; r <= 3; r++) {
+                        ctx.strokeStyle = `rgba(255,105,180,${0.04 + Math.sin(frame * 0.015 + r) * 0.02})`;
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([3, 6]);
+                        ctx.beginPath();
+                        ctx.arc(cx, cy, orbitR * r / 3, 0, Math.PI * 2);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
+
+                    // Draw tool nodes and connections
+                    tools.forEach((tool, i) => {
+                        const a = tool.angle + frame * 0.003;
+                        const tx = cx + Math.cos(a) * orbitR;
+                        const ty = cy + Math.sin(a) * orbitR;
+                        tool.cx = tx;
+                        tool.cy = ty;
+
+                        // Connection line to center
+                        const pulse = Math.sin(frame * 0.04 + i * 1.2) * 0.5 + 0.5;
+                        ctx.strokeStyle = `rgba(${tool.color},${0.08 + pulse * 0.12})`;
+                        ctx.lineWidth = 1 + pulse;
+                        ctx.beginPath();
+                        ctx.moveTo(cx, cy);
+                        ctx.lineTo(tx, ty);
+                        ctx.stroke();
+
+                        // Tool node glow
+                        const nodeR = 16 + Math.sin(frame * 0.05 + i) * 3;
+                        const grad = ctx.createRadialGradient(tx, ty, 0, tx, ty, nodeR * 2);
+                        grad.addColorStop(0, `rgba(${tool.color},${0.15 + pulse * 0.1})`);
+                        grad.addColorStop(1, 'transparent');
+                        ctx.fillStyle = grad;
+                        ctx.beginPath();
+                        ctx.arc(tx, ty, nodeR * 2, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        // Tool node
+                        ctx.fillStyle = `rgba(${tool.color},${0.5 + pulse * 0.3})`;
+                        ctx.beginPath();
+                        ctx.arc(tx, ty, nodeR * 0.5, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.strokeStyle = `rgba(${tool.color},${0.3 + pulse * 0.2})`;
+                        ctx.lineWidth = 1.5;
+                        ctx.beginPath();
+                        ctx.arc(tx, ty, nodeR, 0, Math.PI * 2);
+                        ctx.stroke();
+
+                        // Label
+                        ctx.fillStyle = `rgba(${tool.color},0.55)`;
+                        ctx.font = "bold 8px 'Share Tech Mono', monospace";
+                        ctx.textAlign = 'center';
+                        ctx.fillText(tool.label, tx, ty + nodeR + 14);
+                    });
+
+                    // Generate data streams
+                    if (frame % 12 === 0) {
+                        const ti = Math.floor(Math.random() * tools.length);
+                        const outgoing = Math.random() > 0.4;
+                        dataStreams.push({
+                            toolIdx: ti, t: 0, speed: 0.02 + Math.random() * 0.015,
+                            outgoing: outgoing, color: tools[ti].color
+                        });
+                    }
+
+                    // Draw data streams
+                    for (let si = dataStreams.length - 1; si >= 0; si--) {
+                        const s = dataStreams[si];
+                        s.t += s.speed;
+                        const tool = tools[s.toolIdx];
+                        if (!tool.cx) continue;
+                        const fx = s.outgoing ? cx : tool.cx;
+                        const fy = s.outgoing ? cy : tool.cy;
+                        const tx = s.outgoing ? tool.cx : cx;
+                        const ty = s.outgoing ? tool.cy : cy;
+                        const x = fx + (tx - fx) * s.t;
+                        const y = fy + (ty - fy) * s.t;
+
+                        ctx.fillStyle = `rgba(${s.color},${0.9 - s.t * 0.6})`;
+                        ctx.shadowColor = `rgba(${s.color},0.5)`;
+                        ctx.shadowBlur = 8;
+                        ctx.beginPath();
+                        ctx.arc(x, y, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+
+                        for (let t = 1; t <= 3; t++) {
+                            const tt = Math.max(0, s.t - t * 0.04);
+                            const px = fx + (tx - fx) * tt;
+                            const py = fy + (ty - fy) * tt;
+                            ctx.fillStyle = `rgba(${s.color},${0.2 - t * 0.05})`;
+                            ctx.beginPath();
+                            ctx.arc(px, py, 2, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+
+                        if (s.t >= 1) dataStreams.splice(si, 1);
+                    }
+                    while (dataStreams.length > 30) dataStreams.shift();
+
+                    // Central hub
+                    const hubPulse = Math.sin(frame * 0.04) * 0.15 + 0.85;
+                    const hubGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 35);
+                    hubGrad.addColorStop(0, `rgba(255,105,180,${0.3 * hubPulse})`);
+                    hubGrad.addColorStop(0.5, `rgba(255,105,180,${0.1 * hubPulse})`);
+                    hubGrad.addColorStop(1, 'transparent');
+                    ctx.fillStyle = hubGrad;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 35, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = `rgba(255,105,180,${0.5 + hubPulse * 0.3})`;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 12, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = `rgba(255,105,180,${0.3 + hubPulse * 0.2})`;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                    ctx.font = "bold 7px 'Share Tech Mono', monospace";
+                    ctx.textAlign = 'center';
+                    ctx.fillText('LLM', cx, cy + 3);
+
+                    // Stats
+                    ctx.fillStyle = 'rgba(255,105,180,0.4)';
+                    ctx.font = "10px 'Share Tech Mono', monospace";
+                    ctx.textAlign = 'left';
+                    ctx.fillText(`TOOLS: ${tools.length} ACTIVE`, 10, 18);
+
+                    requestAnimationFrame(draw);
+                }
+                draw();
+            })();
+
+            // Canvas 3: Image Enhancement — Pixel Restoration
+            (function() {
+                const el = document.getElementById('feat-canvas-3');
+                if (!el) return;
+                const parent = el.parentElement;
+                el.width = parent.clientWidth || 600;
+                el.height = parent.clientHeight || 400;
+                const ctx = el.getContext('2d');
+                let frame = 0;
+                const W = el.width, H = el.height;
+
+                const cols = 24, rows = 16;
+                const cw = W / cols, ch = H / rows;
+                // Pre-generate noise values
+                const noise = Array.from({length: rows}, () =>
+                    Array.from({length: cols}, () => Math.random())
+                );
+
+                function draw() {
+                    ctx.clearRect(0, 0, W, H);
+                    frame++;
+
+                    // Sweep line position (cycles left to right)
+                    const sweepX = ((frame * 1.5) % (W + 80)) - 40;
+
+                    for (let r = 0; r < rows; r++) {
+                        for (let c = 0; c < cols; c++) {
+                            const px = c * cw;
+                            const py = r * ch;
+                            const cellCenter = px + cw / 2;
+
+                            if (cellCenter < sweepX - 20) {
+                                // Enhanced side — clean, vibrant
+                                const hue = 190 + Math.sin(frame * 0.015 + c * 0.2 + r * 0.3) * 30;
+                                const sat = 80 + noise[r][c] * 20;
+                                const light = 50 + Math.sin(frame * 0.02 + c * 0.15 + r * 0.2) * 15;
+                                ctx.fillStyle = `hsla(${hue}, ${sat}%, ${light}%, 0.35)`;
+                                ctx.fillRect(px + 1, py + 1, cw - 2, ch - 2);
+                            } else if (cellCenter > sweepX + 20) {
+                                // Degraded side — noisy, desaturated
+                                const v = noise[r][c] * 0.6 + Math.random() * 0.15;
+                                ctx.fillStyle = `rgba(${120 + v * 60}, ${100 + v * 40}, ${110 + v * 50}, ${0.15 + v * 0.15})`;
+                                ctx.fillRect(px + 1, py + 1, cw - 2, ch - 2);
+                                // Noise artifacts
+                                if (Math.random() > 0.85) {
+                                    ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.12})`;
+                                    ctx.fillRect(px + Math.random() * cw, py + Math.random() * ch, 3, 2);
+                                }
+                            } else {
+                                // Transition zone — glow
+                                const blend = (cellCenter - (sweepX - 20)) / 40;
+                                ctx.fillStyle = `rgba(255,105,180,${0.2 + (1 - Math.abs(blend - 0.5) * 2) * 0.3})`;
+                                ctx.fillRect(px, py, cw, ch);
+                            }
+                        }
+                    }
+
+                    // Sweep beam
+                    const beamGrad = ctx.createLinearGradient(sweepX - 30, 0, sweepX + 30, 0);
+                    beamGrad.addColorStop(0, 'transparent');
+                    beamGrad.addColorStop(0.5, 'rgba(255,105,180,0.35)');
+                    beamGrad.addColorStop(1, 'transparent');
+                    ctx.fillStyle = beamGrad;
+                    ctx.fillRect(sweepX - 30, 0, 60, H);
+
+                    // Sweep line
+                    ctx.strokeStyle = 'rgba(255,105,180,0.7)';
+                    ctx.lineWidth = 2;
+                    ctx.shadowColor = 'rgba(255,105,180,0.5)';
+                    ctx.shadowBlur = 10;
+                    ctx.beginPath();
+                    ctx.moveTo(sweepX, 0);
+                    ctx.lineTo(sweepX, H);
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+
+                    // Labels
+                    ctx.fillStyle = 'rgba(0,212,255,0.4)';
+                    ctx.font = "9px 'Share Tech Mono', monospace";
+                    ctx.textAlign = 'left';
+                    ctx.fillText('DEGRADED', 10, H - 12);
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = 'rgba(255,105,180,0.5)';
+                    ctx.fillText('ENHANCED', W - 10, H - 12);
+
+                    // PSNR readout
+                    ctx.fillStyle = 'rgba(255,105,180,0.45)';
+                    ctx.font = "10px 'Share Tech Mono', monospace";
+                    ctx.textAlign = 'left';
+                    const psnr = (34 + Math.sin(frame * 0.025) * 2).toFixed(1);
+                    ctx.fillText(`PSNR: ${psnr}dB`, 10, 18);
+
+                    requestAnimationFrame(draw);
+                }
+                draw();
+            })();
+
+            // Canvas 4: Computer Vision — Detection & Classification
+            (function() {
+                const el = document.getElementById('feat-canvas-4');
+                if (!el) return;
+                const parent = el.parentElement;
+                el.width = parent.clientWidth || 600;
+                el.height = parent.clientHeight || 400;
+                const ctx = el.getContext('2d');
+                let frame = 0;
+                const W = el.width, H = el.height;
+
+                // Detection boxes that appear and fade
+                const detections = [];
+                const labels = ['ANIME', 'PHOTO', 'NOISE', 'SHARP', 'BLUR', 'HDR', 'JPEG'];
+                const scores = ['98.2%', '95.7%', '87.3%', '92.1%', '89.6%', '96.4%', '91.8%'];
+
+                function draw() {
+                    ctx.clearRect(0, 0, W, H);
+                    frame++;
+
+                    // Background grid
+                    const gSize = 30;
+                    ctx.strokeStyle = 'rgba(0,212,255,0.04)';
+                    ctx.lineWidth = 0.5;
+                    for (let x = 0; x < W; x += gSize) {
+                        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+                    }
+                    for (let y = 0; y < H; y += gSize) {
+                        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+                    }
+
+                    // Scanning crosshair
+                    const scanX = W * 0.5 + Math.sin(frame * 0.018) * (W * 0.35);
+                    const scanY = H * 0.5 + Math.cos(frame * 0.023) * (H * 0.3);
+
+                    ctx.strokeStyle = 'rgba(255,105,180,0.3)';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([6, 4]);
+                    ctx.beginPath(); ctx.moveTo(scanX, 0); ctx.lineTo(scanX, H); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(0, scanY); ctx.lineTo(W, scanY); ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    // Crosshair circle
+                    ctx.strokeStyle = 'rgba(255,105,180,0.5)';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.arc(scanX, scanY, 20, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(scanX, scanY, 30, -0.5, 0.8);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(scanX, scanY, 30, 2, 3.3);
+                    ctx.stroke();
+
+                    // Generate detections
+                    if (frame % 60 === 0) {
+                        const idx = Math.floor(Math.random() * labels.length);
+                        detections.push({
+                            x: 40 + Math.random() * (W - 140),
+                            y: 40 + Math.random() * (H - 120),
+                            w: 60 + Math.random() * 80,
+                            h: 50 + Math.random() * 60,
+                            label: labels[idx],
+                            score: scores[idx],
+                            life: 1,
+                            color: Math.random() > 0.5 ? '255,105,180' : '0,212,255'
+                        });
+                    }
+
+                    // Draw detections
+                    for (let di = detections.length - 1; di >= 0; di--) {
+                        const d = detections[di];
+                        d.life -= 0.005;
+                        if (d.life <= 0) { detections.splice(di, 1); continue; }
+
+                        const a = Math.min(d.life, 0.7);
+                        // Box
+                        ctx.strokeStyle = `rgba(${d.color},${a})`;
+                        ctx.lineWidth = 1.5;
+                        ctx.strokeRect(d.x, d.y, d.w, d.h);
+                        // Corner accents
+                        const cl = 8;
+                        ctx.lineWidth = 2.5;
+                        ctx.beginPath();
+                        ctx.moveTo(d.x, d.y + cl); ctx.lineTo(d.x, d.y); ctx.lineTo(d.x + cl, d.y);
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(d.x + d.w - cl, d.y); ctx.lineTo(d.x + d.w, d.y); ctx.lineTo(d.x + d.w, d.y + cl);
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(d.x, d.y + d.h - cl); ctx.lineTo(d.x, d.y + d.h); ctx.lineTo(d.x + cl, d.y + d.h);
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(d.x + d.w - cl, d.y + d.h); ctx.lineTo(d.x + d.w, d.y + d.h); ctx.lineTo(d.x + d.w, d.y + d.h - cl);
+                        ctx.stroke();
+
+                        // Label background
+                        ctx.fillStyle = `rgba(${d.color},${a * 0.15})`;
+                        ctx.fillRect(d.x, d.y - 16, ctx.measureText(d.label + ' ' + d.score).width + 16, 15);
+                        ctx.fillStyle = `rgba(${d.color},${a})`;
+                        ctx.font = "bold 9px 'Share Tech Mono', monospace";
+                        ctx.textAlign = 'left';
+                        ctx.fillText(`${d.label} ${d.score}`, d.x + 4, d.y - 4);
+                    }
+                    while (detections.length > 6) detections.shift();
+
+                    // IQA score display
+                    ctx.fillStyle = 'rgba(0,212,255,0.45)';
+                    ctx.font = "10px 'Share Tech Mono', monospace";
+                    ctx.textAlign = 'left';
+                    const iqa = (78 + Math.sin(frame * 0.02) * 12).toFixed(1);
+                    ctx.fillText(`IQA SCORE: ${iqa}`, 10, 18);
+
+                    requestAnimationFrame(draw);
+                }
+                draw();
+            })();
+
+            // Canvas 5: Audio / Community — Immersive Equalizer (R4 Canvas 4 style)
+            (function() {
+                const el = document.getElementById('feat-canvas-5');
+                if (!el) return;
+                const parent = el.parentElement;
+                el.width = parent.clientWidth || 600;
+                el.height = parent.clientHeight || 400;
+                const ctx = el.getContext('2d');
+                let frame = 0;
+                const W = el.width, H = el.height;
+
+                const barCount = 48;
+                const barW = (W - 60) / barCount;
+                const frequencies = Array.from({length: barCount}, () => ({
+                    phase: Math.random() * Math.PI * 2,
+                    speed: 0.03 + Math.random() * 0.04,
+                    amp: 0.3 + Math.random() * 0.7,
+                    decay: 0.92 + Math.random() * 0.06
+                }));
+
+                function draw() {
+                    ctx.clearRect(0, 0, W, H);
+                    frame++;
+                    const centerY = H * 0.5;
+
+                    // Background waveforms
+                    ctx.beginPath();
+                    ctx.strokeStyle = 'rgba(255,105,180,0.06)';
+                    ctx.lineWidth = 1;
+                    for (let x = 0; x < W; x++) {
+                        const y = centerY + Math.sin(x * 0.015 + frame * 0.03) * 40 + Math.sin(x * 0.008 + frame * 0.02) * 25;
+                        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = 'rgba(255,105,180,0.04)';
+                    for (let x = 0; x < W; x++) {
+                        const y = centerY + Math.sin(x * 0.02 - frame * 0.025) * 30 + Math.cos(x * 0.012 + frame * 0.015) * 20;
+                        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+
+                    // Equalizer bars (mirrored)
+                    for (let i = 0; i < barCount; i++) {
+                        const f = frequencies[i];
+                        const val = (Math.sin(frame * f.speed + f.phase) * 0.5 + 0.5) * f.amp;
+                        const barH = val * (H * 0.38);
+                        const x = 30 + i * barW;
+
+                        // Top gradient
+                        const grad = ctx.createLinearGradient(x, centerY - barH, x, centerY);
+                        grad.addColorStop(0, `rgba(255,105,180,${0.9 * val})`);
+                        grad.addColorStop(0.5, `rgba(255,105,180,${0.6 * val})`);
+                        grad.addColorStop(1, `rgba(255,105,180,${0.3 * val})`);
+                        ctx.fillStyle = grad;
+                        ctx.fillRect(x, centerY - barH, barW - 2, barH);
+
+                        // Mirror bottom
+                        const gradB = ctx.createLinearGradient(x, centerY, x, centerY + barH);
+                        gradB.addColorStop(0, `rgba(255,105,180,${0.25 * val})`);
+                        gradB.addColorStop(1, `rgba(255,105,180,${0.03 * val})`);
+                        ctx.fillStyle = gradB;
+                        ctx.fillRect(x, centerY, barW - 2, barH * 0.6);
+
+                        // Peak dot
+                        ctx.fillStyle = `rgba(255,105,180,${0.5 + val * 0.5})`;
+                        ctx.fillRect(x, centerY - barH - 4, barW - 2, 2);
+                    }
+
+                    // Center line
+                    ctx.strokeStyle = 'rgba(255,105,180,0.15)';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([4, 4]);
+                    ctx.beginPath();
+                    ctx.moveTo(0, centerY);
+                    ctx.lineTo(W, centerY);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    // Circular visualizer (corner)
+                    const vcx = W - 70, vcy = 65, vr = 35;
+                    ctx.strokeStyle = 'rgba(255,105,180,0.12)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(vcx, vcy, vr, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    for (let i = 0; i < 32; i++) {
+                        const angle = (i / 32) * Math.PI * 2;
+                        const fIdx = Math.floor((i / 32) * barCount);
+                        const val = (Math.sin(frame * frequencies[fIdx].speed + frequencies[fIdx].phase) * 0.5 + 0.5) * frequencies[fIdx].amp;
+                        const r1 = vr;
+                        const r2 = vr + val * 22;
+                        ctx.beginPath();
+                        ctx.moveTo(vcx + r1 * Math.cos(angle), vcy + r1 * Math.sin(angle));
+                        ctx.lineTo(vcx + r2 * Math.cos(angle), vcy + r2 * Math.sin(angle));
+                        ctx.strokeStyle = `rgba(255,105,180,${0.3 + val * 0.5})`;
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                    }
+
+                    // dB readout
+                    ctx.fillStyle = 'rgba(255,105,180,0.45)';
+                    ctx.font = "10px 'Share Tech Mono', monospace";
+                    ctx.textAlign = 'left';
+                    const db = (-12 + Math.sin(frame * 0.04) * 8).toFixed(1);
+                    ctx.fillText(`VOL: ${db} dB`, 10, 18);
+
+                    requestAnimationFrame(draw);
+                }
+                draw();
+            })();
+
+            // Canvas 6: Security — Shield & Threat Scanner
+            (function() {
+                const el = document.getElementById('feat-canvas-6');
+                if (!el) return;
+                const parent = el.parentElement;
+                el.width = parent.clientWidth || 600;
+                el.height = parent.clientHeight || 400;
+                const ctx = el.getContext('2d');
+                let frame = 0;
+                const W = el.width, H = el.height;
+                const cx = W / 2, cy = H / 2;
+
+                const threats = [];
+
+                function draw() {
+                    ctx.clearRect(0, 0, W, H);
+                    frame++;
+
+                    // Hex grid background
+                    const hexR = 22;
+                    const hexW = hexR * Math.sqrt(3);
+                    const hexH = hexR * 2;
+                    for (let row = -1; row < H / (hexH * 0.75) + 1; row++) {
+                        for (let col = -1; col < W / hexW + 1; col++) {
+                            const hx = col * hexW + (row % 2) * hexW / 2;
+                            const hy = row * hexH * 0.75;
+                            const dist = Math.hypot(hx - cx, hy - cy);
+                            const pulse = Math.sin(frame * 0.02 - dist * 0.015) * 0.5 + 0.5;
+                            ctx.strokeStyle = `rgba(0,212,255,${0.03 + pulse * 0.04})`;
+                            ctx.lineWidth = 0.6;
+                            ctx.beginPath();
+                            for (let s = 0; s < 6; s++) {
+                                const a = (Math.PI / 3) * s - Math.PI / 6;
+                                const px = hx + Math.cos(a) * (hexR - 2);
+                                const py = hy + Math.sin(a) * (hexR - 2);
+                                s === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+                            }
+                            ctx.closePath();
+                            ctx.stroke();
+                        }
+                    }
+
+                    // Radar sweep
+                    const sweepAngle = frame * 0.02;
+                    const sweepR = Math.min(W, H) * 0.42;
+                    ctx.save();
+                    const sweepGrad = ctx.createConicGradient(sweepAngle, cx, cy);
+                    sweepGrad.addColorStop(0, 'rgba(255,105,180,0.08)');
+                    sweepGrad.addColorStop(0.15, 'rgba(255,105,180,0)');
+                    sweepGrad.addColorStop(1, 'rgba(255,105,180,0)');
+                    ctx.fillStyle = sweepGrad;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, sweepR, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+
+                    // Radar rings
+                    for (let r = 1; r <= 3; r++) {
+                        ctx.strokeStyle = `rgba(0,212,255,${0.06 + Math.sin(frame * 0.03 + r) * 0.02})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.beginPath();
+                        ctx.arc(cx, cy, sweepR * r / 3, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+
+                    // Shield
+                    const ss = 1 + Math.sin(frame * 0.035) * 0.04;
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.scale(ss, ss);
+
+                    // Shield glow
+                    const shieldGlow = ctx.createRadialGradient(0, 0, 20, 0, 0, 60);
+                    shieldGlow.addColorStop(0, `rgba(255,105,180,${0.08 + Math.sin(frame * 0.04) * 0.04})`);
+                    shieldGlow.addColorStop(1, 'transparent');
+                    ctx.fillStyle = shieldGlow;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 60, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Shield shape
+                    ctx.strokeStyle = `rgba(255,105,180,${0.45 + Math.sin(frame * 0.05) * 0.15})`;
+                    ctx.lineWidth = 2.5;
+                    ctx.shadowColor = 'rgba(255,105,180,0.3)';
+                    ctx.shadowBlur = 12;
+                    ctx.beginPath();
+                    ctx.moveTo(0, -45);
+                    ctx.lineTo(40, -22);
+                    ctx.lineTo(40, 18);
+                    ctx.quadraticCurveTo(20, 48, 0, 55);
+                    ctx.quadraticCurveTo(-20, 48, -40, 18);
+                    ctx.lineTo(-40, -22);
+                    ctx.closePath();
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+
+                    // Inner shield
+                    ctx.strokeStyle = `rgba(0,212,255,${0.2 + Math.sin(frame * 0.06) * 0.1})`;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(0, -30);
+                    ctx.lineTo(26, -14);
+                    ctx.lineTo(26, 12);
+                    ctx.quadraticCurveTo(13, 33, 0, 38);
+                    ctx.quadraticCurveTo(-13, 33, -26, 12);
+                    ctx.lineTo(-26, -14);
+                    ctx.closePath();
+                    ctx.stroke();
+
+                    // Check mark
+                    ctx.strokeStyle = 'rgba(255,105,180,0.8)';
+                    ctx.lineWidth = 3;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(-10, 5);
+                    ctx.lineTo(-2, 14);
+                    ctx.lineTo(14, -8);
+                    ctx.stroke();
+                    ctx.lineCap = 'butt';
+
+                    ctx.restore();
+
+                    // Threat indicators
+                    if (frame % 90 === 0) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const dist = sweepR * 0.5 + Math.random() * sweepR * 0.4;
+                        threats.push({
+                            x: cx + Math.cos(angle) * dist,
+                            y: cy + Math.sin(angle) * dist,
+                            life: 1, detected: false
+                        });
+                    }
+
+                    for (let ti = threats.length - 1; ti >= 0; ti--) {
+                        const t = threats[ti];
+                        t.life -= 0.008;
+                        if (t.life <= 0) { threats.splice(ti, 1); continue; }
+
+                        if (t.life < 0.5 && !t.detected) t.detected = true;
+                        const col = t.detected ? '0,255,136' : '255,70,70';
+                        const a = Math.min(t.life, 0.8);
+
+                        ctx.fillStyle = `rgba(${col},${a * 0.6})`;
+                        ctx.beginPath();
+                        ctx.arc(t.x, t.y, 4, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        // Ping ring
+                        const pingR = (1 - t.life) * 20 + 4;
+                        ctx.strokeStyle = `rgba(${col},${a * 0.3})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.arc(t.x, t.y, pingR, 0, Math.PI * 2);
+                        ctx.stroke();
+
+                        // Label
+                        ctx.fillStyle = `rgba(${col},${a * 0.7})`;
+                        ctx.font = "7px 'Share Tech Mono', monospace";
+                        ctx.textAlign = 'left';
+                        ctx.fillText(t.detected ? 'BLOCKED' : 'THREAT', t.x + 8, t.y - 2);
+                    }
+                    while (threats.length > 5) threats.shift();
+
+                    // Stats
+                    ctx.fillStyle = 'rgba(0,212,255,0.45)';
+                    ctx.font = "10px 'Share Tech Mono', monospace";
+                    ctx.textAlign = 'left';
+                    const blocked = Math.floor(frame / 90);
+                    ctx.fillText(`THREATS BLOCKED: ${blocked}`, 10, 18);
+
+                    requestAnimationFrame(draw);
+                }
+                draw();
+            })();
+
+            // ======== ECOSYSTEM CARDS ========
+            const GITHUB_USER = 'AmanoShizukikun';
+            const ecosystemProjects = [
+                {
+                    name: 'Nagato-Sakura-Discord-Bot-py',
+                    desc: '以 Python 撰寫的 Discord 機器人，作為與長門櫻溝通的管道，支援文字聊天、語音互動、音樂播放等功能。',
+                    tags: ['Python', 'Discord.py', 'GLM4', 'Qwen3'],
+                    status: 'active',
+                    repo: 'Nagato-Sakura-Discord-Bot-py'
+                },
+                {
+                    name: 'Nagato-Sakura-Image-Quality-Assessment',
+                    desc: '基於深度學習的圖像品質評估系統，自動分析並評分圖像的清晰度、色彩、構圖等品質指標。',
+                    tags: ['Python', 'PyTorch', 'Computer Vision'],
+                    status: 'active',
+                    repo: 'Nagato-Sakura-Image-Quality-Assessment'
+                },
+                {
+                    name: 'Nagato-Sakura-Image-Charm',
+                    desc: '影像增強與評估工具，搭載鏡花 / 界律 / 斷律三大模型系列，支援 AI 超分辨率、JPEG 壓縮還原、馬賽克修復與影片增強。',
+                    tags: ['Python', 'PyTorch', 'Super Resolution'],
+                    status: 'active',
+                    repo: 'Nagato-Sakura-Image-Charm'
+                },
+                {
+                    name: 'Nagato-Sakura-SMS-Checker',
+                    desc: 'SMS 簡訊安全檢測工具，使用 AI 識別詐騙簡訊和垃圾資訊，保護使用者數位安全。',
+                    tags: ['Python', 'NLP', 'Security'],
+                    status: 'active',
+                    repo: 'Nagato-Sakura-SMS-Checker'
+                },
+                {
+                    name: 'Nagato-Sakura-Image-Classification',
+                    desc: '通用圖像分類系統，基於深度學習模型實現多類別圖像自動分類與標註。',
+                    tags: ['Python', 'CNN', 'Classification'],
+                    status: 'active',
+                    repo: 'Nagato-Sakura-Image-Classification'
+                },
+                {
+                    name: 'Nagato-Sakura-Image-Quality-Enhancer',
+                    desc: '圖像品質增強工具，運用超解析度、降噪等技術提升圖像清晰度與視覺品質。',
+                    tags: ['Python', 'Super Resolution', 'Enhancement'],
+                    status: 'active',
+                    repo: 'Nagato-Sakura-Image-Quality-Enhancer'
+                }
+            ];
+
+            // 透過 CORS proxy 取得 GitHub 頁面真實 og:image（自訂 Social Preview）
+            async function fetchSocialPreview(owner, repo) {
+                const fallback = `https://opengraph.githubassets.com/1/${owner}/${repo}`;
+                try {
+                    const url = `https://github.com/${owner}/${repo}`;
+                    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+                    const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
+                    const html = await res.text();
+                    const m = html.match(/property="og:image"\s+content="([^"]+)"|content="([^"]+)"\s+property="og:image"/);
+                    if (m) {
+                        const imgUrl = m[1] || m[2];
+                        if (imgUrl.includes('repository-images.githubusercontent.com')) return imgUrl;
+                    }
+                } catch (e) { /* fallback */ }
+                return fallback;
+            }
+
+            // Build ecosystem cards
+            const ecoGrid = document.getElementById('ecosystem-grid');
+            if (ecoGrid) {
+                const ecoImgMap = {};
+                const ecoFetchAll = ecosystemProjects.map(p =>
+                    fetchSocialPreview(GITHUB_USER, p.repo).then(url => { ecoImgMap[p.repo] = url; })
+                );
+
+                ecosystemProjects.forEach(project => {
+                    const fallbackUrl = `https://opengraph.githubassets.com/1/${GITHUB_USER}/${project.repo}`;
+                    const repoUrl = `https://github.com/${GITHUB_USER}/${project.repo}`;
+                    const card = document.createElement('a');
+                    card.className = 'eco-card fade-in-up';
+                    card.href = repoUrl;
+                    card.target = '_blank';
+                    card.rel = 'noopener noreferrer';
+                    const statusClass = project.status || 'active';
+                    const statusText = { active: 'ACTIVE', dev: 'IN DEV', archive: 'ARCHIVE' }[statusClass] || 'ACTIVE';
+                    card.innerHTML = `
+                        <div class="eco-card-preview">
+                            <img src="${fallbackUrl}" alt="${project.name}" loading="lazy" data-repo="${project.repo}" data-fallback="${fallbackUrl}" onerror="if(this.src!==this.dataset.fallback){this.src=this.dataset.fallback;}">
+                            <div class="eco-card-overlay"></div>
+                            <div class="eco-card-status ${statusClass}">${statusText}</div>
+                        </div>
+                        <div class="eco-card-body">
+                            <div class="eco-card-name">${project.name}</div>
+                            <div class="eco-card-desc">${project.desc}</div>
+                            <div class="eco-card-tags">
+                                ${project.tags.map(t => `<span class="eco-tag">${t}</span>`).join('')}
+                            </div>
+                            <div class="eco-card-footer">
+                                <span class="eco-card-link">VIEW ON GITHUB →</span>
+                            </div>
+                        </div>
+                    `;
+                    ecoGrid.appendChild(card);
+                });
+
+                // Replace images with real social previews
+                Promise.all(ecoFetchAll).then(() => {
+                    ecoGrid.querySelectorAll('img[data-repo]').forEach(img => {
+                        const repo = img.getAttribute('data-repo');
+                        if (ecoImgMap[repo]) img.src = ecoImgMap[repo];
+                    });
+                });
+            }
+
+            // ======== GALLERY STRIP ========
+            const galleryRepos = [
+                { repo: 'Nagato-Sakura-Image-Quality-Assessment',  name: 'Nagato-Sakura-Image-Quality-Assessment' },
+                { repo: 'Nagato-Sakura-Image-Charm',  name: 'Nagato-Sakura-Image-Charm' },
+                { repo: 'Nagato-Sakura-SMS-Checker',  name: 'Nagato-Sakura-SMS-Checker' },
+                { repo: 'Nagato-Sakura-Image-Classification',  name: 'Nagato-Sakura-Image-Classification' },
+                { repo: 'Nagato-Sakura-Discord-Bot-py',  name: 'Nagato-Sakura-Discord-Bot-py' },
+                { repo: 'Nagato-Sakura-Image-Quality-Enhancer',  name: 'Nagato-Sakura-Image-Quality-Enhancer' },
+            ];
+
+            const track = document.getElementById('gallery-track');
+            if (track) {
+                const previewCache = {};
+                const fetchAll = galleryRepos.map(item =>
+                    fetchSocialPreview(GITHUB_USER, item.repo).then(url => {
+                        previewCache[item.repo] = url;
+                    })
+                );
+
+                const items = [...galleryRepos, ...galleryRepos, ...galleryRepos, ...galleryRepos];
+                const cardMap = {};
+                items.forEach(item => {
+                    const fallbackUrl = `https://opengraph.githubassets.com/1/${GITHUB_USER}/${item.repo}`;
+                    const repoUrl = `https://github.com/${GITHUB_USER}/${item.repo}`;
+                    const card = document.createElement('a');
+                    card.className = 'gallery-card';
+                    card.href = repoUrl;
+                    card.target = '_blank';
+                    card.rel = 'noopener noreferrer';
+                    card.innerHTML = `
+                        <img class="gallery-card-img" src="${fallbackUrl}" alt="${item.name}" loading="lazy" data-fallback="${fallbackUrl}" onerror="if(this.src!==this.dataset.fallback){this.src=this.dataset.fallback;}">
+                        <div class="gallery-card-overlay"></div>
+                        <div class="gallery-card-line"></div>
+                        <div class="gallery-card-repo">GITHUB</div>
+                        <div class="gallery-card-tag">${item.name}</div>
+                    `;
+                    if (!cardMap[item.repo]) cardMap[item.repo] = [];
+                    cardMap[item.repo].push(card.querySelector('.gallery-card-img'));
+                    track.appendChild(card);
+                });
+
+                Promise.all(fetchAll).then(() => {
+                    galleryRepos.forEach(item => {
+                        const url = previewCache[item.repo];
+                        if (url && cardMap[item.repo]) {
+                            cardMap[item.repo].forEach(img => { img.src = url; });
+                        }
+                    });
+                });
+            }
         });
     </script>
 </body>

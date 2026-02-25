@@ -637,7 +637,9 @@ async function loadWidget(config) {
       window.addEventListener('mouseover', (ev) => {
         for (let { selector, text } of tips.mouseover) {
           if (!ev.target?.closest(selector)) continue;
-          showMessage(text.replace('{text}', ev.target.innerText), 4000, 8);
+          let msg = randomSelection(text);
+          if (typeof msg === 'string') msg = msg.replace('{text}', ev.target.innerText);
+          showMessage(msg, 4000, 8);
           return;
         }
       });
