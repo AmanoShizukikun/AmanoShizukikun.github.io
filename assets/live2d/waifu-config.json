@@ -15,7 +15,7 @@
     ],
     "welcome": "<span>歡迎閱讀 \"$1\"</span>",
     "referrer": "Hello！來自 <span>$1</span> 的朋友",
-    "hoverBody": ["幹嘛呢你，快把手拿開～～", "鼠…鼠標放錯地方了！"],
+    "hoverBody": ["幹嘛呢你，快把手拿開～～"],
     "tapBody": ["是…是不小心碰到了吧…", "嗚哇！請小心別嚇到我～", "嗚…這是什麼感覺？", "你想幹嘛呀～", "咦？有人碰我嗎？"],
     "animations": [
       "/assets/live2d/animations/hiyori_m01.motion3.json",
@@ -30,18 +30,38 @@
       "/assets/live2d/animations/hiyori_m10.motion3.json"
     ]
   },
+  "modelMessages": {
+    "NS-V5": {
+      "default": ["嗨～我是長門櫻，有什麼需要我服務的嗎？", "主人好～長門櫻隨時待命中！"],
+      "hitokoto": ["身為女僕，照顧主人是我的使命呢！", "今天也要一起努力哦，主人！", "有什麼想讓我做的事嗎？"],
+      "tapBody": ["主…主人請不要亂摸啦！", "嗚…主人的手好溫暖…", "請、請注意分寸哦主人！"],
+      "hoverBody": ["主人？請把手拿開好嗎…"]
+    },
+    "L2D-CMT-01": {
+      "default": ["嗨，我是 SUMI，代號 L2D-CMT-01，有什麼需要服務的嗎？", "SUMI 系統已上線，等待指令中…"],
+      "hitokoto": ["系統運作正常，一切都在掌控之中。", "作為 AI 助手，效率是我的追求。", "需要什麼幫助嗎？我隨時都在。"],
+      "tapBody": ["偵測到觸碰事件…請注意操作規範。", "這個觸碰似乎不在預期範圍內呢。", "嗯？這是什麼互動協議？"],
+      "hoverBody": ["偵測到異常接觸，請保持適當距離。"]
+    },
+    "WL2D-01": {
+      "default": ["哈囉～我是三和音，代號 SGO，有什麼我可以幫忙的嗎？", "三和音在此，隨時為您效勞～"],
+      "hitokoto": ["音樂是連結人心的橋樑呢♪", "今天要不要來聽首歌放鬆一下？", "每一天都值得用美好的旋律來點綴～"],
+      "tapBody": ["哎呀～別亂碰人家啦！", "嗚…這是什麼意思呀？", "你、你想幹嘛！"],
+      "hoverBody": ["欸～手不要亂放哦！"]
+    }
+  },
   "mouseover": [
     { "selector": "a.btn[href='#projects']", "text": ["要看看天野靜樹的專案嗎？", "這裡有天野靜樹精心打造的專案哦～"] },
     { "selector": "a.btn-secondary[href='#contact']", "text": ["要聯絡天野靜樹看看嗎？", "想跟天野靜樹說點什麼嗎？"] },
 
-    { "selector": ".nav-links a[href='pages/about.html']", "text": "想更了解天野靜樹嗎？點進去看看吧！" },
-    { "selector": ".nav-links a[href='pages/experience.html']", "text": "來看看天野靜樹的經歷吧！" },
-    { "selector": ".nav-links a[href='pages/skills.html']", "text": "想知道天野靜樹會什麼技能嗎？" },
+    { "selector": ".nav-links a[href='pages/about.html'], .nav-links a[href='about.html'], .nav-links a[href*='pages/about']", "text": "想更了解天野靜樹嗎？點進去看看吧！" },
+    { "selector": ".nav-links a[href='pages/experience.html'], .nav-links a[href='experience.html'], .nav-links a[href*='pages/experience']", "text": "來看看天野靜樹的經歷吧！" },
+    { "selector": ".nav-links a[href='pages/skills.html'], .nav-links a[href='skills.html'], .nav-links a[href*='pages/skills']", "text": "想知道天野靜樹會什麼技能嗎？" },
     { "selector": ".nav-links a[href*='game-center']", "text": ["要去遊戲中心玩玩嗎？好多遊戲等你來挑戰！", "遊戲時間到囉～要去玩嗎？"] },
     { "selector": ".nav-links a[href*='nagato-sakura-webos']", "text": "要試試 Web OS 嗎？很酷的哦！" },
     { "selector": ".nav-links a[href*='music-player']", "text": ["想聽音樂嗎？去音樂播放器看看吧～", "來點音樂放鬆一下吧♪"] },
     { "selector": ".nav-links a[href*='youtube']", "text": "去 YouTube 訂閱天野靜樹的頻道吧！" },
-    { "selector": ".nav-links a[href*='github']", "text": "去 GitHub 看看天野靜樹的開源專案吧！" },
+    { "selector": ".nav-links a[href*='github']", "text": "去 GitHub 看看天野靜樹的專案吧！" },
     { "selector": ".nav-links a[href*='discord']", "text": "來 Discord 一起聊天吧～" },
     { "selector": ".nav-links a[href^='mailto:']", "text": "要寫封郵件給天野靜樹嗎？" },
 
@@ -66,14 +86,73 @@
     { "selector": ".side-nav a[href='#hero']", "text": "回到最上面吧～" },
     { "selector": ".side-nav a[href='#projects']", "text": "快速跳到專案區域！" },
     { "selector": ".side-nav a[href='#contact']", "text": "快速跳到聯絡資訊！" },
+    { "selector": ".side-nav a[href='#about'], .side-nav a[href='#about-me']", "text": "跳到關於的部分看看吧～" },
+    { "selector": ".side-nav a[href='#skills']", "text": "快速跳到技能區域！" },
+    { "selector": ".side-nav a[href='#timeline']", "text": "來看看經歷時間線吧！" },
+    { "selector": ".side-nav a[href='#values']", "text": "來看看天野靜樹的理念吧！" },
+    { "selector": ".side-nav a[href='#features']", "text": "來看看核心功能吧！" },
+    { "selector": ".side-nav a[href='#demo']", "text": "有演示影片可以看哦！" },
+    { "selector": ".side-nav a[href='#ecosystem']", "text": "來看看整個生態系統！" },
 
-    { "selector": "#live2d", "text": ["你在看我嗎？", "嘿嘿，被你發現了～", "不要一直盯著我看啦！"] }
+    { "selector": ".back-to-top", "text": "點一下就能回到最上面哦～" },
+
+    { "selector": "#live2d", "text": ["你在看我嗎？", "ㄟ嘿嘿，被你發現了～", "不要一直盯著我看啦！"] }
   ],
-  "click": [],
+  "click": [
+    { "selector": ".back-to-top", "text": "咻～回到最上面囉！" }
+  ],
   "seasons": [],
   "time": [],
+  "pageMessages": {
+    "about": {
+      "mouseover": [
+        { "selector": ".avatar-box", "text": ["這就是天野靜樹本人哦！", "看起來很帥呢～"] },
+        { "selector": ".profile-badge", "text": "AI 架構師！聽起來好厲害呢！" },
+        { "selector": ".sidebar-toggle", "text": "點這裡可以展開或收起側邊欄哦！" },
+        { "selector": ".contact-item", "text": ["這裡有天野靜樹的聯絡方式哦！", "想聯絡天野靜樹的話可以看看這裡～"] },
+        { "selector": ".content-section .section-title", "text": ["這個章節看起來很有趣呢！", "來仔細看看吧～"] },
+        { "selector": ".skill-progress", "text": ["哇～天野靜樹好厲害！", "這些技能條看起來值都很高呢！"] },
+        { "selector": ".timeline-item", "text": ["天野靜樹的經歷好豐富哦！", "每一段經歷都是寶貴的回憶呢～"] },
+        { "selector": ".hero-section .glitch-title", "text": "歡迎來到關於頁面！這裡可以更了解天野靜樹哦～" },
+        { "selector": ".scroll-indicator", "text": "往下滾動看看更多內容吧～" }
+      ]
+    },
+    "nagato-sakura": {
+      "mouseover": [
+        { "selector": ".project-hero-title", "text": ["長門櫻計畫——次世代 AI 女僕系統！", "NAGATO SAKURA，聽名字就覺得很酷呢！"] },
+        { "selector": ".hero-btn-primary", "text": "點這裡可以去 GitHub 看原始碼哦！" },
+        { "selector": ".hero-btn-secondary", "text": "點這裡開始探索長門櫻計畫吧～" },
+        { "selector": ".about-fullscreen", "text": ["來了解長門櫻計畫的背景故事吧！", "這個計畫整合了好多 AI 技術呢！"] },
+        { "selector": ".about-icon-img", "text": "這就是長門櫻的圖示！好可愛呢～" },
+        { "selector": ".about-stat-card", "text": ["好厲害的數據！", "這些成就都是一步步累積出來的呢！"] },
+        { "selector": ".feature-row", "text": ["這個功能看起來很強大呢！", "核心功能區域——每個都值得細看！"] },
+        { "selector": ".feature-title", "text": ["好酷的功能名稱！", "天野靜樹的技術真的很厲害呢～"] },
+        { "selector": ".demo-video-container", "text": ["有演示影片！快來看看長門櫻的實際效果吧！", "影片裡可以看到長門櫻實際運作的樣子哦～"] },
+        { "selector": ".ecosystem-grid, #ecosystem-grid", "text": ["長門櫻計畫的生態系統好完整哦！", "每個子項目都有專精的 AI 能力呢！"] },
+        { "selector": ".gallery-strip", "text": "這裡有長門櫻計畫的精選圖片展示哦～" },
+        { "selector": ".scroll-indicator", "text": "往下滾動可以看到更多精彩內容！" },
+        { "selector": ".hero-panel-item", "text": ["版本資訊和領域一目了然！", "NLP 領域的 AI 助手呢！"] }
+      ]
+    }
+  },
   "models": [
-    { "name": "L2D-CMT-01", "paths": ["/assets/live2d/model/L2D-CMT-01ver2.3_vts/L2D-CMT-01.model3.json"], "message": "嗨，我是 L2D-CMT-01（本機模型）" },
-    { "name": "WL2D-01", "paths": ["/assets/live2d/model/WL2D-01_vts/WL2D-01.model3.json"], "message": "嗨，我是「三和音」有甚麼我可以為您服務的嗎? " }
+    {
+      "name": "NS-V5",
+      "paths": ["/assets/live2d/model/NS-V5-Ver1.0/NS-V5-Ver1.0.model3.json"],
+      "message": "嗨，我是長門櫻，有甚麼需要您服務的嗎? ",
+      "textures": []
+    },
+    {
+      "name": "L2D-CMT-01",
+      "paths": ["/assets/live2d/model/L2D-CMT-01ver2.3_vts/L2D-CMT-01.model3.json"],
+      "message": "嗨，我是 SUMI，代號:L2D-CMT-01，有甚麼需要您服務的嗎? ",
+      "textures": []
+    },
+    {
+      "name": "WL2D-01",
+      "paths": ["/assets/live2d/model/WL2D-01_vts/WL2D-01.model3.json"],
+      "message": "哈囉，我是「三和音」，代號:SGO，有甚麼我可以為您服務的嗎? ",
+      "textures": []
+    }
   ]
 }

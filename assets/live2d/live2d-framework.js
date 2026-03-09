@@ -9375,8 +9375,6 @@ class bs extends Ms {
   transformOffset(t) {
     const e = this._subdelegates.at(0),
       i = e.getCanvas().getBoundingClientRect(),
-      // 使用 clientX/clientY（相對於 viewport）與 getBoundingClientRect() 一起計算偏移，
-      // 避免 pageX/pageY 與 rect.top 混用在有滾動或 CSS transform 時導致的垂直偏移錯誤。
       s = t.clientX - i.left,
       r = t.clientY - i.top,
       a = s * window.devicePixelRatio,

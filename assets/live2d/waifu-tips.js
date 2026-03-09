@@ -130,6 +130,41 @@ class Logger {
 Logger.levelOrder = { error: 0, warn: 1, info: 2, trace: 3 };
 const logger = new Logger();
 
+// --- Per-model message helper ---
+// Returns the message for key from modelMessages if a model-specific override exists,
+// otherwise falls back to the global tips.message[key].
+function getModelMessage(tips, modelName, key) {
+  if (tips && tips.modelMessages && modelName && tips.modelMessages[modelName]) {
+    const mm = tips.modelMessages[modelName];
+    if (mm[key] !== undefined) return mm[key];
+  }
+  return tips && tips.message ? tips.message[key] : undefined;
+}
+
+// --- Page detection helper ---
+function detectPageKey() {
+  const path = location.pathname.toLowerCase();
+  if (path.includes('about')) return 'about';
+  if (path.includes('nagato-sakura') && !path.includes('webos') && !path.includes('nijigen')) return 'nagato-sakura';
+  if (path.includes('experience')) return 'experience';
+  if (path.includes('skills')) return 'skills';
+  if (path.includes('game-center')) return 'game-center';
+  if (path.includes('music-player')) return 'music-player';
+  return '';
+}
+
+// --- Throttle helper for mouseover ---
+function throttle(fn, delay) {
+  let last = 0;
+  return function (...args) {
+    const now = Date.now();
+    if (now - last >= delay) {
+      last = now;
+      return fn.apply(this, args);
+    }
+  };
+}
+
 // Model loader / manager class (supports CDN or local models)
 class ModelManager {
   constructor(options, models = []) {
@@ -475,7 +510,26 @@ class ModelManager {
         }
       }
     } else {
-      if (this.models[modelId].paths.length === 1) noSwap = true; else this.modelTexturesId = nextIndex(this.models[modelId].paths.length, this.modelTexturesId);
+      const model = this.models[modelId];
+      // Check for textures array (outfit/costume switching)
+      if (model.textures && model.textures.length > 1) {
+        this.modelTexturesId = nextIndex(model.textures.length, this.modelTexturesId);
+        // Reload the model with the new texture applied
+        const modelPath = model.paths[0];
+        const json = await this.fetchWithCache(modelPath);
+        if (json && json.FileReferences && json.FileReferences.Textures) {
+          // Create a copy so we don't pollute the cache
+          const jsonCopy = JSON.parse(JSON.stringify(json));
+          jsonCopy.FileReferences.Textures = [model.textures[this.modelTexturesId]];
+          // Invalidate cache for this path so the modified version is used
+          this.modelJSONCache[modelPath] = jsonCopy;
+          await this.loadLive2D(modelPath, jsonCopy);
+          setTimeout(() => this.autoFitModel(0.72), 120);
+          showMessage(args[0] || '換裝完成！', 4000, 10);
+          return;
+        }
+      }
+      if (model.paths.length === 1) noSwap = true; else this.modelTexturesId = nextIndex(model.paths.length, this.modelTexturesId);
     }
 
     if (noSwap) showMessage(args[1], 4000, 10); else await this.loadModel(args[0]);
@@ -489,6 +543,11 @@ class ModelManager {
     } else {
       this.modelId = (this.modelId + 1) % this.models.length;
       await this.loadModel();
+      // Show model-specific switch message
+      const newModel = this.models[this.modelId];
+      if (newModel && newModel.message) {
+        showMessage(newModel.message, 4000, 10);
+      }
     }
   }
 }
@@ -501,8 +560,9 @@ class ToolsManager {
       hitokoto: {
         icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M512 240c0 114.9-114.6 208-256 208c-37.1 0-72.3-6.4-104.1-17.9c-11.9 8.7-31.3 20.6-54.3 30.6C73.6 471.1 44.7 480 16 480c-6.5 0-12.3-3.9-14.8-9.9c-2.5-6-1.1-12.8 3.4-17.4c0 0 0 0 0 0s0 0 0 0s0 0 0 0c0 0 0 0 0 0l.3-.3c.3-.3 .7-.7 1.3-1.4c1.1-1.2 2.8-3.1 4.9-5.7c4.1-5 9.6-12.4 15.2-21.6c10-16.6 19.5-38.4 21.4-62.9C17.7 326.8 0 285.1 0 240C0 125.1 114.6 32 256 32s256 93.1 256 208z"/></svg>',
         callback: () => {
-          // Use locally configured sentences (array or single string) instead of fetching from external API
-          const source = tips && tips.message && tips.message.hitokoto;
+          // Use model-specific hitokoto if available, then fall back to global
+          const currentModelName = api && api.models && api.models[api.modelId] ? api.models[api.modelId].name : '';
+          const source = getModelMessage(tips, currentModelName, 'hitokoto');
           let text = '今天心情不錯喔！';
           if (Array.isArray(source)) text = randomSelection(source);
           else if (typeof source === 'string' && source.length) text = source;
@@ -619,6 +679,13 @@ async function loadWidget(config) {
         }
       });
 
+      // Merge page-specific mouseover rules into the global list
+      const pageKey = detectPageKey();
+      let allMouseover = [...(tips.mouseover || [])];
+      if (pageKey && tips.pageMessages && tips.pageMessages[pageKey] && tips.pageMessages[pageKey].mouseover) {
+        allMouseover = [...tips.pageMessages[pageKey].mouseover, ...allMouseover];
+      }
+
       window.addEventListener('mousemove', () => (userAction = true));
       window.addEventListener('keydown', () => (userAction = true));
 
@@ -629,13 +696,28 @@ async function loadWidget(config) {
           userActionTimer = null;
         } else if (!userActionTimer) {
           userActionTimer = setInterval(() => {
-            showMessage(messageArray, 6000, 9);
+            // Use model-specific default messages if available (low priority so it never blocks interactive messages)
+            const currentModelName = api && api.models && api.models[api.modelId] ? api.models[api.modelId].name : '';
+            const modelDefault = getModelMessage(tips, currentModelName, 'default');
+            showMessage(modelDefault || messageArray, 4000, 5);
           }, 20000);
         }
       }, 1000);
 
-      window.addEventListener('mouseover', (ev) => {
-        for (let { selector, text } of tips.mouseover) {
+      // Throttled mouseover handler for performance (100ms to stay responsive)
+      const mouseoverHandler = throttle((ev) => {
+        for (let { selector, text } of allMouseover) {
+          if (!ev.target?.closest(selector)) continue;
+          let msg = randomSelection(text);
+          if (typeof msg === 'string') msg = msg.replace('{text}', ev.target.innerText);
+          showMessage(msg, 4000, 8);
+          return;
+        }
+      }, 1);
+      window.addEventListener('mouseover', mouseoverHandler);
+
+      window.addEventListener('click', (ev) => {
+        for (let { selector, text } of (tips.click || [])) {
           if (!ev.target?.closest(selector)) continue;
           let msg = randomSelection(text);
           if (typeof msg === 'string') msg = msg.replace('{text}', ev.target.innerText);
@@ -644,18 +726,16 @@ async function loadWidget(config) {
         }
       });
 
-      window.addEventListener('click', (ev) => {
-        for (let { selector, text } of tips.click) {
-          if (!ev.target?.closest(selector)) continue;
-          showMessage(text.replace('{text}', ev.target.innerText), 4000, 8);
-          return;
-        }
+      window.addEventListener('live2d:hoverbody', () => {
+        const currentModelName = api && api.models && api.models[api.modelId] ? api.models[api.modelId].name : '';
+        const hoverBody = getModelMessage(tips, currentModelName, 'hoverBody');
+        showMessage(randomSelection(hoverBody), 4000, 8, false);
       });
-
-      window.addEventListener('live2d:hoverbody', () => { showMessage(randomSelection(tips.message.hoverBody), 4000, 8, false); });
       window.addEventListener('live2d:tapbody', () => {
-        // display a random tap message
-        showMessage(randomSelection(tips.message.tapBody), 4000, 9);
+        // Use model-specific tap messages if available
+        const currentModelName = api && api.models && api.models[api.modelId] ? api.models[api.modelId].name : '';
+        const tapBody = getModelMessage(tips, currentModelName, 'tapBody');
+        showMessage(randomSelection(tapBody), 4000, 9);
 
         (async function playRandomAnimation() {
           try {
@@ -970,6 +1050,47 @@ async function loadWidget(config) {
     await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
     // Notify external controllers that the model and initial frame are ready for a smooth entrance
     document.dispatchEvent(new Event('live2d:modelReady'));
+
+    // --- Performance optimization: pause rendering when not visible ---
+    let live2dPaused = false;
+
+    function pauseLive2D() {
+      if (live2dPaused) return;
+      live2dPaused = true;
+      try {
+        if (api && api.cubism5model && typeof api.cubism5model.stop === 'function') {
+          api.cubism5model.stop();
+          logger.trace('Live2D rendering paused (Cubism5)');
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    function resumeLive2D() {
+      if (!live2dPaused) return;
+      live2dPaused = false;
+      try {
+        if (api && api.cubism5model && typeof api.cubism5model.run === 'function' && !api.cubism5model._drawFrameId) {
+          api.cubism5model.run();
+          logger.trace('Live2D rendering resumed (Cubism5)');
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    // Pause when page is hidden (tab switch)
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) pauseLive2D(); else resumeLive2D();
+    });
+
+    // Pause when canvas is scrolled out of viewport
+    const live2dCanvas = document.getElementById('live2d');
+    if (live2dCanvas && typeof IntersectionObserver !== 'undefined') {
+      const visObserver = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) resumeLive2D(); else pauseLive2D();
+        }
+      }, { threshold: 0.01 });
+      visObserver.observe(waifuEl);
+    }
   }
 }
 
