@@ -138,9 +138,13 @@
   "models": [
     {
       "name": "NS-V5",
-      "paths": ["/assets/live2d/model/NS-V5-Ver1.0/NS-V5-Ver1.0.model3.json"],
+      "paths": ["/assets/live2d/model/NS-V5-Ver1.1/NS-V5-Ver1.1.model3.json"],
       "message": "嗨，我是長門櫻，有甚麼需要您服務的嗎? ",
-      "textures": []
+      "textures": [],
+      "paramOutfits": {
+        "paramId": "ParamCloth",
+        "values": [-2, -1, 0, 1]
+      }
     },
     {
       "name": "L2D-CMT-01",

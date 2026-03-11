@@ -45,6 +45,8 @@ header { position: relative; z-index: 20050 !important; }
 #waifu { bottom: 0 !important; transform: translateY(110%) !important; transition: transform 360ms cubic-bezier(.22,.9,.31,1) !important; will-change: transform; backface-visibility: hidden; }
 #waifu.waifu-active { transform: translateY(0) !important; }
 #waifu:hover { transform: translateY(0) !important; }
+#waifu.waifu-custom-pos { bottom: auto !important; transform: none !important; transition: none !important; }
+#waifu.waifu-custom-pos:hover { transform: none !important; }
 #waifu #live2d, #waifu #waifu-canvas { will-change: transform; backface-visibility: hidden; transform: translateZ(0); -webkit-transform: translateZ(0); }
         `;
         const s = document.createElement('style');
@@ -152,14 +154,16 @@ header { position: relative; z-index: 20050 !important; }
     async function hide() {
         if (!loaded) return false;
 
-        const quitEl = document.getElementById('waifu-tool-quit');
-        if (quitEl) {
-            try { quitEl.click(); return true; } catch (e) { console.warn('Live2D: fail to trigger quit tool, fallback to hide', e); }
+        // Exit edit mode if active
+        if (window.waifuEditMode && window.waifuEditMode.active) {
+            window.waifuEditMode.close();
         }
 
         const w = document.getElementById('waifu');
         if (w) {
             localStorage.setItem('waifu-display', Date.now().toString());
+            try { localStorage.setItem('live2dEnabled', 'false'); } catch (e) {}
+            try { window.dispatchEvent(new CustomEvent('live2d:quit')); } catch (e) {}
             w.classList.remove('waifu-active');
             setTimeout(() => {
                 try { w.classList.add('waifu-hidden'); } catch (e) {}

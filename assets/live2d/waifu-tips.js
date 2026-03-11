@@ -239,7 +239,14 @@ class ModelManager {
   get modelTexturesId() { return this._modelTexturesId; }
 
   resetCanvas() {
-    document.getElementById('waifu-canvas').innerHTML = '<canvas id="live2d" width="800" height="800"></canvas>';
+    const container = document.getElementById('waifu-canvas');
+    const savedW = container ? container.style.width : '';
+    const savedH = container ? container.style.height : '';
+    container.innerHTML = '<canvas id="live2d" width="800" height="800"></canvas>';
+    // Re-apply saved dimensions to the new canvas element
+    const newCanvas = document.getElementById('live2d');
+    if (newCanvas && savedW) newCanvas.style.width = savedW;
+    if (newCanvas && savedH) newCanvas.style.height = savedH;
   }
 
   async fetchWithCache(url) {
@@ -357,6 +364,8 @@ class ModelManager {
     try {
       setTimeout(() => {
         this.autoFitModel(0.72);
+        // Re-apply parameter outfit state after model loads
+        this.applyParamOutfits();
       }, 120);
     } catch (e) { console.warn('autoFitModel failed to start', e); }
 
@@ -492,6 +501,76 @@ class ModelManager {
     }
   }
 
+  /**
+   * Get the internal CubismModel (framework level) from the currently loaded Cubism5 model.
+   * Returns null if not available.
+   */
+  getCubismModel() {
+    try {
+      if (this.cubism5model && this.cubism5model.subdelegates && typeof this.cubism5model.subdelegates.at === 'function') {
+        const sub = this.cubism5model.subdelegates.at(0);
+        const liveMgr = sub && typeof sub.getLive2DManager === 'function' ? sub.getLive2DManager() : null;
+        const model5 = liveMgr && liveMgr._models && typeof liveMgr._models.at === 'function' ? liveMgr._models.at(0) : null;
+        if (model5 && typeof model5.getModel === 'function') {
+          return model5.getModel();
+        }
+      }
+    } catch (e) { /* ignore */ }
+    return null;
+  }
+
+  /**
+   * Set a parameter value on the currently loaded model by parameter ID string.
+   * Also persists the value in _savedParameters so it survives the loadParameters/saveParameters cycle.
+   */
+  setModelParameter(paramId, value) {
+    const cubismModel = this.getCubismModel();
+    if (!cubismModel) return false;
+    try {
+      // Find the parameter index by matching the string ID from the core model
+      const coreModel = cubismModel._model;
+      if (!coreModel || !coreModel.parameters) return false;
+      const ids = coreModel.parameters.ids;
+      const count = coreModel.parameters.count;
+      let idx = -1;
+      for (let i = 0; i < count; i++) {
+        if (ids[i] === paramId) { idx = i; break; }
+      }
+      if (idx < 0) return false;
+      // Set the value directly on the parameters array
+      cubismModel._parameterValues[idx] = value;
+      // Also persist in saved parameters so loadParameters() doesn't overwrite it
+      if (cubismModel._savedParameters && cubismModel._savedParameters.getSize() > idx) {
+        cubismModel._savedParameters.set(idx, value);
+      }
+      return true;
+    } catch (e) {
+      console.warn('setModelParameter failed', e);
+      return false;
+    }
+  }
+
+  /**
+   * Apply saved paramOutfits state to the current model.
+   * Reads the stored outfit index from localStorage and sets the corresponding parameter value.
+   */
+  applyParamOutfits() {
+    if (!this.models || !this.models[this.modelId]) return;
+    const model = this.models[this.modelId];
+    if (!model.paramOutfits) return;
+    const { paramId, values } = model.paramOutfits;
+    if (!paramId || !Array.isArray(values) || values.length === 0) return;
+    const storedIdx = parseInt(localStorage.getItem('paramOutfitIdx_' + this.modelId), 10);
+    const outfitIdx = (!isNaN(storedIdx) && storedIdx >= 0 && storedIdx < values.length) ? storedIdx : (values.length - 1);
+    // Retry a few times to account for model initialization delay
+    let attempts = 0;
+    const tryApply = () => {
+      if (this.setModelParameter(paramId, values[outfitIdx])) return;
+      if (++attempts < 10) setTimeout(tryApply, 200);
+    };
+    tryApply();
+  }
+
   async loadRandTexture(...args) {
     const { modelId } = this;
     let noSwap = false;
@@ -511,6 +590,21 @@ class ModelManager {
       }
     } else {
       const model = this.models[modelId];
+      // Check for paramOutfits (parameter-based outfit switching)
+      if (model.paramOutfits && model.paramOutfits.paramId && Array.isArray(model.paramOutfits.values) && model.paramOutfits.values.length > 1) {
+        const { paramId, values } = model.paramOutfits;
+        const storedIdx = parseInt(localStorage.getItem('paramOutfitIdx_' + modelId), 10);
+        const currentIdx = (!isNaN(storedIdx) && storedIdx >= 0 && storedIdx < values.length) ? storedIdx : (values.length - 1);
+        const newIdx = (currentIdx - 1 + values.length) % values.length;
+        localStorage.setItem('paramOutfitIdx_' + modelId, newIdx.toString());
+        const ok = this.setModelParameter(paramId, values[newIdx]);
+        if (ok) {
+          showMessage(args[0] || '換裝完成！', 4000, 10);
+        } else {
+          showMessage(args[1] || '換裝失敗，模型尚未準備好', 4000, 10);
+        }
+        return;
+      }
       // Check for textures array (outfit/costume switching)
       if (model.textures && model.textures.length > 1) {
         this.modelTexturesId = nextIndex(model.textures.length, this.modelTexturesId);
@@ -599,17 +693,10 @@ class ToolsManager {
         }
       } },
       info: { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336l24 0 0-64-24 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l48 0c13.3 0 24 10.7 24 24l0 88 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-80 0c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>', callback: () => { open('https://amanoshizukikun.github.io/'); } },
-      quit: { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>', callback: () => { 
-            // Mark widget as closed and sync site setting
-            localStorage.setItem('waifu-display', Date.now().toString());
-            try { localStorage.setItem('live2dEnabled', 'false'); } catch (e) {}
-            // notify the site so UI can update
-            try { window.dispatchEvent(new CustomEvent('live2d:quit')); } catch (e) {}
-
-            showMessage(tips.message.goodbye, 2000, 11); 
-            const w = document.getElementById('waifu'); if (w) { w.classList.remove('waifu-active'); setTimeout(() => { w.classList.add('waifu-hidden'); // release model resources only after hide transition completes
-            try { if (api && api.cubism5model && typeof api.cubism5model.release === 'function') api.cubism5model.release(); if (api && api.cubism2model && typeof api.cubism2model.destroy === 'function') api.cubism2model.destroy(); } catch (e) {}
-            const t = document.getElementById('waifu-toggle'); if (t) t.classList.add('waifu-toggle-active'); }, 3000); } } }
+      quit: { icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.3 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9.3 15.5-18.4 17.4c-12.6 2.6-25.7 4-39.2 4s-26.5-1.3-39.2-4c-9.2-1.9-16.4-8.3-18.4-17.4l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.3-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9.3-15.5 18.4-17.4C226.5 1.3 239.7 0 254.2 0s26.5 1.3 39.2 4c9.2 1.9 16.4 8.3 18.4 17.4l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"/></svg>', callback: () => {
+        // Toggle edit mode
+        window.waifuEditMode && typeof window.waifuEditMode.toggle === 'function' && window.waifuEditMode.toggle();
+      } }
     };
   }
 
@@ -638,11 +725,33 @@ async function loadWidget(config) {
 
   document.body.insertAdjacentHTML('beforeend', `
     <div id="waifu">
+      <div id="waifu-edit-titlebar">
+        <span class="titlebar-label">EDIT MODE</span>
+        <div class="titlebar-buttons">
+          <button class="titlebar-btn btn-done" title="完成編輯">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg>
+          </button>
+          <button class="titlebar-btn btn-reset" title="還原初始化">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M125.7 160l50.3 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L48 224c-17.7 0-32-14.3-32-32L16 64c0-17.7 14.3-32 32-32s32 14.3 32 32l0 51.2C122.6 72.1 194.8 32 256 32c141.4 0 256 114.6 256 256s-114.6 256-256 256S0 429.4 0 288c0-17.7 14.3-32 32-32s32 14.3 32 32c0 106 86 192 192 192s192-86 192-192S362 96 256 96c-46.6 0-87.1 16.6-120.3 48z"/></svg>
+          </button>
+          <button class="titlebar-btn btn-close" title="關閉">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>
+          </button>
+        </div>
+      </div>
       <div id="waifu-tips"></div>
       <div id="waifu-canvas">
         <canvas id="live2d" width="800" height="800"></canvas>
       </div>
       <div id="waifu-tool"></div>
+      <div class="waifu-resize-handle handle-nw" data-dir="nw"></div>
+      <div class="waifu-resize-handle handle-ne" data-dir="ne"></div>
+      <div class="waifu-resize-handle handle-sw" data-dir="sw"></div>
+      <div class="waifu-resize-handle handle-se" data-dir="se"></div>
+      <div class="waifu-resize-edge edge-n" data-dir="n"></div>
+      <div class="waifu-resize-edge edge-s" data-dir="s"></div>
+      <div class="waifu-resize-edge edge-w" data-dir="w"></div>
+      <div class="waifu-resize-edge edge-e" data-dir="e"></div>
     </div>
   `);
 
@@ -941,16 +1050,484 @@ async function loadWidget(config) {
   const tools = new ToolsManager(api, config, tipsObj);
   tools.registerTools();
 
+  // ============================
+  // Edit Mode (視窗化編輯模式)
+  // ============================
+  (function initEditMode() {
+    const waifu = document.getElementById('waifu');
+    if (!waifu) return;
+
+    const MIN_SIZE = 150;
+    const MAX_SIZE = 900;
+    let isEditing = false;
+    let savedState = null;
+
+    function updateScale() {
+      const w = waifu.offsetWidth || 300;
+      waifu.style.setProperty('--waifu-scale', (w / 300).toFixed(3));
+    }
+
+    function getDefaultState() {
+      return {
+        left: waifu.style.left || '',
+        top: waifu.style.top || '',
+        bottom: waifu.style.bottom || '',
+        width: '',
+        height: '',
+        transform: waifu.style.transform || ''
+      };
+    }
+
+    function saveCurrentState() {
+      const canvas = document.getElementById('live2d');
+      return {
+        left: waifu.style.left,
+        top: waifu.style.top,
+        bottom: waifu.style.bottom,
+        width: waifu.style.width,
+        height: waifu.style.height,
+        transform: waifu.style.transform,
+        customPos: waifu.classList.contains('waifu-custom-pos'),
+        canvasWidth: canvas ? canvas.style.width : '',
+        canvasHeight: canvas ? canvas.style.height : '',
+        canvasContainerWidth: waifu.querySelector('#waifu-canvas') ? waifu.querySelector('#waifu-canvas').style.width : '',
+        canvasContainerHeight: waifu.querySelector('#waifu-canvas') ? waifu.querySelector('#waifu-canvas').style.height : ''
+      };
+    }
+
+    function enterEditMode() {
+      if (isEditing) return;
+      isEditing = true;
+      savedState = saveCurrentState();
+
+      // Compute current visual position BEFORE changing any classes
+      const needComputePos = !waifu.style.top || waifu.style.top === '';
+      let computedTop, computedLeft;
+      if (needComputePos) {
+        const rect = waifu.getBoundingClientRect();
+        computedTop = rect.top;
+        computedLeft = rect.left;
+      }
+
+      // Save to localStorage for persistence
+      try {
+        const pos = {
+          left: waifu.offsetLeft,
+          top: waifu.offsetTop,
+          width: waifu.offsetWidth,
+          height: waifu.offsetHeight
+        };
+        localStorage.setItem('waifu-edit-before', JSON.stringify(pos));
+      } catch (e) { /* ignore */ }
+
+      // Now apply classes and position
+      waifu.classList.add('waifu-custom-pos');
+      if (needComputePos) {
+        waifu.style.top = computedTop + 'px';
+        waifu.style.left = computedLeft + 'px';
+      }
+      waifu.classList.add('waifu-edit-mode');
+
+      // Compensate top position for titlebar height so canvas stays visually in place
+      const titlebarEl = waifu.querySelector('#waifu-edit-titlebar');
+      const tbH = titlebarEl ? titlebarEl.offsetHeight : 0;
+      if (tbH > 0) {
+        const currentTop = parseFloat(waifu.style.top) || 0;
+        waifu.style.top = (currentTop - tbH) + 'px';
+      }
+
+      showMessage('進入編輯模式，可以拖動邊角調整大小', 3000, 10);
+    }
+
+    function exitEditMode() {
+      if (!isEditing) return;
+      isEditing = false;
+
+      // Compensate top position back: add titlebar height before removing edit mode
+      const titlebarEl = waifu.querySelector('#waifu-edit-titlebar');
+      const tbH = titlebarEl ? titlebarEl.offsetHeight : 0;
+      if (tbH > 0) {
+        const currentTop = parseFloat(waifu.style.top) || 0;
+        waifu.style.top = (currentTop + tbH) + 'px';
+      }
+
+      waifu.classList.remove('waifu-edit-mode');
+
+      // Save current position/size to localStorage so it persists
+      try {
+        const canvas = document.getElementById('live2d');
+        const canvasContainer = waifu.querySelector('#waifu-canvas');
+        localStorage.setItem('waifu-custom-layout', JSON.stringify({
+          left: waifu.style.left,
+          top: waifu.style.top,
+          bottom: waifu.style.bottom,
+          width: waifu.style.width,
+          height: waifu.style.height,
+          canvasWidth: canvas ? canvas.style.width : '',
+          canvasHeight: canvas ? canvas.style.height : '',
+          canvasContainerWidth: canvasContainer ? canvasContainer.style.width : '',
+          canvasContainerHeight: canvasContainer ? canvasContainer.style.height : ''
+        }));
+      } catch (e) { /* ignore */ }
+
+      showMessage('編輯完成！', 2000, 10);
+    }
+
+    function resetLayout() {
+      const canvas = document.getElementById('live2d');
+      const canvasContainer = waifu.querySelector('#waifu-canvas');
+
+      // Reset to defaults
+      waifu.style.left = '0px';
+      waifu.style.top = '';
+      waifu.style.bottom = '';
+      waifu.style.width = '';
+      waifu.style.height = '';
+      waifu.style.transform = '';
+
+      if (canvas) {
+        canvas.style.width = '';
+        canvas.style.height = '';
+        canvas.style.transform = '';
+      }
+
+      if (canvasContainer) {
+        canvasContainer.style.width = '';
+        canvasContainer.style.height = '';
+      }
+
+      // Clear stored layout
+      try { localStorage.removeItem('waifu-custom-layout'); } catch (e) { /* ignore */ }
+      try { localStorage.removeItem('waifu-edit-before'); } catch (e) { /* ignore */ }
+
+      // Reset scale and custom position
+      waifu.style.removeProperty('--waifu-scale');
+
+      // If still in edit mode, recompute position from bottom:0 before switching to top/left
+      if (isEditing) {
+        // Force reflow so getBoundingClientRect reflects bottom:0 positioning
+        waifu.classList.remove('waifu-custom-pos');
+        const rect = waifu.getBoundingClientRect();
+        waifu.classList.add('waifu-custom-pos');
+        waifu.style.top = rect.top + 'px';
+        waifu.style.left = rect.left + 'px';
+      } else {
+        waifu.classList.remove('waifu-custom-pos');
+      }
+
+      // Re-autofit model
+      if (api && typeof api.autoFitModel === 'function') {
+        setTimeout(() => api.autoFitModel(0.72), 150);
+      }
+
+      showMessage('已還原初始位置與大小', 2000, 10);
+    }
+
+    function closeEditMode() {
+      if (!isEditing) return;
+
+      // Restore to state before entering edit mode
+      if (savedState) {
+        const canvas = document.getElementById('live2d');
+        const canvasContainer = waifu.querySelector('#waifu-canvas');
+
+        waifu.style.left = savedState.left;
+        waifu.style.top = savedState.top;
+        waifu.style.bottom = savedState.bottom;
+        waifu.style.width = savedState.width;
+        waifu.style.height = savedState.height;
+        waifu.style.transform = savedState.transform;
+
+        if (canvas) {
+          canvas.style.width = savedState.canvasWidth;
+          canvas.style.height = savedState.canvasHeight;
+        }
+        if (canvasContainer) {
+          canvasContainer.style.width = savedState.canvasContainerWidth;
+          canvasContainer.style.height = savedState.canvasContainerHeight;
+        }
+      }
+
+      isEditing = false;
+      waifu.classList.remove('waifu-edit-mode');
+      // Restore waifu-custom-pos to the state before editing
+      if (savedState && savedState.customPos) {
+        waifu.classList.add('waifu-custom-pos');
+      } else {
+        waifu.classList.remove('waifu-custom-pos');
+      }
+
+      showMessage('已取消編輯', 2000, 10);
+    }
+
+    // Titlebar button listeners
+    const btnDone = waifu.querySelector('.titlebar-btn.btn-done');
+    const btnReset = waifu.querySelector('.titlebar-btn.btn-reset');
+    const btnClose = waifu.querySelector('.titlebar-btn.btn-close');
+
+    if (btnDone) btnDone.addEventListener('click', (e) => { e.stopPropagation(); exitEditMode(); });
+    if (btnReset) btnReset.addEventListener('click', (e) => { e.stopPropagation(); resetLayout(); });
+    if (btnClose) btnClose.addEventListener('click', (e) => { e.stopPropagation(); closeEditMode(); });
+
+    // Titlebar drag (move in edit mode)
+    const titlebar = waifu.querySelector('#waifu-edit-titlebar');
+    if (titlebar) {
+      titlebar.addEventListener('mousedown', (e) => {
+        if (!isEditing) return;
+        if (e.target.closest('.titlebar-btn')) return;
+        e.preventDefault();
+        e.stopPropagation();
+
+        const rect = waifu.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        const offsetY = e.clientY - rect.top;
+        const winW = window.innerWidth;
+        const winH = window.innerHeight;
+        const w = rect.width;
+        const h = rect.height;
+
+        const headerEl2 = document.querySelector('header');
+        const headerBottom = headerEl2 ? headerEl2.getBoundingClientRect().bottom : 0;
+        const minTopEdit = Math.max(0, headerBottom);
+
+        function onMove(ev) {
+          let left = ev.clientX - offsetX;
+          let top = ev.clientY - offsetY;
+          if (left < 0) left = 0;
+          if (top < minTopEdit) top = minTopEdit;
+          if (left > winW - Math.min(w, 50)) left = winW - Math.min(w, 50);
+          if (top > winH - Math.min(h, 50)) top = winH - Math.min(h, 50);
+          // Ensure waifu-custom-pos is active to override bottom:0 !important
+          if (!waifu.classList.contains('waifu-custom-pos')) {
+            waifu.classList.add('waifu-custom-pos');
+          }
+          waifu.style.left = left + 'px';
+          waifu.style.top = top + 'px';
+        }
+
+        function onUp() {
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+        }
+
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+      });
+    }
+
+    // Resize handles (corners + edges)
+    function initResize() {
+      const handles = waifu.querySelectorAll('.waifu-resize-handle, .waifu-resize-edge');
+
+      handles.forEach(handle => {
+        handle.addEventListener('mousedown', (e) => {
+          if (!isEditing) return;
+          e.preventDefault();
+          e.stopPropagation();
+
+          const dir = handle.dataset.dir;
+          const startX = e.clientX;
+          const startY = e.clientY;
+          const startRect = waifu.getBoundingClientRect();
+          const startW = startRect.width;
+          const startH = startRect.height;
+          const startL = startRect.left;
+          const startT = startRect.top;
+
+          const hdrEl = document.querySelector('header');
+          const hdrBottom = hdrEl ? hdrEl.getBoundingClientRect().bottom : 0;
+          const minTopResize = Math.max(0, hdrBottom);
+
+          function onMove(ev) {
+            const dx = ev.clientX - startX;
+            const dy = ev.clientY - startY;
+            let newW = startW, newH = startH, newL = startL, newT = startT;
+
+            // Compute new dimensions based on direction
+            if (dir.includes('e')) newW = startW + dx;
+            if (dir.includes('w')) { newW = startW - dx; newL = startL + dx; }
+            if (dir.includes('s')) newH = startH + dy;
+            if (dir.includes('n')) { newH = startH - dy; newT = startT + dy; }
+
+            // Enforce min/max
+            if (newW < MIN_SIZE) {
+              if (dir.includes('w')) newL = startL + startW - MIN_SIZE;
+              newW = MIN_SIZE;
+            }
+            if (newW > MAX_SIZE) {
+              if (dir.includes('w')) newL = startL + startW - MAX_SIZE;
+              newW = MAX_SIZE;
+            }
+            if (newH < MIN_SIZE) {
+              if (dir.includes('n')) newT = startT + startH - MIN_SIZE;
+              newH = MIN_SIZE;
+            }
+            if (newH > MAX_SIZE) {
+              if (dir.includes('n')) newT = startT + startH - MAX_SIZE;
+              newH = MAX_SIZE;
+            }
+
+            // Boundary check (header + left)
+            if (newL < 0) { newW += newL; newL = 0; }
+            if (newT < minTopResize) { newH -= (minTopResize - newT); newT = minTopResize; }
+
+            waifu.style.width = newW + 'px';
+            waifu.style.height = newH + 'px';
+            waifu.style.left = newL + 'px';
+            waifu.style.top = newT + 'px';
+            waifu.style.bottom = 'auto';
+
+            // Scale canvas and container to match (subtract titlebar height)
+            const canvas = document.getElementById('live2d');
+            const canvasContainer = waifu.querySelector('#waifu-canvas');
+            const titlebar = waifu.querySelector('#waifu-edit-titlebar');
+            const titlebarH = titlebar ? titlebar.offsetHeight : 0;
+            const canvasH = Math.max(newH - titlebarH, MIN_SIZE);
+
+            if (canvas) {
+              canvas.style.width = newW + 'px';
+              canvas.style.height = canvasH + 'px';
+            }
+            if (canvasContainer) {
+              canvasContainer.style.width = newW + 'px';
+              canvasContainer.style.height = canvasH + 'px';
+            }
+
+            updateScale();
+          }
+
+          function onUp() {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+          }
+
+          document.addEventListener('mousemove', onMove);
+          document.addEventListener('mouseup', onUp);
+        });
+
+        // Touch support
+        handle.addEventListener('touchstart', (e) => {
+          if (!isEditing) return;
+          const touch = e.touches[0];
+          if (!touch) return;
+          e.preventDefault();
+          e.stopPropagation();
+
+          const dir = handle.dataset.dir;
+          const startX = touch.clientX;
+          const startY = touch.clientY;
+          const startRect = waifu.getBoundingClientRect();
+          const startW = startRect.width;
+          const startH = startRect.height;
+          const startL = startRect.left;
+          const startT = startRect.top;
+
+          const hdrEl2 = document.querySelector('header');
+          const hdrBottom2 = hdrEl2 ? hdrEl2.getBoundingClientRect().bottom : 0;
+          const minTopResizeT = Math.max(0, hdrBottom2);
+
+          function onTouchMove(ev) {
+            const t = ev.touches[0];
+            if (!t) return;
+            const dx = t.clientX - startX;
+            const dy = t.clientY - startY;
+            let newW = startW, newH = startH, newL = startL, newT = startT;
+
+            if (dir.includes('e')) newW = startW + dx;
+            if (dir.includes('w')) { newW = startW - dx; newL = startL + dx; }
+            if (dir.includes('s')) newH = startH + dy;
+            if (dir.includes('n')) { newH = startH - dy; newT = startT + dy; }
+
+            if (newW < MIN_SIZE) { if (dir.includes('w')) newL = startL + startW - MIN_SIZE; newW = MIN_SIZE; }
+            if (newW > MAX_SIZE) { if (dir.includes('w')) newL = startL + startW - MAX_SIZE; newW = MAX_SIZE; }
+            if (newH < MIN_SIZE) { if (dir.includes('n')) newT = startT + startH - MIN_SIZE; newH = MIN_SIZE; }
+            if (newH > MAX_SIZE) { if (dir.includes('n')) newT = startT + startH - MAX_SIZE; newH = MAX_SIZE; }
+            if (newL < 0) { newW += newL; newL = 0; }
+            if (newT < minTopResizeT) { newH -= (minTopResizeT - newT); newT = minTopResizeT; }
+
+            waifu.style.width = newW + 'px';
+            waifu.style.height = newH + 'px';
+            waifu.style.left = newL + 'px';
+            waifu.style.top = newT + 'px';
+            waifu.style.bottom = 'auto';
+
+            const canvas = document.getElementById('live2d');
+            const canvasContainer = waifu.querySelector('#waifu-canvas');
+            const titlebar2 = waifu.querySelector('#waifu-edit-titlebar');
+            const titlebarH2 = titlebar2 ? titlebar2.offsetHeight : 0;
+            const canvasH2 = Math.max(newH - titlebarH2, MIN_SIZE);
+            if (canvas) { canvas.style.width = newW + 'px'; canvas.style.height = canvasH2 + 'px'; }
+            if (canvasContainer) { canvasContainer.style.width = newW + 'px'; canvasContainer.style.height = canvasH2 + 'px'; }
+            updateScale();
+          }
+
+          function onTouchEnd() {
+            document.removeEventListener('touchmove', onTouchMove);
+            document.removeEventListener('touchend', onTouchEnd);
+          }
+
+          document.addEventListener('touchmove', onTouchMove);
+          document.addEventListener('touchend', onTouchEnd);
+        });
+      });
+    }
+
+    initResize();
+
+    // Restore layout from localStorage on load
+    try {
+      const savedLayout = localStorage.getItem('waifu-custom-layout');
+      if (savedLayout) {
+        const layout = JSON.parse(savedLayout);
+        if (layout.left) waifu.style.left = layout.left;
+        if (layout.top) {
+          // Validate top is within viewport bounds
+          let topVal = parseInt(layout.top, 10);
+          const headerEl = document.querySelector('header');
+          const minTopRestore = headerEl ? headerEl.getBoundingClientRect().bottom : 0;
+          if (topVal < minTopRestore) topVal = minTopRestore;
+          if (topVal > window.innerHeight - 50) topVal = window.innerHeight - 50;
+          waifu.style.top = topVal + 'px';
+        }
+        if (layout.bottom) waifu.style.bottom = layout.bottom;
+        if (layout.width) waifu.style.width = layout.width;
+        if (layout.height) waifu.style.height = layout.height;
+
+        const canvas = document.getElementById('live2d');
+        const canvasContainer = waifu.querySelector('#waifu-canvas');
+        if (canvas && layout.canvasWidth) canvas.style.width = layout.canvasWidth;
+        if (canvas && layout.canvasHeight) canvas.style.height = layout.canvasHeight;
+        if (canvasContainer && layout.canvasContainerWidth) canvasContainer.style.width = layout.canvasContainerWidth;
+        if (canvasContainer && layout.canvasContainerHeight) canvasContainer.style.height = layout.canvasContainerHeight;
+
+        // Mark as custom position so injected !important rules are overridden
+        if (layout.top) waifu.classList.add('waifu-custom-pos');
+
+        updateScale();
+      }
+    } catch (e) { /* ignore */ }
+
+    // Expose for the quit/setting toolbutton
+    window.waifuEditMode = {
+      toggle: () => { if (isEditing) exitEditMode(); else enterEditMode(); },
+      enter: enterEditMode,
+      exit: exitEditMode,
+      reset: resetLayout,
+      close: closeEditMode,
+      get active() { return isEditing; }
+    };
+  })();
+
   if (config.drag) {
     const waifu = document.getElementById('waifu');
     if (waifu) {
       let winW = window.innerWidth, winH = window.innerHeight;
-      const w = waifu.offsetWidth, h = waifu.offsetHeight;
 
       const LONG_PRESS_MS = 250;
 
       waifu.addEventListener('mousedown', (e) => {
         if (e.button === 2) return;
+        if (window.waifuEditMode && window.waifuEditMode.active) return;
         const canvas = document.getElementById('live2d');
         if (e.target !== canvas) return;
         e.preventDefault();
@@ -969,11 +1546,19 @@ async function loadWidget(config) {
 
         function onMove(ev) {
           if (!dragging) return;
+          // Ensure waifu-custom-pos is active FIRST to avoid bottom:0 conflict
+          if (!waifu.classList.contains('waifu-custom-pos')) {
+            waifu.classList.add('waifu-custom-pos');
+          }
+          // Use dynamic size to account for resized widget
+          const w = waifu.offsetWidth, h = waifu.offsetHeight;
           const x = ev.clientX, y = ev.clientY;
           let left = x - offsetX, top = y - offsetY;
-          // 限制 top 不能高於 header 底部，且不能超出視窗底部
-          if (top < minTop) top = minTop; else if (top >= winH - h) top = winH - h;
-          if (left < 0) left = 0; else if (left >= winW - w) left = winW - w;
+          // Same constraints as edit mode: header top boundary, viewport edges
+          if (top < minTop) top = minTop;
+          if (top > winH - Math.min(h, 50)) top = winH - Math.min(h, 50);
+          if (left < 0) left = 0;
+          if (left > winW - Math.min(w, 50)) left = winW - Math.min(w, 50);
           waifu.style.top = `${top}px`;
           waifu.style.left = `${left}px`;
         }
@@ -985,6 +1570,19 @@ async function loadWidget(config) {
 
           if (!dragging) {
             window.dispatchEvent(new Event('live2d:tapbody'));
+          } else {
+            // Save position to localStorage so toggle remembers it
+            try {
+              const canvas = document.getElementById('live2d');
+              const canvasContainer = waifu.querySelector('#waifu-canvas');
+              localStorage.setItem('waifu-custom-layout', JSON.stringify({
+                left: waifu.style.left, top: waifu.style.top,
+                bottom: waifu.style.bottom, width: waifu.style.width, height: waifu.style.height,
+                canvasWidth: canvas ? canvas.style.width : '', canvasHeight: canvas ? canvas.style.height : '',
+                canvasContainerWidth: canvasContainer ? canvasContainer.style.width : '',
+                canvasContainerHeight: canvasContainer ? canvasContainer.style.height : ''
+              }));
+            } catch (e) { /* ignore */ }
           }
         }
 
@@ -995,6 +1593,7 @@ async function loadWidget(config) {
       });
 
       waifu.addEventListener('touchstart', (e) => {
+        if (window.waifuEditMode && window.waifuEditMode.active) return;
         const touch = e.touches && e.touches[0];
         if (!touch) return;
         const canvas = document.getElementById('live2d');
@@ -1017,11 +1616,19 @@ async function loadWidget(config) {
           if (!dragging) return;
           const t = ev.touches && ev.touches[0];
           if (!t) return;
+          // Ensure waifu-custom-pos is active FIRST to avoid bottom:0 conflict
+          if (!waifu.classList.contains('waifu-custom-pos')) {
+            waifu.classList.add('waifu-custom-pos');
+          }
+          // Use dynamic size to account for resized widget
+          const w = waifu.offsetWidth, h = waifu.offsetHeight;
           const x = t.clientX, y = t.clientY;
           let left = x - offsetX, top = y - offsetY;
-          // 限制 top 不能高於 header 底部，且不能超出視窗底部
-          if (top < minTop) top = minTop; else if (top >= winH - h) top = winH - h;
-          if (left < 0) left = 0; else if (left >= winW - w) left = winW - w;
+          // Same constraints as edit mode: header top boundary, viewport edges
+          if (top < minTop) top = minTop;
+          if (top > winH - Math.min(h, 50)) top = winH - Math.min(h, 50);
+          if (left < 0) left = 0;
+          if (left > winW - Math.min(w, 50)) left = winW - Math.min(w, 50);
           waifu.style.top = `${top}px`;
           waifu.style.left = `${left}px`;
         }
@@ -1033,6 +1640,19 @@ async function loadWidget(config) {
 
           if (!dragging) {
             window.dispatchEvent(new Event('live2d:tapbody'));
+          } else {
+            // Save position to localStorage so toggle remembers it
+            try {
+              const canvas = document.getElementById('live2d');
+              const canvasContainer = waifu.querySelector('#waifu-canvas');
+              localStorage.setItem('waifu-custom-layout', JSON.stringify({
+                left: waifu.style.left, top: waifu.style.top,
+                bottom: waifu.style.bottom, width: waifu.style.width, height: waifu.style.height,
+                canvasWidth: canvas ? canvas.style.width : '', canvasHeight: canvas ? canvas.style.height : '',
+                canvasContainerWidth: canvasContainer ? canvasContainer.style.width : '',
+                canvasContainerHeight: canvasContainer ? canvasContainer.style.height : ''
+              }));
+            } catch (e) { /* ignore */ }
           }
         }
 

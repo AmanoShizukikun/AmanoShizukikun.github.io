@@ -137,9 +137,54 @@
 			"Name": "摇动　后发"
 		},
 		{
-			"Id": "cloth",
-			"GroupId": "",
+			"Id": "ParamCloth",
+			"GroupId": "ParamGroup8",
 			"Name": "衣服"
+		},
+		{
+			"Id": "ParamArmLA",
+			"GroupId": "ParamGroup10",
+			"Name": "左肩"
+		},
+		{
+			"Id": "ParamArmRAngle",
+			"GroupId": "ParamGroup10",
+			"Name": "右肩"
+		},
+		{
+			"Id": "ParamForearmLAngle",
+			"GroupId": "ParamGroup10",
+			"Name": "左肘"
+		},
+		{
+			"Id": "ParamForearmRAngle",
+			"GroupId": "ParamGroup10",
+			"Name": "右肘"
+		},
+		{
+			"Id": "ParamHandLB",
+			"GroupId": "ParamGroup10",
+			"Name": "左手"
+		},
+		{
+			"Id": "ParamHandRB",
+			"GroupId": "ParamGroup10",
+			"Name": "右手"
+		},
+		{
+			"Id": "ParamLegLAngle",
+			"GroupId": "ParamGroup9",
+			"Name": "左腿　角度"
+		},
+		{
+			"Id": "ParamLeg",
+			"GroupId": "ParamGroup9",
+			"Name": "右腿　角度"
+		},
+		{
+			"Id": "ParamTail",
+			"GroupId": "",
+			"Name": "尾巴"
 		}
 	],
 	"ParameterGroups": [
@@ -182,6 +227,16 @@
 			"Id": "ParamGroup8",
 			"GroupId": "",
 			"Name": "衣服"
+		},
+		{
+			"Id": "ParamGroup10",
+			"GroupId": "",
+			"Name": "手"
+		},
+		{
+			"Id": "ParamGroup9",
+			"GroupId": "",
+			"Name": "腿"
 		}
 	],
 	"Parts": [],
