@@ -701,15 +701,25 @@ class ToolsManager {
   }
 
   registerTools() {
+    const parent = document.getElementById('waifu-tool');
+    if (!parent) return;
+
     if (!Array.isArray(this.config.tools)) this.config.tools = Object.keys(this.tools);
     for (const name of this.config.tools) {
       if (this.tools[name]) {
         const { icon, callback } = this.tools[name];
+        const toolId = `waifu-tool-${name}`;
+
+        // Idempotent registration: remove stale/duplicated node before creating a new one.
+        const existing = document.getElementById(toolId);
+        if (existing && existing.parentElement === parent) {
+          existing.remove();
+        }
+
         const el = document.createElement('span');
-        el.id = `waifu-tool-${name}`;
+        el.id = toolId;
         el.innerHTML = icon;
-        const parent = document.getElementById('waifu-tool');
-        if (parent) parent.insertAdjacentElement('beforeend', el);
+        parent.insertAdjacentElement('beforeend', el);
         el.addEventListener('click', callback);
       }
     }
@@ -757,6 +767,7 @@ async function loadWidget(config) {
 
   let tipsObj = null;
   let models = [];
+  let live2dReady = false;
 
   if (config.waifuPath) {
     try {
@@ -773,81 +784,26 @@ async function loadWidget(config) {
       let userActionTimer = null;
       const messageArray = tips.message.default;
 
-      // seasons: add seasonal messages
-      tips.seasons.forEach(({ date, text }) => {
-        const now = new Date();
-        const after = date.split('-')[0];
-        const before = date.split('-')[1] || after;
-        if (Number(after.split('/')[0]) <= now.getMonth() + 1 &&
-            now.getMonth() + 1 <= Number(before.split('/')[0]) &&
-            Number(after.split('/')[1]) <= now.getDate() &&
-            now.getDate() <= Number(before.split('/')[1])) {
-          let chosen = randomSelection(text);
-          chosen = chosen.replace('{year}', String(now.getFullYear()));
-          messageArray.push(chosen);
-        }
-      });
-
-      // Merge page-specific mouseover rules into the global list
-      const pageKey = detectPageKey();
-      let allMouseover = [...(tips.mouseover || [])];
-      if (pageKey && tips.pageMessages && tips.pageMessages[pageKey] && tips.pageMessages[pageKey].mouseover) {
-        allMouseover = [...tips.pageMessages[pageKey].mouseover, ...allMouseover];
-      }
-
-      window.addEventListener('mousemove', () => (userAction = true));
-      window.addEventListener('keydown', () => (userAction = true));
-
-      setInterval(() => {
-        if (userAction) {
-          userAction = false;
-          clearInterval(userActionTimer);
-          userActionTimer = null;
-        } else if (!userActionTimer) {
-          userActionTimer = setInterval(() => {
-            // Use model-specific default messages if available (low priority so it never blocks interactive messages)
-            const currentModelName = api && api.models && api.models[api.modelId] ? api.models[api.modelId].name : '';
-            const modelDefault = getModelMessage(tips, currentModelName, 'default');
-            showMessage(modelDefault || messageArray, 4000, 5);
-          }, 20000);
-        }
-      }, 1000);
-
-      // Throttled mouseover handler for performance (100ms to stay responsive)
-      const mouseoverHandler = throttle((ev) => {
-        for (let { selector, text } of allMouseover) {
-          if (!ev.target?.closest(selector)) continue;
-          let msg = randomSelection(text);
-          if (typeof msg === 'string') msg = msg.replace('{text}', ev.target.innerText);
-          showMessage(msg, 4000, 8);
-          return;
-        }
-      }, 1);
-      window.addEventListener('mouseover', mouseoverHandler);
-
-      window.addEventListener('click', (ev) => {
-        for (let { selector, text } of (tips.click || [])) {
-          if (!ev.target?.closest(selector)) continue;
-          let msg = randomSelection(text);
-          if (typeof msg === 'string') msg = msg.replace('{text}', ev.target.innerText);
-          showMessage(msg, 4000, 8);
-          return;
-        }
-      });
-
-      window.addEventListener('live2d:hoverbody', () => {
-        const currentModelName = api && api.models && api.models[api.modelId] ? api.models[api.modelId].name : '';
-        const hoverBody = getModelMessage(tips, currentModelName, 'hoverBody');
-        showMessage(randomSelection(hoverBody), 4000, 8, false);
-      });
-      window.addEventListener('live2d:tapbody', () => {
-        // Use model-specific tap messages if available
-        const currentModelName = api && api.models && api.models[api.modelId] ? api.models[api.modelId].name : '';
-        const tapBody = getModelMessage(tips, currentModelName, 'tapBody');
-        showMessage(randomSelection(tapBody), 4000, 9);
+      function triggerSpeechExpressionMotion() {
+        // Avoid touching model internals before api/model is fully ready.
+        if (!live2dReady) return;
 
         (async function playRandomAnimation() {
           try {
+            // Best effort: trigger a random expression before motion playback.
+            try {
+              if (api && api.cubism5model && api.cubism5model.subdelegates && typeof api.cubism5model.subdelegates.at === 'function') {
+                const sub = api.cubism5model.subdelegates.at(0);
+                const liveMgr = sub && typeof sub.getLive2DManager === 'function' ? sub.getLive2DManager() : null;
+                const model5 = liveMgr && liveMgr._models && typeof liveMgr._models.at === 'function' ? liveMgr._models.at(0) : null;
+                const exprTarget =
+                  (model5 && typeof model5.setRandomExpression === 'function') ? model5 :
+                  ((liveMgr && typeof liveMgr.setRandomExpression === 'function') ? liveMgr :
+                  ((sub && typeof sub.setRandomExpression === 'function') ? sub : null));
+                if (exprTarget) exprTarget.setRandomExpression();
+              }
+            } catch (e) { console.warn('setRandomExpression failed', e); }
+
             // animations list may be in tips.animations or tips.message.animations
             const anims = (tips && (tips.animations || (tips.message && tips.message.animations))) ? (tips.animations || tips.message.animations) : [];
             if (!anims || !anims.length) return;
@@ -1016,6 +972,82 @@ async function loadWidget(config) {
             console.warn('playRandomAnimation failed', err);
           }
         })();
+      }
+
+      // seasons: add seasonal messages
+      tips.seasons.forEach(({ date, text }) => {
+        const now = new Date();
+        const after = date.split('-')[0];
+        const before = date.split('-')[1] || after;
+        if (Number(after.split('/')[0]) <= now.getMonth() + 1 &&
+            now.getMonth() + 1 <= Number(before.split('/')[0]) &&
+            Number(after.split('/')[1]) <= now.getDate() &&
+            now.getDate() <= Number(before.split('/')[1])) {
+          let chosen = randomSelection(text);
+          chosen = chosen.replace('{year}', String(now.getFullYear()));
+          messageArray.push(chosen);
+        }
+      });
+
+      // Merge page-specific mouseover rules into the global list
+      const pageKey = detectPageKey();
+      let allMouseover = [...(tips.mouseover || [])];
+      if (pageKey && tips.pageMessages && tips.pageMessages[pageKey] && tips.pageMessages[pageKey].mouseover) {
+        allMouseover = [...tips.pageMessages[pageKey].mouseover, ...allMouseover];
+      }
+
+      window.addEventListener('mousemove', () => (userAction = true));
+      window.addEventListener('keydown', () => (userAction = true));
+
+      setInterval(() => {
+        if (userAction) {
+          userAction = false;
+          clearInterval(userActionTimer);
+          userActionTimer = null;
+        } else if (!userActionTimer) {
+          userActionTimer = setInterval(() => {
+            // Use model-specific default messages if available (low priority so it never blocks interactive messages)
+            const currentModelName = api && api.models && api.models[api.modelId] ? api.models[api.modelId].name : '';
+            const modelDefault = getModelMessage(tips, currentModelName, 'default');
+            showMessage(modelDefault || messageArray, 4000, 5);
+            triggerSpeechExpressionMotion();
+          }, 10000);
+        }
+      }, 1000);
+
+      // Throttled mouseover handler for performance (100ms to stay responsive)
+      const mouseoverHandler = throttle((ev) => {
+        for (let { selector, text } of allMouseover) {
+          if (!ev.target?.closest(selector)) continue;
+          let msg = randomSelection(text);
+          if (typeof msg === 'string') msg = msg.replace('{text}', ev.target.innerText);
+          showMessage(msg, 4000, 8);
+          return;
+        }
+      }, 1);
+      window.addEventListener('mouseover', mouseoverHandler);
+
+      window.addEventListener('click', (ev) => {
+        for (let { selector, text } of (tips.click || [])) {
+          if (!ev.target?.closest(selector)) continue;
+          let msg = randomSelection(text);
+          if (typeof msg === 'string') msg = msg.replace('{text}', ev.target.innerText);
+          showMessage(msg, 4000, 8);
+          return;
+        }
+      });
+
+      window.addEventListener('live2d:hoverbody', () => {
+        const currentModelName = api && api.models && api.models[api.modelId] ? api.models[api.modelId].name : '';
+        const hoverBody = getModelMessage(tips, currentModelName, 'hoverBody');
+        showMessage(randomSelection(hoverBody), 4000, 8, false);
+      });
+      window.addEventListener('live2d:tapbody', () => {
+        // Use model-specific tap messages if available
+        const currentModelName = api && api.models && api.models[api.modelId] ? api.models[api.modelId].name : '';
+        const tapBody = getModelMessage(tips, currentModelName, 'tapBody');
+        showMessage(randomSelection(tapBody), 4000, 9);
+        triggerSpeechExpressionMotion();
       });
 
       const devtools = () => {};
@@ -1046,6 +1078,7 @@ async function loadWidget(config) {
 
   const api = await ModelManager.initCheck(config, models);
   await api.loadModel('');
+  live2dReady = true;
 
   const tools = new ToolsManager(api, config, tipsObj);
   tools.registerTools();
@@ -1080,6 +1113,7 @@ async function loadWidget(config) {
 
     function saveCurrentState() {
       const canvas = document.getElementById('live2d');
+      const toolEl = waifu.querySelector('#waifu-tool');
       return {
         left: waifu.style.left,
         top: waifu.style.top,
@@ -1091,7 +1125,12 @@ async function loadWidget(config) {
         canvasWidth: canvas ? canvas.style.width : '',
         canvasHeight: canvas ? canvas.style.height : '',
         canvasContainerWidth: waifu.querySelector('#waifu-canvas') ? waifu.querySelector('#waifu-canvas').style.width : '',
-        canvasContainerHeight: waifu.querySelector('#waifu-canvas') ? waifu.querySelector('#waifu-canvas').style.height : ''
+        canvasContainerHeight: waifu.querySelector('#waifu-canvas') ? waifu.querySelector('#waifu-canvas').style.height : '',
+        toolLeft: toolEl ? toolEl.style.left : '',
+        toolTop: toolEl ? toolEl.style.top : '',
+        toolRight: toolEl ? toolEl.style.right : '',
+        toolBottom: toolEl ? toolEl.style.bottom : '',
+        toolScale: waifu.style.getPropertyValue('--waifu-tool-scale') || ''
       };
     }
 
@@ -1133,10 +1172,13 @@ async function loadWidget(config) {
       const tbH = titlebarEl ? titlebarEl.offsetHeight : 0;
       if (tbH > 0) {
         const currentTop = parseFloat(waifu.style.top) || 0;
-        waifu.style.top = (currentTop - tbH) + 'px';
+        // Clamp so titlebar doesn't go behind the header
+        const hdrElEnter = document.querySelector('header');
+        const hdrBottomEnter = hdrElEnter ? hdrElEnter.getBoundingClientRect().bottom : 0;
+        waifu.style.top = Math.max(hdrBottomEnter, currentTop - tbH) + 'px';
       }
 
-      showMessage('進入編輯模式，可以拖動邊角調整大小', 3000, 10);
+      showMessage('進入編輯模式，可拖動標題列移動、拖動邊角縮放；工具列可獨立拖動/縮放', 3000, 10);
     }
 
     function exitEditMode() {
@@ -1170,6 +1212,18 @@ async function loadWidget(config) {
         }));
       } catch (e) { /* ignore */ }
 
+      // Save tool position/scale to localStorage
+      try {
+        const toolEl = waifu.querySelector('#waifu-tool');
+        localStorage.setItem('waifu-tool-layout', JSON.stringify({
+          left: toolEl ? toolEl.style.left : '',
+          top: toolEl ? toolEl.style.top : '',
+          right: toolEl ? toolEl.style.right : '',
+          bottom: toolEl ? toolEl.style.bottom : '',
+          scale: waifu.style.getPropertyValue('--waifu-tool-scale') || ''
+        }));
+      } catch (e) { /* ignore */ }
+
       showMessage('編輯完成！', 2000, 10);
     }
 
@@ -1199,9 +1253,22 @@ async function loadWidget(config) {
       // Clear stored layout
       try { localStorage.removeItem('waifu-custom-layout'); } catch (e) { /* ignore */ }
       try { localStorage.removeItem('waifu-edit-before'); } catch (e) { /* ignore */ }
+      try { localStorage.removeItem('waifu-tool-layout'); } catch (e) { /* ignore */ }
 
       // Reset scale and custom position
       waifu.style.removeProperty('--waifu-scale');
+      waifu.style.removeProperty('--waifu-tool-scale');
+
+      // Reset tool position
+      const toolResetEl = waifu.querySelector('#waifu-tool');
+      if (toolResetEl) {
+        toolResetEl.style.left = '';
+        toolResetEl.style.top = '';
+        toolResetEl.style.bottom = '';
+        // CSS default is right:-10px which sticks out of the widget.
+        // In edit mode keep it inside (right:0); in normal mode clear to use CSS default.
+        toolResetEl.style.right = isEditing ? '0px' : '';
+      }
 
       // If still in edit mode, recompute position from bottom:0 before switching to top/left
       if (isEditing) {
@@ -1246,6 +1313,17 @@ async function loadWidget(config) {
           canvasContainer.style.width = savedState.canvasContainerWidth;
           canvasContainer.style.height = savedState.canvasContainerHeight;
         }
+
+        // Restore tool position/scale
+        const toolEl = waifu.querySelector('#waifu-tool');
+        if (toolEl) {
+          toolEl.style.left = savedState.toolLeft || '';
+          toolEl.style.top = savedState.toolTop || '';
+          toolEl.style.right = savedState.toolRight || '';
+          toolEl.style.bottom = savedState.toolBottom || '';
+        }
+        if (savedState.toolScale) waifu.style.setProperty('--waifu-tool-scale', savedState.toolScale);
+        else waifu.style.removeProperty('--waifu-tool-scale');
       }
 
       isEditing = false;
@@ -1394,6 +1472,7 @@ async function loadWidget(config) {
             }
 
             updateScale();
+            clampToolInBounds();
           }
 
           function onUp() {
@@ -1459,6 +1538,7 @@ async function loadWidget(config) {
             if (canvas) { canvas.style.width = newW + 'px'; canvas.style.height = canvasH2 + 'px'; }
             if (canvasContainer) { canvasContainer.style.width = newW + 'px'; canvasContainer.style.height = canvasH2 + 'px'; }
             updateScale();
+            clampToolInBounds();
           }
 
           function onTouchEnd() {
@@ -1474,6 +1554,183 @@ async function loadWidget(config) {
 
     initResize();
 
+    // Clamp tool panel position within waifu bounds
+    function clampToolInBounds() {
+      const toolEl = waifu.querySelector('#waifu-tool');
+      if (!toolEl) return;
+      const tl = parseFloat(toolEl.style.left);
+      const tt = parseFloat(toolEl.style.top);
+      // Only clamp if tool has explicit inline positioning
+      if (isNaN(tl) && isNaN(tt)) return;
+      const wW = waifu.offsetWidth;
+      const wH = waifu.offsetHeight;
+      const tW = toolEl.offsetWidth;
+      const tH = toolEl.offsetHeight;
+      if (!isNaN(tl)) {
+        if (tl + tW > wW) toolEl.style.left = Math.max(0, wW - tW) + 'px';
+        if (tl < 0) toolEl.style.left = '0px';
+      }
+      if (!isNaN(tt)) {
+        if (tt + tH > wH) toolEl.style.top = Math.max(0, wH - tH) + 'px';
+        if (tt < 0) toolEl.style.top = '0px';
+      }
+    }
+
+    // Tool panel drag and resize in edit mode
+    function initToolDragResize() {
+      const toolEl = waifu.querySelector('#waifu-tool');
+      if (!toolEl) return;
+
+      // Add drag handle at top (before tool buttons)
+      if (!toolEl.querySelector('.waifu-tool-drag-handle')) {
+        const dh = document.createElement('div');
+        dh.className = 'waifu-tool-drag-handle';
+        dh.title = '\u62d6\u52d5\u5de5\u5177\u5217\u4f4d\u7f6e';
+        toolEl.insertBefore(dh, toolEl.firstChild);
+      }
+      // Add resize handle at bottom (after tool buttons)
+      if (!toolEl.querySelector('.waifu-tool-resize-handle')) {
+        const rh = document.createElement('div');
+        rh.className = 'waifu-tool-resize-handle';
+        rh.title = '\u4e0a\u4e0b\u62d6\u52d5\u7e2e\u653e\u5de5\u5177\u5217\u5927\u5c0f';
+        toolEl.appendChild(rh);
+      }
+
+      // Drag: move tool panel position within waifu widget
+      const dragHandle = toolEl.querySelector('.waifu-tool-drag-handle');
+      if (dragHandle) {
+        dragHandle.addEventListener('mousedown', (e) => {
+          if (!isEditing) return;
+          e.preventDefault();
+          e.stopPropagation();
+
+          const waifuRect = waifu.getBoundingClientRect();
+          const toolRect = toolEl.getBoundingClientRect();
+          const offsetX = e.clientX - toolRect.left;
+          const offsetY = e.clientY - toolRect.top;
+          const toolW = toolRect.width;
+          const toolH = toolRect.height;
+
+          function onMove(ev) {
+            let newLeft = ev.clientX - waifuRect.left - offsetX;
+            let newTop = ev.clientY - waifuRect.top - offsetY;
+            // Clamp within waifu bounds
+            if (newLeft < 0) newLeft = 0;
+            if (newTop < 0) newTop = 0;
+            if (newLeft + toolW > waifuRect.width) newLeft = waifuRect.width - toolW;
+            if (newTop + toolH > waifuRect.height) newTop = waifuRect.height - toolH;
+            toolEl.style.left = newLeft + 'px';
+            toolEl.style.top = newTop + 'px';
+            toolEl.style.right = 'auto';
+            toolEl.style.bottom = 'auto';
+          }
+
+          function onUp() {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+          }
+
+          document.addEventListener('mousemove', onMove);
+          document.addEventListener('mouseup', onUp);
+        });
+
+        dragHandle.addEventListener('touchstart', (e) => {
+          if (!isEditing) return;
+          const touch = e.touches[0];
+          if (!touch) return;
+          e.preventDefault();
+          e.stopPropagation();
+
+          const waifuRect = waifu.getBoundingClientRect();
+          const toolRect = toolEl.getBoundingClientRect();
+          const offsetX = touch.clientX - toolRect.left;
+          const offsetY = touch.clientY - toolRect.top;
+          const toolW = toolRect.width;
+          const toolH = toolRect.height;
+
+          function onTouchMove(ev) {
+            const t = ev.touches[0];
+            if (!t) return;
+            let newLeft = t.clientX - waifuRect.left - offsetX;
+            let newTop = t.clientY - waifuRect.top - offsetY;
+            // Clamp within waifu bounds
+            if (newLeft < 0) newLeft = 0;
+            if (newTop < 0) newTop = 0;
+            if (newLeft + toolW > waifuRect.width) newLeft = waifuRect.width - toolW;
+            if (newTop + toolH > waifuRect.height) newTop = waifuRect.height - toolH;
+            toolEl.style.left = newLeft + 'px';
+            toolEl.style.top = newTop + 'px';
+            toolEl.style.right = 'auto';
+            toolEl.style.bottom = 'auto';
+          }
+
+          function onTouchEnd() {
+            document.removeEventListener('touchmove', onTouchMove);
+            document.removeEventListener('touchend', onTouchEnd);
+          }
+
+          document.addEventListener('touchmove', onTouchMove);
+          document.addEventListener('touchend', onTouchEnd);
+        });
+      }
+
+      // Resize: drag down to enlarge, drag up to shrink tool buttons
+      const resizeHandle = toolEl.querySelector('.waifu-tool-resize-handle');
+      if (resizeHandle) {
+        resizeHandle.addEventListener('mousedown', (e) => {
+          if (!isEditing) return;
+          e.preventDefault();
+          e.stopPropagation();
+
+          const startY = e.clientY;
+          const startScale = parseFloat(waifu.style.getPropertyValue('--waifu-tool-scale') || waifu.style.getPropertyValue('--waifu-scale') || '1');
+
+          function onMove(ev) {
+            const dy = ev.clientY - startY;
+            const newScale = Math.max(0.5, Math.min(4.0, startScale + dy / 80));
+            waifu.style.setProperty('--waifu-tool-scale', newScale.toFixed(3));
+          }
+
+          function onUp() {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+          }
+
+          document.addEventListener('mousemove', onMove);
+          document.addEventListener('mouseup', onUp);
+        });
+
+        resizeHandle.addEventListener('touchstart', (e) => {
+          if (!isEditing) return;
+          const touch = e.touches[0];
+          if (!touch) return;
+          e.preventDefault();
+          e.stopPropagation();
+
+          const startY = touch.clientY;
+          const startScale = parseFloat(waifu.style.getPropertyValue('--waifu-tool-scale') || waifu.style.getPropertyValue('--waifu-scale') || '1');
+
+          function onTouchMove(ev) {
+            const t = ev.touches[0];
+            if (!t) return;
+            const dy = t.clientY - startY;
+            const newScale = Math.max(0.5, Math.min(4.0, startScale + dy / 80));
+            waifu.style.setProperty('--waifu-tool-scale', newScale.toFixed(3));
+          }
+
+          function onTouchEnd() {
+            document.removeEventListener('touchmove', onTouchMove);
+            document.removeEventListener('touchend', onTouchEnd);
+          }
+
+          document.addEventListener('touchmove', onTouchMove);
+          document.addEventListener('touchend', onTouchEnd);
+        });
+      }
+    }
+
+    initToolDragResize();
+
     // Restore layout from localStorage on load
     try {
       const savedLayout = localStorage.getItem('waifu-custom-layout');
@@ -1481,10 +1738,13 @@ async function loadWidget(config) {
         const layout = JSON.parse(savedLayout);
         if (layout.left) waifu.style.left = layout.left;
         if (layout.top) {
-          // Validate top is within viewport bounds
+          // Validate top is within viewport bounds (reserve titlebar height)
           let topVal = parseInt(layout.top, 10);
           const headerEl = document.querySelector('header');
-          const minTopRestore = headerEl ? headerEl.getBoundingClientRect().bottom : 0;
+          const hdrBtm = headerEl ? headerEl.getBoundingClientRect().bottom : 0;
+          const tbEl = waifu.querySelector('#waifu-edit-titlebar');
+          const tbH = tbEl ? (tbEl.scrollHeight || 34) : 0;
+          const minTopRestore = hdrBtm + tbH;
           if (topVal < minTopRestore) topVal = minTopRestore;
           if (topVal > window.innerHeight - 50) topVal = window.innerHeight - 50;
           waifu.style.top = topVal + 'px';
@@ -1504,6 +1764,22 @@ async function loadWidget(config) {
         if (layout.top) waifu.classList.add('waifu-custom-pos');
 
         updateScale();
+      }
+    } catch (e) { /* ignore */ }
+
+    // Restore tool layout from localStorage
+    try {
+      const savedToolLayout = localStorage.getItem('waifu-tool-layout');
+      if (savedToolLayout) {
+        const tl = JSON.parse(savedToolLayout);
+        const toolRestoreEl = waifu.querySelector('#waifu-tool');
+        if (toolRestoreEl) {
+          if (tl.left) toolRestoreEl.style.left = tl.left;
+          if (tl.top) toolRestoreEl.style.top = tl.top;
+          if (tl.right !== undefined && tl.right !== '') toolRestoreEl.style.right = tl.right;
+          if (tl.bottom !== undefined && tl.bottom !== '') toolRestoreEl.style.bottom = tl.bottom;
+        }
+        if (tl.scale) waifu.style.setProperty('--waifu-tool-scale', tl.scale);
       }
     } catch (e) { /* ignore */ }
 
@@ -1539,7 +1815,10 @@ async function loadWidget(config) {
         // 計算 header 的底部（相對於 viewport），拖曳時不能超出此頂部區域
         const headerEl = document.querySelector('header');
         let headerRect = headerEl ? headerEl.getBoundingClientRect() : { bottom: 0 };
-        let minTop = Math.max(0, headerRect.bottom);
+        // Reserve titlebar height so drag range is consistent with edit mode
+        const editTitlebar = waifu.querySelector('#waifu-edit-titlebar');
+        const tbReserve = editTitlebar ? (editTitlebar.scrollHeight || 34) : 0;
+        let minTop = Math.max(0, headerRect.bottom + tbReserve);
 
         let dragging = false;
         let longPressTimer = setTimeout(() => { dragging = true; }, LONG_PRESS_MS);
@@ -1589,7 +1868,7 @@ async function loadWidget(config) {
         document.addEventListener('mousemove', onMove);
         document.addEventListener('mouseup', onUp);
 
-        window.onresize = () => { winW = window.innerWidth; winH = window.innerHeight; headerRect = headerEl ? headerEl.getBoundingClientRect() : { bottom: 0 }; minTop = Math.max(0, headerRect.bottom); };
+        window.onresize = () => { winW = window.innerWidth; winH = window.innerHeight; headerRect = headerEl ? headerEl.getBoundingClientRect() : { bottom: 0 }; minTop = Math.max(0, headerRect.bottom + tbReserve); };
       });
 
       waifu.addEventListener('touchstart', (e) => {
@@ -1607,7 +1886,10 @@ async function loadWidget(config) {
         // 計算 header 的底部（相對於 viewport），拖曳時不能超出此頂部區域
         const headerEl = document.querySelector('header');
         let headerRect = headerEl ? headerEl.getBoundingClientRect() : { bottom: 0 };
-        let minTop = Math.max(0, headerRect.bottom);
+        // Reserve titlebar height so drag range is consistent with edit mode
+        const editTitlebar2 = waifu.querySelector('#waifu-edit-titlebar');
+        const tbReserve2 = editTitlebar2 ? (editTitlebar2.scrollHeight || 34) : 0;
+        let minTop = Math.max(0, headerRect.bottom + tbReserve2);
 
         let dragging = false;
         let longPressTimer = setTimeout(() => { dragging = true; }, LONG_PRESS_MS);
@@ -1659,7 +1941,7 @@ async function loadWidget(config) {
         document.addEventListener('touchmove', onTouchMove);
         document.addEventListener('touchend', onTouchEnd);
 
-        window.onresize = () => { winW = window.innerWidth; winH = window.innerHeight; headerRect = headerEl ? headerEl.getBoundingClientRect() : { bottom: 0 }; minTop = Math.max(0, headerRect.bottom); };
+        window.onresize = () => { winW = window.innerWidth; winH = window.innerHeight; headerRect = headerEl ? headerEl.getBoundingClientRect() : { bottom: 0 }; minTop = Math.max(0, headerRect.bottom + tbReserve2); };
       });
     }
   }

@@ -127,14 +127,39 @@
 			"Name": "摇动　前发"
 		},
 		{
-			"Id": "ParamHairSide",
+			"Id": "ParamHairFrontR",
 			"GroupId": "ParamGroup7",
-			"Name": "摇动　侧发"
+			"Name": "搖動右前髮"
+		},
+		{
+			"Id": "ParamHairFrontL",
+			"GroupId": "ParamGroup7",
+			"Name": "搖動左前髮"
+		},
+		{
+			"Id": "ParamHairSiderR",
+			"GroupId": "ParamGroup7",
+			"Name": "摇动　右後侧发"
+		},
+		{
+			"Id": "ParamHairSiderL",
+			"GroupId": "ParamGroup7",
+			"Name": "搖動左後側髮"
 		},
 		{
 			"Id": "ParamHairBack",
 			"GroupId": "ParamGroup7",
 			"Name": "摇动　后发"
+		},
+		{
+			"Id": "ParamEarR",
+			"GroupId": "ParamGroup7",
+			"Name": "搖動右耳"
+		},
+		{
+			"Id": "ParamEarL",
+			"GroupId": "ParamGroup7",
+			"Name": "搖動左耳"
 		},
 		{
 			"Id": "ParamCloth",

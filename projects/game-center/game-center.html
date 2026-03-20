@@ -2864,6 +2864,8 @@
                 style.textContent = '.page-entrance-overlay { display: none !important; }';
                 document.head.appendChild(style);
                 sessionStorage.removeItem('skipEntranceAnimation');
+                // 提前標記進場動畫完成，避免 Live2D 等待不存在的完成事件
+                window.entryAnimationsCompleted = true;
             }
         })();
     </script>
@@ -3299,7 +3301,11 @@
         // 整版進入動畫控制 - 增強版
         function playEntranceAnimation() {
             const overlay = document.getElementById('entranceOverlay');
-            if (!overlay) return;
+            if (!overlay) {
+                window.entryAnimationsCompleted = true;
+                try { window.dispatchEvent(new CustomEvent('animations:entryComplete')); } catch (e) {}
+                return;
+            }
 
             // 檢查是否跳過進入動畫
             const skipAnimation = sessionStorage.getItem('skipEntranceAnimation');
@@ -3307,6 +3313,8 @@
                 // 立即隱藏進入動畫，不顯示
                 overlay.classList.add('hidden');
                 sessionStorage.removeItem('skipEntranceAnimation');
+                window.entryAnimationsCompleted = true;
+                try { window.dispatchEvent(new CustomEvent('animations:entryComplete')); } catch (e) {}
                 return;
             }
 
@@ -3322,6 +3330,8 @@
             // 3秒後隱藏進入動畫
             setTimeout(() => {
                 overlay.classList.add('hidden');
+                window.entryAnimationsCompleted = true;
+                try { window.dispatchEvent(new CustomEvent('animations:entryComplete')); } catch (e) {}
             }, 3000);
         }
 

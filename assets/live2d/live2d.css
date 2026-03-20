@@ -164,7 +164,7 @@
 	align-items: center;
 	display: flex;
 	flex-direction: column;
-	gap: clamp(5px, calc(8px * var(--waifu-scale, 1)), 14px);
+	gap: clamp(5px, calc(8px * var(--waifu-tool-scale, var(--waifu-scale, 1))), 14px);
 	opacity: 0;
 	position: absolute;
 	right: -10px;
@@ -187,8 +187,8 @@
 
 /* 單顆按鈕的預設動畫初始狀態（隱藏） */
 #waifu-tool span {
-    width: clamp(24px, calc(32px * var(--waifu-scale, 1)), 48px);
-    height: clamp(24px, calc(32px * var(--waifu-scale, 1)), 48px);
+    width: clamp(24px, calc(32px * var(--waifu-tool-scale, var(--waifu-scale, 1))), 48px);
+    height: clamp(24px, calc(32px * var(--waifu-tool-scale, var(--waifu-scale, 1))), 48px);
     background: rgba(0, 212, 255, 0.08);
     border: 1px solid var(--primary-cyan);
     border-radius: 50%;
@@ -207,19 +207,22 @@
     opacity: 1;
     transform: translateY(0) scale(1) rotate(0);
 }
-#waifu:hover #waifu-tool span:nth-child(1) { transition-delay: 80ms; }
-#waifu:hover #waifu-tool span:nth-child(2) { transition-delay: 140ms; }
-#waifu:hover #waifu-tool span:nth-child(3) { transition-delay: 200ms; }
-#waifu:hover #waifu-tool span:nth-child(4) { transition-delay: 260ms; }
-#waifu:hover #waifu-tool span:nth-child(5) { transition-delay: 320ms; }
-#waifu:hover #waifu-tool span:nth-child(6) { transition-delay: 380ms; }
-
-#waifu[data-force-tools-visible="true"] #waifu-tool span:nth-child(1) { transition-delay: 80ms; }
-#waifu[data-force-tools-visible="true"] #waifu-tool span:nth-child(2) { transition-delay: 140ms; }
-#waifu[data-force-tools-visible="true"] #waifu-tool span:nth-child(3) { transition-delay: 200ms; }
-#waifu[data-force-tools-visible="true"] #waifu-tool span:nth-child(4) { transition-delay: 260ms; }
-#waifu[data-force-tools-visible="true"] #waifu-tool span:nth-child(5) { transition-delay: 320ms; }
-#waifu[data-force-tools-visible="true"] #waifu-tool span:nth-child(6) { transition-delay: 380ms; }
+#waifu:hover #waifu-tool > span:nth-of-type(1),
+#waifu[data-force-tools-visible="true"] #waifu-tool > span:nth-of-type(1) { transition-delay: 80ms; }
+#waifu:hover #waifu-tool > span:nth-of-type(2),
+#waifu[data-force-tools-visible="true"] #waifu-tool > span:nth-of-type(2) { transition-delay: 140ms; }
+#waifu:hover #waifu-tool > span:nth-of-type(3),
+#waifu[data-force-tools-visible="true"] #waifu-tool > span:nth-of-type(3) { transition-delay: 200ms; }
+#waifu:hover #waifu-tool > span:nth-of-type(4),
+#waifu[data-force-tools-visible="true"] #waifu-tool > span:nth-of-type(4) { transition-delay: 260ms; }
+#waifu:hover #waifu-tool > span:nth-of-type(5),
+#waifu[data-force-tools-visible="true"] #waifu-tool > span:nth-of-type(5) { transition-delay: 320ms; }
+#waifu:hover #waifu-tool > span:nth-of-type(6),
+#waifu[data-force-tools-visible="true"] #waifu-tool > span:nth-of-type(6) { transition-delay: 380ms; }
+#waifu:hover #waifu-tool > span:nth-of-type(7),
+#waifu[data-force-tools-visible="true"] #waifu-tool > span:nth-of-type(7) { transition-delay: 440ms; }
+#waifu:hover #waifu-tool > span:nth-of-type(8),
+#waifu[data-force-tools-visible="true"] #waifu-tool > span:nth-of-type(8) { transition-delay: 500ms; }
 
 /* 懸停單一按鈕時的強化效果 */
 #waifu-tool span:hover {
@@ -232,8 +235,8 @@
 /* SVG 圖示本身的樣式 */
 #waifu-tool svg {
     fill: var(--primary-cyan);
-    height: clamp(12px, calc(16px * var(--waifu-scale, 1)), 24px);
-    width: clamp(12px, calc(16px * var(--waifu-scale, 1)), 24px);
+    height: clamp(12px, calc(16px * var(--waifu-tool-scale, var(--waifu-scale, 1))), 24px);
+    width: clamp(12px, calc(16px * var(--waifu-tool-scale, var(--waifu-scale, 1))), 24px);
     transition: all var(--transition-normal);
     display: block; /* 確保為塊級元素 */
 }
@@ -480,10 +483,99 @@
 .waifu-resize-edge.edge-w { left: -4px; top: 8px; bottom: 8px; width: 8px; cursor: w-resize; }
 .waifu-resize-edge.edge-e { right: -4px; top: 8px; bottom: 8px; width: 8px; cursor: e-resize; }
 
-/* 編輯模式下隱藏工具列 */
+/* 編輯模式下顯示工具列，並允許拖動/縮放 */
 #waifu.waifu-edit-mode #waifu-tool {
-	opacity: 0 !important;
-	pointer-events: none !important;
+	opacity: 1 !important;
+	pointer-events: auto !important;
+	transform: none !important;
+	transition: opacity 0.2s ease !important;
+	max-height: none !important;
+}
+
+#waifu.waifu-edit-mode #waifu-tool span {
+	opacity: 1 !important;
+	transform: none !important;
+	transition: background 0.2s, box-shadow 0.2s, transform 0.2s !important;
+	transition-delay: 0ms !important;
+}
+
+/* 工具列拖曳把手（僅編輯模式顯示） */
+.waifu-tool-drag-handle {
+	display: none;
+	width: 100%;
+	min-height: 14px;
+	background: rgba(0, 212, 255, 0.08);
+	border: 1px solid rgba(0, 212, 255, 0.25);
+	border-radius: 4px;
+	cursor: grab;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	user-select: none;
+	-webkit-user-select: none;
+	margin-bottom: 4px;
+	box-sizing: border-box;
+}
+
+.waifu-tool-drag-handle:active {
+	cursor: grabbing;
+}
+
+.waifu-tool-drag-handle::after {
+	content: "⋮⋮";
+	font-size: 9px;
+	color: rgba(0, 212, 255, 0.6);
+	letter-spacing: 3px;
+}
+
+#waifu.waifu-edit-mode .waifu-tool-drag-handle {
+	display: flex;
+}
+
+/* 工具列縮放把手（僅編輯模式顯示） */
+.waifu-tool-resize-handle {
+	display: none;
+	width: 100%;
+	height: 16px;
+	cursor: s-resize;
+	align-items: center;
+	justify-content: center;
+	margin-top: 4px;
+	flex-shrink: 0;
+}
+
+.waifu-tool-resize-handle::after {
+	content: "";
+	width: 20px;
+	height: 5px;
+	border-radius: 3px;
+	background: rgba(0, 212, 255, 0.25);
+	border: 1.5px solid var(--primary-cyan, #00d4ff);
+	transition: all 0.2s ease;
+}
+
+.waifu-tool-resize-handle:hover::after {
+	background: rgba(0, 212, 255, 0.5);
+	box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+	height: 6px;
+}
+
+#waifu.waifu-edit-mode .waifu-tool-resize-handle {
+	display: flex;
+}
+
+[data-theme="light"] .waifu-tool-drag-handle {
+	background: rgba(0, 153, 204, 0.06);
+	border-color: rgba(0, 153, 204, 0.2);
+}
+
+[data-theme="light"] .waifu-tool-drag-handle::after {
+	color: rgba(0, 153, 204, 0.5);
+}
+
+[data-theme="light"] .waifu-tool-resize-handle::after {
+	background: rgba(0, 153, 204, 0.15);
+	border-color: #0099cc;
 }
 
 /* 編輯模式下隱藏提示 */

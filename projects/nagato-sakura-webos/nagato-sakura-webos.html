@@ -1856,32 +1856,79 @@
             }
 
             /* 對話/聊天區域 - 與整體風格保持一致 */
-            [data-theme="light"] .nagato-messages {
-                background: rgba(0, 153, 204, 0.02);
+            [data-theme="light"] .nagato-content {
+                background: linear-gradient(
+                    180deg,
+                    rgba(0, 153, 204, 0.08) 0%,
+                    rgba(255, 255, 255, 0.92) 42%,
+                    rgba(255, 255, 255, 0.96) 100%
+                );
             }
 
-            [data-theme="light"] .message.ai {
-                background: rgba(0, 153, 204, 0.08);
-                color: #1a1a1a;
+            [data-theme="light"] .nagato-live2d-stage {
+                background: radial-gradient(
+                        circle at 50% 18%,
+                        rgba(0, 153, 204, 0.26),
+                        rgba(255, 255, 255, 0.08) 60%
+                    ),
+                    linear-gradient(
+                        180deg,
+                        rgba(255, 255, 255, 0.7),
+                        rgba(240, 250, 255, 0.45)
+                    );
             }
 
-            [data-theme="light"] .message.user {
-                background: #0099cc;
-                color: #fff;
+            [data-theme="light"] .nagato-ai-bubble {
+                background: rgba(255, 255, 255, 0.94);
+                color: #153246;
+                border: 1px solid rgba(0, 153, 204, 0.2);
+                box-shadow: 0 10px 26px rgba(0, 93, 136, 0.2);
             }
 
-            [data-theme="light"] .message-suggestions .suggestion-btn {
-                background: rgba(0, 153, 204, 0.05);
-                border: 1px solid rgba(0, 153, 204, 0.15);
-                color: #333;
+            [data-theme="light"] .nagato-overlay-btn {
+                background: rgba(255, 255, 255, 0.62);
+                border-color: rgba(0, 153, 204, 0.18);
+                color: #0f4f70;
+                box-shadow: 0 10px 22px rgba(0, 76, 110, 0.14);
             }
 
-            [data-theme="light"] .message-suggestions .suggestion-btn:hover {
-                background: rgba(0, 153, 204, 0.12);
+            [data-theme="light"] .nagato-overlay-btn:hover {
+                background: rgba(255, 255, 255, 0.84);
+                border-color: rgba(0, 153, 204, 0.28);
+                color: #08364e;
+            }
+
+            [data-theme="light"] .nagato-overlay-btn.clear-btn {
+                color: #b84c6f;
+            }
+
+            [data-theme="light"] .nagato-ai-bubble::before {
+                border-top-color: rgba(255, 255, 255, 0.94);
+            }
+
+            [data-theme="light"] .nagato-ai-bubble.typing {
+                color: rgba(0, 70, 100, 0.85);
+            }
+
+            [data-theme="light"] .nagato-suggestions .suggestion-btn {
+                background: rgba(255, 255, 255, 0.55);
+                backdrop-filter: blur(12px) saturate(160%);
+                -webkit-backdrop-filter: blur(12px) saturate(160%);
+                border: 1px solid rgba(0, 153, 204, 0.3);
+                color: #0a3a52;
+                text-shadow: 0 1px 3px rgba(255, 255, 255, 0.7);
+                font-weight: 500;
+            }
+
+            [data-theme="light"] .nagato-suggestions .suggestion-btn:hover {
+                background: rgba(0, 153, 204, 0.18);
+                border-color: rgba(0, 153, 204, 0.45);
+                color: #062b40;
             }
 
             [data-theme="light"] .nagato-input-area {
                 border-top: 1px solid rgba(0, 153, 204, 0.15);
+                background: rgba(255, 255, 255, 0.74);
             }
 
             [data-theme="light"] .nagato-input-area textarea {
@@ -1892,15 +1939,66 @@
 
             [data-theme="light"] .nagato-input-area textarea:focus {
                 border-color: rgba(0, 153, 204, 0.5);
+                box-shadow: 0 0 0 2px rgba(0, 153, 204, 0.1);
             }
 
-            [data-theme="light"] .nagato-input-area .clear-btn {
-                color: #0099cc;
+            [data-theme="light"] .nagato-toolbar-btn {
+                background: rgba(0, 153, 204, 0.06);
+                border: 1px solid rgba(0, 153, 204, 0.18);
+                color: #0f4f70;
             }
 
-            [data-theme="light"] .nagato-input-area .clear-btn:hover {
-                background: rgba(0, 153, 204, 0.1);
-                color: #0099cc;
+            [data-theme="light"] .nagato-toolbar-btn:hover {
+                background: rgba(0, 153, 204, 0.14);
+            }
+
+            [data-theme="light"] .nagato-history-panel {
+                background: linear-gradient(
+                    180deg,
+                    rgba(250, 253, 255, 0.88),
+                    rgba(241, 249, 255, 0.94)
+                );
+                box-shadow: inset 0 -1px 0 rgba(0, 153, 204, 0.1);
+            }
+
+            [data-theme="light"] .nagato-history-header {
+                border-bottom: 1px solid rgba(0, 153, 204, 0.12);
+                background: linear-gradient(
+                    180deg,
+                    rgba(255, 255, 255, 0.72),
+                    rgba(255, 255, 255, 0.42)
+                );
+                color: #0b4f72;
+            }
+
+            [data-theme="light"] .nagato-history-item {
+                background: transparent;
+                border: none;
+            }
+
+            [data-theme="light"] .nagato-history-meta {
+                color: rgba(0, 76, 110, 0.6);
+            }
+
+            [data-theme="light"] .nagato-history-text {
+                color: #1e2a33;
+                background: rgba(255, 255, 255, 0.78);
+                border: 1px solid rgba(0, 153, 204, 0.12);
+                box-shadow: 0 10px 24px rgba(0, 76, 110, 0.12);
+            }
+
+            [data-theme="light"] .nagato-history-item.user .nagato-history-text {
+                background: linear-gradient(
+                    135deg,
+                    rgba(0, 153, 204, 0.18),
+                    rgba(0, 153, 204, 0.09)
+                );
+                border-color: rgba(0, 153, 204, 0.22);
+            }
+
+            [data-theme="light"] .nagato-history-item.ai .nagato-history-text {
+                background: rgba(255, 255, 255, 0.84);
+                border-color: rgba(0, 153, 204, 0.1);
             }
 
             /* 計算機 - 與整體風格保持一致 */
@@ -3009,98 +3107,375 @@
             }
 
             .nagato-content {
-                display: flex;
-                flex-direction: column;
+                position: relative;
+                --nagato-chat-shell-height: 63px;
                 height: 100%;
                 padding: 0;
+                overflow: hidden;
+                background: linear-gradient(
+                    180deg,
+                    rgba(0, 16, 34, 0.86) 0%,
+                    rgba(7, 24, 50, 0.92) 42%,
+                    rgba(8, 15, 28, 0.98) 100%
+                );
             }
-            .nagato-messages {
-                flex: 1;
-                padding: 15px;
-                overflow-y: auto;
-                background: rgba(0, 0, 0, 0.1);
+            .nagato-live2d-stage {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 63px;
+                background: radial-gradient(
+                        circle at 50% 10%,
+                        rgba(0, 255, 247, 0.2),
+                        rgba(0, 255, 247, 0.02) 58%
+                    ),
+                    linear-gradient(
+                        180deg,
+                        rgba(0, 0, 0, 0.14),
+                        rgba(0, 0, 0, 0.34)
+                    );
             }
-            .message {
-                margin-bottom: 15px;
-                padding: 10px 15px;
-                border-radius: 10px;
-                max-width: 80%;
-                line-height: 1.5;
+            .nagato-live2d-host {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                background: transparent;
+                overflow: hidden;
+                z-index: 1;
             }
-            .message.user {
-                background: var(--primary-cyan);
-                color: #000;
-                align-self: flex-end;
-                margin-left: auto;
-                border-bottom-right-radius: 2px;
+
+            .nagato-live2d-host #waifu {
+                position: absolute !important;
+                left: 50% !important;
+                right: auto !important;
+                top: auto !important;
+                bottom: 0 !important;
+                width: min(100%, 320px) !important;
+                height: 100% !important;
+                transform: translateX(-50%) !important;
+                transition: none !important;
+                pointer-events: none !important;
             }
-            .message.ai {
-                background: rgba(255, 255, 255, 0.1);
-                color: #f0f0f0;
-                align-self: flex-start;
-                border-bottom-left-radius: 2px;
+
+            .nagato-live2d-host #waifu.waifu-active,
+            .nagato-live2d-host #waifu:hover {
+                transform: translateX(-50%) !important;
             }
-            .message-suggestions {
-                margin-top: 8px;
+
+            .nagato-live2d-host #waifu #waifu-canvas,
+            .nagato-live2d-host #waifu #live2d,
+            .nagato-live2d-host #waifu #waifu-canvas canvas {
+                width: 100% !important;
+                height: 100% !important;
+                pointer-events: none !important;
+            }
+
+            .nagato-live2d-host #waifu #waifu-tool,
+            .nagato-live2d-host #waifu #waifu-tips,
+            .nagato-live2d-host #waifu #waifu-edit-titlebar,
+            .nagato-live2d-host #waifu .waifu-resize-handle,
+            .nagato-live2d-host #waifu .waifu-resize-edge,
+            .nagato-live2d-host #waifu-toggle {
+                display: none !important;
+            }
+
+            .nagato-ai-bubble {
+                position: absolute;
+                top: 40%;
+                left: 12px;
+                right: 12px;
+                max-width: calc(100% - 24px);
+                padding: 10px 12px;
+                border-radius: 12px;
+                border: 1px solid rgba(0, 255, 247, 0.2);
+                background: rgba(10, 18, 34, 0.92);
+                color: #e9f8ff;
+                line-height: 1.45;
+                font-size: 0.86rem;
+                box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35);
+                opacity: 0;
+                transform: translateY(calc(-50% - 6px));
+                pointer-events: none;
+                transition: opacity 0.24s ease, transform 0.24s ease;
+                z-index: 4;
+            }
+
+            .nagato-overlay-actions {
+                position: absolute;
+                top: 12px;
+                left: 12px;
+                right: 12px;
                 display: flex;
-                gap: 6px;
+                align-items: center;
+                justify-content: space-between;
+                pointer-events: none;
+                z-index: 6;
             }
-            .message-suggestions .suggestion-btn {
-                background: rgba(255, 255, 255, 0.04);
-                border: 1px solid rgba(255, 255, 255, 0.04);
-                color: #f0f0f0;
-                padding: 6px 8px;
-                border-radius: 6px;
+
+            .nagato-overlay-btn {
+                width: 40px;
+                height: 40px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid rgba(255, 255, 255, 0.14);
+                border-radius: 12px;
+                background: rgba(7, 18, 34, 0.48);
+                backdrop-filter: blur(14px) saturate(155%);
+                -webkit-backdrop-filter: blur(14px) saturate(155%);
+                color: #e9f2ff;
                 cursor: pointer;
-                font-size: 0.85rem;
+                pointer-events: auto;
+                box-shadow: 0 12px 26px rgba(0, 0, 0, 0.24);
+                transition: background 0.18s ease, border-color 0.18s ease,
+                    transform 0.18s ease, color 0.18s ease;
             }
-            .message-suggestions .suggestion-btn:hover {
-                background: rgba(255, 255, 255, 0.08);
+
+            .nagato-overlay-btn:hover {
+                background: rgba(14, 38, 68, 0.7);
+                border-color: rgba(0, 255, 247, 0.3);
+                color: #ffffff;
+                transform: translateY(-1px);
+            }
+
+            .nagato-overlay-btn.clear-btn {
+                color: #ffd0d0;
+            }
+
+            .nagato-ai-bubble::before {
+                content: "";
+                position: absolute;
+                left: 50%;
+                bottom: -8px;
+                width: 0;
+                height: 0;
+                transform: translateX(-50%);
+                border-left: 8px solid transparent;
+                border-right: 8px solid transparent;
+                border-top: 8px solid rgba(10, 18, 34, 0.92);
+            }
+
+            .nagato-ai-bubble.show {
+                opacity: 1;
+                transform: translateY(-50%);
+            }
+
+            .nagato-ai-bubble.typing {
+                color: rgba(230, 244, 255, 0.8);
+                font-style: italic;
+            }
+
+            .nagato-chat-shell {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 30;
+            }
+            .nagato-chat-shell.history-open .nagato-suggestions {
+                display: none;
+                opacity: 0;
+                transform: translateY(10px);
+                pointer-events: none;
+            }
+            .nagato-suggestions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                padding: 8px 10px 4px;
+                align-content: flex-start;
+                pointer-events: auto;
+                transition: opacity 0.2s ease, transform 0.2s ease;
+            }
+            .nagato-suggestions .suggestion-btn {
+                background: rgba(4, 14, 30, 0.62);
+                backdrop-filter: blur(12px) saturate(160%);
+                -webkit-backdrop-filter: blur(12px) saturate(160%);
+                border: 1px solid rgba(0, 210, 255, 0.28);
+                color: #b8ecff;
+                text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9), 0 0 12px rgba(0, 0, 0, 0.6);
+                padding: 6px 10px;
+                border-radius: 999px;
+                cursor: pointer;
+                font-size: 0.82rem;
+                font-weight: 500;
+                transition: all 0.18s ease;
+            }
+            .nagato-suggestions .suggestion-btn:hover {
+                background: rgba(0, 180, 210, 0.28);
+                border-color: rgba(0, 255, 247, 0.55);
+                color: #e4faff;
+                text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9), 0 0 14px rgba(0, 220, 255, 0.4);
+                transform: translateY(-1px);
             }
             .nagato-input-area {
-                display: flex;
+                display: grid;
+                grid-template-columns: 1fr auto;
+                gap: 8px;
+                align-items: end;
                 padding: 10px;
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                border-top: 1px solid rgba(255, 255, 255, 0.12);
+                background: rgba(0, 0, 0, 0.26);
             }
             .nagato-input-area textarea {
-                flex: 1;
+                width: 100%;
+                min-height: 42px;
                 padding: 10px;
-                background: rgba(0, 0, 0, 0.2);
+                background: rgba(0, 0, 0, 0.3);
                 border: 1px solid rgba(255, 255, 255, 0.2);
-                border-radius: 4px;
+                border-radius: 8px;
                 outline: none;
                 color: #fff;
                 font-family: var(--font-ui);
                 resize: none;
+                overflow-y: hidden;
+                font-size: 0.92rem;
+                line-height: 1.4;
             }
-            .nagato-input-area button {
+            .nagato-input-area textarea:focus {
+                border-color: rgba(0, 255, 247, 0.5);
+                box-shadow: 0 0 0 2px rgba(0, 255, 247, 0.12);
+            }
+            .nagato-input-area #nagato-send {
                 background: var(--accent-pink);
                 border: none;
-                color: #000;
-                padding: 0 15px;
-                margin-left: 10px;
-                border-radius: 4px;
+                color: #07151f;
+                padding: 0 14px;
+                border-radius: 8px;
                 cursor: pointer;
-                font-size: 1.1rem;
+                font-size: 1.02rem;
+                height: 42px;
             }
-            .nagato-input-area .clear-btn {
-                background: transparent;
+            .nagato-toolbar-btn {
+                background: rgba(255, 255, 255, 0.06);
+                border: 1px solid rgba(255, 255, 255, 0.14);
+                color: #e9f2ff;
+                padding: 0 12px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 0.84rem;
+                height: 42px;
+            }
+            .nagato-toolbar-btn:hover {
+                background: rgba(255, 255, 255, 0.12);
+            }
+            .nagato-toolbar-btn.clear-btn {
+                color: #ffd0d0;
+            }
+            .nagato-history-panel {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: var(--nagato-chat-shell-height, 63px);
+                background: linear-gradient(
+                    180deg,
+                    rgba(7, 16, 30, 0.86) 0%,
+                    rgba(8, 18, 34, 0.92) 34%,
+                    rgba(5, 10, 20, 0.96) 100%
+                );
+                backdrop-filter: blur(18px) saturate(145%);
+                -webkit-backdrop-filter: blur(18px) saturate(145%);
                 border: none;
-                color: #f0f0f0;
-                padding: 0 10px;
-                margin-left: 8px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 1rem;
-                height: 36px;
-                align-self: center;
+                border-radius: 0;
+                display: none;
+                flex-direction: column;
+                overflow: hidden;
+                z-index: 35;
+                box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.06);
             }
-            .nagato-input-area .clear-btn:hover {
-                background: rgba(255, 255, 255, 0.04);
-                color: #fff;
+            .nagato-history-panel.show {
+                display: flex;
             }
-            .message.ai.typing {
-                opacity: 0.9;
+            .nagato-history-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                height: 63px;
+                min-height: 63px;
+                flex-shrink: 0;
+                padding: 14px 16px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                background: linear-gradient(
+                    180deg,
+                    rgba(255, 255, 255, 0.05),
+                    rgba(255, 255, 255, 0.02)
+                );
+                font-size: 0.95rem;
+                font-weight: 600;
+            }
+            .nagato-history-list {
+                flex: 1;
+                overflow-y: auto;
+                padding: 18px 16px 22px;
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+            }
+            /* Hide duplicate vertical scrollbar buttons (keep single up/down arrows). */
+            .nagato-history-list::-webkit-scrollbar-button:vertical:start:increment,
+            .nagato-history-list::-webkit-scrollbar-button:vertical:end:decrement {
+                display: none;
+            }
+            .nagato-history-item {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                max-width: min(82%, 520px);
+                font-size: 0.88rem;
+            }
+            .nagato-history-item.user {
+                align-self: flex-end;
+                align-items: flex-end;
+            }
+            .nagato-history-item.ai {
+                align-self: flex-start;
+                align-items: flex-start;
+            }
+            .nagato-history-meta {
+                display: block;
+                font-size: 0.72rem;
+                padding: 0 4px;
+                letter-spacing: 0.02em;
+                color: rgba(225, 235, 255, 0.72);
+            }
+            .nagato-history-text {
+                padding: 12px 14px;
+                border-radius: 18px;
+                color: #f4f8ff;
+                background: rgba(255, 255, 255, 0.07);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+                word-break: break-word;
+                white-space: pre-wrap;
+                line-height: 1.55;
+            }
+            .nagato-history-item.user .nagato-history-text {
+                background: linear-gradient(
+                    135deg,
+                    rgba(0, 216, 255, 0.28),
+                    rgba(0, 140, 255, 0.18)
+                );
+                border-color: rgba(0, 216, 255, 0.3);
+                border-bottom-right-radius: 6px;
+            }
+            .nagato-history-item.ai .nagato-history-text {
+                background: linear-gradient(
+                    135deg,
+                    rgba(255, 255, 255, 0.08),
+                    rgba(255, 255, 255, 0.03)
+                );
+                border-color: rgba(255, 255, 255, 0.1);
+                border-bottom-left-radius: 6px;
+            }
+            .nagato-history-empty {
+                margin: auto;
+                color: rgba(255, 255, 255, 0.7);
+                font-size: 0.86rem;
             }
             .typing-dots {
                 display: inline-block;
@@ -7690,29 +8065,66 @@
                         </div>
                     </div>
                     <div class="window-content nagato-content">
-                        <div class="nagato-messages">
-                            <div class="message ai">
-                                主人您好！我叫長門櫻，您的專屬女僕。請問您有什麼需要長門櫻為您效勞的嗎？
+                        <div class="nagato-live2d-stage">
+                            <div id="nagato-live2d-host" class="nagato-live2d-host"></div>
+                            <div id="nagato-ai-bubble" class="nagato-ai-bubble" aria-live="polite"></div>
+                            <div class="nagato-overlay-actions" aria-label="長門櫻工具列">
+                                <button
+                                    id="nagato-history-toggle"
+                                    class="nagato-overlay-btn"
+                                    type="button"
+                                    title="回顧對話紀錄"
+                                    aria-label="回顧對話紀錄"
+                                >
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                </button>
+                                <button
+                                    id="nagato-clear"
+                                    class="nagato-overlay-btn clear-btn"
+                                    type="button"
+                                    title="清除對話"
+                                    aria-label="清除對話"
+                                >
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
                             </div>
                         </div>
-                        <div class="nagato-input-area">
-                            <textarea
-                                id="nagato-input"
-                                rows="1"
-                                placeholder="在這裡輸入..."
-                                aria-label="輸入訊息"
-                            ></textarea>
-                            <button
-                                id="nagato-clear"
-                                class="clear-btn"
-                                title="清除對話"
-                                aria-label="清除對話"
-                            >
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                            <button id="nagato-send" title="傳送">
-                                <i class="fa-solid fa-paper-plane"></i>
-                            </button>
+
+                        <div class="nagato-chat-shell">
+                            <div
+                                class="nagato-suggestions"
+                                id="nagato-suggestions"
+                                aria-label="建議選項"
+                            ></div>
+                            <div class="nagato-input-area">
+                                <textarea
+                                    id="nagato-input"
+                                    rows="1"
+                                    placeholder="和長門櫻說說話......"
+                                    aria-label="輸入訊息"
+                                ></textarea>
+                                <button id="nagato-send" type="button" title="傳送">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div
+                            class="nagato-history-panel"
+                            id="nagato-history-panel"
+                            aria-hidden="true"
+                        >
+                            <div class="nagato-history-header">
+                                <span>對話回顧</span>
+                                <button
+                                    id="nagato-history-close"
+                                    class="nagato-toolbar-btn"
+                                    type="button"
+                                >
+                                    關閉
+                                </button>
+                            </div>
+                            <div class="nagato-history-list" id="nagato-history-list"></div>
                         </div>
                     </div>
                 </div>
@@ -14526,7 +14938,7 @@ Nagato Sakura Terminal [版本 1.0.0]
                         iframe.classList.add("show");
                     }
                     if (appId === "nagato") {
-                        // Focus input and refresh messages when opening the assistant
+                        // Focus input and initialize embedded Live2D + history state
                         setTimeout(() => {
                             const inputEl =
                                 document.getElementById("nagato-input");
@@ -14534,7 +14946,7 @@ Nagato Sakura Terminal [版本 1.0.0]
                                 inputEl.focus({ preventScroll: true });
                             }
                             try {
-                                renderNagatoMessages();
+                                initNagatoAssistantUI();
                             } catch (e) {}
                         }, 50);
                     }
@@ -16859,26 +17271,76 @@ Nagato Sakura Terminal [版本 1.0.0]
                     });
                 }
 
-                // --- 11. 長門櫻 (模擬的對話助理，功能增強) ---
+                // --- 11. 長門櫻 (AI 女僕 / 女友視窗) ---
                 const nagatoWindow = document.getElementById("window-nagato");
-                const nagatoMessages =
-                    nagatoWindow.querySelector(".nagato-messages");
+                const nagatoLive2DHost = nagatoWindow.querySelector(
+                    "#nagato-live2d-host"
+                );
+                const nagatoAIBubble = nagatoWindow.querySelector(
+                    "#nagato-ai-bubble"
+                );
+                const nagatoContent = nagatoWindow.querySelector(".nagato-content");
+                const nagatoChatShell = nagatoWindow.querySelector(
+                    ".nagato-chat-shell"
+                );
                 const nagatoInput = nagatoWindow.querySelector("#nagato-input");
                 const nagatoSend = nagatoWindow.querySelector("#nagato-send");
-                const NAGATO_KEY = "nagato_conversation_v1";
+                const nagatoClearBtn =
+                    nagatoWindow.querySelector("#nagato-clear");
+                const nagatoSuggestions =
+                    nagatoWindow.querySelector("#nagato-suggestions");
+                const nagatoHistoryToggle = nagatoWindow.querySelector(
+                    "#nagato-history-toggle"
+                );
+                const nagatoHistoryPanel = nagatoWindow.querySelector(
+                    "#nagato-history-panel"
+                );
+                const nagatoHistoryClose = nagatoWindow.querySelector(
+                    "#nagato-history-close"
+                );
+                const nagatoHistoryList = nagatoWindow.querySelector(
+                    "#nagato-history-list"
+                );
 
-                // Load conversation from localStorage and render
+                const NAGATO_KEY = "nagato_conversation_v2";
+                const NAGATO_SUGGEST_KEY = "nagato_suggestions_v2";
+                const NAGATO_GREETING =
+                    "主人，歡迎回來。我是長門櫻，今天也請讓我好好陪你。";
+                const NAGATO_DEFAULT_SUGGESTIONS = [
+                    "今天的行程幫我整理一下",
+                    "你可以幫我做什麼？",
+                    "現在幾點了？",
+                    "我今天有點累",
+                ];
+
+                let nagatoBubbleTimer = null;
+                let nagatoLive2DBooting = false;
+                let nagatoLive2DReady = false;
+
+                function formatNagatoTime(ts) {
+                    return new Date(ts).toLocaleTimeString("zh-TW", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                    });
+                }
+
                 function loadNagatoConversation() {
                     try {
                         const raw = localStorage.getItem(NAGATO_KEY);
                         if (!raw) return [];
                         const parsed = JSON.parse(raw);
                         if (!Array.isArray(parsed)) return [];
-                        return parsed;
+                        return parsed.filter(
+                            (x) =>
+                                x &&
+                                (x.role === "user" || x.role === "ai") &&
+                                typeof x.text === "string"
+                        );
                     } catch (e) {
                         return [];
                     }
                 }
+
                 function saveNagatoConversation(arr) {
                     try {
                         localStorage.setItem(NAGATO_KEY, JSON.stringify(arr));
@@ -16886,185 +17348,425 @@ Nagato Sakura Terminal [版本 1.0.0]
                         console.warn(e);
                     }
                 }
-                function renderNagatoMessages() {
-                    let list = loadNagatoConversation();
-                    // Seed a friendly greeting if no previous conversation found
-                    if (!list || !list.length) {
-                        list = [
-                            {
-                                role: "ai",
-                                text: "主人您好！我叫長門櫻，您的專屬女僕。請問您有什麼需要長門櫻為您效勞的嗎？",
-                                ts: Date.now(),
-                            },
-                        ];
-                        saveNagatoConversation(list);
+
+                function loadNagatoSuggestions() {
+                    try {
+                        const raw = localStorage.getItem(NAGATO_SUGGEST_KEY);
+                        if (!raw) return [...NAGATO_DEFAULT_SUGGESTIONS];
+                        const parsed = JSON.parse(raw);
+                        if (!Array.isArray(parsed) || parsed.length === 0) {
+                            return [...NAGATO_DEFAULT_SUGGESTIONS];
+                        }
+                        return parsed.slice(0, 6);
+                    } catch (e) {
+                        return [...NAGATO_DEFAULT_SUGGESTIONS];
                     }
-                    nagatoMessages.innerHTML = "";
-                    list.forEach((msg) => {
-                        const el = document.createElement("div");
-                        el.classList.add(
-                            "message",
-                            msg.role === "user" ? "user" : "ai"
-                        );
-                        el.textContent = msg.text;
-                        nagatoMessages.appendChild(el);
-                    });
-                    nagatoMessages.scrollTop = nagatoMessages.scrollHeight;
                 }
 
-                function showTypingIndicator() {
-                    const typing = document.createElement("div");
-                    typing.classList.add("message", "ai", "typing");
-                    typing.innerHTML =
-                        '<span class="typing-dots"><span></span><span></span><span></span></span>';
-                    typing.id = "nagato-typing";
-                    nagatoMessages.appendChild(typing);
-                    nagatoMessages.scrollTop = nagatoMessages.scrollHeight;
+                function saveNagatoSuggestions(list) {
+                    try {
+                        localStorage.setItem(
+                            NAGATO_SUGGEST_KEY,
+                            JSON.stringify((list || []).slice(0, 3))
+                        );
+                    } catch (e) {
+                        console.warn(e);
+                    }
                 }
-                function hideTypingIndicator() {
-                    const el = document.getElementById("nagato-typing");
-                    if (el) el.remove();
+
+                function stabilizeNagatoWaifuLayout(waifu) {
+                    if (!waifu) return;
+                    waifu.classList.remove("waifu-custom-pos", "waifu-edit-mode");
+                    waifu.style.left = "50%";
+                    waifu.style.right = "auto";
+                    waifu.style.top = "auto";
+                    waifu.style.bottom = "0";
+                    waifu.style.width = "min(100%, 320px)";
+                    waifu.style.height = "100%";
+                    waifu.style.transform = "translateX(-50%)";
+                    waifu.style.transition = "none";
+
+                    const canvasEl = waifu.querySelector("#waifu-canvas");
+                    if (canvasEl) {
+                        canvasEl.style.width = "100%";
+                        canvasEl.style.height = "100%";
+                        canvasEl.style.pointerEvents = "none";
+                    }
+                    const live2dEl = waifu.querySelector("#live2d");
+                    if (live2dEl) {
+                        live2dEl.style.pointerEvents = "none";
+                    }
+                }
+
+                function ensureNagatoConversationSeed() {
+                    const list = loadNagatoConversation();
+                    if (list.length) return list;
+                    const seeded = [
+                        {
+                            role: "ai",
+                            text: NAGATO_GREETING,
+                            ts: Date.now(),
+                        },
+                    ];
+                    saveNagatoConversation(seeded);
+                    return seeded;
+                }
+
+                function pushNagatoMessage(role, text) {
+                    const list = loadNagatoConversation();
+                    const entry = { role, text, ts: Date.now() };
+                    list.push(entry);
+                    if (list.length > 180) {
+                        list.splice(0, list.length - 180);
+                    }
+                    saveNagatoConversation(list);
+                    return entry;
+                }
+
+                function renderNagatoHistory(list) {
+                    const conv = list || loadNagatoConversation();
+                    nagatoHistoryList.innerHTML = "";
+                    if (!conv.length) {
+                        const empty = document.createElement("div");
+                        empty.className = "nagato-history-empty";
+                        empty.textContent = "還沒有對話紀錄。";
+                        nagatoHistoryList.appendChild(empty);
+                        return;
+                    }
+
+                    conv.forEach((msg) => {
+                        const item = document.createElement("div");
+                        item.className = `nagato-history-item ${msg.role}`;
+
+                        const meta = document.createElement("span");
+                        meta.className = "nagato-history-meta";
+                        meta.textContent = `${
+                            msg.role === "user" ? "主人" : "長門櫻"
+                        } ・ ${formatNagatoTime(msg.ts || Date.now())}`;
+
+                        const text = document.createElement("div");
+                        text.className = "nagato-history-text";
+                        text.textContent = msg.text;
+
+                        item.appendChild(meta);
+                        item.appendChild(text);
+                        nagatoHistoryList.appendChild(item);
+                    });
+                }
+
+                function syncNagatoOverlayLayout() {
+                    if (!nagatoContent || !nagatoChatShell) return;
+                    const shellHeight = Math.max(
+                        63,
+                        nagatoChatShell.offsetHeight || 63
+                    );
+                    nagatoContent.style.setProperty(
+                        "--nagato-chat-shell-height",
+                        `${shellHeight}px`
+                    );
+                }
+
+                function setNagatoHistoryVisible(show) {
+                    nagatoHistoryPanel.classList.toggle("show", !!show);
+                    if (nagatoChatShell) {
+                        nagatoChatShell.classList.toggle("history-open", !!show);
+                    }
+                    if (nagatoSuggestions) {
+                        nagatoSuggestions.setAttribute(
+                            "aria-hidden",
+                            show ? "true" : "false"
+                        );
+                    }
+                    nagatoHistoryPanel.setAttribute(
+                        "aria-hidden",
+                        show ? "false" : "true"
+                    );
+                    syncNagatoOverlayLayout();
+                    if (show) renderNagatoHistory();
+                }
+
+                function renderNagatoSuggestions(suggestions) {
+                    nagatoSuggestions.innerHTML = "";
+                    const items = (suggestions || []).slice(0, 3);
+                    items.forEach((text) => {
+                        const btn = document.createElement("button");
+                        btn.type = "button";
+                        btn.className = "suggestion-btn";
+                        btn.textContent = text;
+                        btn.addEventListener("click", () => {
+                            sendNagatoMessage(text);
+                        });
+                        nagatoSuggestions.appendChild(btn);
+                    });
+                    saveNagatoSuggestions(items);
+                }
+
+                function showNagatoAIBubble(text, options = {}) {
+                    if (nagatoBubbleTimer) {
+                        clearTimeout(nagatoBubbleTimer);
+                        nagatoBubbleTimer = null;
+                    }
+
+                    const duration = options.duration || 5000;
+                    nagatoAIBubble.textContent = text || "";
+                    nagatoAIBubble.classList.toggle("typing", !!options.typing);
+                    nagatoAIBubble.classList.add("show");
+
+                    if (duration > 0) {
+                        nagatoBubbleTimer = setTimeout(() => {
+                            nagatoAIBubble.classList.remove("show", "typing");
+                            nagatoAIBubble.textContent = "";
+                        }, duration);
+                    }
+                }
+
+                async function ensureNagatoLive2D() {
+                    if (nagatoLive2DReady || nagatoLive2DBooting) {
+                        const existing = document.getElementById("waifu");
+                        if (existing && existing.parentElement !== nagatoLive2DHost) {
+                            nagatoLive2DHost.appendChild(existing);
+                            stabilizeNagatoWaifuLayout(existing);
+                        }
+                        return;
+                    }
+
+                    nagatoLive2DBooting = true;
+                    try {
+                        if (typeof window.initWidget !== "function") {
+                            await import("../../assets/live2d/waifu-tips.js");
+                        }
+                        if (typeof window.initWidget !== "function") {
+                            throw new Error("initWidget is not available");
+                        }
+
+                        await window.initWidget({
+                            cubism2Path: "../../assets/live2d/live2d.min.js",
+                            cubism5Path:
+                                "../../assets/live2d/live2dcubismcore.min.js",
+                            waifuPath: "../../assets/live2d/waifu-config.json",
+                            drag: false,
+                            logLevel: "warn",
+                            tools: [],
+                            models: [
+                                {
+                                    name: "WL2D-01",
+                                    paths: [
+                                        "../../assets/live2d/model/WL2D-01_vts/WL2D-01.model3.json",
+                                    ],
+                                    message: "嗨，主人。",
+                                },
+                            ],
+                        });
+
+                        const waifu = document.getElementById("waifu");
+                        if (waifu) {
+                            nagatoLive2DHost.appendChild(waifu);
+                            waifu.classList.add("waifu-active");
+                            stabilizeNagatoWaifuLayout(waifu);
+                        }
+                        document.getElementById("waifu-toggle")?.remove();
+                        nagatoLive2DReady = true;
+                    } catch (e) {
+                        console.warn("Nagato Live2D init failed", e);
+                        showNagatoAIBubble("模型載入中斷，請稍後再試。", {
+                            duration: 3600,
+                        });
+                    } finally {
+                        nagatoLive2DBooting = false;
+                    }
+                }
+
+                function detectOpenWindowIntent(text) {
+                    const normalized = text.toLowerCase();
+                    if (!/(開啟|打開|開|幫我開)/.test(normalized)) return null;
+                    const mappings = [
+                        { match: ["設定", "settings"], appId: "settings", label: "設定" },
+                        { match: ["瀏覽器", "browser"], appId: "browser", label: "瀏覽器" },
+                        { match: ["檔案", "檔案總管", "explorer"], appId: "explorer", label: "檔案總管" },
+                        { match: ["終端", "terminal"], appId: "terminal", label: "終端機" },
+                        { match: ["行事曆", "calendar"], appId: "calendar", label: "行事曆" },
+                        { match: ["播放器", "音樂", "player"], appId: "player", label: "播放器" },
+                    ];
+                    return mappings.find((x) =>
+                        x.match.some((kw) => normalized.includes(kw))
+                    );
                 }
 
                 function generateNagatoResponse(userText) {
-                    const txt = userText.toLowerCase();
-                    if (/^(hi|hello|嘿|嗨|你好|您 好)/i.test(userText)) {
-                        return "主人您好！請問您有什麼需要長門櫻為您效勞的嗎？";
+                    const text = userText.trim();
+                    const lower = text.toLowerCase();
+
+                    if (/^(hi|hello|嗨|哈囉|你好|主人好)/i.test(text)) {
+                        return {
+                            reply: "主人您好。今天想讓長門櫻陪你做什麼呢？我會一直在這裡。",
+                            suggestions: ["你可以幫我做什麼？", "陪我聊聊天", "幫我打開設定", "現在幾點了？"],
+                        };
                     }
-                    if (txt.includes("時間")) {
+                    if (lower.includes("時間") || lower.includes("幾點")) {
                         const now = new Date();
                         const hh = String(now.getHours()).padStart(2, "0");
                         const mm = String(now.getMinutes()).padStart(2, "0");
-                        return `主人現在是 ${hh}:${mm}`;
+                        return {
+                            reply: `現在是 ${hh}:${mm}。主人，要不要我也提醒你休息一下眼睛？`,
+                            suggestions: ["今天日期是？", "幫我整理待辦", "陪我說說話", "晚點提醒我休息"],
+                        };
                     }
-                    if (txt.includes("日期"))
-                        return `今天是 ${new Date().toLocaleDateString(
-                            "zh-TW"
-                        )}`;
-                    if (txt.includes("開啟") && txt.includes("設定"))
-                        return "好的，即將開啟設定。";
-                    if (txt.includes("開啟") && txt.includes("瀏覽"))
-                        return "好的，正在開啟瀏覽器。";
-                    if (txt.includes("我的網站") || txt.includes("網站"))
-                        return "你可以查看你的網站: https://amanoshizukikun.github.io/";
-                    if (txt.includes("幫助"))
-                        return '我能提供時間、日期、打開應用程式，或簡單回答一般問題。你可以試試說 "告訴我今天的時間"。';
-                    // fallback: summarize / echo back a short reply
-                    const truncated =
-                        userText.length > 120
-                            ? userText.slice(0, 117) + "…"
-                            : userText;
-                    return `收到："${truncated}"。你想要我怎麼處理？`;
+                    if (lower.includes("日期") || lower.includes("幾號") || lower.includes("星期")) {
+                        const d = new Date();
+                        const weekday = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"][d.getDay()];
+                        return {
+                            reply: `今天是 ${d.toLocaleDateString("zh-TW")}，${weekday}。`,
+                            suggestions: ["現在幾點了？", "今天幫我排三件事", "我想放鬆一下", "謝謝你"],
+                        };
+                    }
+                    if (/累|壓力|煩|焦慮|難過|沮喪|孤單|低落/.test(lower)) {
+                        return {
+                            reply: "辛苦了，主人。先深呼吸三次，好嗎？你不用一個人撐著，我會陪你慢慢把事情整理好。",
+                            suggestions: ["幫我把事情分成三步", "給我一句鼓勵", "放鬆一下，陪我聊聊", "提醒我喝水"],
+                        };
+                    }
+                    if (/你是誰|自我介紹|介紹你自己/.test(lower)) {
+                        return {
+                            reply: "我是長門櫻，你的 AI 女僕。除了陪你聊天，我也能幫你快速開啟 WebOS 裡的常用功能。",
+                            suggestions: ["幫我打開設定", "幫我打開瀏覽器", "你可以做哪些事？", "給我今天的小建議"],
+                        };
+                    }
+                    if (/謝謝|感謝|多虧你/.test(lower)) {
+                        return {
+                            reply: "能幫上主人我很開心。你只要開口，我就會立刻回應你。",
+                            suggestions: ["那再幫我一件事", "現在幾點了？", "陪我聊點輕鬆的", "幫我打開終端機"],
+                        };
+                    }
+
+                    const openIntent = detectOpenWindowIntent(text);
+                    if (openIntent) {
+                        return {
+                            reply: `遵命，主人。我現在就幫你開啟${openIntent.label}。`,
+                            suggestions: ["再幫我開一個應用", "我想看今天日期", "你可以陪我聊聊嗎？", "幫我整理待辦"],
+                            action: () => {
+                                try {
+                                    openWindow(openIntent.appId);
+                                } catch (e) {
+                                    console.warn(e);
+                                }
+                            },
+                        };
+                    }
+
+                    const short = text.length > 80 ? text.slice(0, 77) + "..." : text;
+                    return {
+                        reply: `我有收到你說的「${short}」。如果你願意，我可以幫你把這件事拆成幾個好開始的小步驟。`,
+                        suggestions: ["把這件事拆成三步", "先給我第一步", "換個角度再說一次", "幫我打開設定"],
+                    };
                 }
 
-                function appendNagatoMessage(role, text) {
-                    const el = document.createElement("div");
-                    el.classList.add(
-                        "message",
-                        role === "user" ? "user" : "ai"
-                    );
-                    el.textContent = text;
-                    nagatoMessages.appendChild(el);
-                    nagatoMessages.scrollTop = nagatoMessages.scrollHeight;
-                }
-
-                function sendNagatoMessage() {
-                    const message = nagatoInput.value.trim();
+                function sendNagatoMessage(forcedText) {
+                    const raw = typeof forcedText === "string" ? forcedText : nagatoInput.value;
+                    const message = raw.trim();
                     if (!message) return;
-                    // store
-                    const conv = loadNagatoConversation();
-                    conv.push({ role: "user", text: message, ts: Date.now() });
-                    saveNagatoConversation(conv);
 
-                    appendNagatoMessage("user", message);
-                    nagatoInput.value = "";
-                    showTypingIndicator();
+                    setNagatoHistoryVisible(false);
+                    pushNagatoMessage("user", message);
 
-                    // Simulate AI latency based on message length
-                    const delay = Math.min(1400 + message.length * 5, 2200);
+                    if (typeof forcedText !== "string") {
+                        nagatoInput.value = "";
+                        autoResizeNagatoInput();
+                    }
+
+                    showNagatoAIBubble("長門櫻正在思考中......", {
+                        duration: 0,
+                        typing: true,
+                    });
+
+                    const delay = Math.min(900 + message.length * 14, 1800);
                     setTimeout(() => {
-                        hideTypingIndicator();
-                        const resp = generateNagatoResponse(message);
-                        appendNagatoMessage("ai", resp);
-                        // store AI response
-                        const conv2 = loadNagatoConversation();
-                        conv2.push({ role: "ai", text: resp, ts: Date.now() });
-                        saveNagatoConversation(conv2);
-                        // optionally include quick actions
-                        addNagatoQuickActions(resp);
+                        const result = generateNagatoResponse(message);
+                        pushNagatoMessage("ai", result.reply);
+                        showNagatoAIBubble(result.reply, { duration: 5200 });
+                        renderNagatoHistory(loadNagatoConversation());
+                        renderNagatoSuggestions(
+                            result.suggestions || NAGATO_DEFAULT_SUGGESTIONS
+                        );
+
+                        if (typeof result.action === "function") {
+                            setTimeout(() => {
+                                try {
+                                    result.action();
+                                } catch (e) {
+                                    console.warn(e);
+                                }
+                            }, 260);
+                        }
                     }, delay);
                 }
 
-                function addNagatoQuickActions(respText) {
-                    // remove previous suggestions
-                    nagatoMessages
-                        .querySelectorAll(".message-suggestions")
-                        .forEach((el) => el.remove());
-                    // Suggest a couple quick actions based on the response
-                    const container = document.createElement("div");
-                    container.className = "message-suggestions";
-                    // Basic actions
-                    const suggestions = [
-                        {
-                            label: "開啟設定",
-                            action: () => openWindow("settings"),
-                        },
-                        {
-                            label: "開啟瀏覽器",
-                            action: () => openWindow("browser"),
-                        },
-                        {
-                            label: "顯示時間",
-                            action: () => {
-                                sendNagatoMessageFromBtn("現在時間是多少？");
-                            },
-                        },
-                    ];
-                    suggestions.forEach((s) => {
-                        const b = document.createElement("button");
-                        b.className = "suggestion-btn";
-                        b.textContent = s.label;
-                        b.addEventListener("click", (e) => {
-                            e.stopPropagation();
-                            s.action();
-                        });
-                        container.appendChild(b);
-                    });
-                    nagatoMessages.appendChild(container);
-                    nagatoMessages.scrollTop = nagatoMessages.scrollHeight;
+                function autoResizeNagatoInput() {
+                    nagatoInput.rows = 1;
+                    nagatoInput.style.height = "auto";
+                    nagatoInput.style.overflowY = "hidden";
+
+                    const computed = window.getComputedStyle(nagatoInput);
+                    const lineHeight = parseFloat(computed.lineHeight) || 20;
+                    const paddingTop = parseFloat(computed.paddingTop) || 0;
+                    const paddingBottom = parseFloat(computed.paddingBottom) || 0;
+                    const contentHeight = Math.max(
+                        0,
+                        nagatoInput.scrollHeight - paddingTop - paddingBottom
+                    );
+                    const rows = Math.max(1, Math.round(contentHeight / lineHeight));
+                    nagatoInput.rows = rows;
+                    nagatoInput.style.height = nagatoInput.scrollHeight + "px";
+                    syncNagatoOverlayLayout();
                 }
 
-                function sendNagatoMessageFromBtn(text) {
-                    nagatoInput.value = text;
-                    sendNagatoMessage();
+                async function initNagatoAssistantUI() {
+                    const list = ensureNagatoConversationSeed();
+                    renderNagatoHistory(list);
+                    renderNagatoSuggestions(loadNagatoSuggestions());
+                    syncNagatoOverlayLayout();
+                    await ensureNagatoLive2D();
+                    if (list.length) {
+                        const lastAI = [...list].reverse().find((x) => x.role === "ai");
+                        if (lastAI) {
+                            showNagatoAIBubble(lastAI.text, { duration: 3800 });
+                        }
+                    }
                 }
 
-                // Event bindings
-                nagatoSend.addEventListener("click", sendNagatoMessage);
+                nagatoSend.addEventListener("click", () => sendNagatoMessage());
                 nagatoInput.addEventListener("keydown", (e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
                         sendNagatoMessage();
                     }
                 });
-                // Auto-resize textarea for better UX
-                function autoResizeNagatoInput() {
-                    nagatoInput.style.height = "auto";
-                    nagatoInput.style.height = nagatoInput.scrollHeight + "px";
-                }
                 nagatoInput.addEventListener("input", autoResizeNagatoInput);
-                autoResizeNagatoInput();
-                // initialize messages
-                renderNagatoMessages();
-                // Bind clear button
-                const nagatoClearBtn = document.getElementById("nagato-clear");
+
+                nagatoHistoryToggle.addEventListener("click", () => {
+                    const willShow =
+                        !nagatoHistoryPanel.classList.contains("show");
+                    setNagatoHistoryVisible(willShow);
+                });
+                nagatoHistoryClose.addEventListener("click", () => {
+                    setNagatoHistoryVisible(false);
+                });
+
                 if (nagatoClearBtn) {
                     nagatoClearBtn.addEventListener("click", () => {
-                        if (!confirm("確認要清除長門櫻的聊天紀錄嗎？")) return;
+                        if (!confirm("確認要清除長門櫻的全部聊天紀錄嗎？")) return;
                         saveNagatoConversation([]);
-                        renderNagatoMessages();
+                        saveNagatoSuggestions(NAGATO_DEFAULT_SUGGESTIONS);
+                        const list = ensureNagatoConversationSeed();
+                        renderNagatoHistory(list);
+                        renderNagatoSuggestions(loadNagatoSuggestions());
+                        showNagatoAIBubble(NAGATO_GREETING, { duration: 4200 });
+                        setNagatoHistoryVisible(false);
                     });
                 }
+
+                autoResizeNagatoInput();
+                initNagatoAssistantUI();
+                window.addEventListener("resize", syncNagatoOverlayLayout);
 
                 // --- 12. 初始化 ---
                 // Calculator initialization and enhancements
