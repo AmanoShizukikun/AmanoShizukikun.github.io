@@ -1,0 +1,28 @@
+{
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "NS-V5-Ver1.2.moc3",
+		"Textures": [
+			"NS-V5-Ver1.2.4096/texture_00.png"
+		],
+		"Physics": "NS-V5-Ver1.2.physics3.json",
+		"DisplayInfo": "NS-V5-Ver1.2.cdi3.json"
+	},
+	"Groups": [
+		{
+			"Target": "Parameter",
+			"Name": "LipSync",
+			"Ids": [
+				"ParamMouthOpenY"
+			]
+		},
+		{
+			"Target": "Parameter",
+			"Name": "EyeBlink",
+			"Ids": [
+				"ParamEyeLOpen",
+				"ParamEyeROpen"
+			]
+		}
+	]
+}
