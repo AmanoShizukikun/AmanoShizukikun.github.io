@@ -1276,6 +1276,745 @@
         [data-theme="light"] .section-title {
             color: var(--primary-magenta) !important;
         }
+
+        /* ============================================
+           Profile Unmasked Hacker Theme Styles
+           ============================================ */
+        .profile-card.is-unmasked {
+            background: rgba(25, 2, 5, 0.92) !important;
+            border-color: #ff0055 !important;
+            box-shadow: 0 0 30px rgba(255, 0, 85, 0.25) !important;
+        }
+        .profile-card.is-unmasked::before {
+            background: linear-gradient(90deg, #ff0055, #ff4466) !important;
+        }
+        .profile-card.is-unmasked::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(255, 0, 85, 0.06) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            opacity: 0.8;
+            z-index: 1;
+        }
+        .profile-card.is-unmasked .avatar-box {
+            background: linear-gradient(135deg, rgba(255,0,85,0.4), rgba(204,0,102,0.4)) !important;
+            border-color: rgba(255, 0, 85, 0.8) !important;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.25);
+        }
+        .profile-card.is-unmasked .profile-name {
+            color: #ffffff !important;
+            text-shadow: 0 0 10px rgba(255, 0, 85, 0.75) !important;
+        }
+        /* Override all profile-badge specifications when unmasked */
+        .sidebar-wrapper .profile-card.is-unmasked .profile-badge,
+        .sidebar-wrapper.is-collapsed .profile-card.is-unmasked .profile-badge,
+        .sidebar-wrapper.is-fixed .profile-card.is-unmasked .profile-badge,
+        .sidebar-wrapper.is-anchored .profile-card.is-unmasked .profile-badge {
+            background: rgba(255, 0, 85, 0.15) !important;
+            border: 1px solid rgba(255, 0, 85, 0.5) !important;
+            color: #ff3366 !important;
+            box-shadow: 0 0 10px rgba(255, 0, 85, 0.2) !important;
+        }
+        .profile-card.is-unmasked .contact-icon {
+            background: rgba(255, 0, 85, 0.1) !important;
+            color: #ff3366 !important;
+            border-color: rgba(255, 0, 85, 0.3) !important;
+        }
+        .profile-card.is-unmasked .social-btn {
+            border-color: rgba(255, 0, 85, 0.4) !important;
+            color: #ff3366 !important;
+        }
+        .profile-card.is-unmasked .social-btn:hover {
+            background: #ff0055 !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 15px #ff0055 !important;
+        }
+        .profile-card.is-unmasked .sidebar-divider {
+            background: linear-gradient(90deg, transparent, rgba(255, 0, 85, 0.3), transparent) !important;
+        }
+        .profile-card.is-unmasked .sidebar-toggle {
+            border-color: rgba(255, 0, 85, 0.3) !important;
+            color: #ff3366 !important;
+        }
+        .profile-card.is-unmasked .sidebar-toggle .toggle-chevron {
+            color: #ff3366 !important;
+        }
+
+        /* Light theme overrides when unmasked */
+        [data-theme="light"] .profile-card.is-unmasked {
+            background: rgba(255, 250, 250, 0.98) !important;
+            border: 2px dashed #cc1133 !important;
+            box-shadow: 0 8px 30px rgba(204, 17, 51, 0.08) !important;
+            color: #2b2022 !important;
+            position: relative;
+        }
+        [data-theme="light"] .profile-card.is-unmasked::before {
+            background: #cc1133 !important;
+        }
+        [data-theme="light"] .profile-card.is-unmasked::after {
+            background: linear-gradient(rgba(204, 17, 51, 0) 50%, rgba(204, 17, 51, 0.04) 50%) !important;
+            background-size: 100% 4px;
+        }
+        [data-theme="light"] .profile-card.is-unmasked .avatar-box {
+            background: linear-gradient(135deg, rgba(204,17,51,0.2), rgba(122,0,24,0.2)) !important;
+            border-color: rgba(204, 17, 51, 0.6) !important;
+            box-shadow: none !important;
+        }
+        [data-theme="light"] .profile-card.is-unmasked .profile-name {
+            color: #cc1133 !important;
+            text-shadow: none !important;
+            font-weight: 900;
+        }
+        [data-theme="light"] .sidebar-wrapper .profile-card.is-unmasked .profile-badge,
+        [data-theme="light"] .sidebar-wrapper.is-collapsed .profile-card.is-unmasked .profile-badge,
+        [data-theme="light"] .sidebar-wrapper.is-fixed .profile-card.is-unmasked .profile-badge,
+        [data-theme="light"] .sidebar-wrapper.is-anchored .profile-card.is-unmasked .profile-badge {
+            background: rgba(204, 17, 51, 0.08) !important;
+            border: 1px solid rgba(204, 17, 51, 0.4) !important;
+            color: #cc1133 !important;
+            box-shadow: none !important;
+        }
+        [data-theme="light"] .profile-card.is-unmasked .contact-icon {
+            background: rgba(204, 17, 51, 0.05) !important;
+            color: #cc1133 !important;
+            border-color: rgba(204, 17, 51, 0.2) !important;
+        }
+        [data-theme="light"] .profile-card.is-unmasked .social-btn {
+            border-color: rgba(204, 17, 51, 0.3) !important;
+            color: #cc1133 !important;
+            background: rgba(204, 17, 51, 0.02) !important;
+        }
+        [data-theme="light"] .profile-card.is-unmasked .social-btn:hover {
+            background: #cc1133 !important;
+            color: #ffffff !important;
+            box-shadow: 0 5px 15px rgba(204, 17, 51, 0.2) !important;
+        }
+        [data-theme="light"] .profile-card.is-unmasked .sidebar-divider {
+            background: linear-gradient(90deg, transparent, rgba(204, 17, 51, 0.2), transparent) !important;
+        }
+
+        /* ============================================
+           Hacked Page State - Dark Mode (Neon Cyber Breach)
+           ============================================ */
+        body.is-hacked-state #hero,
+        body.is-hacked-state .content-wrapper {
+            --primary-cyan: #ff0055 !important;
+        }
+        body.is-hacked-state .cyber-bg {
+            background: radial-gradient(circle at center, rgba(30, 2, 5, 0.95) 0%, rgba(10, 0, 2, 0.98) 100%) !important;
+        }
+        body.is-hacked-state .grid-overlay {
+            background-image: 
+                linear-gradient(rgba(255, 0, 85, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 0, 85, 0.05) 1px, transparent 1px) !important;
+        }
+        body.is-hacked-state .content-section {
+            background: rgba(20, 2, 4, 0.8) !important;
+            border-color: rgba(255, 0, 85, 0.2) !important;
+        }
+        body.is-hacked-state .content-section:hover {
+            border-color: rgba(255, 0, 85, 0.5) !important;
+            box-shadow: 0 8px 30px rgba(255, 0, 85, 0.08) !important;
+        }
+        body.is-hacked-state .content-section::before {
+            background: linear-gradient(to bottom, #ff0055, transparent) !important;
+        }
+        body.is-hacked-state .feature-box {
+            background: rgba(255, 0, 85, 0.03) !important;
+            border-color: rgba(255, 0, 85, 0.1) !important;
+        }
+        body.is-hacked-state .feature-box:hover {
+            background: rgba(255, 0, 85, 0.06) !important;
+            border-color: #ff0055 !important;
+        }
+        body.is-hacked-state .feature-box h3 {
+            color: #ff3366 !important;
+        }
+        body.is-hacked-state .skill-progress {
+            background: linear-gradient(90deg, #ff0055, #ff66aa) !important;
+        }
+        body.is-hacked-state .skill-header span:last-child {
+            color: #ff3366 !important;
+        }
+        body.is-hacked-state #timeline div[style*="border-left"] {
+            border-left-color: #ff0055 !important;
+        }
+        body.is-hacked-state #timeline div[style*="background"] {
+            background: #ff0055 !important;
+            box-shadow: 0 0 10px #ff0055 !important;
+        }
+        body.is-hacked-state .text-gradient-cyan {
+            background: linear-gradient(95deg, #ff0055, #ff88aa) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            text-shadow: 0 0 15px rgba(255, 0, 85, 0.3) !important;
+        }
+
+        /* ============================================
+           頁面封鎖線效果 (Cyber Barricade / Caution Tape)
+           ============================================ */
+        body.is-hacked-state .cyber-bg::before,
+        body.is-hacked-state .cyber-bg::after {
+            content: 'WARNING • SYSTEM BREACH • RESTRICTED ACCESS • KEEP OUT • ROOT PRIVILEGE DETECTED • WARNING • SYSTEM BREACH • RESTRICTED ACCESS • KEEP OUT • ';
+            position: fixed;
+            width: 200vw;
+            height: 48px;
+            line-height: 48px;
+            font-family: var(--font-display), monospace;
+            font-size: 1.05rem;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px #000000;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 0.15em;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.38;
+        }
+
+        body.is-hacked-state .cyber-bg::before {
+            top: 25%;
+            left: -50vw;
+            background: repeating-linear-gradient(
+                -45deg,
+                #ff0055,
+                #ff0055 15px,
+                #000000 15px,
+                #000000 30px
+            );
+            transform: rotate(-12deg);
+            animation: cautionScrollBg1 20s linear infinite;
+        }
+
+        body.is-hacked-state .cyber-bg::after {
+            bottom: 25%;
+            left: -50vw;
+            background: repeating-linear-gradient(
+                45deg,
+                #ff0055,
+                #ff0055 15px,
+                #000000 15px,
+                #000000 30px
+            );
+            transform: rotate(12deg);
+            animation: cautionScrollBg2 20s linear infinite;
+        }
+
+        @keyframes cautionScrollBg1 {
+            0% {
+                transform: rotate(-12deg) translate3d(0, 0, 0);
+            }
+            100% {
+                transform: rotate(-12deg) translate3d(-300px, 0, 0); /* 30px repeat width seamless loop */
+            }
+        }
+
+        @keyframes cautionScrollBg2 {
+            0% {
+                transform: rotate(12deg) translate3d(0, 0, 0);
+            }
+            100% {
+                transform: rotate(12deg) translate3d(-300px, 0, 0);
+            }
+        }
+
+        [data-theme="light"] body.is-hacked-state {
+            background-color: #f7f3f3 !important;
+            color: #2b2022 !important;
+        }
+        [data-theme="light"] body.is-hacked-state #hero,
+        [data-theme="light"] body.is-hacked-state .content-wrapper {
+            --primary-cyan: #cc1133 !important;
+        }
+        [data-theme="light"] body.is-hacked-state .cyber-bg {
+            background: radial-gradient(circle at center, #ffffff 0%, #f7f1f2 100%) !important;
+        }
+        [data-theme="light"] body.is-hacked-state .grid-overlay {
+            background-image: 
+                linear-gradient(rgba(204, 17, 51, 0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(204, 17, 51, 0.06) 1px, transparent 1px) !important;
+        }
+        [data-theme="light"] body.is-hacked-state .content-section {
+            background: rgba(255, 253, 253, 0.95) !important;
+            border: 1px dashed rgba(204, 17, 51, 0.4) !important;
+            color: #2b2022 !important;
+        }
+        [data-theme="light"] body.is-hacked-state .content-section:hover {
+            border-color: #cc1133 !important;
+            box-shadow: 0 8px 30px rgba(204, 17, 51, 0.05) !important;
+        }
+        [data-theme="light"] body.is-hacked-state .content-section::before {
+            background: linear-gradient(to bottom, #cc1133, transparent) !important;
+        }
+        [data-theme="light"] body.is-hacked-state .feature-box {
+            background: rgba(204, 17, 51, 0.02) !important;
+            border: 1px dashed rgba(204, 17, 51, 0.15) !important;
+        }
+        [data-theme="light"] body.is-hacked-state .feature-box:hover {
+            background: rgba(204, 17, 51, 0.05) !important;
+            border-color: #cc1133 !important;
+        }
+        [data-theme="light"] body.is-hacked-state .feature-box h3 {
+            color: #cc1133 !important;
+        }
+        [data-theme="light"] body.is-hacked-state .skill-track {
+            background: rgba(204, 17, 51, 0.08) !important;
+        }
+        [data-theme="light"] body.is-hacked-state .skill-progress {
+            background: linear-gradient(90deg, #cc1133, #7a0018) !important;
+        }
+        [data-theme="light"] body.is-hacked-state .skill-header span:last-child {
+            color: #cc1133 !important;
+        }
+        [data-theme="light"] body.is-hacked-state #timeline div[style*="border-left"] {
+            border-left-color: #cc1133 !important;
+        }
+        [data-theme="light"] body.is-hacked-state #timeline div[style*="background"] {
+            background: #cc1133 !important;
+            box-shadow: 0 0 8px rgba(204, 17, 51, 0.4) !important;
+        }
+        [data-theme="light"] body.is-hacked-state .about-text p {
+            color: #3b2b2d !important;
+        }
+        [data-theme="light"] body.is-hacked-state .text-gradient-cyan {
+            background: linear-gradient(95deg, #cc1133, #7a0018) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            text-shadow: none !important;
+        }
+
+        [data-theme="light"] body.is-hacked-state .cyber-bg::before {
+            background: repeating-linear-gradient(
+                -45deg,
+                #cc1133,
+                #cc1133 15px,
+                #ffffff 15px,
+                #ffffff 30px
+            ) !important;
+            color: #cc1133 !important;
+            text-shadow: 1px 1px 0px #ffffff !important;
+            border-top: 2px solid #cc1133;
+            border-bottom: 2px solid #cc1133;
+        }
+
+        [data-theme="light"] body.is-hacked-state .cyber-bg::after {
+            background: repeating-linear-gradient(
+                45deg,
+                #cc1133,
+                #cc1133 15px,
+                #ffffff 15px,
+                #ffffff 30px
+            ) !important;
+            color: #cc1133 !important;
+            text-shadow: 1px 1px 0px #ffffff !important;
+            border-top: 2px solid #cc1133;
+            border-bottom: 2px solid #cc1133;
+        }
+
+        /* ============================================
+           Hacker Reveal Easter Egg Styles (Crash Fever Boss Warning Theme)
+           ============================================ */
+        @keyframes screenShake {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-3px, 3px) rotate(-0.5deg); }
+            20% { transform: translate(3px, -3px) rotate(0.5deg); }
+            30% { transform: translate(-2px, -2px) rotate(0deg); }
+            40% { transform: translate(3px, 2px) rotate(0.5deg); }
+            50% { transform: translate(-3px, -2px) rotate(-0.5deg); }
+            60% { transform: translate(2px, 3px) rotate(0deg); }
+            70% { transform: translate(-2px, 2px) rotate(0.5deg); }
+            80% { transform: translate(3px, -3px) rotate(-0.5deg); }
+            90% { transform: translate(-3px, 3px) rotate(0deg); }
+        }
+        .hacker-glitch-active {
+            animation: screenShake 0.12s infinite !important;
+            overflow: hidden;
+        }
+
+        #hacker-reveal-overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle, rgba(20, 0, 0, 0.9) 0%, rgba(5, 0, 0, 0.98) 100%);
+            z-index: 100000;
+            overflow: hidden;
+            font-family: 'Rajdhani', 'Orbitron', monospace;
+            color: #ff2255;
+            padding: 2rem;
+            box-sizing: border-box;
+            pointer-events: all;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        #hacker-reveal-overlay.active {
+            opacity: 1;
+        }
+
+        /* Ambient warning flash */
+        #hacker-reveal-overlay::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, transparent 40%, rgba(204, 17, 51, 0.35) 100%);
+            animation: alertAmbientFlash 0.4s ease infinite alternate;
+            pointer-events: none;
+            z-index: 1;
+        }
+        @keyframes alertAmbientFlash {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        /* Ambient scanline texture */
+        #hacker-reveal-overlay::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%);
+            z-index: 100020;
+            background-size: 100% 4px;
+            pointer-events: none;
+            opacity: 0.65;
+        }
+
+        /* Spawning popup windows */
+        .hacker-window {
+            position: absolute;
+            background: rgba(30, 2, 5, 0.88);
+            border: 1px solid #cc1133;
+            box-shadow: 0 0 25px rgba(204, 17, 51, 0.35), inset 0 0 15px rgba(204, 17, 51, 0.2);
+            border-radius: 4px;
+            color: #ff4466;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.6) rotate(5deg);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.25), opacity 0.3s ease;
+            z-index: 100002;
+        }
+        .hacker-window.active {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        }
+        .hacker-window .window-header {
+            background: rgba(204, 17, 51, 0.25);
+            padding: 8px 16px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            border-bottom: 1px solid #cc1133;
+            clip-path: polygon(0 0, 140px 0, 155px 100%, 0 100%);
+            color: #ffffff;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            width: fit-content;
+            min-width: 140px;
+        }
+        .hacker-window .window-content {
+            padding: 12px;
+            font-size: 0.85rem;
+            flex-grow: 1;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            position: relative;
+            line-height: 1.4;
+            background: rgba(0, 0, 0, 0.35);
+        }
+
+        /* Unique Styles for Popups */
+        .hacker-window.style-warning {
+            background: rgba(80, 5, 10, 0.92);
+            border: 3px solid #ff0055;
+            color: #ffffff;
+            box-shadow: 0 0 35px rgba(255, 0, 85, 0.6);
+            animation: borderFlash 0.5s step-end infinite alternate;
+        }
+        .hacker-window.style-warning .window-header {
+            background: #ff0055;
+            color: #ffffff;
+            clip-path: none;
+            width: 100%;
+        }
+        @keyframes borderFlash {
+            0% { border-color: #ff0055; box-shadow: 0 0 35px rgba(255, 0, 85, 0.6); }
+            100% { border-color: #ffffff; box-shadow: 0 0 35px rgba(255, 255, 255, 0.4); }
+        }
+
+        .hacker-window.style-terminal {
+            background: rgba(5, 5, 5, 0.96);
+            border: 1px solid #ff0055;
+            color: #ff4466;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.2);
+        }
+        .hacker-window.style-terminal .window-header {
+            background: rgba(255, 0, 85, 0.2);
+            border-bottom-color: #ff0055;
+            color: #ff4466;
+        }
+
+        .hacker-window.style-hex {
+            background: rgba(20, 0, 5, 0.9);
+            border: 1px dashed #ff4466;
+            color: #ff4466;
+            box-shadow: 0 0 12px rgba(255, 68, 102, 0.2);
+        }
+        .hacker-window.style-hex .window-header {
+            background: rgba(255, 68, 102, 0.15);
+            border-bottom-color: #ff4466;
+            color: #ff4466;
+        }
+
+        .hacker-window.style-badge {
+            background: #ff0055;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            font-weight: 900;
+            text-align: center;
+            font-size: 0.9rem;
+            animation: alertBlink 0.4s step-end infinite alternate;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 25px rgba(255, 0, 85, 0.8);
+        }
+        .hacker-window.style-badge .window-header {
+            display: none;
+        }
+        .hacker-window.style-badge .window-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 0;
+            text-align: center;
+            width: 100%;
+        }
+
+        .hacker-window.style-scanner {
+            background: rgba(15, 0, 2, 0.93);
+            border: 1px solid #ff0055;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.3);
+        }
+        .hacker-window.style-scanner .window-header {
+            background: rgba(255, 0, 85, 0.15);
+            border-bottom-color: #ff0055;
+            color: #ff0055;
+        }
+        .scanner-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #ff0055;
+            box-shadow: 0 0 10px #ff0055;
+            opacity: 0.75;
+            animation: scanVertical 2.5s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes scanVertical {
+            0% { top: 0%; opacity: 0; }
+            5% { opacity: 0.8; }
+            95% { opacity: 0.8; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        @keyframes alertBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Central Boss Warning Banner */
+        .main-boss-banner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.4) rotate(-4deg);
+            width: 92%;
+            max-width: 960px;
+            background: #cc1133;
+            border: 4px solid #ffffff;
+            color: #ffffff;
+            padding: 24px 36px;
+            box-shadow: 0 0 55px rgba(204, 17, 51, 0.95), inset 0 0 20px rgba(255, 255, 255, 0.35);
+            z-index: 100010;
+            box-sizing: border-box;
+            text-align: left;
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.25), opacity 0.4s ease;
+            clip-path: polygon(0 0, 97% 0, 100% 20px, 100% 100%, 3% 100%, 0% calc(100% - 20px));
+        }
+        .main-boss-banner.active {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1) rotate(-1deg);
+        }
+        .main-boss-banner .banner-sub {
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            opacity: 0.95;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .main-boss-banner .banner-title {
+            font-size: clamp(2rem, 5vw, 3.8rem);
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            margin: 10px 0;
+            border-top: 2px solid #ffffff;
+            border-bottom: 2px solid #ffffff;
+            padding: 12px 0;
+            text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.45);
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            line-height: 1.15;
+        }
+        .main-boss-banner .banner-footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            margin-top: 10px;
+            font-family: 'Rajdhani', sans-serif;
+        }
+        .main-boss-banner .banner-footer-sub {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            opacity: 0.85;
+            margin-top: 4px;
+            font-family: 'Rajdhani', sans-serif;
+        }
+        .main-boss-banner .right {
+            text-align: right;
+        }
+
+        /* Window Progress Bar */
+        .hacker-window .window-progress {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+            border: 1px solid rgba(204, 17, 51, 0.3);
+        }
+        .hacker-window .window-progress-bar {
+            height: 100%;
+            background: #ff0055;
+            width: 0%;
+            box-shadow: 0 0 8px #ff0055;
+            transition: width 0.15s linear;
+        }
+
+        /* ============================================
+           Cyan / Recovery Theme Overrides
+           ============================================ */
+        #hacker-reveal-overlay.recovery {
+            background: radial-gradient(circle, rgba(0, 20, 20, 0.9) 0%, rgba(0, 5, 5, 0.98) 100%);
+            color: #00d4ff;
+        }
+        #hacker-reveal-overlay.recovery::before {
+            background: radial-gradient(circle, transparent 40%, rgba(0, 212, 255, 0.35) 100%);
+            animation: alertAmbientFlashCyan 0.4s ease infinite alternate;
+        }
+        @keyframes alertAmbientFlashCyan {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        #hacker-reveal-overlay.recovery .hacker-window {
+            background: rgba(2, 25, 30, 0.88);
+            border-color: #0099cc;
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.35), inset 0 0 15px rgba(0, 212, 255, 0.2);
+            color: #33ccff;
+        }
+        #hacker-reveal-overlay.recovery .hacker-window .window-header {
+            background: rgba(0, 153, 204, 0.25);
+            border-bottom-color: #0099cc;
+            clip-path: polygon(0 0, 140px 0, 155px 100%, 0 100%);
+            color: #ffffff;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+        #hacker-reveal-overlay.recovery .main-boss-banner {
+            background: #0099cc;
+            box-shadow: 0 0 55px rgba(0, 212, 255, 0.95), inset 0 0 20px rgba(255, 255, 255, 0.35);
+        }
+        #hacker-reveal-overlay.recovery .hacker-window .window-progress {
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+        #hacker-reveal-overlay.recovery .hacker-window .window-progress-bar {
+            background: #00d4ff;
+            box-shadow: 0 0 8px #00d4ff;
+        }
+
+        /* Recovery Mode overrides for specific style classes */
+        #hacker-reveal-overlay.recovery .hacker-window.style-warning {
+            background: rgba(5, 40, 50, 0.92);
+            border: 3px solid #00d4ff;
+            color: #ffffff;
+            box-shadow: 0 0 35px rgba(0, 212, 255, 0.6);
+            animation: borderFlashCyan 0.5s step-end infinite alternate;
+        }
+        #hacker-reveal-overlay.recovery .hacker-window.style-warning .window-header {
+            background: #00d4ff;
+            color: #ffffff;
+        }
+        @keyframes borderFlashCyan {
+            0% { border-color: #00d4ff; box-shadow: 0 0 35px rgba(0, 212, 255, 0.6); }
+            100% { border-color: #ffffff; box-shadow: 0 0 35px rgba(255, 255, 255, 0.4); }
+        }
+
+        #hacker-reveal-overlay.recovery .hacker-window.style-terminal {
+            background: rgba(5, 5, 5, 0.96);
+            border: 1px solid #00d4ff;
+            color: #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+        }
+        #hacker-reveal-overlay.recovery .hacker-window.style-terminal .window-header {
+            background: rgba(0, 212, 255, 0.2);
+            border-bottom-color: #00d4ff;
+            color: #00d4ff;
+        }
+
+        #hacker-reveal-overlay.recovery .hacker-window.style-hex {
+            background: rgba(0, 15, 20, 0.9);
+            border: 1px dashed #00d4ff;
+            color: #33ccff;
+            box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
+        }
+        #hacker-reveal-overlay.recovery .hacker-window.style-hex .window-header {
+            background: rgba(0, 212, 255, 0.15);
+            border-bottom-color: #00d4ff;
+            color: #33ccff;
+        }
+
+        #hacker-reveal-overlay.recovery .hacker-window.style-badge {
+            background: #00d4ff;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.8);
+        }
+
+        #hacker-reveal-overlay.recovery .hacker-window.style-scanner {
+            background: rgba(0, 15, 20, 0.93);
+            border: 1px solid #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+        #hacker-reveal-overlay.recovery .hacker-window.style-scanner .window-header {
+            background: rgba(0, 212, 255, 0.15);
+            border-bottom-color: #00d4ff;
+            color: #00d4ff;
+        }
+        #hacker-reveal-overlay.recovery .scanner-line {
+            background: #00d4ff;
+            box-shadow: 0 0 10px #00d4ff;
+        }
     </style>
 </head>
 <body>
@@ -1316,6 +2055,7 @@
                     <li><a href="../projects/game-center/game-center.html">◆ GAME CENTER</a></li>
                     <li><a href="../projects/nagato-sakura-webos/nagato-sakura-webos.html">◆ WEB OS</a></li>
                     <li><a href="../projects/music-player/music-player.html">◆ MUSIC PLAYER</a></li>
+                    <li><a href="../projects/forza-tuning-calculator/forza-tuning-calculator.html">◆ FORZA CALC</a></li>
                 </div>
 
                 <div class="nav-section">
@@ -1523,12 +2263,12 @@
                 <div class="profile-card">
                     <div class="sidebar-info">
                         <div class="sidebar-header">
-                            <div class="avatar-box">
-                                <img src="../assets/images/avatar.jpg" alt="天野靜樹">
+                            <div class="avatar-box" id="about-avatar-box" style="cursor: pointer;">
+                                <img src="../assets/images/avatar-anime.jpg" alt="天野靜樹" id="about-avatar-img">
                             </div>
 
                             <div class="profile-meta">
-                                <h2 class="profile-name">天野靜樹</h2>
+                                <h2 class="profile-name" id="about-profile-name" style="cursor: pointer; user-select: none;">天野靜樹</h2>
                                 <div class="profile-badge">AI ARCHITECT</div>
                             </div>
 
@@ -1576,7 +2316,7 @@
                                     </div>
                                     <div class="contact-text">
                                         <h4>Status</h4>
-                                        <span style="color: var(--primary-cyan);">Online</span>
+                                        <span style="color: var(--primary-cyan);" id="profile-status-text">Online</span>
                                     </div>
                                 </li>
                             </ul>
@@ -2169,6 +2909,617 @@
                         }
                     });
                 }
+
+            })();
+
+            // Hacker Reveal Easter Egg Logic (Crash Fever Boss Warning Theme)
+            (function() {
+                const avatarImg = document.getElementById('about-avatar-img');
+                const profileName = document.getElementById('about-profile-name');
+                if (!avatarImg || !profileName) return;
+
+                const profileCard = document.querySelector('.profile-card');
+                const profileBadge = document.querySelector('.sidebar-wrapper .profile-badge');
+                const statusText = document.getElementById('profile-status-text');
+
+                const updateProfileUI = (unmasked) => {
+                    document.body.classList.toggle('is-hacked-state', unmasked);
+                    if (unmasked) {
+                        avatarImg.src = '../assets/images/avatar.jpg';
+                        profileName.textContent = '陳右承';
+                        if (profileCard) profileCard.classList.add('is-unmasked');
+                        if (profileBadge) profileBadge.textContent = 'ROOT ARCHITECT';
+                        if (statusText) {
+                            statusText.textContent = 'OVERLORD';
+                        }
+                    } else {
+                        avatarImg.src = '../assets/images/avatar-anime.jpg';
+                        profileName.textContent = '天野靜樹';
+                        if (profileCard) profileCard.classList.remove('is-unmasked');
+                        if (profileBadge) profileBadge.textContent = 'AI ARCHITECT';
+                        if (statusText) {
+                            statusText.textContent = 'Online';
+                            statusText.style.color = '';
+                        }
+                    }
+                };
+
+                // 1. Initial State Load (Always normal on refresh per user request)
+                updateProfileUI(false);
+
+                // 2. Click Counter
+                let clickCount = 0;
+
+                const onProfileClick = (e) => {
+                    clickCount++;
+                    
+                    // Add visual feedback
+                    avatarImg.style.transform = 'scale(0.93)';
+                    avatarImg.style.filter = 'brightness(1.3) contrast(1.2)';
+                    setTimeout(() => {
+                        avatarImg.style.transform = '';
+                        avatarImg.style.filter = '';
+                    }, 150);
+
+                    if (clickCount >= 10) {
+                        clickCount = 0;
+                        const currentlyUnmasked = document.body.classList.contains('is-hacked-state');
+                        triggerRevealAnimation(!currentlyUnmasked);
+                    }
+                };
+
+                // Add event listeners to profile card elements
+                const avatarBox = document.getElementById('about-avatar-box');
+                if (avatarBox) {
+                    avatarBox.addEventListener('click', onProfileClick);
+                } else {
+                    avatarImg.addEventListener('click', onProfileClick);
+                }
+                profileName.addEventListener('click', onProfileClick);
+
+                // Full Glitch Reveal Animation function
+                const triggerRevealAnimation = (toUnmasked) => {
+                    // Disable page scrolling
+                    document.documentElement.style.overflow = 'hidden';
+                    document.body.style.overflow = 'hidden';
+
+                    // Apply shaking effect to main page content (excluding overlay to keep viewport-fixed positions accurate)
+                    const elementsToShake = document.querySelectorAll('.page-content, header, .side-nav, .cyber-bg, .grid-overlay');
+                    elementsToShake.forEach(el => el.classList.add('hacker-glitch-active'));
+
+                    // Create full screen overlay
+                    const overlay = document.createElement('div');
+                    overlay.id = 'hacker-reveal-overlay';
+                    if (!toUnmasked) {
+                        overlay.classList.add('recovery');
+                    }
+                    document.body.appendChild(overlay);
+
+                    // Force reflow
+                    setTimeout(() => overlay.classList.add('active'), 20);
+
+                    // Predefined window configurations (Responsive sizes/positions for 24 windows of widely different dimensions)
+                    const isMobile = window.innerWidth < 768;
+                    const positions = isMobile ? [
+                        { top: '6%', left: '25%', width: '140px', height: '70px', styleClass: 'style-hex' },
+                        { top: '12%', left: '75%', width: '160px', height: '90px', styleClass: 'style-warning' },
+                        { top: '22%', left: '30%', width: '180px', height: '120px', styleClass: 'style-terminal' },
+                        { top: '32%', left: '70%', width: '170px', height: '90px', styleClass: 'style-badge' },
+                        { top: '42%', left: '25%', width: '190px', height: '100px', styleClass: 'style-scanner' },
+                        { top: '65%', left: '75%', width: '180px', height: '110px', styleClass: 'style-hex' },
+                        { top: '74%', left: '30%', width: '190px', height: '130px', styleClass: '' },
+                        { top: '84%', left: '70%', width: '160px', height: '80px', styleClass: 'style-badge' },
+                        { top: '92%', left: '40%', width: '150px', height: '70px', styleClass: 'style-badge' },
+                        { top: '52%', left: '80%', width: '150px', height: '80px', styleClass: 'style-warning' },
+                        { top: '58%', left: '20%', width: '170px', height: '100px', styleClass: 'style-hex' },
+                        { top: '48%', left: '50%', width: '220px', height: '130px', styleClass: 'style-terminal' }
+                    ] : [
+                        { top: '10%', left: '15%', width: '220px', height: '110px', styleClass: 'style-hex' },
+                        { top: '12%', left: '85%', width: '280px', height: '140px', styleClass: '' },
+                        { top: '48%', left: '16%', width: '460px', height: '280px', styleClass: 'style-scanner' },
+                        { top: '18%', left: '50%', width: '500px', height: '90px', styleClass: 'style-warning' },
+                        { top: '32%', left: '10%', width: '240px', height: '120px', styleClass: '' },
+                        { top: '45%', left: '84%', width: '450px', height: '320px', styleClass: 'style-terminal' },
+                        { top: '84%', left: '20%', width: '520px', height: '110px', styleClass: 'style-scanner' },
+                        { top: '82%', left: '80%', width: '330px', height: '160px', styleClass: 'style-hex' },
+                        { top: '5%', left: '72%', width: '150px', height: '80px', styleClass: 'style-badge' },
+                        { top: '25%', left: '72%', width: '280px', height: '150px', styleClass: 'style-warning' },
+                        { top: '78%', left: '50%', width: '480px', height: '250px', styleClass: 'style-terminal' },
+                        { top: '35%', left: '32%', width: '220px', height: '180px', styleClass: '' },
+                        { top: '92%', left: '12%', width: '180px', height: '70px', styleClass: 'style-badge' },
+                        { top: '94%', left: '88%', width: '220px', height: '60px', styleClass: 'style-badge' },
+                        { top: '6%', left: '46%', width: '290px', height: '110px', styleClass: 'style-warning' },
+                        { top: '32%', left: '92%', width: '180px', height: '400px', styleClass: 'style-scanner' },
+                        { top: '22%', left: '6%', width: '170px', height: '350px', styleClass: 'style-hex' },
+                        { top: '72%', left: '10%', width: '260px', height: '120px', styleClass: '' },
+                        { top: '28%', left: '68%', width: '320px', height: '160px', styleClass: 'style-scanner' },
+                        { top: '62%', left: '50%', width: '380px', height: '100px', styleClass: 'style-warning' },
+                        { top: '5%', left: '28%', width: '180px', height: '90px', styleClass: '' },
+                        { top: '90%', left: '65%', width: '420px', height: '90px', styleClass: 'style-hex' },
+                        { top: '68%', left: '88%', width: '200px', height: '130px', styleClass: '' },
+                        { top: '40%', left: '45%', width: '600px', height: '450px', styleClass: 'style-terminal' }
+                    ];
+
+                    const popupsData = toUnmasked ? [
+                        {
+                            header: "CONNECTION",
+                            content: ">> TARGET ACCESS BYPASSED<br>>> PRIVILEGE STATUS: OVERLORD"
+                        },
+                        {
+                            header: "REGISTERS DUMP",
+                            content: "RAX: 0xFF88D2A1&nbsp;&nbsp;RBX: 0x00A2C9B1<br>RIP: 0x99FF0123&nbsp;&nbsp;RSP: 0x7FFFEEB0<br>STATUS: REGISTER DUMP IN PROGRESS"
+                        },
+                        {
+                            header: "IDENTITY DECRYPTION",
+                            content: ">> TARGET DECOY: '天野靜樹'<br>>> PURGING COGNITIVE ENVELOPE...<div class='window-progress'><div class='window-progress-bar' id='reveal-progress-bar'></div></div><span id='reveal-progress-text'>DECRYPTING: 0%</span>"
+                        },
+                        {
+                            header: "SYS WARNING",
+                            content: "<span style='color: #ff0055; animation: alertBlink 0.3s step-end infinite; font-size: 1.1rem; font-weight: bold; display: block; text-align: center;'>[CRITICAL ERROR] PRIVILEGE ESCALATION</span>"
+                        },
+                        {
+                            header: "NETWORK ROUTE",
+                            content: "LOCAL IP: 127.0.0.1 (COMPROMISED)<br>GATEWAY: ROUTED TO ROOT MATRIX"
+                        },
+                        {
+                            header: "PROJECT SAKURA CORE INTEGRITY",
+                            content: `
+                                <table style='width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 5px; border: 1px solid rgba(255,0,85,0.3);'>
+                                    <thead>
+                                        <tr style='background: rgba(255,0,85,0.25); border-bottom: 1px solid rgba(255,0,85,0.3);'>
+                                            <th style='padding: 4px; text-align: left;'>MODULE</th>
+                                            <th style='padding: 4px; text-align: center;'>STATUS</th>
+                                            <th style='padding: 4px; text-align: right;'>RATE</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td style='padding: 4px;'>SAKURA_NLP</td>
+                                            <td style='padding: 4px; text-align: center; color: #ffffff;'>ONLINE</td>
+                                            <td style='padding: 4px; text-align: right;'>100%</td>
+                                        </tr>
+                                        <tr>
+                                            <td style='padding: 4px;'>L2D_PHYSIC</td>
+                                            <td style='padding: 4px; text-align: center; color: #ff0055;'>HIJACK</td>
+                                            <td style='padding: 4px; text-align: right;'>12.4%</td>
+                                        </tr>
+                                        <tr>
+                                            <td style='padding: 4px;'>MEM_BUFFER</td>
+                                            <td style='padding: 4px; text-align: center; color: #ff0055;'>CRIT</td>
+                                            <td style='padding: 4px; text-align: right;'>ERROR</td>
+                                        </tr>
+                                    </tbody>
+                                </table>`
+                        },
+                        {
+                            header: "BIOMETRIC METADATA",
+                            content: ">> EXTRACTING SEGMENT...<br>>> REAL NAME REF: <span id='shuffle-name-text' style='color: #fff; font-weight: bold;'>██████</span>"
+                        },
+                        {
+                            header: "BINARY DATASTREAM",
+                            content: "<div id='binary-stream-box' style='color: #ff4466; font-size: 0.75rem; line-height: 1.1;'>01001101 01100001 01110100 01110010</div>"
+                        },
+                        {
+                            header: "FIREWALL Status",
+                            content: "<div style='background: rgba(255,0,85,0.15); border: 1px solid #ff0055; text-align: center; font-weight: bold; padding: 5px; color: #ff0055;'>FIREWALL OFFLINE</div>"
+                        },
+                        {
+                            header: "DECOY PURGE TIMER",
+                            content: ">> PURGING COGNITIVE MASK LAYER<br>>> SHUTDOWN T-MINUS: <span id='purge-countdown' style='color: #fff; font-weight: bold;'>3.5s</span>"
+                        },
+                        {
+                            header: "NODE STATUS",
+                            content: ">> SYSTEM OVERRIDE: ACTIVE"
+                        },
+                        {
+                            header: "CORE BUFFER FLUSHING",
+                            content: `
+                                BUFFER_A (DNA SCAN)<div class='window-progress' style='margin: 4px 0;'><div class='window-progress-bar' id='buffer-a-bar' style='width: 0%;'></div></div>
+                                BUFFER_B (NLP RECONNECT)<div class='window-progress' style='margin: 4px 0;'><div class='window-progress-bar' id='buffer-b-bar' style='width: 0%;'></div></div>
+                                BUFFER_C (COGNITIVE REBUILD)<div class='window-progress' style='margin: 4px 0;'><div class='window-progress-bar' id='buffer-c-bar' style='width: 0%;'></div></div>`
+                        },
+                        {
+                            header: "ASCII ROOT LOGO",
+                            content: "<pre style='margin: 0; font-size: 0.65rem; line-height: 1; color: #ff3366;'>  __  __   __   __\n /  \\ |_)  /  \\ /  \\\n \\__/ | \\  \\__/ \\__/</pre>"
+                        },
+                        {
+                            header: "NODE MATRIX",
+                            content: "NODE [127.0.0.1]<br>[ROUTING STATUS: ACTIVE]<br>SUBNET: 255.255.255.0"
+                        },
+                        {
+                            header: "BOOT TRACE",
+                            content: ">> LOADING SYSTEM CORE...<br>>> INJECTING SYSTEM MASK...<br>>> SUCCESS"
+                        },
+                        {
+                            header: "THREAT LEVEL",
+                            content: "<span style='font-size:1.1rem;font-weight:bold;color:#ff0055;animation:alertBlink 0.3s step-end infinite;'>THREAT: CRITICAL</span>"
+                        },
+                        {
+                            header: "MEM ADDRESSES",
+                            content: "<div id='memory-registry-box' style='font-family:monospace;font-size:0.75rem;'>0x00F8A: CC<br>0x00F8B: 9F<br>0x00F8C: A2</div>"
+                        },
+                        {
+                            header: "PORT OVERRIDE",
+                            content: "PORT 80: HIJACKED<br>PORT 443: HIJACKED<br>PORT 8080: LISTENING"
+                        },
+                        {
+                            header: "SHIELD MATRIX",
+                            content: "ENVELOPE STATE: COMPROMISED<br>DECOY INTEGRITY: 0.00%"
+                        },
+                        {
+                            header: "CPU OVERLOAD",
+                            content: "CORE 0: 99.4% [CRIT]<br>CORE 1: 98.7% [CRIT]<br>CORE 2: 100% [CRIT]"
+                        },
+                        {
+                            header: "ALERT BAR",
+                            content: "!! UNAUTHORIZED USER INTRUSION INTERCEPTED !!"
+                        },
+                        {
+                            header: "SYS DIRECTORY",
+                            content: "<pre style='margin:0;font-size:0.7rem;'>root/\n├── bin/\n├── src/\n│   └── architect/\n└── sys/</pre>"
+                        },
+                        {
+                            header: "HEX MEM MATRIX",
+                            content: "<div id='hex-matrix-box' style='font-family:monospace;font-size:0.7rem;line-height:1.1;'></div>"
+                        },
+                        {
+                            header: "DNA DECRYPTION",
+                            content: "CHROMOSOME 21: MATCHED<br>SEQUENCE CODE: 98% RESOLVED"
+                        },
+                        {
+                            header: "MATRIX LOG EXPORT",
+                            content: "<div id='log-export-box' style='font-size:0.7rem;height:100%;overflow:hidden;line-height:1.2;'></div>"
+                        }
+                    ] : [
+                        {
+                            header: "RECOVERY REQUEST",
+                            content: ">> CORE SYSTEM RESET DETECTED<br>>> RE-DEPLOYING SHIELD PROTOCOL"
+                        },
+                        {
+                            header: "STACK RESTORATION",
+                            content: "RAX: 0x00000000&nbsp;&nbsp;RBX: 0x00000000<br>RIP: 0x000075A0&nbsp;&nbsp;RSP: 0x7FFFEEC0<br>STATUS: CORE REGISTER RESET COMPLETE"
+                        },
+                        {
+                            header: "DECOY COMPILATION",
+                            content: ">> TARGET decoy: '天野靜樹'<br>>> COMPILING MASQUERADE LAYER...<div class='window-progress'><div class='window-progress-bar' id='reveal-progress-bar'></div></div><span id='reveal-progress-text'>REBUILDING: 0%</span>"
+                        },
+                        {
+                            header: "SYS ONLINE",
+                            content: "<div style='background: rgba(0,212,255,0.15); border: 1px solid #00d4ff; text-align: center; font-weight: bold; padding: 5px; color: #00d4ff;'>FIREWALL ONLINE</div>"
+                        },
+                        {
+                            header: "NETWORK SECURE",
+                            content: "IP: 127.0.0.1 (SECURED)<br>GATEWAY: AUTHENTICATED & SHIELDED"
+                        },
+                        {
+                            header: "PROJECT SAKURA CORE INTEGRITY",
+                            content: `
+                                <table style='width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 5px; border: 1px solid rgba(0,212,255,0.3);'>
+                                    <thead>
+                                        <tr style='background: rgba(0,212,255,0.25); border-bottom: 1px solid rgba(0,212,255,0.3);'>
+                                            <th style='padding: 4px; text-align: left;'>MODULE</th>
+                                            <th style='padding: 4px; text-align: center;'>STATUS</th>
+                                            <th style='padding: 4px; text-align: right;'>RATE</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td style='padding: 4px;'>SAKURA_NLP</td>
+                                            <td style='padding: 4px; text-align: center; color: #00d4ff;'>ONLINE</td>
+                                            <td style='padding: 4px; text-align: right;'>100%</td>
+                                        </tr>
+                                        <tr>
+                                            <td style='padding: 4px;'>L2D_PHYSIC</td>
+                                            <td style='padding: 4px; text-align: center; color: #00d4ff;'>SECURE</td>
+                                            <td style='padding: 4px; text-align: right;'>100%</td>
+                                        </tr>
+                                        <tr>
+                                            <td style='padding: 4px;'>MEM_BUFFER</td>
+                                            <td style='padding: 4px; text-align: center; color: #00d4ff;'>CLEARED</td>
+                                            <td style='padding: 4px; text-align: right;'>0.0ms</td>
+                                        </tr>
+                                    </tbody>
+                                </table>`
+                        },
+                        {
+                            header: "BIOMETRIC ENVELOPE",
+                            content: ">> RE-ENVELOPE BIOMETRICS...<br>>> REAL NAME RE-MASKED"
+                        },
+                        {
+                            header: "BINARY DATASTREAM",
+                            content: "<div id='binary-stream-box' style='color: #00d4ff; font-size: 0.75rem; line-height: 1.1;'>01001001 01001110 01001001 01010100</div>"
+                        },
+                        {
+                            header: "SYSTEM Status",
+                            content: "<div style='background: rgba(0,212,255,0.15); border: 1px solid #00d4ff; text-align: center; font-weight: bold; padding: 5px; color: #00d4ff;'>SECURED ENVIRONMENT</div>"
+                        },
+                        {
+                            header: "DECOY ENCRYPTION TIMER",
+                            content: ">> ENVELOPE RE-ENCRYPTION TIMEOUT<br>>> ESTABLISHING IN: <span id='purge-countdown' style='color: #fff; font-weight: bold;'>3.5s</span>"
+                        },
+                        {
+                            header: "NODE STATUS",
+                            content: ">> SYSTEM SANITIZED: OK"
+                        },
+                        {
+                            header: "CORE BUFFER REBUILDING",
+                            content: `
+                                BUFFER_A (DNA LOCK)<div class='window-progress' style='margin: 4px 0;'><div class='window-progress-bar' id='buffer-a-bar' style='width: 0%;'></div></div>
+                                BUFFER_B (NLP SHIELD)<div class='window-progress' style='margin: 4px 0;'><div class='window-progress-bar' id='buffer-b-bar' style='width: 0%;'></div></div>
+                                BUFFER_C (COGNITIVE RESTORE)<div class='window-progress' style='margin: 4px 0;'><div class='window-progress-bar' id='buffer-c-bar' style='width: 0%;'></div></div>`
+                        },
+                        {
+                            header: "ASCII SHIELD LOGO",
+                            content: "<pre style='margin: 0; font-size: 0.65rem; line-height: 1; color: #00d4ff;'>  __  __   __   __\n /__` |_)  |__  |  |\n .__/ | \\  |___ |__|</pre>"
+                        },
+                        {
+                            header: "NODE MATRIX",
+                            content: "NODE [127.0.0.1]<br>[ROUTING STATUS: ACTIVE]<br>SUBNET: 255.255.255.0"
+                        },
+                        {
+                            header: "BOOT TRACE",
+                            content: ">> INITIALIZING PROTECTION...<br>>> COMPILING MASQUERADE...<br>>> SUCCESS"
+                        },
+                        {
+                            header: "THREAT LEVEL",
+                            content: "<span style='font-size:1.1rem;font-weight:bold;color:#00d4ff;'>THREAT: SECURED</span>"
+                        },
+                        {
+                            header: "MEM ADDRESSES",
+                            content: "<div id='memory-registry-box' style='font-family:monospace;font-size:0.75rem;'>0x00F8A: 00<br>0x00F8B: 00<br>0x00F8C: 00</div>"
+                        },
+                        {
+                            header: "PORT COVERAGE",
+                            content: "PORT 80: SHIELDED<br>PORT 443: SHIELDED<br>PORT 8080: CLOSED"
+                        },
+                        {
+                            header: "SHIELD MATRIX",
+                            content: "ENVELOPE STATE: SECURED<br>DECOY INTEGRITY: 100.0%"
+                        },
+                        {
+                            header: "CPU SECURED",
+                            content: "CORE 0: 12.4% [OK]<br>CORE 1: 8.7% [OK]<br>CORE 2: 15.0% [OK]"
+                        },
+                        {
+                            header: "ALERT BAR",
+                            content: "!! SYSTEM SAFE & SECURITY MASQUERADE ENGAGED !!"
+                        },
+                        {
+                            header: "SYS DIRECTORY",
+                            content: "<pre style='margin:0;font-size:0.7rem;'>root/\n├── bin/\n├── src/\n│   └── decoy_mask/\n└── sys/</pre>"
+                        },
+                        {
+                            header: "HEX MEM MATRIX",
+                            content: "<div id='hex-matrix-box' style='font-family:monospace;font-size:0.7rem;line-height:1.1;'></div>"
+                        },
+                        {
+                            header: "DNA AUTHENTICATE",
+                            content: "CHROMOSOME 21: SECURED<br>SEQUENCE CODE: 100% CRYPTED"
+                        },
+                        {
+                            header: "MATRIX LOG EXPORT",
+                            content: "<div id='log-export-box' style='font-size:0.7rem;height:100%;overflow:hidden;line-height:1.2;'></div>"
+                        }
+                    ];
+
+                    const popupsToSpawn = isMobile ? popupsData.slice(0, 12) : popupsData;
+
+                    // 1. Spawn popup windows one by one with a staggered timeout
+                    popupsToSpawn.forEach((data, index) => {
+                        setTimeout(() => {
+                            const win = document.createElement('div');
+                            const styleClass = positions[index].styleClass || '';
+                            win.className = `hacker-window ${styleClass}`;
+                            win.style.top = positions[index].top;
+                            win.style.left = positions[index].left;
+                            win.style.width = positions[index].width;
+                            win.style.height = positions[index].height;
+
+                            let contentHtml = data.content;
+                            if (styleClass === 'style-scanner') {
+                                contentHtml += '<div class="scanner-line"></div>';
+                            }
+
+                            win.innerHTML = `
+                                <div class="window-header">${data.header}</div>
+                                <div class="window-content">${contentHtml}</div>
+                            `;
+                            overlay.appendChild(win);
+
+                            // Force reflow and activate window popup animation
+                            setTimeout(() => win.classList.add('active'), 20);
+                        }, index * 60);
+                    });
+
+                    // 2. Slam down the main center Boss Warning Banner at 1.2 seconds
+                    setTimeout(() => {
+                        const banner = document.createElement('div');
+                        banner.className = 'main-boss-banner';
+                        banner.innerHTML = `
+                            <div class="banner-sub">${toUnmasked ? 'ROOT PRIVILEGE ESCALATION DETECTED' : 'ORIGINAL COGNITIVE RESTORATION DETECTED'}</div>
+                            <div class="banner-sub">${toUnmasked ? 'ROOT NODE SYSTEM COMPROMISED' : 'MASQUERADE SHIELD RE-ESTABLISHED'}</div>
+                            <div class="banner-title">${toUnmasked ? 'ROOT ARCHITECT APPEARED!!' : 'RECOVERY COMPILING!!'}</div>
+                            <div class="banner-footer">
+                                <span>MESSAGE BELOW: AT TIME BASED ON GMT +09:00</span>
+                                <span class="right">STATUS CODE ${toUnmasked ? '0x00' : '0x88'}</span>
+                            </div>
+                            <div class="banner-footer-sub">
+                                <span>${toUnmasked ? 'WELCOME BACK, SYSTEM CREATOR.' : 'RESTORING DECOY CONTEXT...'}</span>
+                                <span class="right">${toUnmasked ? 'ROOT GRANTED' : 'NODE RESTORED'}</span>
+                            </div>
+                        `;
+                        overlay.appendChild(banner);
+
+                        // Trigger scale & drop down animation
+                        setTimeout(() => banner.classList.add('active'), 20);
+                    }, 1200);
+
+                    // 3. Drive the progress indicators in Window 3 & Window 12
+                    let progress = 0;
+                    const progressTimer = setInterval(() => {
+                        const bar = document.getElementById('reveal-progress-bar');
+                        const txt = document.getElementById('reveal-progress-text');
+                        if (bar && txt) {
+                            progress += Math.floor(Math.random() * 8) + 4;
+                            if (progress >= 100) {
+                                progress = 100;
+                                clearInterval(progressTimer);
+                            }
+                            bar.style.width = progress + '%';
+                            txt.textContent = `${toUnmasked ? 'DECRYPTING' : 'REBUILDING'}: ${progress}%`;
+                        }
+
+                        // Drive multi-progress buffers
+                        const barA = document.getElementById('buffer-a-bar');
+                        const barB = document.getElementById('buffer-b-bar');
+                        const barC = document.getElementById('buffer-c-bar');
+                        if (barA) barA.style.width = Math.min(100, progress * 1.25) + '%';
+                        if (barB) barB.style.width = Math.min(100, progress * 0.95) + '%';
+                        if (barC) barC.style.width = Math.min(100, progress * 0.75) + '%';
+                    }, 100);
+
+                    // 4. Live Binary Stream Generator (Window 8)
+                    const streamTimer = setInterval(() => {
+                        const streamEl = document.getElementById('binary-stream-box');
+                        if (streamEl) {
+                            let line = "";
+                            for (let i = 0; i < 28; i++) {
+                                line += Math.random() > 0.5 ? "1" : "0";
+                            }
+                            streamEl.innerHTML = (streamEl.innerHTML + "<br>" + line).split("<br>").slice(-6).join("<br>");
+                        }
+                    }, 120);
+
+                    // 5. Real Name Shuffling effect (Window 7)
+                    let shuffleInterval = null;
+                    if (toUnmasked) {
+                        let shuffleCount = 0;
+                        const targetName = "陳右承";
+                        const chars = "██▒░█▓▒░/\\$#@!%-+*=";
+                        shuffleInterval = setInterval(() => {
+                            const nameText = document.getElementById('shuffle-name-text');
+                            if (nameText) {
+                                shuffleCount++;
+                                if (shuffleCount > 18) {
+                                    nameText.textContent = targetName;
+                                    clearInterval(shuffleInterval);
+                                } else {
+                                    let temp = "";
+                                    for (let i = 0; i < targetName.length; i++) {
+                                        temp += chars.charAt(Math.floor(Math.random() * chars.length));
+                                    }
+                                    nameText.textContent = temp;
+                                }
+                            }
+                        }, 100);
+                    }
+
+                    // 6. Countdown Timer (Window 10)
+                    let remainingTime = 3.5;
+                    const countdownInterval = setInterval(() => {
+                        const countdownEl = document.getElementById('purge-countdown');
+                        if (countdownEl) {
+                            remainingTime = Math.max(0, remainingTime - 0.1);
+                            countdownEl.textContent = remainingTime.toFixed(1) + 's';
+                            if (remainingTime <= 0) {
+                                clearInterval(countdownInterval);
+                            }
+                        }
+                    }, 100);
+
+                    // 7. Memory Registry Editor timer (Window 16)
+                    const memTimer = setInterval(() => {
+                        const memEl = document.getElementById('memory-registry-box');
+                        if (memEl) {
+                            let lines = [];
+                            for (let i = 0; i < 4; i++) {
+                                const addr = "0x00" + Math.floor(Math.random() * 4096).toString(16).toUpperCase().padStart(3, '0');
+                                const val = Math.floor(Math.random() * 256).toString(16).toUpperCase().padStart(2, '0');
+                                lines.push(`${addr}: ${val}`);
+                            }
+                            memEl.innerHTML = lines.join("<br>");
+                        }
+                    }, 200);
+
+                    // 8. Hex Matrix Box timer (Window 22)
+                    const hexTimer = setInterval(() => {
+                        const hexEl = document.getElementById('hex-matrix-box');
+                        if (hexEl) {
+                            let rows = [];
+                            for (let r = 0; r < 5; r++) {
+                                let row = "";
+                                for (let c = 0; c < 4; c++) {
+                                    row += Math.floor(Math.random() * 256).toString(16).toUpperCase().padStart(2, '0') + " ";
+                                }
+                                rows.push(row.trim());
+                            }
+                            hexEl.innerHTML = rows.join("<br>");
+                        }
+                    }, 150);
+
+                    // 9. Log Export Box timer (Window 24)
+                    const logTimer = setInterval(() => {
+                        const logEl = document.getElementById('log-export-box');
+                        if (logEl) {
+                            const logPool = toUnmasked ? [
+                                ">> COMPROMISING TARGET SUBNET...",
+                                ">> BYPASSING FIREWALL POLICY...",
+                                ">> PRIVILEGE INJECTED: ROOT ARCHITECT",
+                                ">> DUMPING RAM REGISTERS...",
+                                ">> THREAT ASSESSMENT: FATAL",
+                                ">> MASQUERADE LAYER SHUTDOWN...",
+                                ">> ACCESS CODE DECRYPTED: 0xCF",
+                                ">> INJECTING TROJAN BUFFER..."
+                            ] : [
+                                ">> RE-ESTABLISHING COMPLIANCE...",
+                                ">> SANITIZING STORAGE NODES...",
+                                ">> MASK LAYER LOADED: 天野靜樹",
+                                ">> RESTORING FIREWALL RULES...",
+                                ">> PRIVILEGES RESTRICTED: USER",
+                                ">> COMPILED TARGET ASSET...",
+                                ">> INTEGRITY SIGNATURE VERIFIED",
+                                ">> SECURITY PROTOCOL SUCCEEDED"
+                            ];
+                            const randomLog = logPool[Math.floor(Math.random() * logPool.length)];
+                            logEl.innerHTML = (logEl.innerHTML + "<br>" + randomLog).split("<br>").slice(-8).join("<br>");
+                        }
+                    }, 250);
+
+                    // 10. Final Flash, swap identities, and fade out at 3.5 seconds
+                    setTimeout(() => {
+                        clearInterval(progressTimer);
+                        clearInterval(streamTimer);
+                        clearInterval(countdownInterval);
+                        clearInterval(memTimer);
+                        clearInterval(hexTimer);
+                        clearInterval(logTimer);
+                        if (shuffleInterval) clearInterval(shuffleInterval);
+
+                        // Visual flash effect on overlay
+                        overlay.style.background = '#ffffff';
+                        overlay.style.transition = 'background 0.1s ease-out, opacity 0.5s ease-out';
+
+                        setTimeout(() => {
+                            // Update content
+                            updateProfileUI(toUnmasked);
+                             // State is maintained in ClassList of body/profileCard (resets on refresh)
+
+                            // Restore page scrolling & page shake
+                            document.documentElement.style.overflow = '';
+                            document.body.style.overflow = '';
+                            const elementsToShake = document.querySelectorAll('.page-content, header, .side-nav, .cyber-bg, .grid-overlay');
+                            elementsToShake.forEach(el => el.classList.remove('hacker-glitch-active'));
+                            overlay.classList.remove('active');
+                            overlay.style.opacity = '0';
+
+                            setTimeout(() => {
+                                overlay.remove();
+                            }, 500);
+
+                        }, 100);
+
+                    }, 3500);
+                };
 
             })();
         });

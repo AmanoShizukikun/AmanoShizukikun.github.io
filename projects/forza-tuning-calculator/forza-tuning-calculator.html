@@ -1,0 +1,3333 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FH6 通用調教計算器 - Cyber Nexus</title>
+<meta name="description" content="Forza Horizon 6 通用簡易調教計算器 — 齒比、懸吊、輪胎全方位推薦">
+<link rel="icon" href="../../assets/images/logo.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/core.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="../../assets/css/animations.css">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS & RACING GLOWS
+   ═══════════════════════════════════════════ */
+:root {
+  --bg:      transparent;
+  --bg2:     rgba(10, 10, 15, 0.7);
+  --bg3:     rgba(0, 212, 255, 0.04);
+  --bg4:     rgba(255, 0, 128, 0.05);
+  --bg5:     rgba(255, 255, 255, 0.08);
+  --border:  rgba(0, 212, 255, 0.22);
+  --border2: rgba(255, 0, 128, 0.3);
+  --acc:     var(--primary-magenta);
+  --acc-dim: var(--accent-pink);
+  --acc2:    var(--primary-cyan);
+  --acc3:    var(--accent-pink);
+  --acc4:    var(--accent-purple);
+  --text:    #ffffff;
+  --text2:   rgba(255, 255, 255, 0.7);
+  --text3:   rgba(255, 255, 255, 0.45);
+  
+  --green:   #3dda6a;
+  --red:     #ff5566;
+  --yellow:  #f0c000;
+  --blue:    #4a9eff;
+  --orange:  #ff8844;
+  --cyan:    #44dddd;
+  --glow:    0 0 15px rgba(0, 212, 255, 0.25);
+  --radius:  12px;
+  --transition: all .25s cubic-bezier(.4,0,.2,1);
+}
+
+[data-theme="light"] {
+  --bg:      transparent;
+  --bg2:     rgba(255, 255, 255, 0.65);
+  --bg3:     rgba(0, 153, 204, 0.04);
+  --bg4:     rgba(204, 0, 102, 0.04);
+  --bg5:     rgba(0, 0, 0, 0.05);
+  --border:  rgba(0, 153, 204, 0.22);
+  --border2: rgba(204, 0, 102, 0.3);
+  --text:    #1a1a2e;
+  --text2:   #4a4a5a;
+  --text3:   #7a7a8a;
+  
+  --acc:     #cc0066; /* magenta */
+  --acc-dim: #ff69b4;
+  --acc2:    #0099cc; /* cyan */
+  --acc3:    #e65100;
+  --acc4:    #673ab7;
+  --green:   #2e7d32;
+  --red:     #c62828;
+  --yellow:  #f57f17;
+  --blue:    #1565c0;
+  --orange:  #d84315;
+  --cyan:    #00838f;
+  --glow:    0 0 15px rgba(204,0,102,0.1);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  font-size:14px;
+  line-height:1.6;
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════ */
+.page-content {
+  padding: 100px var(--spacing-md) var(--spacing-xl);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.shell{max-width:1020px;margin:0 auto;padding:0 16px 80px}
+
+/* ═══════════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════════ */
+.hdr{
+  background: url('../../forza-horizon-6-discover-japan-banner.webp') no-repeat center center;
+  background-size: cover;
+  border: 1px solid var(--border);
+  box-shadow: var(--glow), inset 0 0 20px rgba(0, 0, 0, 0.6);
+  padding: 40px 32px 30px;
+  margin-bottom: 24px;
+  border-radius: var(--radius);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 180px;
+}
+
+.hdr::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(10, 10, 15, 0.35) 0%, rgba(10, 10, 15, 0.9) 100%);
+  z-index: 1;
+}
+
+[data-theme="light"] .hdr {
+  border-color: var(--border2);
+  box-shadow: 0 4px 20px rgba(204,0,102,0.1);
+}
+
+[data-theme="light"] .hdr::after {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.92) 100%);
+}
+
+.hdr-content {
+  position: relative;
+  z-index: 2;
+}
+
+.hdr-eyebrow{
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--primary-magenta);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(255, 0, 128, 0.3);
+}
+
+[data-theme="light"] .hdr-eyebrow {
+  color: var(--acc);
+  text-shadow: none;
+}
+
+.hdr h1{
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+  font-weight: 900;
+  background: linear-gradient(45deg, var(--accent-cyan), var(--primary-magenta));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 4px;
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
+  text-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+}
+
+[data-theme="light"] .hdr h1 {
+  background: linear-gradient(45deg, var(--acc2), var(--acc));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+
+.hdr-sub{
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text2);
+  font-weight: 600;
+}
+
+.hdr-status{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:14px;
+}
+
+.status-pill{
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition);
+  font-family: var(--font-body);
+  font-weight: 600;
+}
+
+[data-theme="light"] .status-pill {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--border);
+}
+
+.status-pill .pill-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--text3);
+}
+
+.status-pill.active{
+  border-color: var(--primary-cyan);
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.2);
+  color: #fff;
+}
+
+[data-theme="light"] .status-pill.active {
+  color: var(--text);
+  border-color: var(--acc2);
+}
+
+.status-pill.active .pill-dot{
+  background:var(--primary-cyan);
+  box-shadow:0 0 8px var(--primary-cyan);
+}
+
+/* ═══════════════════════════════════════════
+   TABS
+   ═══════════════════════════════════════════ */
+.tabs{
+  display:flex;gap:3px;margin-bottom:18px;
+  background:var(--bg2);border-radius:var(--radius);padding:4px;
+  border:1px solid var(--border);
+}
+.tab{
+  flex:1;padding:10px 6px;text-align:center;font-size:12px;font-weight:600;
+  cursor:pointer;border-radius:8px;color:var(--text2);
+  transition:var(--transition);letter-spacing:.3px;
+  border:none;background:transparent;font-family:inherit;
+  white-space:nowrap;
+}
+.tab.active{background:var(--acc);color:#000;box-shadow:var(--glow)}
+[data-theme="light"] .tab.active{color:#fff;}
+.tab:hover:not(.active){background:var(--bg3);color:var(--text)}
+.panel{display:none;animation:fadeIn .3s ease}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══════════════════════════════════════════
+   CARDS
+   ═══════════════════════════════════════════ */
+.card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius);margin-bottom:16px;overflow:hidden;
+  transition:var(--transition);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.card:hover{border-color:var(--border2)}
+.card-head{
+  background:linear-gradient(135deg,var(--bg3),var(--bg4));
+  padding:12px 18px;display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid var(--border);
+}
+.card-icon{font-size:16px;flex-shrink:0}
+.card-title{font-size:14px;font-weight:700;color:var(--text);letter-spacing:-.2px}
+.card-badge{
+  margin-left:auto;font-size:10px;padding:3px 10px;border-radius:12px;
+  letter-spacing:.5px;font-weight:600;
+}
+.badge-info{background:#001a2a;color:var(--blue);border:1px solid #003050}
+.badge-calc{background:#1a1500;color:var(--yellow);border:1px solid #3a3000}
+.badge-rec{background:#001a10;color:var(--green);border:1px solid #003020}
+.card-body{padding:16px 18px}
+
+/* ═══════════════════════════════════════════
+   FORM ELEMENTS
+   ═══════════════════════════════════════════ */
+.shell label{font-size:11px;color:var(--text2);display:block;margin-bottom:3px;font-weight:500;letter-spacing:.3px}
+.shell input[type=number],.shell select{
+  background:var(--bg3);border:1px solid var(--border2);color:var(--text);
+  border-radius:6px;padding:8px 12px;font-size:13px;width:100%;
+  outline:none;transition:var(--transition);
+  font-family:'Inter',sans-serif;
+}
+.shell input[type=number]:focus,.shell select:focus{
+  border-color:var(--acc2);
+  box-shadow:0 0 0 3px rgba(68,170,255,0.1);
+}
+.shell input[type=number]:hover,.shell select:hover{border-color:var(--text3)}
+.shell select{cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239999aa'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;
+}
+.inp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin:10px 0}
+.inp-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.inp-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:10px 0}
+.inp-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:10px 0}
+.inp-group{display:flex;flex-direction:column}
+.inp-group.computed input{background:var(--bg4);color:var(--acc);border-style:dashed;cursor:default}
+
+@media(max-width:600px){
+  .inp-grid{grid-template-columns:1fr 1fr}
+  .inp-grid-3,.inp-grid-4{grid-template-columns:1fr 1fr}
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════════ */
+.btn{
+  background:var(--acc);color:#000;border:none;border-radius:6px;
+  padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;
+  transition:var(--transition);letter-spacing:.3px;
+  font-family:'Inter',sans-serif;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.btn:hover{opacity:.88;box-shadow:var(--glow);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn-ghost{
+  background:transparent;border:1px solid var(--border2);color:var(--text2);
+  border-radius:6px;padding:9px 16px;font-size:12px;font-weight:600;
+  cursor:pointer;transition:var(--transition);font-family:'Inter',sans-serif;
+}
+.btn-ghost:hover{border-color:var(--text2);color:var(--text);background:var(--bg3)}
+.btn-ghost.active{border-color:var(--acc);color:var(--acc);background:rgba(200,240,0,0.06)}
+.btn-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center}
+
+/* ═══════════════════════════════════════════
+   STYLE SELECTOR
+   ═══════════════════════════════════════════ */
+.style-selector{
+  display:flex;gap:4px;background:var(--bg3);border-radius:8px;
+  padding:4px;margin-bottom:16px;border:1px solid var(--border);
+}
+.style-btn{
+  flex:1;padding:10px 8px;text-align:center;font-size:12px;font-weight:600;
+  cursor:pointer;border-radius:6px;color:var(--text2);
+  transition:var(--transition);border:none;background:transparent;
+  font-family:'Inter',sans-serif;
+}
+.style-btn.active{color:#000;font-weight:700}
+.style-btn[data-style="grip"].active{background:var(--green);box-shadow:0 0 12px rgba(61,218,106,0.2)}
+.style-btn[data-style="touge"].active{background:var(--yellow);box-shadow:0 0 12px rgba(240,192,0,0.2)}
+.style-btn[data-style="drift"].active{background:var(--orange);box-shadow:0 0 12px rgba(255,136,68,0.2)}
+
+/* ═══════════════════════════════════════════
+   RESULT CARDS
+   ═══════════════════════════════════════════ */
+.rec-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media(max-width:600px){.rec-grid{grid-template-columns:1fr}}
+.rec-card{
+  background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  padding:14px 16px;transition:var(--transition);
+}
+.rec-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.rec-title{
+  font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text3);margin-bottom:8px;font-weight:600;
+  display:flex;align-items:center;gap:6px;
+}
+.rec-values{display:flex;gap:16px;margin-bottom:8px}
+.rec-val-group{text-align:center;flex:1}
+.rec-val-label{font-size:10px;color:var(--text3);margin-bottom:2px}
+.rec-val{font-size:22px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--acc2)}
+.rec-val-unit{font-size:11px;color:var(--text3);margin-left:2px}
+.rec-range-bar{
+  width:100%;height:6px;background:var(--bg);border-radius:3px;
+  position:relative;margin:6px 0 4px;overflow:visible;
+}
+.rec-range-fill{
+  height:100%;border-radius:3px;position:absolute;top:0;left:0;
+  transition:width .5s cubic-bezier(.4,0,.2,1);
+}
+.rec-range-marker{
+  width:3px;height:14px;border-radius:2px;position:absolute;top:-4px;
+  transition:left .5s cubic-bezier(.4,0,.2,1);
+}
+.rec-range-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.rec-note{font-size:11px;color:var(--text2);margin-top:6px;line-height:1.5;border-top:1px solid var(--border);padding-top:6px}
+
+/* ═══════════════════════════════════════════
+   TABLES
+   ═══════════════════════════════════════════ */
+.data-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+.data-table th{
+  background:var(--bg4);color:var(--text3);font-size:10px;letter-spacing:1px;
+  text-transform:uppercase;padding:8px 12px;text-align:left;
+  border-bottom:1px solid var(--border);font-weight:600;
+}
+.data-table td{padding:8px 12px;border-bottom:1px solid var(--bg3);vertical-align:middle;color:var(--text)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--bg3)}
+.mono{font-family:'JetBrains Mono',monospace;color:var(--acc2)}
+.shift-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.dot-green{background:var(--green)} .dot-yellow{background:var(--yellow)} .dot-red{background:var(--red)}
+
+/* ═══════════════════════════════════════════
+   CALLOUTS
+   ═══════════════════════════════════════════ */
+.callout{
+  border-radius:8px;padding:12px 16px;margin:10px 0;font-size:12px;
+  display:flex;gap:10px;line-height:1.6;align-items:flex-start;
+}
+.callout-icon{flex-shrink:0;font-size:14px;margin-top:1px}
+.c-warn{background:#1e1600;border:1px solid #3a2a00;color:#d0a040}
+.c-info{background:#001520;border:1px solid #003040;color:#60b8d8}
+.c-ok{background:#001508;border:1px solid #003018;color:#50d068}
+.c-danger{background:#1e0005;border:1px solid #3a0010;color:#e06070}
+
+/* ═══════════════════════════════════════════
+   FORMULA
+   ═══════════════════════════════════════════ */
+.formula{
+  background:var(--bg);border-left:3px solid var(--acc2);
+  border-radius:0 6px 6px 0;padding:10px 14px;margin:8px 0;
+  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--acc2);
+}
+.formula-label{
+  font-family:'Inter',sans-serif;font-size:10px;color:var(--text3);
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;font-weight:600;
+}
+
+/* ═══════════════════════════════════════════
+   DIVIDER & MISC
+   ═══════════════════════════════════════════ */
+.shell hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+.shell p{font-size:13px;color:var(--text2);margin:6px 0}
+.shell strong{color:var(--text)}
+.section-label{
+  font-size:11px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;
+  font-weight:600;margin:18px 0 8px;display:flex;align-items:center;gap:8px;
+}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.gear-inputs-container{
+  display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;
+}
+.gear-input-wrap{
+  display:flex;flex-direction:column;min-width:70px;flex:1;max-width:100px;
+}
+.gear-input-wrap label{font-size:10px}
+.gear-input-wrap input{font-size:12px;padding:6px 8px;text-align:center}
+
+/* ═══════════════════════════════════════════
+   RESULT CELLS
+   ═══════════════════════════════════════════ */
+.result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:12px}
+.result-cell{
+  background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  padding:10px 8px;text-align:center;transition:var(--transition);
+}
+.result-cell:hover{border-color:var(--border2);transform:translateY(-1px)}
+.result-cell .r-label{font-size:9px;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px}
+.result-cell .r-val{font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.result-cell .r-sub{font-size:10px;margin-top:3px;color:var(--text3)}
+.r-green .r-val{color:var(--green)} .r-green{border-color:rgba(61,218,106,0.2)}
+.r-yellow .r-val{color:var(--yellow)} .r-yellow{border-color:rgba(240,192,0,0.2)}
+.r-red .r-val{color:var(--red)} .r-red{border-color:rgba(255,85,102,0.2)}
+.r-blue .r-val{color:var(--blue)} .r-blue{border-color:rgba(74,158,255,0.2)}
+.r-cyan .r-val{color:var(--cyan)} .r-cyan{border-color:rgba(68,221,221,0.2)}
+.r-accent .r-val{color:var(--acc)} .r-accent{border-color:rgba(200,240,0,0.2)}
+.r-warn .r-val{color:var(--orange)} .r-warn{border-color:rgba(255,136,68,0.2)}
+
+/* ═══════════════════════════════════════════
+   COPY BUTTON
+   ═══════════════════════════════════════════ */
+.copy-toast{
+  position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(60px);
+  background:var(--green);color:#000;padding:10px 24px;border-radius:8px;
+  font-size:13px;font-weight:700;opacity:0;transition:all .3s ease;z-index:999;
+  pointer-events:none;
+}
+.copy-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ═══════════════════════════════════════════
+   TELEMETRY DIAGNOSIS REDESIGN
+   ═══════════════════════════════════════════ */
+.diag-container {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  margin-top: 10px;
+}
+@media (max-width: 850px) {
+  .diag-container {
+    grid-template-columns: 1fr;
+  }
+}
+.diag-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.priority-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.priority-title {
+  font-size: 11px;
+  color: var(--text3);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.priority-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.priority-item:last-child {
+  border-bottom: none;
+}
+.priority-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  min-width: 42px;
+  text-align: center;
+}
+.badge-s { background: rgba(255,85,102,0.15); color: var(--red); border: 1px solid rgba(255,85,102,0.3); }
+.badge-a { background: rgba(255,136,68,0.15); color: var(--orange); border: 1px solid rgba(255,136,68,0.3); }
+.badge-b { background: rgba(240,192,0,0.15); color: var(--yellow); border: 1px solid rgba(240,192,0,0.3); }
+.badge-c { background: rgba(74,158,255,0.15); color: var(--blue); border: 1px solid rgba(74,158,255,0.3); }
+.badge-d { background: rgba(153,153,170,0.15); color: var(--text2); border: 1px solid rgba(153,153,170,0.3); }
+
+.symptom-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.symptom-item {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+.symptom-item:hover {
+  border-color: var(--border2);
+  transform: translateX(4px);
+}
+.symptom-item.active {
+  background: rgba(200,240,0,0.06);
+  border-color: var(--acc);
+  box-shadow: var(--glow);
+}
+.symptom-icon-wrap {
+  font-size: 20px;
+  width: 34px;
+  height: 34px;
+  background: var(--bg4);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+.symptom-item.active .symptom-icon-wrap {
+  background: var(--acc);
+  color: #000;
+}
+.symptom-text {
+  display: flex;
+  flex-direction: column;
+}
+.symptom-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+.symptom-desc {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 1px;
+}
+
+/* Diagnosis Workspace */
+.diag-workspace {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  transition: var(--transition);
+}
+.diag-workspace.has-result {
+  justify-content: flex-start;
+  background: var(--bg3);
+}
+.diag-placeholder {
+  text-align: center;
+  color: var(--text3);
+}
+.diag-placeholder-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.3;
+}
+.diag-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.diag-header-icon {
+  font-size: 28px;
+  width: 44px;
+  height: 44px;
+  background: rgba(200,240,0,0.1);
+  border: 1px solid rgba(200,240,0,0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--acc);
+}
+.diag-header-text h2 {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+}
+.diag-header-text p {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 2px;
+}
+.diag-section {
+  margin-bottom: 22px;
+}
+.diag-section-title {
+  font-size: 11px;
+  color: var(--text3);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.diag-cause-card {
+  background: rgba(255,136,68,0.03);
+  border: 1px solid rgba(255,136,68,0.15);
+  border-left: 4px solid var(--orange);
+  border-radius: 6px;
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+.diag-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.diag-step-item {
+  background: var(--bg4);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.diag-step-number {
+  width: 24px;
+  height: 24px;
+  background: var(--border2);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.diag-step-content {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.diag-step-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.diag-step-title {
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* ═══════════════════════════════════════════
+   2026 REDESIGN OVERRIDES
+   Align with site cyber style + FH6 atmosphere
+   and remove hover floating transforms.
+   ═══════════════════════════════════════════ */
+:root {
+  --bg: #080a12;
+  --bg2: rgba(14, 18, 34, 0.86);
+  --bg3: rgba(24, 31, 56, 0.82);
+  --bg4: rgba(35, 44, 78, 0.85);
+  --bg5: rgba(50, 60, 98, 0.9);
+  --border: rgba(0, 212, 255, 0.2);
+  --border2: rgba(255, 0, 128, 0.42);
+  --acc: #ff2d9b;
+  --acc-dim: #8a1b58;
+  --acc2: #30d6ff;
+  --acc3: #ff7f4a;
+  --acc4: #8e78ff;
+  --text: #f4f7ff;
+  --text2: #a4b4d1;
+  --text3: #6f7f9a;
+  --green: #4edb8f;
+  --red: #ff5f82;
+  --yellow: #ffd061;
+  --blue: #52b4ff;
+  --orange: #ff9e57;
+  --cyan: #52e8ff;
+  --glow: 0 0 20px rgba(255, 45, 155, 0.24);
+  --radius: 14px;
+}
+
+[data-theme="light"] {
+  --bg: #f8fbff;
+  --bg2: rgba(255, 255, 255, 0.86);
+  --bg3: rgba(243, 247, 255, 0.94);
+  --bg4: rgba(232, 239, 252, 0.94);
+  --bg5: rgba(219, 230, 250, 0.94);
+  --border: rgba(0, 126, 178, 0.18);
+  --border2: rgba(204, 0, 102, 0.32);
+  --acc: #cc006a;
+  --acc-dim: #890043;
+  --acc2: #008ec7;
+  --text: #1f273f;
+  --text2: #526183;
+  --text3: #7f8ca8;
+  --glow: 0 0 20px rgba(204, 0, 106, 0.16);
+}
+
+body {
+  font-family: 'Rajdhani', 'Inter', system-ui, sans-serif;
+  letter-spacing: 0.1px;
+}
+
+.page-content {
+  max-width: 1320px;
+  padding-top: 104px;
+}
+
+.shell {
+  max-width: 1160px;
+  padding: 0 18px 92px;
+  position: relative;
+}
+
+.shell::before {
+  content: '';
+  position: absolute;
+  inset: 0 18px auto;
+  height: 220px;
+  border-radius: 18px;
+  background:
+    linear-gradient(120deg, rgba(0, 212, 255, 0.08) 0%, rgba(255, 45, 155, 0.1) 60%, rgba(255, 150, 84, 0.08) 100%),
+    radial-gradient(circle at 85% 8%, rgba(255, 45, 155, 0.22), transparent 58%),
+    radial-gradient(circle at 16% 24%, rgba(48, 214, 255, 0.18), transparent 64%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hdr,
+.tabs,
+.panel {
+  position: relative;
+  z-index: 1;
+}
+
+.hdr {
+  margin-bottom: 18px;
+  padding: 26px 24px 20px;
+  border: 1px solid var(--border);
+  border-bottom: 2px solid var(--acc);
+  border-radius: 16px;
+  background:
+    linear-gradient(132deg, rgba(13, 18, 38, 0.94) 0%, rgba(20, 27, 49, 0.92) 55%, rgba(36, 23, 44, 0.92) 100%);
+  box-shadow:
+    0 12px 28px rgba(6, 10, 24, 0.35),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="light"] .hdr {
+  background: linear-gradient(130deg, rgba(255, 255, 255, 0.95), rgba(246, 250, 255, 0.95));
+}
+
+.hdr::after {
+  content: '';
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  top: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--acc2), var(--acc), #ff8f58);
+  border-radius: 0 0 999px 999px;
+}
+
+.hdr-eyebrow {
+  color: var(--acc2);
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 3.5px;
+}
+
+.hdr h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: clamp(22px, 2.7vw, 31px);
+}
+
+.hdr-sub {
+  font-size: 13px;
+}
+
+.status-pill {
+  border-radius: 999px;
+  border-color: var(--border);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.tabs {
+  padding: 5px;
+  border: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(18, 24, 45, 0.82), rgba(15, 17, 32, 0.86));
+  border-radius: 14px;
+  gap: 5px;
+}
+
+.tab {
+  border-radius: 9px;
+  font-family: 'Orbitron', 'Rajdhani', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: var(--text2);
+  transition: background-color .2s ease, color .2s ease, box-shadow .2s ease;
+}
+
+.tab.active {
+  color: #fff;
+  background: linear-gradient(90deg, #ff2d9b, #ff4d6d 48%, #ff9654);
+  box-shadow: 0 6px 14px rgba(255, 45, 155, 0.28);
+}
+
+[data-theme="light"] .tab.active {
+  color: #fff;
+}
+
+.tab:hover:not(.active) {
+  background: rgba(82, 180, 255, 0.12);
+  color: var(--text);
+}
+
+.card {
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: linear-gradient(145deg, var(--bg2), rgba(14, 17, 30, 0.9));
+  box-shadow: 0 10px 24px rgba(6, 9, 22, 0.24);
+}
+
+[data-theme="light"] .card {
+  background: linear-gradient(145deg, var(--bg2), rgba(248, 251, 255, 0.92));
+}
+
+.card:hover {
+  border-color: var(--border2);
+}
+
+.card-head {
+  background: linear-gradient(100deg, rgba(82, 180, 255, 0.1), rgba(255, 45, 155, 0.1));
+  padding: 12px 16px;
+}
+
+.card-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.35px;
+}
+
+.badge-info,
+.badge-calc,
+.badge-rec {
+  border-radius: 999px;
+}
+
+.shell label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.shell input[type=number],
+.shell select {
+  border-radius: 8px;
+  border-color: rgba(113, 141, 187, 0.42);
+  background: linear-gradient(165deg, rgba(26, 34, 57, 0.74), rgba(16, 22, 40, 0.9));
+  color: var(--text);
+  font-family: 'Rajdhani', 'Inter', sans-serif;
+  font-weight: 600;
+}
+
+[data-theme="light"] .shell input[type=number],
+[data-theme="light"] .shell select {
+  background: linear-gradient(165deg, rgba(246, 250, 255, 0.95), rgba(235, 242, 252, 0.95));
+}
+
+.shell input[type=number]:hover,
+.shell select:hover,
+.shell input[type=number]:focus,
+.shell select:focus {
+  border-color: rgba(82, 180, 255, 0.82);
+}
+
+.btn,
+.btn-ghost,
+.style-btn,
+.symptom-item,
+.rec-card,
+.result-cell,
+.card,
+.status-pill {
+  transform: none !important;
+}
+
+.btn {
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ff2d9b, #ff4d6d 50%, #ff9654);
+  color: #fff;
+  font-family: 'Orbitron', 'Rajdhani', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  box-shadow: 0 7px 16px rgba(255, 45, 155, 0.25);
+  transition: filter .2s ease, box-shadow .2s ease, opacity .2s ease;
+}
+
+.btn:hover {
+  opacity: 0.96;
+  box-shadow: 0 8px 18px rgba(255, 45, 155, 0.3);
+}
+
+.btn:active {
+  transform: none;
+}
+
+.btn-ghost {
+  border-radius: 999px;
+  border-color: rgba(82, 180, 255, 0.5);
+  color: var(--acc2);
+}
+
+.btn-ghost:hover,
+.btn-ghost.active {
+  background: rgba(82, 180, 255, 0.1);
+  color: var(--text);
+}
+
+.style-selector {
+  border-radius: 10px;
+  border-color: var(--border);
+}
+
+.style-btn {
+  border-radius: 7px;
+  font-family: 'Orbitron', 'Rajdhani', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.35px;
+}
+
+.style-btn.active {
+  color: #0f1020;
+}
+
+.rec-card,
+.result-cell,
+.diag-workspace,
+.priority-card,
+.symptom-item {
+  border-radius: 12px;
+  border-color: var(--border);
+}
+
+.rec-card:hover,
+.result-cell:hover,
+.symptom-item:hover {
+  border-color: var(--border2);
+  transform: none;
+}
+
+.rec-title,
+.section-label,
+.priority-title,
+.diag-section-title {
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 1.1px;
+}
+
+.rec-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 21px;
+}
+
+.data-table th {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  letter-spacing: 1.2px;
+  background: linear-gradient(90deg, rgba(82, 180, 255, 0.12), rgba(255, 45, 155, 0.1));
+}
+
+.data-table tr:hover td {
+  background: rgba(82, 180, 255, 0.08);
+}
+
+.callout {
+  border-radius: 10px;
+  border-width: 1px;
+}
+
+.diag-workspace {
+  background: linear-gradient(140deg, rgba(14, 18, 34, 0.88), rgba(19, 26, 46, 0.88));
+}
+
+[data-theme="light"] .diag-workspace {
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.95), rgba(244, 248, 255, 0.95));
+}
+
+.diag-header-icon {
+  background: linear-gradient(145deg, rgba(255, 45, 155, 0.14), rgba(82, 180, 255, 0.15));
+  border-color: rgba(82, 180, 255, 0.35);
+}
+
+.copy-toast {
+  border-radius: 999px;
+  background: linear-gradient(90deg, #42dca2, #53e8ff);
+  color: #052126;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 0.4px;
+}
+
+@media (max-width: 940px) {
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .tab {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-content {
+    padding-top: 95px;
+  }
+
+  .shell {
+    padding: 0 12px 74px;
+  }
+
+  .hdr {
+    padding: 22px 16px 18px;
+  }
+
+  .hdr h1 {
+    font-size: 21px;
+  }
+
+  .tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .card-head {
+    gap: 8px;
+    padding: 11px 12px;
+  }
+
+  .card-body {
+    padding: 14px 12px;
+  }
+
+  .btn-row {
+    gap: 7px;
+  }
+
+  .btn,
+  .btn-ghost {
+    width: 100%;
+    justify-content: center;
+  }
+}
+</style>
+<style>
+/* Forza calculator redesign: site-consistent cyber + FH6 magenta/cyan + no hover floating */
+.page-content {
+  max-width: 1320px;
+  padding: calc(var(--header-height) + 24px) var(--spacing-md) var(--spacing-xl);
+}
+
+.shell {
+  max-width: 1180px;
+  padding: 0 18px 72px;
+}
+
+body {
+  font-family: 'Rajdhani', sans-serif;
+  color: #f3f8ff;
+}
+
+[data-theme="light"] body {
+  color: #1a2433;
+}
+
+/* Tokens remap */
+:root {
+  --bg: #080d14;
+  --bg2: rgba(10, 17, 27, 0.8);
+  --bg3: rgba(20, 30, 45, 0.92);
+  --bg4: rgba(30, 42, 60, 0.95);
+  --bg5: rgba(46, 62, 86, 0.95);
+  --border: rgba(95, 169, 255, 0.2);
+  --border2: rgba(255, 54, 170, 0.45);
+  --acc: #ff2fa6;
+  --acc-dim: #a21d6f;
+  --acc2: #3cc8ff;
+  --acc3: #ff7b39;
+  --acc4: #a790ff;
+  --text: #eef4ff;
+  --text2: #b6c6dc;
+  --text3: #7d92b2;
+  --green: #4be18e;
+  --red: #ff5f7f;
+  --yellow: #f2cb4f;
+  --blue: #4fb4ff;
+  --orange: #ff9b4b;
+  --cyan: #38daff;
+  --glow: 0 0 24px rgba(255, 47, 166, 0.2);
+  --radius: 14px;
+}
+
+[data-theme="light"] {
+  --bg: #f4f8ff;
+  --bg2: rgba(255, 255, 255, 0.86);
+  --bg3: rgba(240, 246, 255, 0.94);
+  --bg4: rgba(230, 239, 251, 0.96);
+  --bg5: rgba(220, 232, 247, 1);
+  --border: rgba(0, 123, 199, 0.2);
+  --border2: rgba(222, 0, 111, 0.4);
+  --text: #1d2a3b;
+  --text2: #4e647f;
+  --text3: #6f88a6;
+}
+
+/* Hero header */
+.hdr {
+  border: 1px solid var(--border2);
+  border-bottom: 2px solid var(--acc);
+  border-radius: 18px;
+  padding: 26px 24px 22px;
+  margin-bottom: 18px;
+  background:
+    radial-gradient(circle at 84% 8%, rgba(255, 47, 166, 0.24), transparent 42%),
+    radial-gradient(circle at 10% 130%, rgba(60, 200, 255, 0.25), transparent 48%),
+    linear-gradient(120deg, rgba(13, 22, 35, 0.95), rgba(20, 34, 52, 0.92));
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="light"] .hdr {
+  background:
+    radial-gradient(circle at 84% 8%, rgba(255, 47, 166, 0.15), transparent 44%),
+    radial-gradient(circle at 12% 115%, rgba(60, 200, 255, 0.15), transparent 48%),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.96), rgba(241, 247, 255, 0.95));
+  box-shadow: 0 8px 20px rgba(42, 68, 102, 0.14);
+}
+
+.hdr::before {
+  width: 420px;
+  height: 420px;
+  top: -56%;
+  right: -12%;
+  background: radial-gradient(circle, rgba(255, 47, 166, 0.16) 0%, transparent 72%);
+}
+
+.hdr-eyebrow {
+  font-family: 'Orbitron', sans-serif;
+  color: var(--acc2);
+  letter-spacing: 3px;
+}
+
+.hdr h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(24px, 2.6vw, 34px);
+  margin-bottom: 3px;
+  text-transform: uppercase;
+}
+
+.hdr-sub {
+  font-size: 13px;
+  color: var(--text2);
+  letter-spacing: 0.4px;
+}
+
+.status-pill {
+  border-radius: 999px;
+  padding: 5px 12px;
+  background: rgba(59, 87, 123, 0.28);
+  border: 1px solid rgba(113, 166, 225, 0.3);
+}
+
+.status-pill.active {
+  border-color: rgba(75, 225, 142, 0.52);
+  background: rgba(75, 225, 142, 0.12);
+}
+
+/* Tabs */
+.tabs {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(11, 20, 34, 0.7), rgba(16, 25, 40, 0.82));
+  padding: 5px;
+  gap: 6px;
+}
+
+[data-theme="light"] .tabs {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(238, 245, 255, 0.94));
+}
+
+.tab {
+  border-radius: 8px;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text2);
+}
+
+.tab.active {
+  color: #fff;
+  background: linear-gradient(110deg, #ff2fa6, #ff5bb7);
+  box-shadow: 0 6px 18px rgba(255, 47, 166, 0.34);
+}
+
+.tab:hover:not(.active) {
+  background: rgba(67, 95, 130, 0.3);
+  color: var(--text);
+}
+
+/* No hover floating animations */
+.btn:hover,
+.btn:active,
+.card:hover,
+.rec-card:hover,
+.result-cell:hover,
+.symptom-item:hover,
+.tab:hover,
+.btn-ghost:hover {
+  transform: none !important;
+}
+
+.btn,
+.btn-ghost,
+.card,
+.rec-card,
+.result-cell,
+.symptom-item,
+.tab,
+.status-pill {
+  transition: color .2s ease, background-color .2s ease, border-color .2s ease, box-shadow .2s ease, opacity .2s ease !important;
+}
+
+.panel {
+  animation: fadeInOpacity .18s ease;
+}
+
+@keyframes fadeInOpacity {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Cards and content */
+.card {
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: linear-gradient(160deg, rgba(12, 20, 32, 0.84), rgba(20, 30, 46, 0.9));
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28);
+}
+
+[data-theme="light"] .card {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(240, 246, 255, 0.95));
+  box-shadow: 0 8px 18px rgba(56, 78, 107, 0.1);
+}
+
+.card-head {
+  background: linear-gradient(90deg, rgba(46, 183, 255, 0.12), rgba(255, 47, 166, 0.12));
+  border-bottom: 1px solid var(--border);
+  padding: 13px 18px;
+}
+
+.card-title {
+  font-size: 15px;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 0.6px;
+}
+
+.badge-info,
+.badge-calc,
+.badge-rec {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text2);
+}
+
+.shell p {
+  font-size: 14px;
+}
+
+.section-label {
+  color: var(--acc2);
+  letter-spacing: 1.3px;
+}
+
+.section-label::after {
+  background: linear-gradient(90deg, rgba(60, 200, 255, 0.5), rgba(255, 47, 166, 0.35), transparent);
+}
+
+.shell input[type=number],
+.shell select {
+  min-height: 40px;
+  border-radius: 8px;
+  border: 1px solid rgba(108, 154, 210, 0.36);
+  background: rgba(8, 15, 25, 0.65);
+  color: var(--text);
+  font-size: 14px;
+}
+
+[data-theme="light"] .shell input[type=number],
+[data-theme="light"] .shell select {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.shell input[type=number]:focus,
+.shell select:focus {
+  border-color: var(--acc);
+  box-shadow: 0 0 0 3px rgba(255, 47, 166, 0.14);
+}
+
+.btn {
+  background: linear-gradient(110deg, #ff2fa6, #ff5cb8);
+  color: #fff;
+  border-radius: 9px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.6px;
+}
+
+.btn:hover {
+  opacity: 0.95;
+  box-shadow: 0 4px 14px rgba(255, 47, 166, 0.24);
+}
+
+.btn-ghost {
+  border-radius: 9px;
+  border-color: rgba(111, 166, 233, 0.45);
+  color: var(--text2);
+  background: rgba(61, 97, 149, 0.12);
+}
+
+.btn-ghost.active,
+.btn-ghost:hover {
+  border-color: var(--acc);
+  color: #ffe7f7;
+  background: rgba(255, 47, 166, 0.16);
+}
+
+.style-selector {
+  background: rgba(20, 31, 48, 0.72);
+  border-radius: 10px;
+  border: 1px solid rgba(100, 152, 217, 0.34);
+}
+
+.style-btn.active {
+  color: #fff;
+}
+
+.style-btn[data-style="grip"].active {
+  background: linear-gradient(110deg, #18beff, #39dcff);
+}
+
+.style-btn[data-style="touge"].active {
+  background: linear-gradient(110deg, #f5bf2d, #ffd85d);
+}
+
+.style-btn[data-style="drift"].active {
+  background: linear-gradient(110deg, #ff2fa6, #ff67c0);
+}
+
+.rec-card,
+.result-cell,
+.diag-workspace,
+.priority-card,
+.symptom-item {
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(17, 28, 43, 0.78);
+}
+
+[data-theme="light"] .rec-card,
+[data-theme="light"] .result-cell,
+[data-theme="light"] .diag-workspace,
+[data-theme="light"] .priority-card,
+[data-theme="light"] .symptom-item {
+  background: rgba(251, 254, 255, 0.96);
+}
+
+.rec-val {
+  font-size: clamp(20px, 2.2vw, 26px);
+}
+
+.data-table {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.data-table th {
+  background: rgba(58, 93, 142, 0.35);
+  color: #d4e4ff;
+}
+
+[data-theme="light"] .data-table th {
+  color: #3d5c84;
+  background: rgba(201, 222, 246, 0.8);
+}
+
+.data-table tr:hover td {
+  background: rgba(42, 62, 92, 0.3);
+}
+
+[data-theme="light"] .data-table tr:hover td {
+  background: rgba(223, 235, 250, 0.7);
+}
+
+.formula {
+  border-left: 3px solid var(--acc);
+  background: rgba(10, 19, 31, 0.8);
+  color: #ffd5ef;
+}
+
+.copy-toast {
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2ee1c1, #66ffc8);
+  box-shadow: 0 10px 20px rgba(10, 66, 56, 0.32);
+}
+
+.diag-container {
+  gap: 16px;
+}
+
+.symptom-item.active {
+  background: rgba(255, 47, 166, 0.14);
+  border-color: rgba(255, 47, 166, 0.56);
+  box-shadow: 0 0 0 1px rgba(255, 47, 166, 0.22) inset;
+}
+
+.symptom-item:hover {
+  border-color: rgba(127, 183, 255, 0.58);
+}
+
+.symptom-item.active .symptom-icon-wrap {
+  background: linear-gradient(110deg, #ff2fa6, #ff6ac2);
+  color: #fff;
+}
+
+@media (max-width: 900px) {
+  .page-content {
+    padding: calc(var(--header-height) + 18px) 14px var(--spacing-lg);
+  }
+
+  .shell {
+    padding: 0 4px 52px;
+  }
+
+  .hdr {
+    padding: 20px 16px 16px;
+    border-radius: 14px;
+  }
+
+  .tabs {
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    min-width: calc(50% - 3px);
+    flex: 1 1 calc(50% - 3px);
+  }
+
+  .inp-grid,
+  .inp-grid-2,
+  .inp-grid-3,
+  .inp-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 移除導航欄連結觸碰/懸浮的掃描線動畫 */
+.nav-links a::before,
+.nav-links a:hover::before {
+  display: none !important;
+  animation: none !important;
+}
+
+/* 降低 Header (hdr) 佔比以減少上下滾動 */
+.hdr {
+  min-height: auto !important;
+  padding: 12px 20px 10px !important;
+  margin-bottom: 12px !important;
+  position: relative !important;
+}
+
+.hdr h1 {
+  font-size: clamp(18px, 2.2vw, 24px) !important;
+  margin-bottom: 2px !important;
+}
+
+.hdr-eyebrow {
+  margin-bottom: 2px !important;
+}
+
+/* 將版本號 (hdr-sub) 移到右上角 */
+.hdr-sub {
+  position: absolute !important;
+  top: 12px !important;
+  right: 18px !important;
+  font-size: 11px !important;
+  color: var(--text3) !important;
+  font-family: 'Orbitron', sans-serif !important;
+}
+
+/* 減少上方空白，讓整個內容往上移，並壓縮底部空白 */
+.page-content {
+  padding-top: calc(var(--header-height) - 40px) !important;
+  padding-bottom: 24px !important;
+}
+
+.shell {
+  padding-bottom: 24px !important;
+}
+
+/* 關閉 Header 與 Shell 的背景發光效果（完全解決發光範圍過大的問題） */
+.hdr::before,
+.shell::before {
+  display: none !important;
+}
+
+/* 移除下面的 card 與 card-body 內部所有元素（按鈕、輸入框等）的觸碰/懸浮掃描與掃光動畫 */
+.card::before,
+.card::after,
+.card-body *::before,
+.card-body *::after {
+  display: none !important;
+  animation: none !important;
+}
+
+/* 修正按鈕形狀，使其與其他按鈕一致（停用斜邊效果） */
+.btn {
+  clip-path: none !important;
+}
+
+/* 移除齒比計算器下方的 gc-info-cells 區塊 */
+#gc-info-cells {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  .hdr {
+    padding: 10px 14px 8px !important;
+  }
+  .page-content {
+    padding-top: calc(var(--header-height) - 40px) !important;
+    padding-bottom: 20px !important;
+  }
+  .shell {
+    padding-bottom: 20px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .hdr {
+    padding: 8px 12px 6px !important;
+  }
+  .hdr h1 {
+    font-size: 16px !important;
+  }
+  .page-content {
+    padding-top: calc(var(--header-height) - 40px) !important;
+    padding-bottom: 16px !important;
+  }
+  .shell {
+    padding-bottom: 16px !important;
+  }
+}
+/* 淺色模式色彩修正 (style-selector, rake-analysis, callouts) */
+[data-theme="light"] .style-selector {
+  background: rgba(0, 126, 178, 0.05) !important;
+  border-color: rgba(0, 126, 178, 0.22) !important;
+}
+
+[data-theme="light"] .style-btn {
+  color: var(--text2) !important;
+}
+
+[data-theme="light"] .style-btn.active {
+  font-weight: 700 !important;
+}
+
+[data-theme="light"] .style-btn[data-style="grip"].active {
+  color: #fff !important;
+}
+
+[data-theme="light"] .style-btn[data-style="touge"].active {
+  color: #000 !important;
+}
+
+[data-theme="light"] .style-btn[data-style="drift"].active {
+  color: #fff !important;
+}
+
+[data-theme="light"] .c-warn {
+  background: #fffbe6 !important;
+  border-color: #ffe58f !important;
+  color: #d46b08 !important;
+}
+
+[data-theme="light"] .c-info {
+  background: #e6f7ff !important;
+  border-color: #91d5ff !important;
+  color: #0050b3 !important;
+}
+
+[data-theme="light"] .c-ok {
+  background: #f6ffed !important;
+  border-color: #b7eb8f !important;
+  color: #389e0d !important;
+}
+
+[data-theme="light"] .c-danger {
+  background: #fff1f0 !important;
+  border-color: #ffa39e !important;
+  color: #cf1322 !important;
+}
+
+[data-theme="light"] .formula {
+  background: var(--bg3) !important;
+  color: var(--text) !important;
+  border-left-color: var(--acc) !important;
+}
+</style>
+</head>
+<body>
+    <!-- 立即應用主題,避免閃爍 -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+
+    <!-- 背景系統 -->
+    <div class="cyber-bg"></div>
+    <div class="grid-overlay"></div>
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <header>
+        <a href="../../index.html">
+            <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
+        </a>
+        <div class="nav-container">
+            <ul class="nav-links">
+                <div class="nav-header">
+                    <h2 class="nav-title">選單導航</h2>
+                </div>
+                
+                <div class="search-box">
+                    <input type="text" id="navSearch" class="search-input" placeholder="搜尋頁面...">
+                    <button class="search-btn" aria-label="Search">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="nav-section">
+                    <h3 class="nav-section-title">主要頁面</h3>
+                    <li><a href="../../index.html">◆ HOME</a></li>
+                    <li><a href="../../pages/about.html">◆ ABOUT</a></li>
+                    <li><a href="../../pages/experience.html">◆ EXPERIENCE</a></li>
+                    <li><a href="../../pages/skills.html">◆ SKILLS</a></li>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-section-title">特別內容</h3>
+                    <li><a href="../game-center/game-center.html">◆ GAME CENTER</a></li>
+                    <li><a href="../nagato-sakura-webos/nagato-sakura-webos.html">◆ WEB OS</a></li>
+                    <li><a href="../music-player/music-player.html">◆ MUSIC PLAYER</a></li>
+                    <li><a href="forza-tuning-calculator.html" class="active">◆ FORZA CALC</a></li>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-section-title">更多連結</h3>
+                    <li>
+                        <a href="https://www.youtube.com/@Amano_Shizuki_Kun" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
+                            YouTube
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/AmanoShizukikun" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                            GitHub
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://discord.gg/jac8eAFzjz" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                        </svg>
+                        Discord
+                    </a>
+                </li>
+                <li>
+                    <a href="mailto:3b017128@gm.student.ncut.edu.tw" class="social-link">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                        Email
+                    </a>
+                </li>
+            </div>
+        </ul>
+    </div>
+    <div class="header-actions">
+        <button class="settings-toggle" aria-label="Settings"></button>
+        <button class="menu-toggle" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+</header>
+
+<!-- Settings Panel -->
+<div class="settings-panel">
+    <div class="settings-header">
+        <h2 class="settings-title">系統設定</h2>
+    </div>
+
+    <div class="settings-section">
+        <h3 class="settings-section-title">顯示設定</h3>
+        
+        <div class="setting-item">
+            <div class="setting-label">
+                <span>固定導航欄</span>
+                <span class="setting-description">保持導航欄在頂部固定</span>
+            </div>
+            <div class="toggle-switch" id="headerFixed"></div>
+        </div>
+
+        <div class="setting-item">
+            <div class="setting-label">
+                <span>導航欄高度</span>
+                <span class="setting-description">調整頂部導航欄的高度</span>
+            </div>
+            <div class="slider-control">
+                <div class="slider-value" id="headerHeightValue">75px</div>
+                <input type="range" class="slider-range" id="headerHeight" min="50" max="100" value="75" step="5">
+                <div class="slider-marks">
+                    <span data-value="50">小</span>
+                    <span data-value="75">中</span>
+                    <span data-value="100">大</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="setting-item">
+            <div class="setting-label">
+                <span>側邊欄文字顯示</span>
+                <span class="setting-description">是否持續顯示側邊欄文字標題</span>
+            </div>
+            <div class="toggle-switch active" id="sideNavTextVisible" role="switch" tabindex="0" aria-label="側邊欄文字顯示"></div>
+        </div>
+
+        <div class="setting-item">
+            <div class="setting-label">
+                <span>主題模式</span>
+                <span class="setting-description">切換深色/淺色模式</span>
+            </div>
+            <div class="select-control">
+                <select id="themeMode">
+                    <option value="dark">深色模式</option>
+                    <option value="light">淺色模式</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="setting-item">
+            <div class="setting-label">
+                <span>看板娘 (Live2D)</span>
+                <span class="setting-description">啟用或停用頁面上的 Live2D 看板娘</span>
+            </div>
+            <div class="toggle-switch" id="live2dToggle" role="switch" aria-checked="false" tabindex="0" aria-label="看板娘 (Live2D)"></div>
+        </div>
+
+        <div class="setting-item">
+            <div class="setting-label">
+                <span>背景樣式</span>
+                <span class="setting-description">選擇背景動畫樣式</span>
+            </div>
+            <div class="select-control">
+                <select id="backgroundStyle" title="背景樣式" aria-label="背景樣式">
+                    <option value="dom">粒子風暴</option>
+                    <option value="network">網格連線</option>
+                    <option value="magnet">磁力連線</option>
+                    <option value="star">宇宙星圖</option>
+                    <option value="bubble">氣泡派對</option>
+                    <option value="circuit">電路脈衝</option>
+                    <option value="sakura">櫻花飄落</option>
+                    <option value="glitch">故障雜訊</option>
+                    <option value="laser">雷射禁地</option>
+                    <option value="fleet">宇宙戰艦</option>
+                    <option value="off">關閉</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-section">
+        <h3 class="settings-section-title">效能設定</h3>
+        
+        <div class="setting-item">
+            <div class="setting-label">
+                <span>動畫強度</span>
+                <span class="setting-description">調整頁面動畫效果強度</span>
+            </div>
+            <div class="slider-control">
+                <div class="slider-value" id="animationValue">強</div>
+                <input type="range" class="slider-range" id="animationStrength" min="0" max="2" value="2" step="1">
+                <div class="slider-marks">
+                    <span data-value="0">關</span>
+                    <span data-value="1">低</span>
+                    <span data-value="2">強</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="setting-item fps-monitor">
+            <div class="setting-label">
+                <span>幀數監控</span>
+                <span class="setting-description">即時顯示頁面渲染幀率</span>
+            </div>
+            <div class="fps-display">
+                <span class="fps-value" id="fpsValue">000</span>
+                <span class="fps-unit">FPS</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-section">
+        <h3 class="settings-section-title">音效設定</h3>
+        
+        <div class="setting-item">
+            <div class="setting-label">
+                <span>音效開關</span>
+                <span class="setting-description">啟用/關閉互動音效</span>
+            </div>
+            <div class="toggle-switch active" id="soundEnabled"></div>
+        </div>
+    </div>
+</div>
+
+<main class="page-content">
+<div class="shell">
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- HEADER -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="hdr">
+  <h1>《極限競速:地平線6》 通用調教計算器</h1>
+  <div class="hdr-eyebrow">Forza Horizon 6 Tuning Calculator</div>
+  <div class="hdr-sub">v0.9 beta</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TABS -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="tabs" id="main-tabs">
+  <button class="tab active" onclick="switchTab('car')">車輛設定</button>
+  <button class="tab" onclick="switchTab('rec')">快速設定</button>
+  <button class="tab" onclick="switchTab('gear')">齒比計算</button>
+  <button class="tab" onclick="switchTab('telemetry')">快速診斷</button>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB 1: CAR DATA & PARAMETER RANGES -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="panel active" id="tab-car">
+
+  <div class="card">
+    <div class="card-head">
+      <span class="card-icon">🏎️</span>
+      <span class="card-title">車輛基本規格</span>
+    </div>
+    <div class="card-body">
+      <p>輸入你的車輛基本數據，系統將根據這些資訊計算推薦設定值。</p>
+
+      <div class="section-label">動力系統</div>
+      <div class="inp-grid">
+        <div class="inp-group">
+          <label>馬力 (hp)</label>
+          <input type="number" id="car-hp" value="280" min="50" max="2000" step="1" oninput="updatePWR()">
+        </div>
+        <div class="inp-group">
+          <label>扭力 (kg·m)</label>
+          <input type="number" id="car-torque" value="30" min="5" max="300" step="0.1">
+        </div>
+        <div class="inp-group">
+          <label>車重 (kg)</label>
+          <input type="number" id="car-weight" value="1000" min="500" max="3000" step="1" oninput="updatePWR()">
+        </div>
+        <div class="inp-group computed">
+          <label>馬力重量比 (hp/kg)</label>
+          <input type="number" id="car-pwr" value="0.28" readonly tabindex="-1">
+        </div>
+      </div>
+
+      <div class="section-label">底盤配置</div>
+      <div class="inp-grid-2">
+        <div class="inp-group">
+          <label>前端重量比 (%)</label>
+          <input type="number" id="car-front-bias" value="50" min="30" max="70" step="0.1">
+        </div>
+        <div class="inp-group">
+          <label>驅動方式</label>
+          <select id="car-drivetrain">
+            <option value="FR" selected>FR 前置後驅</option>
+            <option value="FF">FF 前置前驅</option>
+            <option value="MR">MR 中置後驅</option>
+            <option value="RR">RR 後置後驅</option>
+            <option value="AWD">AWD 四輪驅動</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-label">輪胎配置</div>
+      <div class="inp-grid">
+        <div class="inp-group">
+          <label>輪胎類型</label>
+          <select id="car-tire-type">
+            <option value="stock">原廠胎</option>
+            <option value="sport">跑車胎</option>
+            <option value="race" selected>賽車光頭胎 (熱熔胎)</option>
+            <option value="rally">拉力胎</option>
+          </select>
+        </div>
+        <div class="inp-group">
+          <label>前胎寬 (mm)</label>
+          <input type="number" id="car-tire-f" value="185" min="125" max="395" step="5">
+        </div>
+        <div class="inp-group">
+          <label>後胎寬 (mm)</label>
+          <input type="number" id="car-tire-r" value="185" min="125" max="395" step="5">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span class="card-icon">📏</span>
+        <span class="card-title">遊戲可調範圍</span>
+      </div>
+      <button type="button" class="btn-ghost btn-sm" id="unlock-ranges-btn" onclick="toggleRangesUnlock()" style="padding: 4px 10px; font-size: 11px;">🔓 解鎖進階參數</button>
+    </div>
+    <div class="card-body">
+      <p>輸入遊戲中各項調教參數的允許範圍（最小值 / 最大值），推薦值會在此範圍內生成。</p>
+
+      <div class="section-label">輪胎 & 傳動</div>
+      <div class="inp-grid-4">
+        <div class="inp-group"><label>胎壓 最小 (psi)</label><input type="number" id="rng-tp-min" value="15.0" step="0.1"></div>
+        <div class="inp-group"><label>胎壓 最大 (psi)</label><input type="number" id="rng-tp-max" value="55.0" step="0.1"></div>
+        <div class="inp-group"><label>終傳比 最小</label><input type="number" id="rng-fd-min" value="2.20" step="0.01"></div>
+        <div class="inp-group"><label>終傳比 最大</label><input type="number" id="rng-fd-max" value="6.10" step="0.01"></div>
+      </div>
+      <div class="inp-grid-2">
+        <div class="inp-group"><label>個別齒比 最小</label><input type="number" id="rng-gr-min" value="0.48" step="0.01"></div>
+        <div class="inp-group"><label>個別齒比 最大</label><input type="number" id="rng-gr-max" value="6.00" step="0.01"></div>
+      </div>
+
+      <div class="section-label">輪胎定位</div>
+      <div class="inp-grid-4">
+        <div class="inp-group"><label>外傾角 最小 (°)</label><input type="number" id="rng-cam-min" value="-5.0" step="0.1"></div>
+        <div class="inp-group"><label>外傾角 最大 (°)</label><input type="number" id="rng-cam-max" value="5.0" step="0.1"></div>
+        <div class="inp-group"><label>束角 最小 (°)</label><input type="number" id="rng-toe-min" value="-5.0" step="0.1"></div>
+        <div class="inp-group"><label>束角 最大 (°)</label><input type="number" id="rng-toe-max" value="5.0" step="0.1"></div>
+      </div>
+      <div class="inp-grid-2">
+        <div class="inp-group"><label>前後傾角 最小 (°)</label><input type="number" id="rng-cst-min" value="1.0" step="0.1"></div>
+        <div class="inp-group"><label>前後傾角 最大 (°)</label><input type="number" id="rng-cst-max" value="7.0" step="0.1"></div>
+      </div>
+
+      <div class="section-label">懸吊系統</div>
+      <div class="inp-grid-4">
+        <div class="inp-group"><label>防傾桿 最小</label><input type="number" id="rng-arb-min" value="1.0" step="0.1"></div>
+        <div class="inp-group"><label>防傾桿 最大</label><input type="number" id="rng-arb-max" value="65.0" step="0.1"></div>
+        <div class="inp-group"><label>彈簧 最小 (kgf/mm)</label><input type="number" id="rng-spr-min" value="33.6" step="0.1"></div>
+        <div class="inp-group"><label>彈簧 最大 (kgf/mm)</label><input type="number" id="rng-spr-max" value="168.0" step="0.1"></div>
+      </div>
+
+      <div class="section-label">車高</div>
+      <div class="inp-grid-4">
+        <div class="inp-group"><label>前車高 最小 (cm)</label><input type="number" id="rng-rhf-min" value="13.4" step="0.1"></div>
+        <div class="inp-group"><label>前車高 最大 (cm)</label><input type="number" id="rng-rhf-max" value="19.1" step="0.1"></div>
+        <div class="inp-group"><label>後車高 最小 (cm)</label><input type="number" id="rng-rhr-min" value="13.4" step="0.1"></div>
+        <div class="inp-group"><label>後車高 最大 (cm)</label><input type="number" id="rng-rhr-max" value="19.1" step="0.1"></div>
+      </div>
+
+      <div class="section-label">阻尼</div>
+      <div class="inp-grid-4">
+        <div class="inp-group"><label>回彈硬度 最小</label><input type="number" id="rng-dr-min" value="1.0" step="0.1"></div>
+        <div class="inp-group"><label>回彈硬度 最大</label><input type="number" id="rng-dr-max" value="20.0" step="0.1"></div>
+        <div class="inp-group"><label>壓縮硬度 最小</label><input type="number" id="rng-db-min" value="1.0" step="0.1"></div>
+        <div class="inp-group"><label>壓縮硬度 最大</label><input type="number" id="rng-db-max" value="20.0" step="0.1"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB 3: RECOMMENDATIONS -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="panel" id="tab-rec">
+
+  <div class="card">
+    <div class="card-head">
+      <span class="card-icon">🎯</span>
+      <span class="card-title">快速調教設定</span>
+    </div>
+    <div class="card-body">
+      <p>選擇駕駛風格，根據<strong>車輛資料</strong>與<strong>參數範圍</strong>自動計算推薦調教值。</p>
+
+      <div class="style-selector" id="style-selector">
+        <button class="style-btn active" data-style="grip" onclick="setStyle('grip')">🏁 Grip 抓地</button>
+        <button class="style-btn" data-style="touge" onclick="setStyle('touge')">⛰️ Touge 山道</button>
+        <button class="style-btn" data-style="drift" onclick="setStyle('drift')">💨 Drift 甩尾</button>
+      </div>
+
+
+
+      <div id="rec-output" style="display:none">
+        <div class="section-label" style="margin-top:20px">輪胎設定</div>
+        <div class="rec-grid" id="rec-tires"></div>
+
+        <div class="section-label">輪胎定位</div>
+        <div class="rec-grid" id="rec-alignment"></div>
+
+        <div class="section-label">懸吊系統</div>
+        <div class="rec-grid" id="rec-suspension"></div>
+
+        <div class="section-label">車高 & Rake</div>
+        <div class="rec-grid" id="rec-ride-height"></div>
+        <div id="rake-analysis"></div>
+
+        <div class="section-label">阻尼</div>
+        <div class="rec-grid" id="rec-damping"></div>
+
+        <div class="section-label">差速器設定</div>
+        <div class="rec-grid" id="rec-differential"></div>
+
+        <div id="rec-summary-box" style="margin-top:16px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB 4: GEAR CALCULATOR (INTEGRATED) -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="panel" id="tab-gear">
+
+  <div class="card">
+    <div class="card-head">
+      <span class="card-icon">⚙️</span>
+      <span class="card-title">齒比計算器</span>
+    </div>
+    <div class="card-body">
+      <p>輸入引擎與齒比參數，計算換檔落點並可自動生成等比齒比。<strong>最低目標落點</strong>為換檔後轉速的下限保證。</p>
+
+      <div class="section-label">基本參數</div>
+      <div class="inp-grid">
+        <div class="inp-group">
+          <label>引擎紅線 / 換檔轉速 (rpm)</label>
+          <input type="number" id="gc-redline" value="9000" step="100">
+        </div>
+        <div class="inp-group">
+          <label>最低目標落點 (rpm)</label>
+          <input type="number" id="gc-target-drop" value="7500" step="50">
+        </div>
+        <div class="inp-group">
+          <label>終傳比 (Final Drive)</label>
+          <input type="number" id="gc-final" value="4.10" step="0.01" min="2.20" max="6.10">
+        </div>
+        <div class="inp-group">
+          <label>檔位數量</label>
+          <select id="gc-gear-count" onchange="buildGearInputs()">
+            <option value="3">3 檔</option>
+            <option value="4">4 檔</option>
+            <option value="5">5 檔</option>
+            <option value="6" selected>6 檔</option>
+            <option value="7">7 檔</option>
+            <option value="8">8 檔</option>
+            <option value="9">9 檔</option>
+            <option value="10">10 檔</option>
+          </select>
+        </div>
+        <div class="inp-group">
+          <label>齒比生成模式</label>
+          <select id="gc-mode" onchange="toggleGcMode()">
+            <option value="equal" selected>等比級數生成</option>
+            <option value="limit">最速約束</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="callout c-info">
+        <span class="callout-icon">ℹ</span>
+        <span>所有換檔落點必須 <strong>≥ 最低目標落點</strong>，低於此值會標記為紅色警告。</span>
+      </div>
+
+      <div class="section-label">各檔齒比</div>
+      <div class="gear-inputs-container" id="gc-gear-inputs"></div>
+
+      <div class="formula">
+        <div class="formula-label">齒比生成公式</div>
+        • 等比級數生成：gear[n] = gear[1] × k<sup>(n−1)</sup> (從 1 檔正向遞推，其中 k = 最低目標落點 ÷ 紅線轉速)<br>
+        • 最速約束：同時鎖定 1 檔與最後一檔，中間檔位按等比插值生成 (k = (gear[max] / gear[1])<sup>1/(max-1)</sup>)
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" onclick="generateAndCalc()">生成齒比 </button>
+        <button class="btn-ghost" onclick="calcOnly()">計算落點</button>
+      </div>
+
+      <div id="gc-results" style="display:none">
+        <hr>
+        <!-- GEAR CHART CANVAS -->
+        <div class="section-label">齒比圖 — RPM 換檔視覺化</div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;overflow-x:auto">
+          <canvas id="gear-chart" width="900" height="280" style="width:100%;height:auto;display:block"></canvas>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px" id="gc-info-cells"></div>
+
+        <!-- SHIFT TABLE -->
+        <div class="section-label" style="margin-top:16px">換檔落點明細</div>
+        <table class="data-table">
+          <thead>
+            <tr><th>換檔</th><th>當前齒比</th><th>下一檔齒比</th><th>跌落倍率</th><th>總傳動比</th><th>落點轉速</th><th>狀態</th><th>等比偏差</th></tr>
+          </thead>
+          <tbody id="gc-tbody"></tbody>
+        </table>
+
+        <div id="gc-analysis" style="margin-top:10px"></div>
+        <div id="gc-warnings" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB 5: TELEMETRY DIAGNOSIS -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="panel" id="tab-telemetry">
+  <div class="card">
+    <div class="card-head">
+      <span class="card-icon">🔧</span>
+      <span class="card-title">快速診斷指南</span>
+    </div>
+    <div class="card-body">
+      <p style="margin-bottom: 16px;">公路最速理論的核心在於「<strong>症狀 → 原因 → 修正</strong>」。請在實測中觀察車輛行為，並選擇下方的動態症狀，系統將提供物理原因與調整步驟。</p>
+
+      <div class="diag-container">
+        <!-- Sidebar Navigation -->
+        <div class="diag-sidebar">
+          <!-- Tuning Priority -->
+          <div class="priority-card">
+            <div class="priority-title">調校優先級 (Priority)</div>
+            <div class="priority-item">
+              <span class="priority-badge badge-s">S 級</span>
+              <span style="font-weight: 600; color: var(--text);">配胎 & 齒比</span>
+            </div>
+            <div class="priority-item">
+              <span class="priority-badge badge-a">A 級</span>
+              <span style="font-weight: 600; color: var(--text);">LSD 差速器 & ARB</span>
+            </div>
+            <div class="priority-item">
+              <span class="priority-badge badge-b">B 級</span>
+              <span style="font-weight: 600; color: var(--text);">外傾角 & 胎壓</span>
+            </div>
+            <div class="priority-item">
+              <span class="priority-badge badge-c">C 級</span>
+              <span style="font-weight: 600; color: var(--text);">彈簧 & 阻尼</span>
+            </div>
+            <div class="priority-item">
+              <span class="priority-badge badge-d">D 級</span>
+              <span style="font-weight: 600; color: var(--text);">車高 & 空力</span>
+            </div>
+          </div>
+
+          <!-- Symptom List Selection -->
+          <div class="section-label" style="margin-top: 0;">選擇車輛動態症狀</div>
+          <div class="symptom-list">
+            <div class="symptom-item" id="sym-overspin" onclick="diagnose('overspin')">
+              <span class="symptom-icon-wrap">💨</span>
+              <div class="symptom-text">
+                <span class="symptom-name">出彎大腳油門</span>
+                <span class="symptom-desc">後輪空轉打滑/起步冒煙</span>
+              </div>
+            </div>
+            <div class="symptom-item" id="sym-understeer" onclick="diagnose('understeer')">
+              <span class="symptom-icon-wrap">🚗</span>
+              <div class="symptom-text">
+                <span class="symptom-name">彎中轉向不足</span>
+                <span class="symptom-desc">前輪推頭/不願進彎</span>
+              </div>
+            </div>
+            <div class="symptom-item" id="sym-snap" onclick="diagnose('snap')">
+              <span class="symptom-icon-wrap">⚠️</span>
+              <div class="symptom-text">
+                <span class="symptom-name">煞車或收油暴甩</span>
+                <span class="symptom-desc">後軸無預警甩出 (Snap)</span>
+              </div>
+            </div>
+            <div class="symptom-item" id="sym-boat" onclick="diagnose('boat')">
+              <span class="symptom-icon-wrap">⛵</span>
+              <div class="symptom-text">
+                <span class="symptom-name">車身連續晃動</span>
+                <span class="symptom-desc">變線像船一樣擺盪</span>
+              </div>
+            </div>
+            <div class="symptom-item" id="sym-bumpy" onclick="diagnose('bumpy')">
+              <span class="symptom-icon-wrap">⛰️</span>
+              <div class="symptom-text">
+                <span class="symptom-name">壓路肩劇烈跳動</span>
+                <span class="symptom-desc">輪胎失去貼地/ABS過早觸發</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Diagnosis Detail Workspace -->
+        <div class="diag-workspace" id="diag-workspace">
+          <div class="diag-placeholder">
+            <div class="diag-placeholder-icon">🔍</div>
+            <p style="color: var(--text2); font-weight: 500;">請選擇左側車輛動態症狀，開始診斷...</p>
+            <p style="font-size: 11px; color: var(--text3); margin-top: 4px;">公路最速理論診斷引擎</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end shell -->
+
+<!-- COPY TOAST -->
+<div class="copy-toast" id="copy-toast">✓ 已複製到剪貼板</div>
+
+<script>
+let rangesUnlocked = false;
+
+function toggleRangesUnlock() {
+  rangesUnlocked = !rangesUnlocked;
+  
+  const btn = $('unlock-ranges-btn');
+  if (btn) {
+    btn.innerHTML = rangesUnlocked ? '🔒 鎖定進階參數' : '🔓 解鎖進階參數';
+    btn.classList.toggle('active', rangesUnlocked);
+  }
+  
+  const lockedIds = [
+    'rng-tp-min', 'rng-tp-max', 'rng-fd-min', 'rng-fd-max', 'rng-gr-min', 'rng-gr-max',
+    'rng-cam-min', 'rng-cam-max', 'rng-toe-min', 'rng-toe-max', 'rng-cst-min', 'rng-cst-max',
+    'rng-arb-min', 'rng-arb-max',
+    'rng-dr-min', 'rng-dr-max', 'rng-db-min', 'rng-db-max'
+  ];
+  
+  lockedIds.forEach(id => {
+    const input = $(id);
+    if (input) {
+      input.disabled = !rangesUnlocked;
+      if (!rangesUnlocked) {
+        input.style.opacity = '0.5';
+        input.style.cursor = 'not-allowed';
+      } else {
+        input.style.opacity = '';
+        input.style.cursor = '';
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
+const $ = id => document.getElementById(id);
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const lerp = (lo, hi, t) => lo + (hi - lo) * t;
+const pct = (v, lo, hi) => hi === lo ? 0.5 : (v - lo) / (hi - lo);
+const round = (v, d=1) => {const m = Math.pow(10, d); return Math.round(v * m) / m;};
+
+// ═══════════════════════════════════════════
+// TAB SWITCH
+// ═══════════════════════════════════════════
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const tabs = document.querySelectorAll('.tab');
+  const map = ['car','rec','gear','telemetry'];
+  const idx = map.indexOf(id);
+  if (idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
+  const panel = $('tab-' + id);
+  if (panel) panel.classList.add('active');
+
+  // Auto generate recommendation on switching to Rec tab
+  if (id === 'rec') {
+    generateRec();
+  }
+
+  // Update header pills
+  updatePills();
+}
+
+function updatePills() {
+  const hp = +$('car-hp').value;
+  const w = +$('car-weight').value;
+  const rangeOk = +$('rng-tp-min').value > 0;
+  const pillCar = $('pill-car');
+  const pillRec = $('pill-rec');
+  if (pillCar) pillCar.classList.toggle('active', hp > 0 && w > 0 && rangeOk);
+  if (pillRec) pillRec.classList.toggle('active', $('rec-output').style.display !== 'none');
+}
+
+// ═══════════════════════════════════════════
+// CAR DATA
+// ═══════════════════════════════════════════
+function updatePWR() {
+  const hp = +$('car-hp').value;
+  const w = +$('car-weight').value;
+  if (w > 0) $('car-pwr').value = (hp / w).toFixed(2);
+}
+
+function getCarData() {
+  const hpEl = $('car-hp');
+  const torqueEl = $('car-torque');
+  const weightEl = $('car-weight');
+  const frontBiasEl = $('car-front-bias');
+  const drivetrainEl = $('car-drivetrain');
+  const tireTypeEl = $('car-tire-type');
+  const tireFEl = $('car-tire-f');
+  const tireREl = $('car-tire-r');
+  const pwrEl = $('car-pwr');
+
+  return {
+    hp: hpEl ? +hpEl.value : 280,
+    torque: torqueEl ? +torqueEl.value : 30,
+    weight: weightEl ? +weightEl.value : 1000,
+    frontBias: frontBiasEl ? +frontBiasEl.value : 50,
+    drivetrain: drivetrainEl ? drivetrainEl.value : 'FR',
+    tireType: tireTypeEl ? tireTypeEl.value : 'race',
+    tireF: tireFEl ? +tireFEl.value : 185,
+    tireR: tireREl ? +tireREl.value : 185,
+    brake: 'race',
+    engineType: 'na',
+    redline: 9000,
+    pwr: pwrEl ? +pwrEl.value : 0.28,
+  };
+}
+
+function getRanges() {
+  return {
+    tp:  { min: +$('rng-tp-min').value, max: +$('rng-tp-max').value },
+    fd:  { min: +$('rng-fd-min').value, max: +$('rng-fd-max').value },
+    gr:  { min: +$('rng-gr-min').value, max: +$('rng-gr-max').value },
+    cam: { min: +$('rng-cam-min').value, max: +$('rng-cam-max').value },
+    toe: { min: +$('rng-toe-min').value, max: +$('rng-toe-max').value },
+    cst: { min: +$('rng-cst-min').value, max: +$('rng-cst-max').value },
+    arb: { min: +$('rng-arb-min').value, max: +$('rng-arb-max').value },
+    spr: { min: +$('rng-spr-min').value, max: +$('rng-spr-max').value },
+    rhf: { min: +$('rng-rhf-min').value, max: +$('rng-rhf-max').value },
+    rhr: { min: +$('rng-rhr-min').value, max: +$('rng-rhr-max').value },
+    dr:  { min: +$('rng-dr-min').value, max: +$('rng-dr-max').value },
+    db:  { min: +$('rng-db-min').value, max: +$('rng-db-max').value },
+  };
+}
+
+// ═══════════════════════════════════════════
+// STYLE SELECTOR
+// ═══════════════════════════════════════════
+let currentStyle = 'grip';
+function setStyle(s) {
+  currentStyle = s;
+  document.querySelectorAll('.style-btn').forEach(b => b.classList.toggle('active', b.dataset.style === s));
+  generateRec();
+}
+
+// ═══════════════════════════════════════════
+// RECOMMENDATION ENGINE
+// ═══════════════════════════════════════════
+function generateRec() {
+  const car = getCarData();
+  const rng = getRanges();
+  const style = currentStyle;
+  const fb = car.frontBias / 100; // 0-1
+  const rb = 1 - fb;
+  const tireRatio = car.tireF / car.tireR;
+
+  // ─── TRACTION CLASSIFIER ───
+  const rearGripIndex = car.tireR * Math.sqrt(car.weight);
+  const isLowTraction = (car.drivetrain === 'FR' && car.pwr > 0.45 && rearGripIndex < 7000);
+  const protectRear = (car.tireF < car.tireR - 15) || isLowTraction;
+
+  // ─── TIRE PRESSURE ───
+  let tpF = 28.5;
+  let tpR = 27.5;
+  if (style === 'touge') {
+    tpF = 29.0;
+    tpR = 28.0;
+  } else if (style === 'drift') {
+    tpF = 31.0;
+    tpR = 55.0;
+  }
+  if (fb > 0.51 && style !== 'drift') {
+    tpF += 0.5;
+    tpR += 0.5;
+  }
+  tpF = round(clamp(tpF, rng.tp.min, rng.tp.max), 1);
+  tpR = round(clamp(tpR, rng.tp.min, rng.tp.max), 1);
+  
+  const tpNote = style === 'drift'
+    ? '後胎壓極高，顯著降低後軸抓地力，促進並維持長時間滑行與冒煙。'
+    : '低胎壓可優化輪胎形變與接地面積，驅動輪微低提供抓地窗口。';
+
+  // ─── CAMBER ───
+  let camF = -2.3;
+  let camR = -1.2;
+  if (style === 'grip') {
+    camF = -2.3 - (car.tireF < 225 ? 0.3 : 0) - (car.frontBias > 50 ? 0.1 : 0);
+    camR = -1.2 - (car.tireR < 235 ? 0.3 : 0) + (car.frontBias > 50 ? 0.1 : 0);
+  } else if (style === 'touge') {
+    camF = -2.6 - (car.tireF < 225 ? 0.4 : 0) - (car.frontBias > 50 ? 0.2 : 0);
+    camR = -1.2 - (car.tireR < 235 ? 0.1 : 0);
+  } else if (style === 'drift') {
+    camF = -5.0;
+    camR = -0.5;
+  }
+  camF = round(clamp(camF, rng.cam.min, rng.cam.max), 1);
+  camR = round(clamp(camR, rng.cam.min, rng.cam.max), 1);
+  const camNote = style === 'drift'
+    ? '前輪極端負外傾角確保反打方向盤時最大接地面積；後輪接近垂直以利均勻磨損與燒煙穩定。'
+    : '前輪較大負外傾角提升過彎指向力；後輪略小以保留出彎與直線的油門抓地力。';
+
+  // ─── TOE (負號 - 為內束 Toe-in，正號 + 為外束 Toe-out) ───
+  let toeF = 0.0;
+  let toeR = 0.0;
+  if (style === 'grip') {
+    toeF = 0.0;
+    toeR = -0.1;
+  } else if (style === 'touge') {
+    toeF = 0.1;
+    toeR = 0.0;
+  } else if (style === 'drift') {
+    toeF = 0.4;
+    toeR = -0.1;
+  }
+  toeF = round(clamp(toeF, rng.toe.min, rng.toe.max), 1);
+  toeR = round(clamp(toeR, rng.toe.min, rng.toe.max), 1);
+  const toeNote = style === 'drift'
+    ? '前輪顯著外束 (+0.4) 加強大角度反打時的指向引導；後輪微幅內束 (-0.1) 提供側向牽引力防止原地自旋。'
+    : style === 'touge'
+      ? '前輪微幅外束 (Toe-out) 激發極為敏銳神經質的進彎反應；後輪維持 0.0 釋放車尾靈活性。'
+      : '前輪 0.0 減少直道摩擦阻力；後輪微幅內束 (Toe-in) 提供煞車與高速行駛時的卓越循跡穩定性。';
+
+  // ─── CASTER ───
+  let cst = 6.8;
+  if (style === 'grip') {
+    cst = 6.8 - (car.tireF < 225 ? 0.3 : 0);
+  } else if (style === 'touge') {
+    cst = 7.0 - (car.tireF < 225 ? 0.2 : 0);
+  } else if (style === 'drift') {
+    cst = 7.0;
+  }
+  cst = round(clamp(cst, rng.cst.min, rng.cst.max), 1);
+  const cstNote = '較大前後傾角可在方向盤轉動時提供動態負外傾增益，並提供更強的回正力矩。';
+
+  // ─── ANTI-ROLL BAR (LLTD 與配胎寬度優化) ───
+  let arbF = 21.5;
+  let arbR = 26.5;
+  
+  if (protectRear) {
+    // 像 S2000 這類前窄後寬，或大馬力/窄後胎 FR 易甩尾的車型：前硬後軟以穩定後軸
+    arbF = lerp(rng.arb.min, rng.arb.max, style === 'grip' ? 0.34 : style === 'touge' ? 0.36 : 0.53);
+    arbR = lerp(rng.arb.min, rng.arb.max, style === 'grip' ? 0.31 : style === 'touge' ? 0.33 : 0.37);
+  } else {
+    // 像 RX-7 (FD/FC) 前後胎寬平衡的車型：前軟後硬以釋放前輪抓地，利用車尾旋轉幫助過彎
+    const biasMod = (fb - 0.5) * 0.5; // 適度微調前重車型
+    arbF = lerp(rng.arb.min, rng.arb.max, (style === 'grip' ? 0.32 : style === 'touge' ? 0.35 : 0.64) + biasMod);
+    arbR = lerp(rng.arb.min, rng.arb.max, (style === 'grip' ? 0.40 : style === 'touge' ? 0.37 : 0.33) - biasMod);
+  }
+  
+  // 針對其他驅動形式做適配
+  if (car.drivetrain === 'FF') {
+    arbF = lerp(rng.arb.min, rng.arb.max, 0.25);
+    arbR = lerp(rng.arb.min, rng.arb.max, 0.65);
+  } else if (car.drivetrain === 'AWD') {
+    arbF = lerp(rng.arb.min, rng.arb.max, style === 'drift' ? 0.55 : 0.38);
+    arbR = lerp(rng.arb.min, rng.arb.max, style === 'drift' ? 0.45 : 0.42);
+  }
+  
+  arbF = round(clamp(arbF, rng.arb.min, rng.arb.max), 1);
+  arbR = round(clamp(arbR, rng.arb.min, rng.arb.max), 1);
+  const arbNote = car.tireF < car.tireR - 15
+    ? '前窄後寬型防傾桿：前硬後軟配置。抑制極易發生 Snap Oversteer 的後軸負載轉移，穩定後輪牽引力。'
+    : '前後平衡型防傾桿：前軟後硬配置。在彎中釋放前軸抓地力，利用後軸的側向負載轉移輔助車頭指向。';
+
+  // ─── SPRINGS (自然頻率 Natural Frequency 物理推導) ───
+  let fnF = style === 'grip' ? 1.88 : style === 'touge' ? 1.80 : 2.10;
+  let fnR = style === 'grip' ? 1.80 : style === 'touge' ? 1.74 : 1.90;
+  
+  const massF = (car.weight * fb) / 2;
+  const massR = (car.weight * rb) / 2;
+  
+  const kwF = (massF * Math.pow(2 * Math.PI * fnF, 2)) / 9806.65;
+  const kwR = (massR * Math.pow(2 * Math.PI * fnR, 2)) / 9806.65;
+  
+  const mr2 = 0.042 + Math.max(0, car.weight - 1000) * 0.00002;
+  
+  let sprF = kwF / mr2;
+  let sprR = kwR / mr2;
+  
+  if (car.tireF < car.tireR - 15 && style !== 'drift') {
+    sprR *= 0.93;
+  }
+  
+  sprF = round(clamp(sprF, rng.spr.min, rng.spr.max), 1);
+  sprR = round(clamp(sprR, rng.spr.min, rng.spr.max), 1);
+  
+  const sprNote = `基於自然頻率 (前 ${fnF} Hz / 後 ${fnR} Hz) 與車身重量 (${car.weight} kg) 物理計算。軟懸吊能最大化輪胎在不平山路上的貼地時間。`;
+
+  // ─── RIDE HEIGHT ───
+  let rhF = rng.rhf.min;
+  let rake = style === 'drift' ? 0.0 : (car.frontBias > 50 ? 0.7 : 0.5);
+  let rhR = style === 'drift' ? rng.rhr.min : Math.max(rng.rhr.min, rhF + rake);
+  
+  rhF = round(clamp(rhF, rng.rhf.min, rng.rhf.max), 1);
+  rhR = round(clamp(rhR, rng.rhr.min, rng.rhr.max), 1);
+  const actualRake = round(rhR - rhF, 1);
+  const rhNote = style === 'drift'
+    ? '水平車高 (Rake = 0.0)：提供前後輪均等的側滑負載，使甩尾切換更線性。'
+    : actualRake >= 0.4
+      ? `正確 Rake：後車高比前車高出 ${actualRake} cm，煞車時重心適度前移以壓實前輪。`
+      : `⚠ 範圍限制下 Rake 偏小 (${actualRake} cm)，出彎踩油門可能會有微幅轉向不足。`;
+
+  // ─── DAMPING (耦合彈簧與前後偏置) ───
+  let drF = Math.sqrt(sprF) * 1.15 * 1.03;
+  let drR = Math.sqrt(sprR) * 1.15 * 0.97;
+  
+  drF = round(clamp(drF, rng.dr.min, rng.dr.max), 1);
+  drR = round(clamp(drR, rng.dr.min, rng.dr.max), 1);
+  
+  const bumpFactor = style === 'drift' ? 0.70 : (style === 'touge' ? 0.48 : 0.55);
+  
+  let dbF = round(clamp(drF * bumpFactor, rng.db.min, rng.db.max), 1);
+  let dbR = round(clamp(drR * bumpFactor, rng.db.min, rng.db.max), 1);
+  const dampNote = `回彈阻尼根據彈簧剛度動態耦合，壓縮/回彈比對齊風格標定（${Math.round(bumpFactor * 100)}%），在吸收顛簸的同時牢牢抑制晃動。`;
+
+  // ─── DIFFERENTIAL (LSD 差速器鎖定率) ───
+  let baseLock = 25 + car.pwr * 20 + ((car.tireR - 200) / 20);
+  let diffAcc = 45;
+  let diffDec = 15;
+  if (style === 'grip') {
+    diffAcc = Math.round(clamp(baseLock + 5, 45, 65));
+    diffDec = Math.round(15 + (car.frontBias > 50 ? 3 : 0));
+  } else if (style === 'touge') {
+    diffAcc = Math.round(clamp(baseLock - 5, 35, 55));
+    diffDec = Math.round(20 + (car.frontBias > 50 ? 2 : 0));
+  } else if (style === 'drift') {
+    diffAcc = 100;
+    diffDec = 0;
+  }
+  
+  const diffNote = style === 'drift'
+    ? '100% 加速鎖定確保雙驅動輪絕對同步旋轉，拉出大角度煙霧；0% 減速提供靈敏的回油轉向。'
+    : `基礎鎖定率由 PWR 與胎寬推導 (${Math.round(baseLock)}%)。加速鎖定限制在 ${diffAcc}% 保護出彎循跡；減速鎖定在 ${diffDec}% 提供穩定性。`;
+
+  lastRec = {
+    tp: { f: tpF, r: tpR, note: tpNote },
+    cam: { f: camF, r: camR, note: camNote },
+    toe: { f: toeF, r: toeR, note: toeNote },
+    cst: { val: cst, note: cstNote },
+    arb: { f: arbF, r: arbR, note: arbNote },
+    spr: { f: sprF, r: sprR, note: sprNote },
+    rh: { f: rhF, r: rhR, note: rhNote, rake: actualRake },
+    dr: { f: drF, r: drR },
+    db: { f: dbF, r: dbR, note: dampNote },
+    diff: { acc: diffAcc, dec: diffDec, note: diffNote },
+    style: style,
+    car: car,
+  };
+
+  renderRec(lastRec, rng);
+  $('rec-output').style.display = 'block';
+  updatePills();
+}
+
+function makeRangeBar(value, min, max, color) {
+  const p = clamp(pct(value, min, max) * 100, 0, 100);
+  return `
+    <div class="rec-range-bar">
+      <div class="rec-range-fill" style="width:${p}%;background:${color};opacity:0.25"></div>
+      <div class="rec-range-marker" style="left:calc(${p}% - 1.5px);background:${color}"></div>
+    </div>
+    <div class="rec-range-labels"><span>${min}</span><span>${max}</span></div>
+  `;
+}
+
+function recCard(title, frontVal, rearVal, unit, min, max, note, color='var(--acc2)', label1='前', label2='後') {
+  const hasRear = rearVal !== null && rearVal !== undefined;
+  return `
+    <div class="rec-card">
+      <div class="rec-title">${title}</div>
+      <div class="rec-values">
+        <div class="rec-val-group">
+          <div class="rec-val-label">${hasRear ? label1 : ''}</div>
+          <div class="rec-val" style="color:${color}">${frontVal}<span class="rec-val-unit">${unit}</span></div>
+          ${makeRangeBar(frontVal, min, max, color)}
+        </div>
+        ${hasRear ? `
+        <div class="rec-val-group">
+          <div class="rec-val-label">${label2}</div>
+          <div class="rec-val" style="color:${color}">${rearVal}<span class="rec-val-unit">${unit}</span></div>
+          ${makeRangeBar(rearVal, min, max, color)}
+        </div>` : ''}
+      </div>
+      <div class="rec-note">${note}</div>
+    </div>
+  `;
+}
+
+function renderRec(rec, rng) {
+  $('rec-tires').innerHTML = recCard('胎壓', rec.tp.f, rec.tp.r, 'psi', rng.tp.min, rng.tp.max, rec.tp.note, 'var(--cyan)');
+
+  $('rec-alignment').innerHTML =
+    recCard('外傾角 (Camber)', rec.cam.f, rec.cam.r, '°', rng.cam.min, rng.cam.max, rec.cam.note, 'var(--acc4)') +
+    recCard('束角 (Toe)', rec.toe.f, rec.toe.r, '°', rng.toe.min, rng.toe.max, rec.toe.note, 'var(--blue)') +
+    recCard('前後傾角 (Caster)', rec.cst.val, null, '°', rng.cst.min, rng.cst.max, rec.cst.note, 'var(--yellow)');
+
+  $('rec-suspension').innerHTML =
+    recCard('防傾桿 (ARB)', rec.arb.f, rec.arb.r, '', rng.arb.min, rng.arb.max, rec.arb.note, 'var(--orange)') +
+    recCard('彈簧 (Spring)', rec.spr.f, rec.spr.r, 'kgf', rng.spr.min, rng.spr.max, rec.spr.note, 'var(--acc3)');
+
+  $('rec-ride-height').innerHTML =
+    recCard('車高 (Ride Height)', rec.rh.f, rec.rh.r, 'cm', Math.min(rng.rhf.min, rng.rhr.min), Math.max(rng.rhf.max, rng.rhr.max), rec.rh.note,
+      rec.rh.rake >= 0.2 ? 'var(--green)' : 'var(--red)');
+
+  // Rake analysis
+  const rakeOk = rec.rh.rake >= 0.2;
+  $('rake-analysis').innerHTML = rakeOk
+    ? `<div class="callout c-ok"><span class="callout-icon">✓</span><span>Rake 正確：後車高 ${rec.rh.r} cm > 前車高 ${rec.rh.f} cm，差值 +${rec.rh.rake} cm。制動時重心前移有效。</span></div>`
+    : `<div class="callout c-danger"><span class="callout-icon">⚠</span><span>Rake 警告：後車高 ${rec.rh.r} cm ${rec.rh.rake >= 0 ? '≈' : '<'} 前車高 ${rec.rh.f} cm，差值 ${rec.rh.rake} cm。制動推頭風險高，請手動調整。</span></div>`;
+
+  $('rec-damping').innerHTML =
+    recCard('阻尼回彈 (Rebound)', rec.dr.f, rec.dr.r, '', rng.dr.min, rng.dr.max, '', 'var(--green)') +
+    recCard('阻尼壓縮 (Bump)', rec.db.f, rec.db.r, '', rng.db.min, rng.db.max, rec.db.note, 'var(--blue)');
+
+  $('rec-differential').innerHTML =
+    recCard('差速器 (LSD)', rec.diff.acc, rec.diff.dec, '%', 0, 100, rec.diff.note, 'var(--acc)', '加速', '減速');
+
+  // Summary
+  const styleLabel = { grip: '🏁 Grip 抓地', touge: '⛰️ Touge 山道', drift: '💨 Drift 甩尾' }[rec.style];
+  $('rec-summary-box').innerHTML = `
+    <div class="callout c-info">
+      <span class="callout-icon">📊</span>
+      <span>
+        <strong>${styleLabel}</strong> 風格推薦完成<br>
+        車輛：${rec.car.hp}hp / ${rec.car.weight}kg (${rec.car.pwr} hp/kg) — ${rec.car.drivetrain}<br>
+        所有數值均已限制在遊戲允許範圍內，可直接套用。微調時請根據實際駕駛感受做 ±5% 的修正。
+      </span>
+    </div>
+  `;
+}
+
+function copyRec() {
+  if (!lastRec) { generateRec(); }
+  const r = lastRec;
+  const styleLabel = { grip: 'Grip 抓地', touge: 'Touge 山道', drift: 'Drift 甩尾' }[r.style];
+  const lines = [
+    `═══ FH6 調教設定 (${styleLabel}) ═══`,
+    `車輛：${r.car.hp}hp / ${r.car.weight}kg / ${r.car.drivetrain}`,
+    ``,
+    `【胎壓】 前 ${r.tp.f} / 後 ${r.tp.r} psi`,
+    `【外傾角】 前 ${r.cam.f}° / 後 ${r.cam.r}°`,
+    `【束角】 前 ${r.toe.f}° / 後 ${r.toe.r}°`,
+    `【前後傾角】 ${r.cst.val}°`,
+    `【防傾桿】 前 ${r.arb.f} / 後 ${r.arb.r}`,
+    `【彈簧】 前 ${r.spr.f} / 後 ${r.spr.r} kgf/mm`,
+    `【車高】 前 ${r.rh.f} / 後 ${r.rh.r} cm (Rake: ${r.rh.rake >= 0 ? '+' : ''}${r.rh.rake} cm)`,
+    `【阻尼回彈】 前 ${r.dr.f} / 後 ${r.dr.r}`,
+    `【阻尼壓縮】 前 ${r.db.f} / 後 ${r.db.r}`,
+    `【差速器】 加速 ${r.diff.acc}% / 減速 ${r.diff.dec}%`,
+  ];
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    const toast = $('copy-toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  });
+}
+
+// ═══════════════════════════════════════════
+// GEAR CALCULATOR — INTEGRATED
+// ═══════════════════════════════════════════
+function buildGearInputs() {
+  const count = +$('gc-gear-count').value;
+  const container = $('gc-gear-inputs');
+  if (!container) return;
+
+  // Preserve existing values
+  const existing = [];
+  for (let i = 1; i <= 10; i++) {
+    const el = $('gc-g' + i);
+    if (el) existing[i] = +el.value;
+  }
+
+  const defaults = [0, 3.50, 2.50, 2.08, 1.73, 1.44, 1.20, 1.00, 0.86, 0.74, 0.64];
+
+  let html = '';
+  for (let i = 1; i <= count; i++) {
+    const val = existing[i] || defaults[i] || round(defaults[6] * Math.pow(0.83, i - 6), 2);
+    html += `
+      <div class="gear-input-wrap">
+        <label>${i} 檔</label>
+        <input type="number" id="gc-g${i}" value="${typeof val === 'number' ? val.toFixed(2) : val}" step="0.01" min="0.48" max="6.00">
+      </div>
+    `;
+  }
+  container.innerHTML = html;
+}
+
+function toggleGcMode() {
+  buildGearInputs();
+}
+
+function generateAndCalc() {
+  const redline = +$('gc-redline').value;
+  const targetDrop = +$('gc-target-drop').value;
+  const count = +$('gc-gear-count').value;
+  const mode = $('gc-mode').value;
+
+  if (targetDrop >= redline) {
+    showToast('⚠ 最低目標落點必須小於紅線轉速');
+    return;
+  }
+
+  const k = targetDrop / redline;
+  const gears = [];
+
+  if (mode === 'equal') {
+    // Read the 1st gear from input (default to 3.50 if invalid)
+    const g1El = $('gc-g1');
+    let g1 = g1El ? +g1El.value : 3.50;
+    if (!g1 || g1 <= 0) g1 = 3.50;
+
+    gears[0] = g1;
+    for (let i = 1; i < count; i++) {
+      gears[i] = round(gears[i - 1] * k, 2);
+    }
+  } else if (mode === 'limit') {
+    // Read the 1st gear from input (default to 3.50 if invalid)
+    const g1El = $('gc-g1');
+    let g1 = g1El ? +g1El.value : 3.50;
+    if (!g1 || g1 <= 0) g1 = 3.50;
+
+    // Read the final gear from input (default to 1.00 if invalid)
+    const gTopEl = $('gc-g' + count);
+    let gTop = gTopEl ? +gTopEl.value : 1.00;
+    if (!gTop || gTop <= 0) gTop = 1.00;
+
+    gears[0] = g1;
+    gears[count - 1] = gTop;
+
+    if (count > 1) {
+      const kFactor = Math.pow(gTop / g1, 1 / (count - 1));
+      for (let i = 1; i < count - 1; i++) {
+        gears[i] = round(g1 * Math.pow(kFactor, i), 2);
+      }
+    }
+  }
+
+  // Fill generated values into inputs
+  gears.forEach((g, i) => {
+    const el = $('gc-g' + (i + 1));
+    if (el) el.value = g.toFixed(2);
+  });
+
+  // Now calculate
+  calcOnly();
+}
+
+// Calculate shift points from current gear inputs (no generation)
+function calcOnly() {
+  const redline = +$('gc-redline').value;
+  const targetDrop = +$('gc-target-drop').value;
+  const finalDrive = +$('gc-final').value;
+  const count = +$('gc-gear-count').value;
+
+  const gears = [];
+  for (let i = 1; i <= count; i++) {
+    gears.push(+$('gc-g' + i).value);
+  }
+
+  const grMin = +$('rng-gr-min').value || 0.48;
+  const grMax = +$('rng-gr-max').value || 6.00;
+
+  // ── Gear range checks ──
+  let gearWarnings = [];
+  gears.forEach((g, i) => {
+    const outOfRange = g < grMin || g > grMax;
+    if (outOfRange) gearWarnings.push(`${i+1} 檔 (${g.toFixed(2)}) 超出 ${grMin}–${grMax}`);
+  });
+
+  // ── Info cells: final drive & ratio k ──
+  $('gc-info-cells').innerHTML = `
+    <div class="result-cell r-cyan" style="min-width:110px">
+      <div class="r-label">終傳比</div>
+      <div class="r-val">${finalDrive.toFixed(2)}</div>
+      <div class="r-sub">Final Drive</div>
+    </div>
+    <div class="result-cell r-accent" style="min-width:110px">
+      <div class="r-label">目標落點</div>
+      <div class="r-val">${targetDrop.toLocaleString()}</div>
+      <div class="r-sub">≥ 此 rpm</div>
+    </div>
+  `;
+
+  // ── Shift point table ──
+  const tbody = $('gc-tbody');
+  tbody.innerHTML = '';
+  const ratios = [];
+  const dropRPMs = [];
+
+  for (let i = 0; i < count - 1; i++) {
+    const dropRatio = gears[i + 1] / gears[i];
+    ratios.push(dropRatio);
+    const drop = Math.round(redline * dropRatio);
+    dropRPMs.push(drop);
+    const totalRatio = round(gears[i] * finalDrive, 3);
+
+    // Color: green if >= target, yellow if within 300 below, red if far below
+    const isOk = drop >= targetDrop;
+    const isClose = !isOk && drop >= targetDrop - 300;
+    const col = isOk ? 'green' : isClose ? 'yellow' : 'red';
+    const dotClass = 'dot-' + col;
+    const statusText = isOk ? `✓ ≥ ${targetDrop}` : isClose ? `△ 略低 (差 ${targetDrop - drop})` : `✗ 過低 (差 ${targetDrop - drop})`;
+    const statusColor = col === 'green' ? 'var(--green)' : col === 'yellow' ? 'var(--yellow)' : 'var(--red)';
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${i + 1}→${i + 2} 檔</td>
+        <td class="mono">${gears[i].toFixed(2)}</td>
+        <td class="mono">${gears[i + 1].toFixed(2)}</td>
+        <td class="mono">${dropRatio.toFixed(3)}</td>
+        <td class="mono" style="color:var(--text2)">${totalRatio}</td>
+        <td class="mono" style="color:${statusColor};font-weight:700">${drop.toLocaleString()} rpm</td>
+        <td style="color:${statusColor}"><span class="shift-dot ${dotClass}"></span>${statusText}</td>
+        <td class="mono" id="gc-eq-${i}"></td>
+      </tr>`;
+  }
+
+  // ── Equal ratio analysis ──
+  if (ratios.length > 0) {
+    const avgRatio = ratios.reduce((a, b) => a + b, 0) / ratios.length;
+    const maxDev = Math.max(...ratios.map(r => Math.abs(r - avgRatio)));
+    const isEqual = maxDev < 0.008;
+
+    for (let i = 0; i < ratios.length; i++) {
+      const dev = ratios[i] - avgRatio;
+      const cell = $('gc-eq-' + i);
+      if (cell) {
+        const sign = dev >= 0 ? '+' : '';
+        cell.textContent = (Math.abs(dev) < 0.001) ? '≈ 0' : `${sign}${dev.toFixed(3)}`;
+        cell.style.color = Math.abs(dev) < 0.008 ? 'var(--green)' : Math.abs(dev) < 0.015 ? 'var(--yellow)' : 'var(--red)';
+      }
+    }
+
+    const analysis = $('gc-analysis');
+    if (isEqual) {
+      analysis.innerHTML = `<div class="callout c-ok"><span class="callout-icon">✓</span><span>等比設計確認：平均公比 <strong>${avgRatio.toFixed(3)}</strong>，最大偏差 ±${maxDev.toFixed(4)}（<0.008），換檔節奏一致。</span></div>`;
+    } else {
+      analysis.innerHTML = `<div class="callout c-warn"><span class="callout-icon">△</span><span>非嚴格等比設計：平均公比 <strong>${avgRatio.toFixed(3)}</strong>，最大偏差 ±${maxDev.toFixed(4)}（>0.008）。某些換檔落點與其他檔不一致。</span></div>`;
+    }
+  }
+
+  // ── Warnings ──
+  const belowTarget = dropRPMs.filter(d => d < targetDrop);
+  let warnHtml = '';
+  if (gearWarnings.length > 0) {
+    warnHtml += `<div class="callout c-danger"><span class="callout-icon">⚠</span><span>齒比超出限制：${gearWarnings.join('；')}。</span></div>`;
+  }
+  if (belowTarget.length > 0) {
+    warnHtml += `<div class="callout c-danger"><span class="callout-icon">⚠</span><span>${belowTarget.length} 個換檔落點低於最低目標 ${targetDrop} rpm。請調整齒比或目標落點。</span></div>`;
+  }
+  if (gearWarnings.length === 0 && belowTarget.length === 0) {
+    warnHtml = `<div class="callout c-ok"><span class="callout-icon">✓</span><span>所有齒比在範圍內，所有換檔落點 ≥ ${targetDrop} rpm 最低目標，可直接套用。</span></div>`;
+  }
+  $('gc-warnings').innerHTML = warnHtml;
+
+  // Show the results section FIRST, so that the canvas is visible
+  // and has a non-zero clientWidth when drawGearChart is called!
+  $('gc-results').style.display = 'block';
+
+  // ── Draw chart ──
+  drawGearChart(gears, redline, targetDrop, finalDrive, dropRPMs);
+}
+
+// ═══════════════════════════════════════════
+// GEAR CHART — Canvas RPM Sawtooth
+// ═══════════════════════════════════════════
+function drawGearChart(gears, redline, targetDrop, finalDrive, dropRPMs) {
+  const canvas = $('gear-chart');
+  if (!canvas) return;
+
+  const dpr = window.devicePixelRatio || 1;
+  const parentWidth = canvas.parentElement ? canvas.parentElement.clientWidth : 0;
+  const cssW = parentWidth > 24 ? parentWidth - 24 : 900;
+  const cssH = 280;
+  canvas.width = cssW * dpr;
+  canvas.height = cssH * dpr;
+  canvas.style.width = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const W = cssW;
+  const H = cssH;
+  const pad = { top: 20, right: 20, bottom: 40, left: 60 };
+  const plotW = W - pad.left - pad.right;
+  const plotH = H - pad.top - pad.bottom;
+
+  // Clear
+  ctx.clearRect(0, 0, W, H);
+
+  // RPM range
+  const rpmMin = 0;
+  const rpmMax = Math.ceil(redline / 1000) * 1000 + 500;
+
+  // Helpers
+  const count = gears.length;
+  const xPerGear = plotW / count;
+  const yForRPM = (rpm) => pad.top + plotH - (rpm / rpmMax) * plotH;
+  const xForGear = (gIdx, rpmInGear) => {
+    // Within each gear slot, x goes from left to right as RPM goes up
+    const slotLeft = pad.left + gIdx * xPerGear;
+    const rpmFraction = rpmInGear / redline; // 0..1 within the gear
+    return slotLeft + rpmFraction * xPerGear;
+  };
+
+  // ── Grid lines ──
+  ctx.strokeStyle = '#1a1a2a';
+  ctx.lineWidth = 1;
+  const rpmStep = rpmMax <= 10000 ? 1000 : 2000;
+  for (let rpm = 0; rpm <= rpmMax; rpm += rpmStep) {
+    const y = yForRPM(rpm);
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(W - pad.right, y);
+    ctx.stroke();
+
+    // Y-axis labels
+    ctx.fillStyle = '#55556a';
+    ctx.font = '10px "JetBrains Mono", monospace';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText((rpm / 1000).toFixed(0), pad.left - 8, y);
+  }
+
+  // Y-axis title
+  ctx.save();
+  ctx.translate(14, pad.top + plotH / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillStyle = '#55556a';
+  ctx.font = '10px "Inter", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('RPM (×1000)', 0, 0);
+  ctx.restore();
+
+  // ── Redline horizontal ──
+  ctx.strokeStyle = '#ff3366';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.moveTo(pad.left, yForRPM(redline));
+  ctx.lineTo(W - pad.right, yForRPM(redline));
+  ctx.stroke();
+
+  // Redline label
+  ctx.fillStyle = '#ff3366';
+  ctx.font = 'bold 10px "Inter", sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText(`紅線 ${redline.toLocaleString()}`, W - pad.right, yForRPM(redline) - 6);
+
+  // ── Target drop horizontal (dashed) ──
+  ctx.strokeStyle = '#c8f000';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.moveTo(pad.left, yForRPM(targetDrop));
+  ctx.lineTo(W - pad.right, yForRPM(targetDrop));
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Target label
+  ctx.fillStyle = '#c8f000';
+  ctx.font = 'bold 10px "Inter", sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText(`最低目標 ${targetDrop.toLocaleString()}`, pad.left + 4, yForRPM(targetDrop) - 6);
+
+  // ── Gear sawtooth lines ──
+  // Colors for gears
+  const gearColors = [
+    '#ff7844', '#f0c000', '#3dda6a', '#4a9eff', '#b07aff',
+    '#44dddd', '#ff5566', '#c8f000', '#ff88cc', '#88ccff'
+  ];
+
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  for (let i = 0; i < count; i++) {
+    const color = gearColors[i % gearColors.length];
+
+    // Each gear: line goes from entry RPM up to redline
+    let entryRPM;
+    if (i === 0) {
+      // 1st gear starts from low RPM (e.g., idle area)
+      entryRPM = Math.max(redline * 0.15, 1000);
+    } else {
+      // Entry RPM = drop from previous gear
+      entryRPM = dropRPMs[i - 1];
+    }
+
+    const x1 = xForGear(i, entryRPM);
+    const y1 = yForRPM(entryRPM);
+    const x2 = xForGear(i, redline);
+    const y2 = yForRPM(redline);
+
+    // Draw the gear acceleration line
+    ctx.strokeStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+
+    // Draw the drop line (vertical drop to next gear's entry)
+    if (i < count - 1) {
+      const nextEntryRPM = dropRPMs[i];
+      const xDrop = x2;
+      const yDrop = yForRPM(nextEntryRPM);
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(xDrop, yDrop);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.lineWidth = 2.5;
+    }
+
+    // Gear label at bottom
+    const xCenter = pad.left + (i + 0.5) * xPerGear;
+    ctx.fillStyle = color;
+    ctx.font = 'bold 11px "Inter", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${i + 1}檔`, xCenter, H - pad.bottom + 16);
+
+    // Gear ratio below label
+    ctx.fillStyle = '#55556a';
+    ctx.font = '9px "JetBrains Mono", monospace';
+    ctx.fillText(gears[i].toFixed(2), xCenter, H - pad.bottom + 28);
+
+    // Entry dot
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x1, y1, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Redline dot
+    ctx.beginPath();
+    ctx.arc(x2, y2, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// ═══════════════════════════════════════════
+// COPY GEARS
+// ═══════════════════════════════════════════
+function copyGears() {
+  const redline = +$('gc-redline').value;
+  const targetDrop = +$('gc-target-drop').value;
+  const finalDrive = +$('gc-final').value;
+  const count = +$('gc-gear-count').value;
+
+  const gears = [];
+  for (let i = 1; i <= count; i++) {
+    gears.push(+$('gc-g' + i).value);
+  }
+
+  const lines = [
+    `═══ FH6 齒比設定 ═══`,
+    `紅線：${redline} rpm | 最低目標落點：${targetDrop} rpm`,
+    `終傳比：${finalDrive}`,
+    ``,
+  ];
+
+  gears.forEach((g, i) => {
+    lines.push(`${i+1} 檔：${g.toFixed(2)} (總比 ${round(g * finalDrive, 2)})`);
+  });
+
+  lines.push('');
+  for (let i = 0; i < count - 1; i++) {
+    const drop = Math.round(redline * (gears[i+1] / gears[i]));
+    const ok = drop >= targetDrop;
+    lines.push(`${i+1}→${i+2} 檔 落點：${drop} rpm ${ok ? '✓' : '✗'}`);
+  }
+
+  navigator.clipboard.writeText(lines.join('\n')).then(() => showToast('✓ 已複製到剪貼板'));
+}
+
+function showToast(msg) {
+  const toast = $('copy-toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// ═══════════════════════════════════════════
+// TELEMETRY DIAGNOSIS
+// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════
+// TELEMETRY DIAGNOSIS
+// ═══════════════════════════════════════════
+const symptomsData = {
+  overspin: {
+    title: "出彎大腳油門：後輪空轉打滑/起步冒煙",
+    icon: "💨",
+    cause: "<strong>LSD 加速鎖定率過高</strong>，或<strong>後輪胎壓過高/後彈簧過硬</strong>。當大馬力輸出瞬間傳遞給窄胎時，過高的鎖定率會強迫左右驅動輪完全鎖死，強行扯斷抓地力而打滑；過硬的後部懸吊則會限制車身縱向重心轉移，使後輪無法獲得足夠的「下蹲載重」壓實地面。",
+    actions: [
+      { priority: "A 級", badgeClass: "badge-a", title: "降低差速器加速鎖定率", text: "將加速鎖定由 60%-70% 調降至 <strong>45% - 50%</strong>，容許驅動輪適度差速，出彎動力釋放更平順線性。" },
+      { priority: "B 級", badgeClass: "badge-b", title: "降低後輪胎壓", text: "將後胎壓微調至 <strong>27.0 - 27.5 PSI</strong>，以增加接地面積並加寬輪胎工作溫度窗口。" },
+      { priority: "C 級", badgeClass: "badge-c", title: "放軟後側彈簧與阻尼", text: "將後側彈簧剛度降低 <strong>5% - 10%</strong>（例如調至 80-82 kg/mm），並調軟後側壓縮阻尼 (Bump)，使車尾更容易下蹲。" }
+    ]
+  },
+  understeer: {
+    title: "彎中轉向不足：前輪推頭/轉向不足/不願進彎",
+    icon: "🚗",
+    cause: "<strong>前防傾桿 (ARB) 或前彈簧過硬</strong>，導致轉向時側傾負載瞬間集中在前外側輪，使前胎迅速飽和打滑；或<strong>前外傾角不足</strong>，過彎側傾時前輪胎面無法平整切入地面；或<strong>前輪束角為內束</strong>導致入彎響應遲鈍。",
+    actions: [
+      { priority: "A 級", badgeClass: "badge-a", title: "調整防傾桿比例", text: "軟化前部防傾桿（如調至 <strong>21.0 - 23.0</strong>），或加硬後防傾桿（如調至 <strong>25.0 - 27.0</strong>），利用後軸的側向負載轉移輔助車頭指向。" },
+      { priority: "B 級", badgeClass: "badge-b", title: "調整前輪束角", text: "將前輪束角設定為微幅<strong>外束 (Toe-out, 正號 +0.1)</strong>，大幅提升切彎的指向性與靈敏度。" },
+      { priority: "B 級", badgeClass: "badge-b", title: "增加前外傾角", text: "將前外傾角調深至 <strong>-2.6° 至 -3.0°</strong>，以對抗過彎時的輪胎變形，保持最大接地面積。" }
+    ]
+  },
+  snap: {
+    title: "煞車或收油：後軸無預警甩出 (Snap Oversteer)",
+    icon: "⚠️",
+    cause: "<strong>前傾幾何車高 (Rake) 過大</strong>導致重煞車時重心劇烈前移，使後輪瞬間失去負載；且<strong>後彈簧或後防傾桿過硬</strong>，使後輪在失重時極易發生跳動打滑；或<strong>LSD 減速鎖定率過低</strong>，回油煞車時無引擎制動同步，導致後軸產生不穩定滑差。",
+    actions: [
+      { priority: "A 級", badgeClass: "badge-a", title: "增加差速器減速鎖定率", text: "將減速鎖定提高至 <strong>15% - 22%</strong>，在收油或重煞車時提供穩定的雙輪同步牽引效應。" },
+      { priority: "A/C 級", badgeClass: "badge-a", title: "降低後軸側向剛性", text: "適度放軟後防傾桿（調至 <strong>21.0 - 22.0</strong>）與後彈簧（調至 <strong>80.0 - 82.0 kg/mm</strong>），確保後軸不易跳胎。" },
+      { priority: "B 級", badgeClass: "badge-b", title: "增加後輪內束", text: "將後輪束角設定為微幅<strong>內束 (Toe-in, 負號 -0.1)</strong>，在重煞車時產生類似船錨的對齊穩定效應。" }
+    ]
+  },
+  boat: {
+    title: "連續過彎或變線：車身像船一樣晃動/上下擺盪",
+    icon: "⛵",
+    cause: "<strong>阻尼回彈硬度 (Rebound) 太低</strong>，無法及時拉住彈簧釋放的多餘能量，造成車身連續晃動；或<strong>壓縮阻尼 (Bump) 過低</strong>，重煞時前沉過快，車身動態不穩定。",
+    actions: [
+      { priority: "C 級", badgeClass: "badge-c", title: "提高阻尼回彈硬度", text: "前/後回彈調高至 <strong>9.0 - 10.0</strong>，快速拉住車身拉平動態。" },
+      { priority: "C 級", badgeClass: "badge-c", title: "微調阻尼壓縮硬度", text: "將壓縮調至回彈的 50% - 60% 之間（維持 2:1 黃金比例，約 <strong>4.5 - 5.0</strong>）。" }
+    ]
+  },
+  bumpy: {
+    title: "壓到路肩或凹凸：車輪跳動劇烈/失去抓地/煞車提早作動",
+    icon: "⛰️",
+    cause: "<strong>避震彈簧與防傾桿過硬</strong>，或<strong>阻尼壓縮硬度 (Bump) 過高</strong>，車輛在顛簸路段直接彈離地面；或<strong>車高太低觸底</strong>，避震行程耗盡，直接將衝擊硬碰硬傳給車架。",
+    actions: [
+      { priority: "C 級", badgeClass: "badge-c", title: "降低彈簧剛度", text: "將彈簧下修 15% - 20%（回歸山道 1.8 Hz 黃金自然頻率，如 <strong>80 - 90 kg/mm</strong>），增加輪胎貼地抓地時間。" },
+      { priority: "C 級", badgeClass: "badge-c", title: "放軟阻尼壓縮", text: "將 Bump 降低（如 <strong>4.1 - 4.5</strong>），使其能快速吸收凹凸凹陷。" },
+      { priority: "D 級", badgeClass: "badge-d", title: "升高車高預留避震行程", text: "提升 <strong>0.5 - 1.0 cm</strong>，確保預留充足避震緩衝行程，防止車底硬觸底。" }
+    ]
+  }
+};
+
+function diagnose(symptom) {
+  const ws = $('diag-workspace');
+  if (!ws) return;
+
+  // Highlights active sidebar symptom item
+  document.querySelectorAll('.symptom-item').forEach(el => el.classList.remove('active'));
+  const activeItem = $('sym-' + symptom);
+  if (activeItem) activeItem.classList.add('active');
+
+  const data = symptomsData[symptom];
+  if (!data) return;
+
+  ws.classList.add('has-result');
+  
+  let stepsHtml = '';
+  data.actions.forEach((act, idx) => {
+    stepsHtml += `
+      <div class="diag-step-item">
+        <div class="diag-step-number">${idx + 1}</div>
+        <div class="diag-step-content">
+          <div class="diag-step-header">
+            <span class="diag-step-title">${act.title}</span>
+            <span class="priority-badge ${act.badgeClass}">${act.priority}</span>
+          </div>
+          <p style="font-size:13px; color:var(--text2); margin-top:2px;">${act.text}</p>
+        </div>
+      </div>
+    `;
+  });
+
+  ws.innerHTML = `
+    <div class="diag-header">
+      <div class="diag-header-icon">${data.icon}</div>
+      <div class="diag-header-text">
+        <h2>${data.title}</h2>
+        <p>Telemetry Dynamic Diagnostic Report</p>
+      </div>
+    </div>
+    
+    <div class="diag-section">
+      <div class="diag-section-title">⚠️ 物理原因分析</div>
+      <div class="diag-cause-card">${data.cause}</div>
+    </div>
+
+    <div class="diag-section">
+      <div class="diag-section-title">🛠️ 技師推薦調整方案 (按優先級操作)</div>
+      <div class="diag-steps">${stepsHtml}</div>
+    </div>
+  `;
+}
+
+</script>
+
+<!-- 腳本 -->
+<script src="../../assets/js/core.js"></script>
+<script src="../../assets/js/live2d-manager.js"></script>
+<script src="../../assets/js/navigation.js"></script>
+<script src="../../assets/js/animations.js"></script>
+
+<script>
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  // 初始化核心系統
+  Core.initBackground();
+  Navigation.init();
+  Animations.init();
+
+  // 原始調教計算器初始化
+  updatePWR();
+  buildGearInputs();
+  updatePills();
+
+  // 初始化進階參數為鎖定狀態
+  rangesUnlocked = true;
+  toggleRangesUnlock();
+});
+</script>
+</div>
+</main>
+</body>
+</html>
