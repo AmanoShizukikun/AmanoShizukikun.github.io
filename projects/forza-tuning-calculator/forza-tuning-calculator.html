@@ -1922,7 +1922,7 @@ body {
 <div class="hdr">
   <h1>《極限競速:地平線6》 通用調教計算器</h1>
   <div class="hdr-eyebrow">Forza Horizon 6 Tuning Calculator</div>
-  <div class="hdr-sub">v0.9 beta</div>
+  <div class="hdr-sub">v0.9.1 Beta</div>
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
@@ -1990,11 +1990,17 @@ body {
       <div class="inp-grid">
         <div class="inp-group">
           <label>輪胎類型</label>
-          <select id="car-tire-type">
-            <option value="stock">原廠胎</option>
-            <option value="sport">跑車胎</option>
-            <option value="race" selected>賽車光頭胎 (熱熔胎)</option>
-            <option value="rally">拉力胎</option>
+          <select id="car-tire-type" onchange="updateTireCard()">
+            <option value="slick">光頭胎 (Slick)</option>
+            <option value="semislick" selected>半熱熔胎 (Semi-Slick)</option>
+            <option value="rally">拉力胎 (Rally)</option>
+            <option value="drift">甩尾胎 (Drift)</option>
+            <option value="sport">跑車胎 (Sport)</option>
+            <option value="street">街車胎 (Street)</option>
+            <option value="offroad">越野胎 (Offroad)</option>
+            <option value="snow">雪地胎 (Snow)</option>
+            <option value="drag">直線加速胎 (Drag)</option>
+            <option value="stock">原廠胎 (Stock)</option>
           </select>
         </div>
         <div class="inp-group">
@@ -2008,6 +2014,9 @@ body {
       </div>
     </div>
   </div>
+
+  <!-- 輪胎性能概覽資訊卡 -->
+  <div id="tire-info-card" style="margin-bottom: 16px;"></div>
 
   <div class="card">
     <div class="card-head" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
@@ -2089,8 +2098,6 @@ body {
         <button class="style-btn" data-style="touge" onclick="setStyle('touge')">⛰️ Touge 山道</button>
         <button class="style-btn" data-style="drift" onclick="setStyle('drift')">💨 Drift 甩尾</button>
       </div>
-
-
 
       <div id="rec-output" style="display:none">
         <div class="section-label" style="margin-top:20px">輪胎設定</div>
@@ -2319,7 +2326,7 @@ function toggleRangesUnlock() {
   
   const btn = $('unlock-ranges-btn');
   if (btn) {
-    btn.innerHTML = rangesUnlocked ? '🔒 鎖定進階參數' : '🔓 解鎖進階參數';
+    btn.innerHTML = rangesUnlocked ? '🔓 鎖定進階參數' : '🔒 解鎖進階參數';
     btn.classList.toggle('active', rangesUnlocked);
   }
   
@@ -2353,6 +2360,26 @@ const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const lerp = (lo, hi, t) => lo + (hi - lo) * t;
 const pct = (v, lo, hi) => hi === lo ? 0.5 : (v - lo) / (hi - lo);
 const round = (v, d=1) => {const m = Math.pow(10, d); return Math.round(v * m) / m;};
+
+// ═══════════════════════════════════════════
+// TIRE PROFILE DATABASE (實測數據驅動)
+// 基準：AE86 (333hp/824kg/185mm) 各胎種遙測數據
+// latG  = 橫向抓地係數 (以光頭胎 1.11G 為 1.00 基準)
+// longG = 縱向抓地係數 (以半熱熔胎 0.942G 為 1.00 基準)
+// slip  = 滑移角容忍窗口 (1.00 為標準, >1.0 表示更寬容)
+// ═══════════════════════════════════════════
+const tireProfile = {
+  slick:     { lat: 1.00, long: 0.97, slip: 1.00, label: '光頭胎',     desc: '最高橫向極限，縱向略低於半熱熔' },
+  semislick: { lat: 1.00, long: 1.00, slip: 1.05, label: '半熱熔胎',   desc: '全方位最均衡，煞車能力最強' },
+  rally:     { lat: 0.96, long: 0.97, slip: 1.15, label: '拉力胎',     desc: '接近光頭胎的綜合表現，寬容度較高' },
+  drift:     { lat: 0.89, long: 0.91, slip: 1.30, label: '甩尾胎',     desc: '柏油版拉力胎，極寬滑移角窗口' },
+  sport:     { lat: 0.86, long: 0.87, slip: 1.00, label: '跑車胎',     desc: '標準性能胎，抓地力低於甩尾胎' },
+  street:    { lat: 0.83, long: 0.84, slip: 0.95, label: '街車胎',     desc: '日常用胎，滑移容忍度略低' },
+  offroad:   { lat: 0.80, long: 0.82, slip: 1.10, label: '越野胎',     desc: '柏油抓地低，有一定越野滑移寬容度' },
+  snow:      { lat: 0.84, long: 0.78, slip: 1.00, label: '雪地胎',     desc: '縱向最弱，煞車距離最長' },
+  drag:      { lat: 0.85, long: 0.97, slip: 0.80, label: '直線加速胎', desc: '縱向極強，橫向中等，滑移窗口極窄' },
+  stock:     { lat: 0.77, long: 0.79, slip: 0.90, label: '原廠胎',     desc: '最基礎的抓地力，各項最低' },
+};
 
 // ═══════════════════════════════════════════
 // TAB SWITCH
@@ -2412,7 +2439,7 @@ function getCarData() {
     weight: weightEl ? +weightEl.value : 1000,
     frontBias: frontBiasEl ? +frontBiasEl.value : 50,
     drivetrain: drivetrainEl ? drivetrainEl.value : 'FR',
-    tireType: tireTypeEl ? tireTypeEl.value : 'race',
+    tireType: tireTypeEl ? tireTypeEl.value : 'semislick',
     tireF: tireFEl ? +tireFEl.value : 185,
     tireR: tireREl ? +tireREl.value : 185,
     brake: 'race',
@@ -2460,12 +2487,18 @@ function generateRec() {
   const rb = 1 - fb;
   const tireRatio = car.tireF / car.tireR;
 
+  // ─── TIRE PROFILE LOOKUP ───
+  const tire = tireProfile[car.tireType] || tireProfile.semislick;
+
+  // ─── RENDER TIRE INFO CARD ───
+  renderTireInfoCard(tire, car.tireType);
+
   // ─── TRACTION CLASSIFIER ───
   const rearGripIndex = car.tireR * Math.sqrt(car.weight);
   const isLowTraction = (car.drivetrain === 'FR' && car.pwr > 0.45 && rearGripIndex < 7000);
   const protectRear = (car.tireF < car.tireR - 15) || isLowTraction;
 
-  // ─── TIRE PRESSURE ───
+  // ─── TIRE PRESSURE (輪胎特性修正) ───
   let tpF = 28.5;
   let tpR = 27.5;
   if (style === 'touge') {
@@ -2475,16 +2508,23 @@ function generateRec() {
     tpF = 31.0;
     tpR = 55.0;
   }
-  if (fb > 0.51 && style !== 'drift') {
-    tpF += 0.5;
-    tpR += 0.5;
+  // 低抓地力輪胎微降胎壓以增加接地面積
+  if (style !== 'drift') {
+    if (tire.lat < 0.90) {
+      tpF -= 0.5;
+      tpR -= 0.5;
+    }
+    if (fb > 0.51) {
+      tpF += 0.5;
+      tpR += 0.5;
+    }
   }
   tpF = round(clamp(tpF, rng.tp.min, rng.tp.max), 1);
   tpR = round(clamp(tpR, rng.tp.min, rng.tp.max), 1);
   
   const tpNote = style === 'drift'
     ? '後胎壓極高，顯著降低後軸抓地力，促進並維持長時間滑行與冒煙。'
-    : '低胎壓可優化輪胎形變與接地面積，驅動輪微低提供抓地窗口。';
+    : `低胎壓可優化輪胎形變與接地面積。${tire.lat < 0.90 ? '低抓地輪胎已微降胎壓補償。' : '驅動輪微低提供抓地窗口。'}`;
 
   // ─── CAMBER ───
   let camF = -2.3;
@@ -2538,22 +2578,19 @@ function generateRec() {
   cst = round(clamp(cst, rng.cst.min, rng.cst.max), 1);
   const cstNote = '較大前後傾角可在方向盤轉動時提供動態負外傾增益，並提供更強的回正力矩。';
 
-  // ─── ANTI-ROLL BAR (LLTD 與配胎寬度優化) ───
+  // ─── ANTI-ROLL BAR (LLTD 與配胎寬度優化 × 輪胎橫向係數) ───
   let arbF = 21.5;
   let arbR = 26.5;
   
   if (protectRear) {
-    // 像 S2000 這類前窄後寬，或大馬力/窄後胎 FR 易甩尾的車型：前硬後軟以穩定後軸
     arbF = lerp(rng.arb.min, rng.arb.max, style === 'grip' ? 0.34 : style === 'touge' ? 0.36 : 0.53);
     arbR = lerp(rng.arb.min, rng.arb.max, style === 'grip' ? 0.31 : style === 'touge' ? 0.33 : 0.37);
   } else {
-    // 像 RX-7 (FD/FC) 前後胎寬平衡的車型：前軟後硬以釋放前輪抓地，利用車尾旋轉幫助過彎
-    const biasMod = (fb - 0.5) * 0.5; // 適度微調前重車型
+    const biasMod = (fb - 0.5) * 0.5;
     arbF = lerp(rng.arb.min, rng.arb.max, (style === 'grip' ? 0.32 : style === 'touge' ? 0.35 : 0.64) + biasMod);
     arbR = lerp(rng.arb.min, rng.arb.max, (style === 'grip' ? 0.40 : style === 'touge' ? 0.37 : 0.33) - biasMod);
   }
   
-  // 針對其他驅動形式做適配
   if (car.drivetrain === 'FF') {
     arbF = lerp(rng.arb.min, rng.arb.max, 0.25);
     arbR = lerp(rng.arb.min, rng.arb.max, 0.65);
@@ -2562,13 +2599,18 @@ function generateRec() {
     arbR = lerp(rng.arb.min, rng.arb.max, style === 'drift' ? 0.45 : 0.42);
   }
   
+  // 輪胎橫向抓地修正（限制在 ~5% 內，使用 lerp 保護通用性）
+  const arbTireMod = lerp(1.0, tire.lat, 0.25);
+  arbF = arbF * arbTireMod;
+  arbR = arbR * arbTireMod;
+  
   arbF = round(clamp(arbF, rng.arb.min, rng.arb.max), 1);
   arbR = round(clamp(arbR, rng.arb.min, rng.arb.max), 1);
   const arbNote = car.tireF < car.tireR - 15
-    ? '前窄後寬型防傾桿：前硬後軟配置。抑制極易發生 Snap Oversteer 的後軸負載轉移，穩定後輪牽引力。'
-    : '前後平衡型防傾桿：前軟後硬配置。在彎中釋放前軸抓地力，利用後軸的側向負載轉移輔助車頭指向。';
+    ? `前窄後寬型防傾桿：前硬後軟配置。已按${tire.label}橫向修正率 (${round(arbTireMod, 2)}x) 微調側傾剛度。`
+    : `前後平衡型防傾桿：前軟後硬配置。已按${tire.label}橫向修正率 (${round(arbTireMod, 2)}x) 微調側傾剛度。`;
 
-  // ─── SPRINGS (自然頻率 Natural Frequency 物理推導) ───
+  // ─── SPRINGS (自然頻率 Natural Frequency 物理推導 × 輪胎橫向係數) ───
   let fnF = style === 'grip' ? 1.88 : style === 'touge' ? 1.80 : 2.10;
   let fnR = style === 'grip' ? 1.80 : style === 'touge' ? 1.74 : 1.90;
   
@@ -2583,6 +2625,11 @@ function generateRec() {
   let sprF = kwF / mr2;
   let sprR = kwR / mr2;
   
+  // 輪胎橫向抓地修正（限制在 ~3% 內，使用 lerp 保護自然頻率 $f_n$）
+  const sprTireMod = lerp(1.0, tire.lat, 0.15);
+  sprF = sprF * sprTireMod;
+  sprR = sprR * sprTireMod;
+  
   if (car.tireF < car.tireR - 15 && style !== 'drift') {
     sprR *= 0.93;
   }
@@ -2590,7 +2637,7 @@ function generateRec() {
   sprF = round(clamp(sprF, rng.spr.min, rng.spr.max), 1);
   sprR = round(clamp(sprR, rng.spr.min, rng.spr.max), 1);
   
-  const sprNote = `基於自然頻率 (前 ${fnF} Hz / 後 ${fnR} Hz) 與車身重量 (${car.weight} kg) 物理計算。軟懸吊能最大化輪胎在不平山路上的貼地時間。`;
+  const sprNote = `基於自然頻率 (前 ${fnF} Hz / 後 ${fnR} Hz) 與車重 (${car.weight} kg) 計算，已按${tire.label}橫向修正率 (${round(sprTireMod, 2)}x) 微調支撐剛度。`;
 
   // ─── RIDE HEIGHT ───
   let rhF = rng.rhf.min;
@@ -2606,9 +2653,15 @@ function generateRec() {
       ? `正確 Rake：後車高比前車高出 ${actualRake} cm，煞車時重心適度前移以壓實前輪。`
       : `⚠ 範圍限制下 Rake 偏小 (${actualRake} cm)，出彎踩油門可能會有微幅轉向不足。`;
 
-  // ─── DAMPING (耦合彈簧與前後偏置) ───
+  // ─── DAMPING (耦合彈簧與前後偏置 × 滑移窗口修正) ───
   let drF = Math.sqrt(sprF) * 1.15 * 1.03;
   let drR = Math.sqrt(sprR) * 1.15 * 0.97;
+  
+  // 高滑移窗口輪胎 (如甩尾胎/拉力胎)：適度放鬆後輪回彈阻尼
+  // 允許懸吊在寬容滑移區間內有更柔順的線性拉伸
+  if (tire.slip > 1.2) {
+    drR *= 0.95;
+  }
   
   drF = round(clamp(drF, rng.dr.min, rng.dr.max), 1);
   drR = round(clamp(drR, rng.dr.min, rng.dr.max), 1);
@@ -2617,10 +2670,13 @@ function generateRec() {
   
   let dbF = round(clamp(drF * bumpFactor, rng.db.min, rng.db.max), 1);
   let dbR = round(clamp(drR * bumpFactor, rng.db.min, rng.db.max), 1);
-  const dampNote = `回彈阻尼根據彈簧剛度動態耦合，壓縮/回彈比對齊風格標定（${Math.round(bumpFactor * 100)}%），在吸收顛簸的同時牢牢抑制晃動。`;
+  const dampNote = `回彈阻尼根據彈簧剛度動態耦合（${Math.round(bumpFactor * 100)}%）。${tire.slip > 1.2 ? `${tire.label}具寬滑移窗口 (${tire.slip}x)，後輪回彈已放鬆 5% 以配合平緩的滑移過渡。` : ''}`;
 
-  // ─── DIFFERENTIAL (LSD 差速器鎖定率) ───
+  // ─── DIFFERENTIAL (LSD 差速器鎖定率 × 輪胎縱向係數) ───
   let baseLock = 25 + car.pwr * 20 + ((car.tireR - 200) / 20);
+  // 輪胎縱向抓地修正限制在 ~5% 內，避免雪地胎等極端配胎鎖定率過低
+  const diffTireMod = lerp(1.0, tire.long, 0.20);
+  baseLock = baseLock * diffTireMod;
   let diffAcc = 45;
   let diffDec = 15;
   if (style === 'grip') {
@@ -2633,10 +2689,14 @@ function generateRec() {
     diffAcc = 100;
     diffDec = 0;
   }
+  // 高滑移窗口輪胎在甩尾模式外也可微增鎖定容忍度
+  if (tire.slip > 1.2 && style !== 'drift') {
+    diffAcc = Math.min(diffAcc + 3, 100);
+  }
   
   const diffNote = style === 'drift'
     ? '100% 加速鎖定確保雙驅動輪絕對同步旋轉，拉出大角度煙霧；0% 減速提供靈敏的回油轉向。'
-    : `基礎鎖定率由 PWR 與胎寬推導 (${Math.round(baseLock)}%)。加速鎖定限制在 ${diffAcc}% 保護出彎循跡；減速鎖定在 ${diffDec}% 提供穩定性。`;
+    : `基礎鎖定率由 PWR×胎寬×縱向修正率 (${round(diffTireMod, 2)}x) 推導 (${Math.round(baseLock)}%)。加速鎖定 ${diffAcc}%${tire.slip > 1.2 ? ' (+3% 寬滑移修正)' : ''}；減速鎖定 ${diffDec}%。`;
 
   lastRec = {
     tp: { f: tpF, r: tpR, note: tpNote },
@@ -2651,6 +2711,7 @@ function generateRec() {
     diff: { acc: diffAcc, dec: diffDec, note: diffNote },
     style: style,
     car: car,
+    tire: tire,
   };
 
   renderRec(lastRec, rng);
@@ -2692,6 +2753,65 @@ function recCard(title, frontVal, rearVal, unit, min, max, note, color='var(--ac
   `;
 }
 
+// ═══════════════════════════════════════════
+// TIRE INFO CARD
+// ═══════════════════════════════════════════
+function updateTireCard() {
+  const tireKey = $('car-tire-type').value;
+  const tire = tireProfile[tireKey] || tireProfile.semislick;
+  renderTireInfoCard(tire, tireKey);
+}
+
+function renderTireInfoCard(tire, tireKey) {
+  const container = $('tire-info-card');
+  if (!container) return;
+
+  function makeBar(val, max, color) {
+    const p = Math.round(clamp(val / max, 0, 1) * 100);
+    return `<div style="display:flex;align-items:center;gap:8px;margin-top:3px">
+      <div style="flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden">
+        <div style="width:${p}%;height:100%;background:${color};border-radius:3px;transition:width .4s ease"></div>
+      </div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:${color};min-width:36px;text-align:right">${val}</span>
+    </div>`;
+  }
+
+  // 找出所有胎種中的最大值作為橫條圖的基準
+  const maxLat = 1.00;
+  const maxLong = 1.00;
+  const maxSlip = 1.30;
+
+  container.innerHTML = `
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head">
+        <span class="card-icon">🏎️</span>
+        <span class="card-title">輪胎性能概覽：${tire.label}</span>
+      </div>
+      <div class="card-body" style="padding:14px 16px">
+        <p style="font-size:13px;color:var(--text2);margin-bottom:12px">${tire.desc}</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+          <div>
+            <div style="font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;font-weight:600">橫向抓地 (latG)</div>
+            ${makeBar(tire.lat, maxLat, 'var(--cyan)')}
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;font-weight:600">縱向抓地 (longG)</div>
+            ${makeBar(tire.long, maxLong, 'var(--green)')}
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;font-weight:600">滑移窗口 (slip)</div>
+            ${makeBar(tire.slip, maxSlip, tire.slip > 1.2 ? 'var(--orange)' : 'var(--yellow)')}
+          </div>
+        </div>
+        ${tire.slip > 1.2 ? `<div class="callout c-warn" style="margin-top:10px;margin-bottom:0;padding:8px 12px">
+          <span class="callout-icon">⚡</span>
+          <span style="font-size:12px">此輪胎具有極寬滑移角容忍度 (${tire.slip}x)，後輪阻尼已自動放鬆 5%，LSD 容忍度 +3%。</span>
+        </div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
 function renderRec(rec, rng) {
   $('rec-tires').innerHTML = recCard('胎壓', rec.tp.f, rec.tp.r, 'psi', rng.tp.min, rng.tp.max, rec.tp.note, 'var(--cyan)');
 
@@ -2729,6 +2849,7 @@ function renderRec(rec, rng) {
       <span>
         <strong>${styleLabel}</strong> 風格推薦完成<br>
         車輛：${rec.car.hp}hp / ${rec.car.weight}kg (${rec.car.pwr} hp/kg) — ${rec.car.drivetrain}<br>
+        輪胎：${rec.tire.label} (橫向 ${rec.tire.lat} / 縱向 ${rec.tire.long} / 滑移窗口 ${rec.tire.slip}x)<br>
         所有數值均已限制在遊戲允許範圍內，可直接套用。微調時請根據實際駕駛感受做 ±5% 的修正。
       </span>
     </div>
@@ -2742,6 +2863,7 @@ function copyRec() {
   const lines = [
     `═══ FH6 調教設定 (${styleLabel}) ═══`,
     `車輛：${r.car.hp}hp / ${r.car.weight}kg / ${r.car.drivetrain}`,
+    `輪胎：${r.tire.label} (橫向 ${r.tire.lat} / 縱向 ${r.tire.long} / 滑移窗口 ${r.tire.slip}x)`,
     ``,
     `【胎壓】 前 ${r.tp.f} / 後 ${r.tp.r} psi`,
     `【外傾角】 前 ${r.cam.f}° / 後 ${r.cam.r}°`,
@@ -3321,6 +3443,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updatePWR();
   buildGearInputs();
   updatePills();
+  updateTireCard();
 
   // 初始化進階參數為鎖定狀態
   rangesUnlocked = true;
