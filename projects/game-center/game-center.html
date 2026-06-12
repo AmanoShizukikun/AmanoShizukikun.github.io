@@ -13,6 +13,11 @@
     <link rel="stylesheet" href="../../assets/css/animations.css">
     
     <style>
+        /* 隱藏滾動條 */
+        html.no-scroll, body.no-scroll {
+            overflow: hidden !important;
+        }
+
         /* ========== 整版進入動畫 ========== */
         .page-entrance-overlay {
             position: fixed;
@@ -2970,7 +2975,7 @@
 
                 <div class="nav-section">
                     <h3 class="nav-section-title">特別內容</h3>
-                    <li><a href="index.html" class="active">◆ GAME CENTER</a></li>
+                    <li><a href="game-center.html" class="active">◆ GAME CENTER</a></li>
                     <li><a href="../nagato-sakura-webos/nagato-sakura-webos.html">◆ WEB OS</a></li>
                     <li><a href="../music-player/music-player.html">◆ MUSIC PLAYER</a></li>
                     <li><a href="../forza-tuning-calculator/forza-tuning-calculator.html">◆ FORZA CALC</a></li>
@@ -3319,6 +3324,9 @@
                 return;
             }
 
+            // 隱藏頁面滾動條
+            document.documentElement.classList.add('no-scroll');
+
             // 生成矩陣數字雨
             createMatrixRain();
             
@@ -3331,6 +3339,8 @@
             // 3秒後隱藏進入動畫
             setTimeout(() => {
                 overlay.classList.add('hidden');
+                // 恢復頁面滾動條
+                document.documentElement.classList.remove('no-scroll');
                 window.entryAnimationsCompleted = true;
                 try { window.dispatchEvent(new CustomEvent('animations:entryComplete')); } catch (e) {}
             }, 3000);
@@ -4596,6 +4606,9 @@
                     gameLoadingOverlay.setAttribute('aria-hidden', 'false');
                     if (icon) GameLoader.setIcon(icon);
 
+                    // 隱藏頁面滾動條
+                    document.documentElement.classList.add('no-scroll');
+
                     if (simulate) {
                         // simple progressive fill with tiny randomization for realism
                         let percent = 0;
@@ -4674,6 +4687,9 @@
                         if (hudAssetCount) hudAssetCount.textContent = 'Assets: 0 / 0';
                         if (hudETA) hudETA.textContent = 'ETA: --s';
                         if (gameLoaderIcon) gameLoaderIcon.textContent = '▣';
+                        
+                        // 恢復頁面滾動條
+                        document.documentElement.classList.remove('no-scroll');
                     }, wait);
                 },
                 showAndNavigate(url, opts = {}) {

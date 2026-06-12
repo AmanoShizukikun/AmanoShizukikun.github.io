@@ -24,6 +24,7 @@ function loadScript(src) {
 }
 
 let messageTimer = null;
+let blushFadeFrameId = null;
 
 // Queue for pending motions when effect ids are not ready yet
 let pendingMotions = [];
@@ -788,6 +789,11 @@ async function loadWidget(config) {
         // Avoid touching model internals before api/model is fully ready.
         if (!live2dReady) return;
 
+        if (blushFadeFrameId) {
+          cancelAnimationFrame(blushFadeFrameId);
+          blushFadeFrameId = null;
+        }
+
         (async function playRandomAnimation() {
           try {
             // Best effort: trigger a random expression before motion playback.
@@ -860,43 +866,60 @@ async function loadWidget(config) {
                     const buf = await fetchBytes(url);
                     // 修正點：在加載動作時傳入回調，確保動作結束後手動觸發 Idle 動作重新接管
                     const motion = model5.loadMotion(buf, buf.byteLength, null, (m) => {
-                        // 動作結束回調：手動載入並播放 idle_01.motion3.json
-                        const base = (typeof config?.waifuPath === 'string') ? config.waifuPath.replace(/[^\/]+$/, '') : 'assets/live2d/';
-                        const idleUrl = base + 'animations/idle_01.motion3.json';
+                        // 平滑地將所有動作參數漸變歸零/復位，避免表情結束時瞬間不自然地重置
+                        if (api && typeof api.setModelParameter === 'function') {
+                            const cubismModel = api.getCubismModel();
+                            if (cubismModel) {
+                                const ids = cubismModel._model?.parameters?.ids;
+                                const count = typeof cubismModel.getParameterCount === 'function' ? cubismModel.getParameterCount() : 0;
+                                const fadeData = [];
 
-                        fetch(idleUrl).then(res => {
-                            if (!res.ok) throw new Error('Network response was not ok');
-                            return res.arrayBuffer();
-                        }).then(idleBuf => {
-                            // 載入 Idle 動作，最後參數 false 代表不自動釋放(視情況調整，這裡設為 false 較安全)
-                            const idleMotion = model5.loadMotion(idleBuf, idleBuf.byteLength, null, null, null, null, null, null, false);
-                            
-                            // 2. 核心修復：強制 Idle 動作循環播放
-                            if (typeof idleMotion.setIsLoop === 'function') {
-                                idleMotion.setIsLoop(true);
+                                if (ids && count > 0) {
+                                    for (let i = 0; i < count; i++) {
+                                        const paramId = ids[i];
+                                        if (paramId === "ParamCloth") continue; // 排除衣服/換裝參數
+
+                                        const startVal = cubismModel.getParameterValueByIndex(i);
+                                        const targetVal = typeof cubismModel.getParameterDefaultValue === 'function'
+                                            ? cubismModel.getParameterDefaultValue(i)
+                                            : (cubismModel._model?.parameters?.defaultValues?.[i] ?? 0);
+
+                                        if (Math.abs(startVal - targetVal) > 0.001) {
+                                            fadeData.push({ idx: i, startVal, targetVal });
+                                        }
+                                    }
+                                }
+
+                                if (blushFadeFrameId) {
+                                    cancelAnimationFrame(blushFadeFrameId);
+                                    blushFadeFrameId = null;
+                                }
+
+                                if (fadeData.length > 0) {
+                                    const duration = 800; // 800ms 平滑過渡
+                                    const startTime = performance.now();
+                                    const fade = () => {
+                                        const elapsed = performance.now() - startTime;
+                                        const progress = Math.min(elapsed / duration, 1);
+
+                                        for (const item of fadeData) {
+                                            const currentVal = item.startVal + (item.targetVal - item.startVal) * progress;
+                                            cubismModel._parameterValues[item.idx] = currentVal;
+                                            if (cubismModel._savedParameters && cubismModel._savedParameters.getSize() > item.idx) {
+                                                cubismModel._savedParameters.set(item.idx, currentVal);
+                                            }
+                                        }
+
+                                        if (progress < 1) {
+                                            blushFadeFrameId = requestAnimationFrame(fade);
+                                        } else {
+                                            blushFadeFrameId = null;
+                                        }
+                                    };
+                                    blushFadeFrameId = requestAnimationFrame(fade);
+                                }
                             }
-
-                            // 3. 核心修復：為 idleMotion 設定 Effect IDs，避免 "Cannot read properties of null (reading 'getSize')"
-                            if (model5 && model5._eyeBlinkIds && model5._lipSyncIds && typeof idleMotion.setEffectIds === 'function') {
-                                idleMotion.setEffectIds(model5._eyeBlinkIds, model5._lipSyncIds);
-                            } else if (typeof idleMotion.setEffectIds === 'function') {
-                                // 如果模型尚未準備好 IDs，使用空物件作為 Fallback 防止崩潰
-                                const emptyIds = { getSize: () => 0, at: () => null };
-                                idleMotion.setEffectIds(emptyIds, emptyIds);
-                            }
-
-                            // 設定淡入淡出，讓過渡平滑 (加快過渡速度)
-                            if (idleMotion.setFadeIn) idleMotion.setFadeIn(100);
-                            if (idleMotion.setFadeOut) idleMotion.setFadeOut(100);
-
-                            const motionMgr = model5.getMainMotionManager ? model5.getMainMotionManager() : (model5._motionManager || null);
-                            if (motionMgr && typeof motionMgr.startMotionPriority === 'function') {
-                                // Priority 1 (Idle) 讓它作為待機動作播放
-                                motionMgr.startMotionPriority(idleMotion, false, 1);
-                            }
-                        }).catch(e => {
-                            console.warn('無法載入 Idle 動作:', e);
-                        });
+                        }
                     }, null, null, null, null, false);
                     
                     // 1. 核心修復：強制關閉表情動作的循環，確保它能播完並觸發回調
