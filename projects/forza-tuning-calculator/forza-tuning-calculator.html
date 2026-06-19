@@ -1931,7 +1931,7 @@ body {
 <div class="hdr">
   <h1>《極限競速:地平線6》 通用調教計算器</h1>
   <div class="hdr-eyebrow">Forza Horizon 6 Tuning Calculator</div>
-  <div class="hdr-sub">v0.9.3 Beta</div>
+  <div class="hdr-sub">v0.9.4 Beta</div>
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
@@ -2666,9 +2666,16 @@ function generateRec() {
   const sprNote = `基於自然頻率 (前 ${fnF} Hz / 後 ${fnR} Hz) 與車重 (${car.weight} kg) 計算，已按${tire.label}橫向修正率 (${round(sprTireMod, 2)}x) 微調支撐剛度。`;
 
   // ─── RIDE HEIGHT ───
-  let rhF = rng.rhf.min;
-  let rake = (style === 'angle_drift' || style === 'inertial_drift') ? 0.0 : (car.frontBias > 50 ? 0.7 : 0.5);
-  let rhR = (style === 'angle_drift' || style === 'inertial_drift') ? rng.rhr.min : Math.max(rng.rhr.min, rhF + rake);
+  let rhF, rhR;
+  if (style === 'angle_drift' || style === 'inertial_drift') {
+    const commonRh = Math.max(rng.rhf.min, rng.rhr.min);
+    rhF = commonRh;
+    rhR = commonRh;
+  } else {
+    rhF = rng.rhf.min;
+    const rake = car.frontBias > 50 ? 0.7 : 0.5;
+    rhR = Math.max(rng.rhr.min, rhF + rake);
+  }
   
   rhF = round(clamp(rhF, rng.rhf.min, rng.rhf.max), 1);
   rhR = round(clamp(rhR, rng.rhr.min, rng.rhr.max), 1);
@@ -2768,6 +2775,10 @@ function makeRangeBar(value, min, max, color) {
 
 function recCard(title, frontVal, rearVal, unit, min, max, note, color='var(--acc2)', label1='前', label2='後') {
   const hasRear = rearVal !== null && rearVal !== undefined;
+  const minF = (typeof min === 'object' && min !== null) ? min.f : min;
+  const minR = (typeof min === 'object' && min !== null) ? min.r : min;
+  const maxF = (typeof max === 'object' && max !== null) ? max.f : max;
+  const maxR = (typeof max === 'object' && max !== null) ? max.r : max;
   return `
     <div class="rec-card">
       <div class="rec-title">${title}</div>
@@ -2775,13 +2786,13 @@ function recCard(title, frontVal, rearVal, unit, min, max, note, color='var(--ac
         <div class="rec-val-group">
           <div class="rec-val-label">${hasRear ? label1 : ''}</div>
           <div class="rec-val" style="color:${color}">${frontVal}<span class="rec-val-unit">${unit}</span></div>
-          ${makeRangeBar(frontVal, min, max, color)}
+          ${makeRangeBar(frontVal, minF, maxF, color)}
         </div>
         ${hasRear ? `
         <div class="rec-val-group">
           <div class="rec-val-label">${label2}</div>
           <div class="rec-val" style="color:${color}">${rearVal}<span class="rec-val-unit">${unit}</span></div>
-          ${makeRangeBar(rearVal, min, max, color)}
+          ${makeRangeBar(rearVal, minR, maxR, color)}
         </div>` : ''}
       </div>
       <div class="rec-note">${note}</div>
@@ -2860,15 +2871,24 @@ function renderRec(rec, rng) {
     recCard('防傾桿 (ARB)', rec.arb.f, rec.arb.r, '', rng.arb.min, rng.arb.max, rec.arb.note, 'var(--orange)') +
     recCard('彈簧 (Spring)', rec.spr.f, rec.spr.r, 'kgf', rng.spr.min, rng.spr.max, rec.spr.note, 'var(--acc3)');
 
+  const isDrift = rec.style === 'angle_drift' || rec.style === 'inertial_drift';
+  const rakeOk = isDrift ? (Math.abs(rec.rh.rake) < 0.15) : (rec.rh.rake >= 0.2);
+
   $('rec-ride-height').innerHTML =
-    recCard('車高 (Ride Height)', rec.rh.f, rec.rh.r, 'cm', Math.min(rng.rhf.min, rng.rhr.min), Math.max(rng.rhf.max, rng.rhr.max), rec.rh.note,
-      rec.rh.rake >= 0.2 ? 'var(--green)' : 'var(--red)');
+    recCard('車高 (Ride Height)', rec.rh.f, rec.rh.r, 'cm', 
+      { f: rng.rhf.min, r: rng.rhr.min }, 
+      { f: rng.rhf.max, r: rng.rhr.max }, 
+      rec.rh.note,
+      rakeOk ? 'var(--green)' : 'var(--red)');
 
   // Rake analysis
-  const rakeOk = rec.rh.rake >= 0.2;
-  $('rake-analysis').innerHTML = rakeOk
-    ? `<div class="callout c-ok"><span class="callout-icon">✓</span><span>Rake 正確：後車高 ${rec.rh.r} cm > 前車高 ${rec.rh.f} cm，差值 +${rec.rh.rake} cm。制動時重心前移有效。</span></div>`
-    : `<div class="callout c-danger"><span class="callout-icon">⚠</span><span>Rake 警告：後車高 ${rec.rh.r} cm ${rec.rh.rake >= 0 ? '≈' : '<'} 前車高 ${rec.rh.f} cm，差值 ${rec.rh.rake} cm。制動推頭風險高，請手動調整。</span></div>`;
+  $('rake-analysis').innerHTML = isDrift
+    ? (rakeOk
+      ? `<div class="callout c-ok"><span class="callout-icon">✓</span><span>Rake 正確 (漂移設定)：前後車高相等 (Rake = 0.0)，側滑負載分配合理。</span></div>`
+      : `<div class="callout c-danger"><span class="callout-icon">⚠</span><span>Rake 警告：前後車高不相等 (Rake = ${rec.rh.rake} cm)，將影響甩尾對稱性，請手動調整使前後車高一致。</span></div>`)
+    : (rakeOk
+      ? `<div class="callout c-ok"><span class="callout-icon">✓</span><span>Rake 正確：後車高 ${rec.rh.r} cm > 前車高 ${rec.rh.f} cm，差值 +${rec.rh.rake} cm。制動時重心前移有效。</span></div>`
+      : `<div class="callout c-danger"><span class="callout-icon">⚠</span><span>Rake 警告：後車高 ${rec.rh.r} cm ${rec.rh.rake >= 0 ? '≈' : '<'} 前車高 ${rec.rh.f} cm，差值 ${rec.rh.rake} cm。制動推頭風險高，請手動調整。</span></div>`);
 
   $('rec-damping').innerHTML =
     recCard('阻尼回彈 (Rebound)', rec.dr.f, rec.dr.r, '', rng.dr.min, rng.dr.max, '', 'var(--green)') +
