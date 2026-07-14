@@ -731,6 +731,17 @@
             backdrop-filter: blur(5px);
         }
 
+        .hud-speedometer.nitro-on {
+            border-color: rgba(0, 220, 255, 0.95);
+            box-shadow: 0 0 26px rgba(0, 220, 255, 0.7), inset 0 0 16px rgba(0, 150, 255, 0.28);
+            animation: nitroPulse 0.35s ease-in-out infinite alternate;
+        }
+
+        @keyframes nitroPulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.03); }
+        }
+
         .hud-speed-value {
             font-size: 3rem;
             font-weight: 900;
@@ -1305,11 +1316,11 @@
                     </div>
                     <div class="instruction-item">
                         <span class="instruction-icon">💨</span>
-                        <span class="instruction-text">轉彎時按住 <span class="instruction-highlight">Space</span> 進行<span class="instruction-highlight">漂移</span>，蓄力加速！</span>
+                        <span class="instruction-text">按住 <span class="instruction-highlight">Space</span> 甩尾可儲存能量，角度越大充能越快</span>
                     </div>
                     <div class="instruction-item">
                         <span class="instruction-icon">🔥</span>
-                        <span class="instruction-text">漂移結束時自動釋放<span class="instruction-highlight">渦輪加速</span>：白 → 橘 → 藍三段</span>
+                        <span class="instruction-text">按下 <span class="instruction-highlight">E</span> 直到能量耗盡；按 <span class="instruction-highlight">S</span> 或 <span class="instruction-highlight">Space</span> 可中斷</span>
                     </div>
                     <div class="instruction-item">
                         <span class="instruction-icon">🏆</span>
@@ -1417,17 +1428,94 @@
 
         // ===== 難度配置 =====
         const DIFFICULTY = {
-            easy:   { trackWidth: 18, aiSpeedMul: 0.72, aiCount: 3, label: '新手柏油路' },
-            normal: { trackWidth: 14, aiSpeedMul: 0.88, aiCount: 3, label: '霓虹都市' },
-            hard:   { trackWidth: 11, aiSpeedMul: 1.0,  aiCount: 3, label: '駭客高速公路' }
+            easy:   { trackWidth: 36, aiSpeedMul: 0.7,  aiCount: 3, label: '秋名外環山道' },
+            normal: { trackWidth: 30, aiSpeedMul: 0.86, aiCount: 3, label: '赤城連續彎' },
+            hard:   { trackWidth: 24, aiSpeedMul: 1.02, aiCount: 3, label: '榛名峠下坡' }
+        };
+
+        const TRACK_LAYOUTS = {
+            easy: [
+                new THREE.Vector3(-130, 0, -110),
+                new THREE.Vector3(-35, 0, -138),
+                new THREE.Vector3(65, 0, -132),
+                new THREE.Vector3(128, 0, -90),
+                new THREE.Vector3(138, 0, -20),
+                new THREE.Vector3(118, 0, 42),
+                new THREE.Vector3(72, 0, 102),
+                new THREE.Vector3(-5, 0, 128),
+                new THREE.Vector3(-85, 0, 122),
+                new THREE.Vector3(-138, 0, 80),
+                new THREE.Vector3(-150, 0, 15),
+                new THREE.Vector3(-142, 0, -55),
+            ],
+            normal: [
+                new THREE.Vector3(-122, 0, -130),
+                new THREE.Vector3(-35, 0, -148),
+                new THREE.Vector3(42, 0, -140),
+                new THREE.Vector3(98, 0, -110),
+                new THREE.Vector3(136, 0, -66),
+                new THREE.Vector3(148, 0, -10),
+                new THREE.Vector3(130, 0, 46),
+                new THREE.Vector3(90, 0, 88),
+                new THREE.Vector3(124, 0, 136),
+                new THREE.Vector3(84, 0, 166),
+                new THREE.Vector3(32, 0, 150),
+                new THREE.Vector3(-16, 0, 116),
+                new THREE.Vector3(-68, 0, 162),
+                new THREE.Vector3(-126, 0, 146),
+                new THREE.Vector3(-154, 0, 98),
+                new THREE.Vector3(-136, 0, 40),
+                new THREE.Vector3(-158, 0, -16),
+                new THREE.Vector3(-148, 0, -78),
+            ],
+            hard: [
+                new THREE.Vector3(-88, 0, -176),
+                new THREE.Vector3(-36, 0, -186),
+                new THREE.Vector3(16, 0, -174),
+                new THREE.Vector3(62, 0, -154),
+                new THREE.Vector3(106, 0, -170),
+                new THREE.Vector3(146, 0, -146),
+                new THREE.Vector3(158, 0, -102),
+                new THREE.Vector3(124, 0, -70),
+                new THREE.Vector3(152, 0, -34),
+                new THREE.Vector3(172, 0, 8),
+                new THREE.Vector3(146, 0, 42),
+                new THREE.Vector3(108, 0, 22),
+                new THREE.Vector3(80, 0, 56),
+                new THREE.Vector3(114, 0, 98),
+                new THREE.Vector3(94, 0, 140),
+                new THREE.Vector3(44, 0, 154),
+                new THREE.Vector3(8, 0, 120),
+                new THREE.Vector3(-34, 0, 154),
+                new THREE.Vector3(-80, 0, 176),
+                new THREE.Vector3(-132, 0, 158),
+                new THREE.Vector3(-166, 0, 118),
+                new THREE.Vector3(-150, 0, 72),
+                new THREE.Vector3(-182, 0, 36),
+                new THREE.Vector3(-168, 0, -10),
+                new THREE.Vector3(-136, 0, -42),
+                new THREE.Vector3(-166, 0, -80),
+                new THREE.Vector3(-154, 0, -128),
+                new THREE.Vector3(-120, 0, -152),
+            ]
         };
 
         // ===== 車輛物理參數 =====
         const PHYSICS = {
-            maxSpeed: 1.8,
-            acceleration: 2.8,
+            maxSpeed: 1.5,
+            acceleration: 2.05,
             braking: 4.0,
             friction: 1.2,
+            handbrakeBrake: 2.05,
+            handbrakeDrag: 0.6,
+            handbrakeMinSlipSpeed: 0.34,
+            handbrakeChargeRate: 1.25,
+            handbrakeChargeMax: 1.0,
+            nitroChargeBase: 0.08,
+            nitroChargeAngleBonus: 0.72,
+            nitroDrainRate: 0.24,
+            nitroBoostAccel: 2.35,
+            nitroTopSpeed: 2.0,
             steerRate: 2.2,
             // 漂移
             driftSteerRate: 3.0,
@@ -1437,15 +1525,16 @@
             boostThreshold1: 0.8,
             boostThreshold2: 1.8,
             boostThreshold3: 3.0,
-            boostSpeed1: 0.4,
-            boostSpeed2: 0.7,
-            boostSpeed3: 1.1,
-            boostDuration1: 0.8,
-            boostDuration2: 1.2,
-            boostDuration3: 1.8,
-            boostMaxSpeed: 2.8,
+            boostSpeed1: 0.28,
+            boostSpeed2: 0.45,
+            boostSpeed3: 0.72,
+            boostDuration1: 0.55,
+            boostDuration2: 0.9,
+            boostDuration3: 1.25,
+            boostMaxSpeed: 2.25,
             // 碰撞
-            wallBounce: 0.4,
+            wallBounce: 0.62,
+            wallMinSpeed: 0.35,
             carBounce: 0.5,
             carCollisionDist: 2.8,
         };
@@ -1461,6 +1550,7 @@
         let raceTime = 0;
         let countdownTimer = 0;
         let keys = {};
+        let keyPressed = {};
         let container = null;
         let animId = null;
 
@@ -1472,20 +1562,39 @@
         let minimapCtx = null;
         let minimapTrackPath = [];
 
+        function normalizeAngle(a) {
+            while (a > Math.PI) a -= Math.PI * 2;
+            while (a < -Math.PI) a += Math.PI * 2;
+            return a;
+        }
+
+        function angleDiff(target, current) {
+            return normalizeAngle(target - current);
+        }
+
+        function moveAngleTowards(current, target, maxStep) {
+            const diff = angleDiff(target, current);
+            if (Math.abs(diff) <= maxStep) return target;
+            return current + Math.sign(diff) * maxStep;
+        }
+
+        function angleToDir(angle) {
+            return { x: Math.sin(angle), z: Math.cos(angle) };
+        }
+
+        function dirToAngle(x, z) {
+            return Math.atan2(x, z);
+        }
+
+        function consumePressedKey(key) {
+            if (!keyPressed[key]) return false;
+            keyPressed[key] = false;
+            return true;
+        }
+
         // ===== 賽道生成 =====
         function createTrack() {
-            const pts = [
-                new THREE.Vector3(-60, 0, -110),
-                new THREE.Vector3(60, 0, -110),
-                new THREE.Vector3(115, 0, -65),
-                new THREE.Vector3(125, 0, 5),
-                new THREE.Vector3(100, 0, 60),
-                new THREE.Vector3(45, 0, 90),
-                new THREE.Vector3(-25, 0, 95),
-                new THREE.Vector3(-75, 0, 65),
-                new THREE.Vector3(-110, 0, 10),
-                new THREE.Vector3(-105, 0, -55),
-            ];
+            const pts = TRACK_LAYOUTS[difficulty] || TRACK_LAYOUTS.normal;
 
             trackCurve = new THREE.CatmullRomCurve3(pts, true);
 
@@ -1643,48 +1752,50 @@
 
         function buildEnvironment() {
             // 地面
-            const groundGeo = new THREE.PlaneGeometry(600, 600);
-            const groundMat = new THREE.MeshStandardMaterial({ color: 0x0a0a15 });
+            const groundGeo = new THREE.PlaneGeometry(1200, 1200);
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x141917, roughness: 0.95 });
             const ground = new THREE.Mesh(groundGeo, groundMat);
             ground.rotation.x = -Math.PI / 2;
             ground.position.y = -0.1;
             scene.add(ground);
 
             // 地面網格
-            const gridHelper = new THREE.GridHelper(600, 60, 0x111122, 0x111122);
+            const gridHelper = new THREE.GridHelper(1200, 120, 0x1b231f, 0x151b18);
             gridHelper.position.y = -0.05;
             scene.add(gridHelper);
 
-            // 城市建築
-            const buildingMat = new THREE.MeshStandardMaterial({ color: 0x0a0a1a });
-            const windowColors = [0xff00ff, 0x00ffff, 0xff8800, 0x8800ff];
+            // 山體外圈
+            const mountainMat = new THREE.MeshStandardMaterial({ color: 0x2a2d26, roughness: 0.98, metalness: 0.02 });
+            for (let i = 0; i < 140; i++) {
+                const ang = Math.random() * Math.PI * 2;
+                const radius = 320 + Math.random() * 220;
+                const x = Math.cos(ang) * radius;
+                const z = Math.sin(ang) * radius;
+                if (isInsideTrack(x, z, trackWidth + 80)) continue;
 
-            for (let i = 0; i < 60; i++) {
-                let x, z;
-                do {
-                    x = (Math.random() - 0.5) * 500;
-                    z = (Math.random() - 0.5) * 500;
-                } while (isInsideTrack(x, z, trackWidth + 20));
+                const h = 28 + Math.random() * 120;
+                const r = 20 + Math.random() * 42;
+                const peak = new THREE.Mesh(new THREE.ConeGeometry(r, h, 6), mountainMat);
+                peak.position.set(x, h / 2 - 1, z);
+                peak.rotation.y = Math.random() * Math.PI;
+                scene.add(peak);
+            }
 
-                const h = Math.random() * 60 + 15;
-                const w = Math.random() * 12 + 5;
-                const d = Math.random() * 12 + 5;
-
-                const building = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), buildingMat);
-                building.position.set(x, h / 2, z);
-                scene.add(building);
-
-                // 窗戶燈光
-                const wc = windowColors[Math.floor(Math.random() * windowColors.length)];
-                const winCount = Math.floor(Math.random() * 4) + 1;
-                for (let j = 0; j < winCount; j++) {
-                    const winH = h * 0.08;
-                    const win = new THREE.Mesh(
-                        new THREE.BoxGeometry(w * 0.9, winH, d * 0.9),
-                        new THREE.MeshStandardMaterial({ color: wc, emissive: wc, emissiveIntensity: 0.4 })
-                    );
-                    win.position.y = -h / 2 + (j + 1) * (h / (winCount + 1));
-                    building.add(win);
+            // 賽道邊山壁/岩石
+            const cliffMat = new THREE.MeshStandardMaterial({ color: 0x34362f, roughness: 1.0 });
+            for (let i = 0; i < TRACK_SAMPLES; i += 9) {
+                const pt = trackSamples[i];
+                const n = trackNormals[i];
+                for (const side of [1, -1]) {
+                    if (Math.random() < 0.38) continue;
+                    const offset = trackWidth * 0.7 + 7 + Math.random() * 10;
+                    const x = pt.x + n.x * offset * side;
+                    const z = pt.z + n.z * offset * side;
+                    const h = 3 + Math.random() * 10;
+                    const rock = new THREE.Mesh(new THREE.BoxGeometry(2 + Math.random() * 4, h, 2 + Math.random() * 4), cliffMat);
+                    rock.position.set(x, h / 2 - 0.2, z);
+                    rock.rotation.set(Math.random() * 0.2, Math.random() * Math.PI, Math.random() * 0.2);
+                    scene.add(rock);
                 }
             }
 
@@ -1790,7 +1901,7 @@
             const pt = trackCurve.getPoint(startT);
             const tan = trackCurve.getTangent(startT).normalize();
             const normal = new THREE.Vector3(-tan.z, 0, tan.x);
-            const heading = Math.atan2(-tan.x, -tan.z);
+            const heading = Math.atan2(tan.x, tan.z);
 
             mesh.position.set(
                 pt.x + normal.x * lateralOffset,
@@ -1807,16 +1918,22 @@
                 isDrifting: false,
                 driftCharge: 0,
                 driftDir: 0,
+                handbrakeHolding: false,
+                handbrakeCharge: 0,
+                nitroEnergy: 0,
+                nitroActive: false,
                 boostTimer: 0,
                 boostPower: 0,
                 lap: 0,
                 lastT: startT,
                 totalProgress: 0,
                 crossed: false,
+                lapReady: false,
                 isPlayer: index === 0,
                 name: CAR_NAMES[index],
                 finishTime: 0,
                 finished: false,
+                wallRecoverTimer: 0,
                 // AI 特有
                 aiData: index > 0 ? {
                     targetT: startT,
@@ -1855,7 +1972,7 @@
             const t = bestIdx / TRACK_SAMPLES;
 
             // 賽道方向角
-            const trackAngle = Math.atan2(-tan.x, -tan.z);
+            const trackAngle = Math.atan2(tan.x, tan.z);
 
             return { t, lateral, trackAngle, idx: bestIdx, dist: Math.sqrt(bestDist) };
         }
@@ -1866,8 +1983,13 @@
             const currentT = info.t;
             const lastT = car.lastT;
 
+            if (!car.lapReady && currentT > 0.12 && currentT < 0.88) {
+                car.lapReady = true;
+                car.crossed = false;
+            }
+
             // 檢測跨越起跑線 (t 從 ~1 回到 ~0)
-            if (lastT > 0.9 && currentT < 0.1 && !car.crossed) {
+            if (car.lapReady && lastT > 0.9 && currentT < 0.1 && !car.crossed) {
                 car.lap++;
                 car.crossed = true;
             }
@@ -1889,15 +2011,101 @@
             const throttle = (keys['w'] || keys['arrowup']) ? 1 : 0;
             const brake = (keys['s'] || keys['arrowdown']) ? 1 : 0;
             const driftKey = keys[' '];
+            const nitroTrigger = consumePressedKey('e');
+            const handbrakeActive = !!driftKey;
+
+            if (car.wallRecoverTimer > 0) {
+                car.wallRecoverTimer = Math.max(0, car.wallRecoverTimer - dt);
+                const recoverInfo = getClosestTrackInfo(car.mesh.position.x, car.mesh.position.z);
+                car.heading = moveAngleTowards(car.heading, recoverInfo.trackAngle, dt * 4.5);
+                car.velAngle = moveAngleTowards(car.velAngle, recoverInfo.trackAngle, dt * 6.5);
+                car.speed = Math.max(0, car.speed);
+                if (car.wallRecoverTimer > 0 && !throttle) {
+                    car.speed *= Math.max(0, 1 - dt * 2.2);
+                }
+                if (car.wallRecoverTimer > 0 && throttle && car.speed < 0.24) {
+                    car.speed = 0.24;
+                }
+            }
 
             // 加速 / 煞車
-            const maxSpd = car.boostTimer > 0 ? PHYSICS.boostMaxSpeed : PHYSICS.maxSpeed;
+            const maxSpd = car.nitroActive
+                ? PHYSICS.nitroTopSpeed
+                : (car.boostTimer > 0 ? PHYSICS.boostMaxSpeed : PHYSICS.maxSpeed);
 
             if (throttle) {
                 car.speed = Math.min(maxSpd, car.speed + PHYSICS.acceleration * dt);
             }
             if (brake) {
                 car.speed = Math.max(-PHYSICS.maxSpeed * 0.3, car.speed - PHYSICS.braking * dt);
+            }
+
+            // 手煞車：按住減速甩尾蓄力，放開時小幅推進
+            if (handbrakeActive) {
+                if (!car.handbrakeHolding) {
+                    car.handbrakeHolding = true;
+                    car.handbrakeCharge = 0;
+                    if (steerInput !== 0) car.driftDir = steerInput;
+                    else if (car.driftDir === 0) car.driftDir = 1;
+                }
+
+                if (steerInput !== 0) car.driftDir = steerInput;
+
+                if (Math.abs(car.speed) > 0.2) {
+                    car.handbrakeCharge = Math.min(
+                        PHYSICS.handbrakeChargeMax,
+                        car.handbrakeCharge + dt * PHYSICS.handbrakeChargeRate
+                    );
+                }
+
+                car.isDrifting = Math.abs(car.speed) > 0.18;
+                car.driftCharge = car.handbrakeCharge * PHYSICS.boostThreshold3;
+
+                if (car.speed > 0) {
+                    car.speed = Math.max(PHYSICS.handbrakeMinSlipSpeed, car.speed - PHYSICS.handbrakeBrake * dt);
+                } else if (car.speed < 0) {
+                    car.speed = Math.min(0, car.speed + PHYSICS.handbrakeBrake * dt);
+                }
+                car.speed *= Math.max(0, 1 - PHYSICS.handbrakeDrag * dt * 0.2);
+
+                if (Math.abs(car.speed) > 0.14) {
+                    const steerFactor = steerInput !== 0 ? 1 : 0.58;
+                    car.heading += car.driftDir * PHYSICS.driftSteerRate * steerFactor * dt;
+                    const slideGrip = steerInput !== 0 ? PHYSICS.driftGrip * 0.7 : PHYSICS.driftGrip * 0.2;
+                    car.velAngle += angleDiff(car.heading, car.velAngle) * slideGrip * dt;
+
+                    // 甩尾角度越大，能量儲存越快
+                    const slipAngle = Math.abs(angleDiff(car.heading, car.velAngle));
+                    const angleFactor = Math.min(1, slipAngle / (Math.PI * 0.35));
+                    const speedFactor = Math.min(1, Math.abs(car.speed) / PHYSICS.maxSpeed);
+                    const gain = (PHYSICS.nitroChargeBase + PHYSICS.nitroChargeAngleBonus * angleFactor) * (0.35 + speedFactor * 0.65);
+                    car.nitroEnergy = Math.min(1, car.nitroEnergy + gain * dt);
+                }
+            } else if (car.handbrakeHolding) {
+                car.handbrakeHolding = false;
+                car.handbrakeCharge = 0;
+                car.isDrifting = false;
+                car.driftCharge = 0;
+            }
+
+            const reverseState = car.speed < -0.03;
+            const nitroInterrupted = brake || handbrakeActive || reverseState;
+
+            if (nitroInterrupted) {
+                car.nitroActive = false;
+            } else if (nitroTrigger && car.nitroEnergy > 0.01) {
+                car.nitroActive = true;
+            }
+
+            if (car.nitroActive) {
+                const speedFactor = Math.min(1, Math.abs(car.speed) / PHYSICS.maxSpeed);
+                const drain = PHYSICS.nitroDrainRate * (0.8 + speedFactor * 0.4);
+                car.nitroEnergy = Math.max(0, car.nitroEnergy - drain * dt);
+                car.speed = Math.min(PHYSICS.nitroTopSpeed, car.speed + PHYSICS.nitroBoostAccel * dt);
+                if (car.nitroEnergy <= 0.001) {
+                    car.nitroEnergy = 0;
+                    car.nitroActive = false;
+                }
             }
 
             // 摩擦力
@@ -1916,39 +2124,20 @@
                 }
             }
 
-            // 漂移邏輯
-            if (driftKey && steerInput !== 0 && car.speed > PHYSICS.maxSpeed * 0.3) {
-                if (!car.isDrifting) {
-                    car.isDrifting = true;
-                    car.driftDir = steerInput;
-                    car.driftCharge = 0;
-                }
-                car.driftCharge += dt;
-
-                // 漂移轉向：heading 轉更快
-                car.heading += car.driftDir * PHYSICS.driftSteerRate * dt;
-                // 速度方向追趕 heading，但有延遲
-                const angleDiff = car.heading - car.velAngle;
-                car.velAngle += angleDiff * PHYSICS.driftGrip * dt;
-                // 漂移輕微減速
-                car.speed *= Math.max(0, 1 - PHYSICS.driftSpeedLoss * dt);
-            } else {
-                // 漂移結束 → 釋放加速
-                if (car.isDrifting) {
-                    releaseDriftBoost(car);
-                    car.isDrifting = false;
-                }
-                // 正常轉向
-                if (Math.abs(car.speed) > 0.05) {
-                    car.heading += steerInput * PHYSICS.steerRate * (car.speed / PHYSICS.maxSpeed) * dt;
-                    car.velAngle = car.heading;
-                }
+            // 正常轉向（手煞車按住時交由手煞車邏輯處理）
+            if (!handbrakeActive && Math.abs(car.speed) > 0.05) {
+                car.heading += steerInput * PHYSICS.steerRate * (car.speed / PHYSICS.maxSpeed) * dt;
+                car.velAngle = car.heading;
             }
 
             // 移動
             car.mesh.position.x += Math.sin(car.velAngle) * car.speed * dt * 60;
             car.mesh.position.z += Math.cos(car.velAngle) * car.speed * dt * 60;
             car.mesh.rotation.y = car.heading;
+        }
+
+        function releaseHandbrakeBoost(car) {
+            // 保留函式名稱避免外部呼叫中斷。
         }
 
         function releaseDriftBoost(car) {
@@ -2061,22 +2250,56 @@
             const hw = trackWidth / 2;
 
             // 賽道邊界碰撞
-            if (Math.abs(info.lateral) > hw - 1.0) {
+            if (Math.abs(info.lateral) > hw - 0.55) {
                 const sign = info.lateral > 0 ? 1 : -1;
                 const n = trackNormals[info.idx];
-                const pushBack = sign * (hw - 1.0);
+                const pushBack = sign * (hw - 1.1);
                 const pt = trackSamples[info.idx];
                 car.mesh.position.x = pt.x + n.x * pushBack;
                 car.mesh.position.z = pt.z + n.z * pushBack;
-                car.speed *= PHYSICS.wallBounce;
+                const collidedSpeed = Math.abs(car.speed) * PHYSICS.wallBounce;
+                car.speed = Math.max(PHYSICS.wallMinSpeed, collidedSpeed);
 
-                // 碰牆時修正角度
+                // 用向量反射避免碰牆後瞬間旋轉失控
                 const wallNx = n.x * sign;
                 const wallNz = n.z * sign;
-                const dot = Math.sin(car.velAngle) * wallNx + Math.cos(car.velAngle) * wallNz;
-                if (dot > 0) {
-                    car.velAngle -= dot * 1.5;
-                    car.heading = car.velAngle;
+                const velDir = angleToDir(car.velAngle);
+                const incoming = velDir.x * wallNx + velDir.z * wallNz;
+
+                if (incoming > 0) {
+                    let rx = velDir.x - 2 * incoming * wallNx;
+                    let rz = velDir.z - 2 * incoming * wallNz;
+
+                    const trackForward = trackTangents[info.idx];
+                    if (rx * trackForward.x + rz * trackForward.z < 0) {
+                        rx = trackForward.x;
+                        rz = trackForward.z;
+                    }
+
+                    const len = Math.hypot(rx, rz) || 1;
+                    rx /= len;
+                    rz /= len;
+
+                    const blendX = rx * 0.4 + trackForward.x * 0.6;
+                    const blendZ = rz * 0.4 + trackForward.z * 0.6;
+                    const blendLen = Math.hypot(blendX, blendZ) || 1;
+                    const stableAngle = dirToAngle(blendX / blendLen, blendZ / blendLen);
+
+                    car.velAngle = stableAngle;
+                    car.heading = moveAngleTowards(car.heading, stableAngle, 0.5);
+                } else {
+                    car.velAngle = moveAngleTowards(car.velAngle, info.trackAngle, 0.4);
+                    car.heading = moveAngleTowards(car.heading, info.trackAngle, 0.3);
+                }
+
+                const escape = trackTangents[info.idx];
+                car.mesh.position.x += escape.x * 0.45;
+                car.mesh.position.z += escape.z * 0.45;
+
+                if (car.isPlayer) {
+                    car.isDrifting = false;
+                    car.driftCharge = 0;
+                    car.wallRecoverTimer = Math.max(car.wallRecoverTimer, 0.35);
                 }
             }
 
@@ -2397,7 +2620,7 @@
             document.getElementById('hudPosSuffix').textContent = suffixes[Math.min(position - 1, 3)];
 
             // 圈數
-            const displayLap = Math.min(player.lap + 1, TOTAL_LAPS);
+            const displayLap = Math.min(player.lap, TOTAL_LAPS);
             document.getElementById('hudLap').textContent = displayLap;
 
             // 計時
@@ -2409,27 +2632,13 @@
 
             // 加速條
             const boostFill = document.getElementById('hudBoostFill');
-            if (player.isDrifting) {
-                const maxCharge = PHYSICS.boostThreshold3;
-                const pct = Math.min(100, (player.driftCharge / maxCharge) * 100);
-                boostFill.style.width = pct + '%';
-
-                boostFill.classList.remove('level1', 'level2', 'level3');
-                if (player.driftCharge >= PHYSICS.boostThreshold3) {
-                    boostFill.classList.add('level3');
-                } else if (player.driftCharge >= PHYSICS.boostThreshold2) {
-                    boostFill.classList.add('level2');
-                } else {
-                    boostFill.classList.add('level1');
-                }
-            } else if (player.boostTimer > 0) {
-                boostFill.style.width = '100%';
-                boostFill.classList.remove('level1', 'level2');
-                boostFill.classList.add('level3', 'hud-boost-active');
-            } else {
-                boostFill.style.width = '0%';
-                boostFill.classList.remove('level1', 'level2', 'level3', 'hud-boost-active');
-            }
+            const nitroPct = Math.min(100, (player.nitroEnergy || 0) * 100);
+            boostFill.style.width = nitroPct + '%';
+            boostFill.classList.remove('level1', 'level2', 'level3', 'hud-boost-active');
+            if (nitroPct >= 66) boostFill.classList.add('level3');
+            else if (nitroPct >= 33) boostFill.classList.add('level2');
+            else if (nitroPct > 0) boostFill.classList.add('level1');
+            if (player.nitroActive) boostFill.classList.add('hud-boost-active');
 
             // 漂移指示
             const driftEl = document.getElementById('hudDrift');
@@ -2446,6 +2655,11 @@
                     driftEl.textContent = 'DRIFT!';
                     driftEl.classList.add('drift-l1');
                 }
+            } else if (player.nitroActive) {
+                driftEl.classList.add('active');
+                driftEl.classList.remove('drift-l1', 'drift-l2', 'drift-l3');
+                driftEl.textContent = 'NITRO BOOST!';
+                driftEl.classList.add('drift-l3');
             } else {
                 driftEl.classList.remove('active');
             }
@@ -2454,11 +2668,14 @@
             const vignette = document.getElementById('speedVignette');
             const vignetteOpacity = Math.min(0.8, speedKMH / 280);
             vignette.style.opacity = vignetteOpacity;
-            if (player.boostTimer > 0) {
+            if (player.boostTimer > 0 || player.nitroActive) {
                 vignette.classList.add('boost-active');
             } else {
                 vignette.classList.remove('boost-active');
             }
+
+            const speedometer = document.querySelector('.hud-speedometer');
+            if (speedometer) speedometer.classList.toggle('nitro-on', !!player.nitroActive);
 
             // 小地圖
             drawMinimap();
@@ -2508,7 +2725,6 @@
             } else {
                 overlay.classList.remove('active');
                 gameState = 'playing';
-                raceTime = 0;
             }
         }
 
@@ -2633,12 +2849,21 @@
                 handleCollisions(car);
                 const info = updateLapProgress(car);
 
+                if (car.isPlayer && Math.abs(car.speed) > 0.2) {
+                    const wrongWay = Math.abs(angleDiff(info.trackAngle, car.velAngle)) > Math.PI * 0.72;
+                    if (wrongWay) {
+                        car.speed *= Math.max(0, 1 - dt * 3.5);
+                        car.velAngle = moveAngleTowards(car.velAngle, info.trackAngle, dt * 4.2);
+                        car.heading = moveAngleTowards(car.heading, info.trackAngle, dt * 3.4);
+                    }
+                }
+
                 // 粒子效果 (只渲染玩家的)
                 if (car.isPlayer) {
                     if (car.isDrifting) {
                         emitDriftSparks(car.mesh.position, car.heading, car.driftCharge);
                     }
-                    if (car.boostTimer > 0) {
+                    if (car.boostTimer > 0 || car.nitroActive) {
                         emitBoostFlame(car.mesh.position, car.heading);
                     }
                 }
@@ -2673,7 +2898,9 @@
 
             // 鍵盤
             window.addEventListener('keydown', e => {
-                keys[e.key.toLowerCase()] = true;
+                const k = e.key.toLowerCase();
+                if (!keys[k]) keyPressed[k] = true;
+                keys[k] = true;
                 if (e.key === ' ') e.preventDefault();
                 if (e.key === 'Escape' && gameState === 'playing') {
                     togglePause();
@@ -2707,6 +2934,7 @@
             cars = [];
             raceTime = 0;
             keys = {};
+            keyPressed = {};
 
             // 建造賽道
             createTrack();
@@ -2725,6 +2953,22 @@
                 const car = createCar(i, sp.t, sp.lateral);
                 cars.push(car);
             }
+
+            // 比賽開始前就先重置 HUD/時間，避免倒數到 GO 才跳動
+            raceTime = 0;
+            const hudSpeedEl = document.getElementById('hudSpeed');
+            const hudLapEl = document.getElementById('hudLap');
+            const hudTimerEl = document.getElementById('hudTimer');
+            const boostFillEl = document.getElementById('hudBoostFill');
+            const driftEl = document.getElementById('hudDrift');
+            if (hudSpeedEl) hudSpeedEl.textContent = '0';
+            if (hudLapEl) hudLapEl.textContent = '0';
+            if (hudTimerEl) hudTimerEl.textContent = '00:00.0';
+            if (boostFillEl) {
+                boostFillEl.style.width = '0%';
+                boostFillEl.classList.remove('level1', 'level2', 'level3', 'hud-boost-active');
+            }
+            if (driftEl) driftEl.classList.remove('active', 'drift-l1', 'drift-l2', 'drift-l3');
 
             // 初始化小地圖
             initMinimap();

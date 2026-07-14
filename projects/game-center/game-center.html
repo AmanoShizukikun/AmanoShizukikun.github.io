@@ -582,7 +582,7 @@
         :root {
             --loader-accent: var(--accent-cyan, #00ffff);
             --loader-accent-2: var(--accent-magenta, #ff00ff);
-            --loader-bg: rgba(4, 4, 10, 0.85);
+            --loader-bg: rgba(4, 4, 10, 0.95);
         }
 
         .game-loading-overlay {
@@ -592,11 +592,12 @@
             display: none; /* toggled via JS */
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(6px);
+            backdrop-filter: blur(8px);
             pointer-events: auto;
             opacity: 0;
             transition: opacity 400ms cubic-bezier(0.2, 0.9, 0.2, 1);
             background: var(--loader-bg);
+            perspective: 1000px;
         }
 
         .game-loading-overlay.visible {
@@ -604,18 +605,25 @@
             opacity: 1;
         }
 
+        /* 3D 空間網格扭曲前進效果 */
         .game-loading-grid {
             position: absolute;
-            inset: 0;
+            inset: -100px;
             background-image:
-                linear-gradient(180deg, rgba(0,0,0,0.0) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,0,0,0.0) 1px, transparent 1px),
-                radial-gradient(circle at 10% 20%, rgba(0,255,255,0.04), transparent 20%);
-            background-size: 24px 24px, 24px 24px, 600px 600px;
-            filter: hue-rotate(0deg) saturate(1.3);
-            opacity: 0.8;
-            z-index: 2;
+                linear-gradient(rgba(0, 255, 255, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.15) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: perspective(400px) rotateX(70deg) translateZ(0);
+            transform-origin: center 40%;
+            opacity: 0.3;
+            z-index: 1;
             pointer-events: none;
+            animation: gridWarpSpeed 10s linear infinite;
+        }
+
+        @keyframes gridWarpSpeed {
+            0% { background-position-y: 0; }
+            100% { background-position-y: 500px; }
         }
 
         .game-loading-center {
@@ -624,93 +632,129 @@
             color: var(--loader-accent);
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 22px;
             align-items: center;
             justify-content: center;
-            width: min(720px, 90%);
-            padding: 30px;
+            width: min(520px, 90%);
+            padding: 40px;
+            background: rgba(8, 8, 16, 0.8);
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.15), inset 0 0 20px rgba(0, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
             box-sizing: border-box;
+            position: relative;
         }
 
-        /* Spinner / Logo */
+        /* 左右科技裝飾邊角 */
+        .game-loading-center::before, .game-loading-center::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--loader-accent);
+            pointer-events: none;
+        }
+        .game-loading-center::before {
+            top: -2px; left: -2px;
+            border-right: none; border-bottom: none;
+            border-top-left-radius: 12px;
+        }
+        .game-loading-center::after {
+            bottom: -2px; right: -2px;
+            border-left: none; border-top: none;
+            border-bottom-right-radius: 12px;
+        }
+
+        /* HUD 旋轉標記 & Spinner */
         .game-loader-spinner {
-            width: 160px;
-            height: 160px;
-            border-radius: 20px;
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
             position: relative;
             display: grid;
             place-items: center;
             transform-style: preserve-3d;
         }
 
-        /* outer rings */
+        /* 旋轉外環 */
         .game-loader-spinner .spinner-ring {
             position: absolute;
-            inset: 0;
             border-radius: 50%;
             box-sizing: border-box;
             pointer-events: none;
             mix-blend-mode: screen;
-            filter: blur(6px);
         }
 
+        /* 外層：圓環刻度/羅盤樣式 */
         .game-loader-spinner .spinner-ring.ring1 {
-            border: 3px solid rgba(0,255,255,0.15);
-            width: 140px;
-            height: 140px;
-            animation: ringSpin 6s linear infinite reverse;
+            border: 3px solid rgba(0, 255, 255, 0.15);
+            border-top-color: var(--loader-accent);
+            border-bottom-color: var(--loader-accent);
+            width: 160px;
+            height: 160px;
+            animation: ringSpin 4s cubic-bezier(0.4, 0.08, 0.12, 1) infinite;
         }
 
+        /* 中層：虛線雷達掃描 */
         .game-loader-spinner .spinner-ring.ring2 {
-            border: 2px dashed rgba(255,0,255,0.12);
-            width: 120px;
-            height: 120px;
-            animation: ringSpin 3.5s linear infinite;
+            border: 2px dashed rgba(255, 0, 255, 0.2);
+            border-left-color: var(--loader-accent-2);
+            border-right-color: var(--loader-accent-2);
+            width: 135px;
+            height: 135px;
+            animation: ringSpin 2.5s linear infinite reverse;
         }
 
+        /* 內層：極細齒輪/目標點 */
         .game-loader-spinner .spinner-ring.ring3 {
-            border: 2px solid rgba(0,255,255,0.25);
-            width: 100px;
-            height: 100px;
-            animation: ringSpin 4.2s linear infinite reverse;
+            border: 1px dotted rgba(0, 255, 255, 0.4);
+            border-top-color: #ffffff;
+            width: 110px;
+            height: 110px;
+            animation: ringSpin 5s linear infinite;
         }
 
-        /* 進度環 (conic) */
+        /* Conic 漸進式進度刻度 */
         .game-loading-gauge {
             position: absolute;
             inset: 0;
-            width: 160px;
-            height: 160px;
+            width: 170px;
+            height: 170px;
             border-radius: 50%;
-            background: conic-gradient(var(--loader-accent) 0%, var(--loader-accent-2) var(--loader-progress, 0%), rgba(255,255,255,0) 0%);
-            opacity: 0.25;
+            background: conic-gradient(var(--loader-accent) 0%, var(--loader-accent-2) var(--loader-progress, 0%), rgba(255, 255, 255, 0) 0%);
+            opacity: 0.3;
             pointer-events: none;
-            filter: blur(6px);
+            filter: drop-shadow(0 0 8px var(--loader-accent));
             z-index: 1;
+            transition: opacity 0.3s ease;
         }
 
         .game-loader-inner {
-            width: 72%;
-            height: 72%;
-            border-radius: 12px;
-            background: linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.72));
+            width: 75%;
+            height: 75%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(10, 10, 24, 0.95), rgba(4, 4, 8, 0.98));
+            border: 1px solid rgba(0, 255, 255, 0.3);
             display: grid;
             place-items: center;
             color: #fff;
-            font-weight: 700;
-            font-family: 'Orbitron', sans-serif;
             position: relative;
             z-index: 6;
-            box-shadow: inset 0 2px 8px rgba(255,255,255,0.02), 0 6px 30px rgba(0,255,255,0.06);
-            transform: translateZ(20px);
+            box-shadow: inset 0 0 15px rgba(0, 255, 255, 0.2), 0 0 30px rgba(0, 255, 255, 0.1);
             overflow: hidden;
         }
 
         .game-loader-icon {
-            font-size: 3.8rem;
-            filter: drop-shadow(0 8px 22px rgba(0,255,255,0.3));
-            transform: translateZ(30px);
+            font-size: 3.5rem;
+            filter: drop-shadow(0 0 12px var(--loader-accent));
             line-height: 1;
+            animation: iconPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 12px var(--loader-accent)); }
+            50% { transform: scale(1.08); filter: drop-shadow(0 0 20px var(--loader-accent-2)); }
         }
 
         @keyframes ringSpin {
@@ -719,128 +763,223 @@
         }
 
         .game-loading-title {
-            font-size: clamp(1.25rem, 2.2vw, 2rem);
-            letter-spacing: 0.18em;
-            color: var(--loader-accent);
+            font-size: 1.6rem;
+            letter-spacing: 0.2em;
+            color: #ffffff;
+            font-family: 'Orbitron', sans-serif;
             text-transform: uppercase;
             font-weight: 900;
-            text-shadow: 0 0 30px rgba(0,255,255,0.45);
-            margin-top: 6px;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            margin-top: 5px;
         }
 
         .game-loading-subtitle {
-            color: rgba(255,255,255,0.75);
+            color: var(--text-secondary);
             font-family: 'Rajdhani', sans-serif;
             font-weight: 600;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.1em;
             font-size: 0.9rem;
+            margin-top: -10px;
+        }
+
+        /* 科技感的終端日誌控制台 */
+        .game-loading-console {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.25);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.78rem;
+            color: rgba(0, 255, 255, 0.85);
+            text-align: left;
+            min-height: 52px;
+            box-shadow: inset 0 0 12px rgba(0, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            box-sizing: border-box;
+        }
+
+        .console-line {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .console-line.fade {
+            opacity: 0.4;
+            font-size: 0.72rem;
+        }
+        .console-line.active {
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
+            animation: consoleGlitchText 0.2s ease-out;
+        }
+
+        @keyframes consoleGlitchText {
+            0% { opacity: 0.5; transform: translateX(-2px); }
+            50% { opacity: 0.8; transform: translateX(1px); }
+            100% { opacity: 1; transform: translateX(0); }
         }
 
         .game-loading-percent {
             font-family: 'Orbitron', monospace;
-            font-weight: 800;
-            font-size: 1.4rem;
+            font-weight: 900;
+            font-size: 1.5rem;
             color: var(--loader-accent);
-            text-shadow: 0 0 20px rgba(0,255,255,0.35);
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+            margin-top: 5px;
         }
 
         .game-loading-progress {
             width: 100%;
-            height: 10px;
-            background: rgba(255,255,255,0.06);
-            border-radius: 999px;
+            height: 6px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.6);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+            border: 1px solid rgba(0, 255, 255, 0.15);
         }
 
         .game-loading-progress-bar {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, var(--loader-accent), var(--loader-accent-2));
-            box-shadow: 0 0 12px rgba(0,255,255,0.6);
-            transition: width 300ms cubic-bezier(0.2, 0.9, 0.2, 1);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            transition: width 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        /* Animated indicator */
+        /* 噴射指示器改寫為霓虹光點 */
         .game-loading-dots {
             display: inline-flex;
-            gap: 6px;
+            gap: 8px;
+            margin-top: 5px;
         }
 
         .game-loading-dots span {
             display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: rgba(255,255,255,0.1);
+            width: 6px;
+            height: 6px;
+            background: var(--loader-accent);
             border-radius: 50%;
+            box-shadow: 0 0 8px var(--loader-accent);
             transform: translateY(0);
-            animation: dotFloat 1s ease-in-out infinite;
+            animation: dotFloat 1.2s ease-in-out infinite;
         }
 
-        .game-loading-dots span:nth-child(2) { animation-delay: 0.12s; }
-        .game-loading-dots span:nth-child(3) { animation-delay: 0.24s; }
+        .game-loading-dots span:nth-child(2) { animation-delay: 0.15s; background: #ffffff; box-shadow: 0 0 8px #ffffff; }
+        .game-loading-dots span:nth-child(3) { animation-delay: 0.3s; background: var(--loader-accent-2); box-shadow: 0 0 8px var(--loader-accent-2); }
 
         @keyframes dotFloat {
-            0% { transform: translateY(0); opacity: 0.6; }
-            50% { transform: translateY(-6px); opacity: 1; }
-            100% { transform: translateY(0); opacity: 0.6; }
+            0%, 100% { transform: translateY(0); opacity: 0.5; }
+            50% { transform: translateY(-8px); opacity: 1; }
         }
 
-        /* 引擎火焰 / 燃燒格 */
+        /* 引擎火焰改寫為更亮眼的科技點綴 */
         .game-engine-thrust {
             display: flex;
-            gap: 6px;
-            margin-top: 6px;
+            gap: 4px;
+            margin-top: 4px;
             z-index: 5;
         }
 
         .game-engine-thrust .thrust-bar {
-            width: 10px;
-            height: 18px;
-            background: linear-gradient(180deg, rgba(255,255,255,0.25), rgba(0,255,255,0.06));
-            border-radius: 3px;
+            width: 8px;
+            height: 12px;
+            background: linear-gradient(180deg, #ffffff, var(--loader-accent));
+            border-radius: 2px;
             transform-origin: bottom center;
-            animation: thrust 0.8s ease-in-out infinite;
+            animation: thrust 0.5s ease-in-out infinite;
             opacity: 0.9;
-            box-shadow: 0 0 10px rgba(0,255,255,0.18);
+            box-shadow: 0 0 8px var(--loader-accent);
         }
 
-        .game-engine-thrust .thrust-bar:nth-child(2) { animation-delay: 0.1s; }
+        .game-engine-thrust .thrust-bar:nth-child(2) { animation-delay: 0.12s; background: linear-gradient(180deg, #ffffff, var(--loader-accent-2)); box-shadow: 0 0 8px var(--loader-accent-2); }
         .game-engine-thrust .thrust-bar:nth-child(3) { animation-delay: 0.24s; }
 
         @keyframes thrust {
-            0% { transform: scaleY(1); opacity: 0.8; }
-            50% { transform: scaleY(1.65); opacity: 1; }
-            100% { transform: scaleY(1); opacity: 0.8; }
+            0%, 100% { transform: scaleY(1); opacity: 0.7; }
+            50% { transform: scaleY(1.5); opacity: 1; }
+        }
+
+        /* 載入完成瞬間的科幻時空穿梭/極速崩解過渡動畫 */
+        .game-loading-overlay.loaded-flash {
+            animation: cyberFlashOut 0.35s cubic-bezier(0.15, 0.85, 0.15, 1) forwards;
+        }
+        .game-loading-overlay.loaded-flash .game-loading-center {
+            animation: centerExplode 0.35s cubic-bezier(0.15, 0.85, 0.15, 1) forwards;
+        }
+        .game-loading-overlay.loaded-flash .game-loading-grid {
+            animation: gridWarpExplode 0.35s cubic-bezier(0.15, 0.85, 0.15, 1) forwards;
+        }
+
+        @keyframes cyberFlashOut {
+            0% {
+                filter: brightness(1) contrast(1) blur(0);
+                opacity: 1;
+            }
+            30% {
+                filter: brightness(3) contrast(1.5) blur(2px);
+                opacity: 1;
+            }
+            100% {
+                filter: brightness(8) contrast(3) blur(12px);
+                opacity: 0;
+                transform: scale(1.08);
+                visibility: hidden;
+            }
+        }
+
+        @keyframes centerExplode {
+            0% { transform: scale(1); opacity: 1; filter: none; }
+            100% { transform: scale(1.3) translateZ(50px); opacity: 0; filter: blur(8px); }
+        }
+
+        @keyframes gridWarpExplode {
+            0% { transform: perspective(400px) rotateX(70deg) scale(1); opacity: 0.3; }
+            100% { transform: perspective(400px) rotateX(85deg) scale(2.2); opacity: 0; }
         }
 
         /* Light theme adjustments */
         [data-theme="light"] .game-loading-overlay {
-            --loader-bg: rgba(255,255,255,0.92);
+            --loader-bg: rgba(240, 245, 252, 0.96);
             --loader-accent: #0088cc;
             --loader-accent-2: #6644cc;
+            backdrop-filter: blur(10px);
         }
 
-        [data-theme="light"] .game-loading-gauge {
-            opacity: 0.22;
+        [data-theme="light"] .game-loading-center {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(0, 136, 204, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 136, 204, 0.15);
         }
 
-        [data-theme="light"] .game-loader-spinner .spinner-ring.ring1 {
-            border-color: rgba(0,136,204,0.12);
+        [data-theme="light"] .game-loading-console {
+            background: rgba(240, 245, 255, 0.9);
+            border-color: rgba(0, 136, 204, 0.3);
+            color: rgba(0, 136, 204, 0.85);
+            box-shadow: inset 0 0 10px rgba(0, 136, 204, 0.05);
         }
 
-        [data-theme="light"] .game-loader-spinner .spinner-ring.ring2 {
-            border-color: rgba(102,68,204,0.12);
-        }
-
-        [data-theme="light"] .game-loading-grid {
-            opacity: 0.33;
-            filter: hue-rotate(120deg) saturate(0.8);
+        [data-theme="light"] .console-line.active {
+            color: #111111;
+            text-shadow: 0 0 8px rgba(0, 136, 204, 0.4);
         }
 
         [data-theme="light"] .game-loader-inner {
-            background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(0,0,0,0.02));
-            color: #08303a;
+            background: radial-gradient(circle, #ffffff, #f0f4f8);
+            border-color: rgba(0, 136, 204, 0.4);
+            box-shadow: inset 0 0 15px rgba(0, 136, 204, 0.1);
+        }
+
+        [data-theme="light"] .game-loading-title {
+            color: #222222;
+            text-shadow: none;
+        }
+
+        [data-theme="light"] .game-loading-grid {
+            opacity: 0.15;
+            filter: hue-rotate(140deg);
         }
 
 
@@ -1600,15 +1739,24 @@
         .gc-hero-image::before {
             content: '';
             position: absolute;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            animation: heroShimmer 3s infinite;
+            top: 0;
+            left: -150%;
+            width: 150%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+            transform: skewX(-20deg);
+            pointer-events: none;
+            z-index: 2;
+            animation: softScan 4s infinite linear;
         }
 
-        @keyframes heroShimmer {
-            0% { transform: translateX(-100%) translateY(-100%); }
-            100% { transform: translateX(100%) translateY(100%); }
+        @keyframes softScan {
+            0% {
+                left: -150%;
+            }
+            35%, 100% {
+                left: 150%;
+            }
         }
 
         /* 輪播控制 */
@@ -1750,17 +1898,25 @@
         .gc-stat-card::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.1), transparent);
-            animation: shimmer 3s infinite;
+            top: 0;
+            left: -150%;
+            width: 150%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+            transform: skewX(-20deg);
+            pointer-events: none;
+            z-index: 2;
+            animation: softScanCard 4.5s infinite linear;
+            animation-delay: 0.5s;
         }
 
-        @keyframes shimmer {
-            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        @keyframes softScanCard {
+            0% {
+                left: -150%;
+            }
+            35%, 100% {
+                left: 150%;
+            }
         }
 
         .gc-stat-card:hover {
@@ -2846,6 +3002,130 @@
                 font-size: 2.5rem;
             }
         }
+        /* 遊戲輪播切換與 Shimmer 動畫優化 */
+        .gc-hero-content, .gc-hero-image {
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
+        }
+        
+        .gc-hero.changing .gc-hero-content {
+            transform: translateX(-20px);
+            opacity: 0;
+        }
+
+        .gc-hero.changing .gc-hero-image {
+            transform: scale(0.95) rotate(-3deg);
+            opacity: 0;
+        }
+
+        /* 遊戲庫控制列佈局 */
+        .gc-section-header {
+            display: flex;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 20px;
+        }
+
+        @media (min-width: 992px) {
+            .gc-section-header {
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+            }
+        }
+
+        .gc-library-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            width: 100%;
+        }
+
+        @media (min-width: 992px) {
+            .gc-library-controls {
+                width: auto;
+                justify-content: flex-end;
+            }
+        }
+
+        /* 搜尋框樣式 */
+        .gc-search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: rgba(0, 255, 255, 0.05);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 5px 15px 5px 35px;
+            width: 100%;
+            max-width: 320px;
+            height: 40px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        [data-theme="light"] .gc-search-box {
+            background: rgba(0, 150, 150, 0.05);
+            border-color: rgba(0, 150, 150, 0.3);
+        }
+
+        .gc-search-box:focus-within {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] .gc-search-box:focus-within {
+            border-color: #009999;
+            box-shadow: 0 0 15px rgba(0, 150, 150, 0.2);
+            background: rgba(0, 150, 150, 0.1);
+        }
+
+        .gc-search-icon {
+            position: absolute;
+            left: 12px;
+            color: rgba(0, 255, 255, 0.6);
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+
+        [data-theme="light"] .gc-search-icon {
+            color: rgba(0, 150, 150, 0.6);
+        }
+
+        .gc-search-box input {
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            width: 100%;
+        }
+
+        .gc-search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        [data-theme="light"] .gc-search-box input::placeholder {
+            color: rgba(0, 0, 0, 0.4);
+        }
+
+        .gc-clear-search {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            padding: 0 5px;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .gc-clear-search:hover {
+            color: var(--accent-cyan);
+        }
+
+
     </style>
 </head>
 <body>
@@ -2935,6 +3215,12 @@
             </div>
             <div class="game-loading-title" id="gameLoadingTitle">載入遊戲</div>
             <div class="game-loading-subtitle" id="gameLoadingSubtitle">請稍候，組裝遊戲世界中...</div>
+            
+            <!-- 虛擬科技終端日誌 / Cyber Console Logs -->
+            <div class="game-loading-console" id="gameLoadingConsole" aria-hidden="true">
+                <div class="console-line">> INITIALIZING SYSTEM ENGINE...</div>
+            </div>
+
             <div class="game-loading-percent" id="gameLoadingPercent" aria-hidden="true">0%</div>
             <div class="game-loading-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="載入進度">
                 <div class="game-loading-progress-bar" id="gameLoadingProgressBar"></div>
@@ -3253,9 +3539,21 @@
             <div class="gc-library-section">
                 <div class="gc-section-header">
                     <h2 class="gc-section-title">遊戲庫</h2>
-                    <div class="gc-filter-group">
-                        <button class="gc-filter-btn active" data-filter="all">全部</button>
-                        <button class="gc-filter-btn" data-filter="available">可遊玩</button>
+                    <div class="gc-library-controls">
+                        <!-- 搜尋框 -->
+                        <div class="gc-search-box">
+                            <span class="gc-search-icon">🔍</span>
+                            <input type="text" id="librarySearch" placeholder="搜尋收藏庫遊戲..." aria-label="搜尋收藏庫遊戲">
+                            <button id="clearSearchBtn" class="gc-clear-search" aria-label="清除搜尋" style="display: none;">✕</button>
+                        </div>
+                        <!-- 篩選按鈕群 -->
+                        <div class="gc-filter-group">
+                            <button class="gc-filter-btn active" data-filter="all">全部</button>
+                            <button class="gc-filter-btn" data-filter="action">動作</button>
+                            <button class="gc-filter-btn" data-filter="music">音樂</button>
+                            <button class="gc-filter-btn" data-filter="racing">競速</button>
+                            <button class="gc-filter-btn" data-filter="available">可遊玩</button>
+                        </div>
                     </div>
                 </div>
 
@@ -3273,6 +3571,10 @@
     <script src="../../assets/js/animations.js"></script>
 
     <script>
+        // 全局搜尋與篩選狀態
+        let currentFilter = 'all';
+        let currentSearchQuery = '';
+
         // 遊戲資料
         const games = [
             {
@@ -3301,6 +3603,15 @@
                 status: 'available',
                 icon: '🏎️',
                 url: 'games/cyberrace/cyberrace.html'
+            },
+            {
+                id: 'wallclimber',
+                title: 'Wall Climber',
+                description: '3D 賽博城市極限跑牆與攀爬遊戲。',
+                category: 'action',
+                status: 'available',
+                icon: '🧗',
+                url: 'games/wallclimber/wallclimber.html'
             }
         ];
 
@@ -4196,12 +4507,13 @@
         }
 
         // 渲染遊戲卡片
-        function renderGames(filter = 'all') {
+        function renderGames(filter = 'all', searchQuery = '') {
             const gamesGrid = document.getElementById('gamesGrid');
             gamesGrid.innerHTML = '';
 
             let filteredGames = games;
             
+            // 分類與狀態篩選
             if (filter !== 'all') {
                 if (filter === 'available') {
                     filteredGames = games.filter(g => g.status === 'available');
@@ -4212,11 +4524,20 @@
                 }
             }
 
+            // 關鍵字搜尋篩選
+            if (searchQuery) {
+                const query = searchQuery.toLowerCase().trim();
+                filteredGames = filteredGames.filter(g => 
+                    g.title.toLowerCase().includes(query) || 
+                    g.description.toLowerCase().includes(query)
+                );
+            }
+
             if (filteredGames.length === 0) {
                 gamesGrid.innerHTML = `
                     <div class="gc-empty-state">
-                        <div class="gc-empty-icon">🎮</div>
-                        <div class="gc-empty-text">此分類目前沒有遊戲</div>
+                        <div class="gc-empty-icon">🔍</div>
+                        <div class="gc-empty-text">找不到符合搜尋條件的遊戲</div>
                     </div>
                 `;
                 return;
@@ -4225,7 +4546,7 @@
             filteredGames.forEach((game, index) => {
                 const card = document.createElement('div');
                 card.className = 'gc-game-card';
-                card.style.animationDelay = `${0.7 + index * 0.05}s`;
+                card.style.animationDelay = `${0.2 + index * 0.05}s`;
                 
                 const comingSoonTag = game.status === 'development' 
                     ? '<div class="gc-coming-soon">Coming Soon</div>' 
@@ -4323,9 +4644,18 @@
         }
 
         function goToSlide(index) {
-            carouselState.currentIndex = index;
-            updateHeroCard(games[index].id);
-            updateCarouselDots();
+            const heroCard = document.getElementById('heroCard');
+            if (heroCard) {
+                heroCard.classList.add('changing');
+            }
+            setTimeout(() => {
+                carouselState.currentIndex = index;
+                updateHeroCard(games[index].id);
+                updateCarouselDots();
+                if (heroCard) {
+                    heroCard.classList.remove('changing');
+                }
+            }, 300);
             // 重置自動輪播計時器
             if (carouselState.isPlaying) {
                 clearInterval(carouselState.autoplayInterval);
@@ -4351,7 +4681,8 @@
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.gc-filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                renderGames(btn.dataset.filter);
+                currentFilter = btn.dataset.filter;
+                renderGames(currentFilter, currentSearchQuery);
             });
         });
 
@@ -4360,18 +4691,17 @@
             link.addEventListener('click', () => {
                 document.querySelectorAll('.gc-sidebar-link[data-filter]').forEach(l => l.classList.remove('active'));
                 link.classList.add('active');
-                const filter = link.dataset.filter;
+                currentFilter = link.dataset.filter;
                 
                 // 同步更新header篩選按鈕
                 document.querySelectorAll('.gc-filter-btn').forEach(btn => {
                     btn.classList.remove('active');
-                    if ((filter === 'all' && btn.dataset.filter === 'all') ||
-                        (filter !== 'all' && btn.dataset.filter === filter)) {
+                    if (btn.dataset.filter === currentFilter) {
                         btn.classList.add('active');
                     }
                 });
                 
-                renderGames(filter);
+                renderGames(currentFilter, currentSearchQuery);
             });
         });
 
@@ -4526,11 +4856,34 @@
                 console.error('Error initializing game center specific features:', e);
             }
             
+            // 監聽收藏庫搜尋框
+            const searchInput = document.getElementById('librarySearch');
+            const clearBtn = document.getElementById('clearSearchBtn');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    currentSearchQuery = e.target.value;
+                    if (clearBtn) {
+                        clearBtn.style.display = currentSearchQuery ? 'block' : 'none';
+                    }
+                    renderGames(currentFilter, currentSearchQuery);
+                });
+            }
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    if (searchInput) {
+                        searchInput.value = '';
+                        currentSearchQuery = '';
+                        clearBtn.style.display = 'none';
+                        renderGames(currentFilter, currentSearchQuery);
+                    }
+                });
+            }
+
             // 播放進入動畫
             playEntranceAnimation();
             
             // 渲染遊戲
-            renderGames();
+            renderGames(currentFilter, currentSearchQuery);
             
             // 初始化輪播功能
             initCarousel();
@@ -4602,6 +4955,13 @@
                     gameLoadingPercent.textContent = '0%';
                     gameLoadingBar.style.width = '0%';
                     gameLoadingBar.setAttribute('aria-valuenow', '0');
+                    
+                    const consoleEl = document.getElementById('gameLoadingConsole');
+                    if (consoleEl) {
+                        consoleEl.dataset.lastText = '';
+                        consoleEl.innerHTML = '<div class="console-line">> INITIALIZING SYSTEM ENGINE...</div>';
+                    }
+
                     gameLoadingOverlay.classList.add('visible');
                     gameLoadingOverlay.setAttribute('aria-hidden', 'false');
                     if (icon) GameLoader.setIcon(icon);
@@ -4632,6 +4992,27 @@
                     gameLoadingBar.style.width = clamped + '%';
                     gameLoadingBar.setAttribute('aria-valuenow', '' + clamped);
                     gameLoadingPercent.textContent = clamped + '%';
+                    
+                    // 動態更替科技終端日誌
+                    const consoleEl = document.getElementById('gameLoadingConsole');
+                    if (consoleEl) {
+                        let logText = '> INITIALIZING CYBER NEXUS CORE...';
+                        if (clamped > 85) logText = '> WORLD ASSEMBLED. ENGAGING SYSTEM EXECUTE...';
+                        else if (clamped > 70) logText = '> MOUNTING PHYSICS COLLIDERS & OBJECT GRAVITY...';
+                        else if (clamped > 55) logText = '> SYNCHRONIZING REALTIME SHADOWMAPS & SHADERS...';
+                        else if (clamped > 40) logText = '> COMPILING PROCEDURAL CITY BUILDINGS WIREFRAME...';
+                        else if (clamped > 25) logText = '> INITIALIZING THREE.JS WEBGL GRAPHICS RENDERER...';
+                        else if (clamped > 10) logText = '> FETCHING GAME ASSETS & COMPONENT PACKAGES...';
+                        
+                        if (consoleEl.dataset.lastText !== logText) {
+                            consoleEl.dataset.lastText = logText;
+                            consoleEl.innerHTML = `
+                                <div class="console-line fade">> COMPILING: ${clamped}%</div>
+                                <div class="console-line active">${logText}</div>
+                            `;
+                        }
+                    }
+
                     if (gameLoadingGauge) {
                         // set CSS variable --loader-progress on gauge
                         const pct = clamped + '%';
@@ -4676,11 +5057,8 @@
                     // ensure 100%
                     GameLoader.setPercent(100);
                     setTimeout(() => {
-                        if (fade) {
-                            gameLoadingOverlay.classList.remove('visible');
-                        } else {
-                            gameLoadingOverlay.classList.remove('visible');
-                        }
+                        gameLoadingOverlay.classList.remove('visible');
+                        gameLoadingOverlay.classList.remove('loaded-flash');
                         gameLoadingOverlay.setAttribute('aria-hidden', 'true');
                         // reset gauge and HUD
                         if (gameLoadingGauge) gameLoadingGauge.style.setProperty('--loader-progress', '0%');
@@ -4726,10 +5104,14 @@
                         clearInterval(gameLoadingTimer);
                         clearInterval(hudInterval);
                         GameLoader.setPercent(100);
+                        
+                        // 播放載入完成閃光特效
+                        gameLoadingOverlay.classList.add('loaded-flash');
+                        
                         setTimeout(() => {
                             if (url) window.location.href = url;
                             else GameLoader.hide();
-                        }, 250);
+                        }, 350);
                     }, opts.minDuration || 900);
                 }
             };

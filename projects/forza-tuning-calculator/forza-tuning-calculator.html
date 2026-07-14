@@ -1690,6 +1690,122 @@ body {
   color: var(--text) !important;
   border-left-color: var(--acc) !important;
 }
+
+/* 彈簧進階頻率設定樣式 */
+.rec-card-adv-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px;
+  margin-top: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  color: var(--text2);
+  font-size: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 600;
+  font-family: inherit;
+}
+.rec-card-adv-btn:hover {
+  background: rgba(255, 45, 155, 0.08);
+  border-color: var(--acc);
+  color: var(--text);
+}
+.rec-card-adv-panel {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+.rec-card-adv-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.rec-card-adv-row label {
+  font-size: 12px;
+  color: var(--text2);
+  min-width: 110px;
+  margin-bottom: 0;
+  display: inline-block;
+}
+.rec-card-adv-row input[type=number] {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  outline: none;
+  transition: var(--transition);
+}
+.rec-card-adv-row input[type=number]:focus {
+  border-color: var(--acc2);
+}
+.rec-card-adv-row input[type=number]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.rec-card-adv-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.preset-badge {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 500;
+}
+.preset-badge:hover {
+  border-color: var(--acc2);
+  color: var(--text);
+  background: var(--bg5);
+}
+
+/* 快速診斷面板樣式 */
+.phase-btn {
+  flex: 1;
+  padding: 8px 6px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  color: var(--text2);
+  transition: var(--transition);
+  border: none;
+  background: transparent;
+  font-family: inherit;
+}
+.phase-btn:hover:not(.active) {
+  background: var(--bg4);
+  color: var(--text);
+}
+.phase-btn.active {
+  background: var(--acc2);
+  color: #000;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(48, 214, 255, 0.3);
+}
+[data-theme="light"] .phase-btn.active {
+  color: #fff;
+}
 </style>
 </head>
 <body>
@@ -1931,7 +2047,7 @@ body {
 <div class="hdr">
   <h1>《極限競速:地平線6》 通用調教計算器</h1>
   <div class="hdr-eyebrow">Forza Horizon 6 Tuning Calculator</div>
-  <div class="hdr-sub">v0.9.4 Beta</div>
+  <div class="hdr-sub">v0.9.5 Beta</div>
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
@@ -2236,77 +2352,51 @@ body {
   <div class="card">
     <div class="card-head">
       <span class="card-icon">🔧</span>
-      <span class="card-title">快速診斷指南</span>
+      <span class="card-title">快速診斷指南 (Smart Diagnostic Guide)</span>
     </div>
     <div class="card-body">
-      <p style="margin-bottom: 16px;">公路最速理論的核心在於「<strong>症狀 → 原因 → 修正</strong>」。請在實測中觀察車輛行為，並選擇下方的動態症狀，系統將提供物理原因與調整步驟。</p>
+      <p style="margin-bottom: 16px;">公路最速理論核心在於「<strong>彎道階段 → 觀察症狀 → 優先級調校</strong>」。請在實測中觀察車輛行為，先選擇發生的彎道階段，再選取具體症狀，系統將提供深度物理分析與微調先後順序。</p>
 
       <div class="diag-container">
         <!-- Sidebar Navigation -->
         <div class="diag-sidebar">
           <!-- Tuning Priority -->
           <div class="priority-card">
-            <div class="priority-title">調校優先級 (Priority)</div>
+            <div class="priority-title">微調優先級 (Tuning Hierarchy)</div>
             <div class="priority-item">
-              <span class="priority-badge badge-s">S 級</span>
-              <span style="font-weight: 600; color: var(--text);">配胎 & 齒比</span>
+              <span class="priority-badge badge-s">1 級</span>
+              <span style="font-weight: 600; color: var(--text);">束角 (Toe) — 最快不破壞平台</span>
             </div>
             <div class="priority-item">
-              <span class="priority-badge badge-a">A 級</span>
-              <span style="font-weight: 600; color: var(--text);">LSD 差速器 & ARB</span>
+              <span class="priority-badge badge-a">2 級</span>
+              <span style="font-weight: 600; color: var(--text);">防傾桿 (ARB) — 側傾剛性分配</span>
             </div>
             <div class="priority-item">
-              <span class="priority-badge badge-b">B 級</span>
-              <span style="font-weight: 600; color: var(--text);">外傾角 & 胎壓</span>
+              <span class="priority-badge badge-b">3 級</span>
+              <span style="font-weight: 600; color: var(--text);">外傾角 (Camber) & 胎壓</span>
             </div>
             <div class="priority-item">
-              <span class="priority-badge badge-c">C 級</span>
-              <span style="font-weight: 600; color: var(--text);">彈簧 & 阻尼</span>
+              <span class="priority-badge badge-c">4 級</span>
+              <span style="font-weight: 600; color: var(--text);">阻尼 (Damping) & 差速器 (LSD)</span>
             </div>
             <div class="priority-item">
-              <span class="priority-badge badge-d">D 級</span>
-              <span style="font-weight: 600; color: var(--text);">車高 & 空力</span>
+              <span class="priority-badge badge-d">5 級</span>
+              <span style="font-weight: 600; color: var(--text);">彈簧 & 車高 — 最後大改手段</span>
             </div>
           </div>
 
+          <!-- Phase Selector -->
+          <div class="section-label" style="margin-top: 10px;">第一步：選擇問題發生的彎道階段</div>
+          <div class="phase-selector" style="display:flex;gap:4px;background:var(--bg3);border-radius:8px;padding:4px;margin-bottom:16px;border:1px solid var(--border);">
+            <button type="button" class="phase-btn active" id="phase-btn-entry" onclick="switchDiagPhase('entry')">入彎 (Entry)</button>
+            <button type="button" class="phase-btn" id="phase-btn-mid" onclick="switchDiagPhase('mid')">彎心 (Mid)</button>
+            <button type="button" class="phase-btn" id="phase-btn-exit" onclick="switchDiagPhase('exit')">出彎 (Exit)</button>
+          </div>
+
           <!-- Symptom List Selection -->
-          <div class="section-label" style="margin-top: 0;">選擇車輛動態症狀</div>
-          <div class="symptom-list">
-            <div class="symptom-item" id="sym-overspin" onclick="diagnose('overspin')">
-              <span class="symptom-icon-wrap">💨</span>
-              <div class="symptom-text">
-                <span class="symptom-name">出彎大腳油門</span>
-                <span class="symptom-desc">後輪空轉打滑/起步冒煙</span>
-              </div>
-            </div>
-            <div class="symptom-item" id="sym-understeer" onclick="diagnose('understeer')">
-              <span class="symptom-icon-wrap">🚗</span>
-              <div class="symptom-text">
-                <span class="symptom-name">彎中轉向不足</span>
-                <span class="symptom-desc">前輪推頭/不願進彎</span>
-              </div>
-            </div>
-            <div class="symptom-item" id="sym-snap" onclick="diagnose('snap')">
-              <span class="symptom-icon-wrap">⚠️</span>
-              <div class="symptom-text">
-                <span class="symptom-name">煞車或收油暴甩</span>
-                <span class="symptom-desc">後軸無預警甩出 (Snap)</span>
-              </div>
-            </div>
-            <div class="symptom-item" id="sym-boat" onclick="diagnose('boat')">
-              <span class="symptom-icon-wrap">⛵</span>
-              <div class="symptom-text">
-                <span class="symptom-name">車身連續晃動</span>
-                <span class="symptom-desc">變線像船一樣擺盪</span>
-              </div>
-            </div>
-            <div class="symptom-item" id="sym-bumpy" onclick="diagnose('bumpy')">
-              <span class="symptom-icon-wrap">⛰️</span>
-              <div class="symptom-text">
-                <span class="symptom-name">壓路肩劇烈跳動</span>
-                <span class="symptom-desc">輪胎失去貼地/ABS過早觸發</span>
-              </div>
-            </div>
+          <div class="section-label" style="margin-top: 0;">第二步：選擇具體車輛症狀</div>
+          <div class="symptom-list" id="diag-symptom-list">
+            <!-- Dynamic symptoms list -->
           </div>
         </div>
 
@@ -2330,6 +2420,35 @@ body {
 
 <script>
 let rangesUnlocked = false;
+
+// 彈簧自定義自然頻率全域狀態
+let customHz = {
+  enabled: false,
+  f: 2.10,
+  r: 2.00
+};
+let springAdvancedExpanded = false;
+
+// 阻尼自定義基準全域狀態
+let customDamp = {
+  enabled: false,
+  formula: 'ref_scaling', // 'ref_scaling' (新公式), 'legacy' (原經驗公式), or 'weight_ratio' (車重線性)
+  refCar: 'fd3s',
+  refSpringF: 109.3,
+  refSpringR: 89.5,
+  refDampingF: 10.5,
+  refDampingR: 10.5,
+  weightRatioBumpFactor: 0.50
+};
+let dampingAdvancedExpanded = false;
+
+// 輪胎滑移窗口修正係數 (適用於寬滑移窗口輪胎：如甩尾胎/拉力胎，放鬆後輪阻尼)
+const TIRE_SLIP_DAMPING_MOD = 0.95;
+
+// 壓縮阻尼與回彈阻尼比例常數
+const BUMP_FACTOR_DRIFT = 0.70;
+const BUMP_FACTOR_TOUGE = 0.48;
+const BUMP_FACTOR_DEFAULT = 0.55;
 
 function toggleRangesUnlock() {
   rangesUnlocked = !rangesUnlocked;
@@ -2637,8 +2756,17 @@ function generateRec() {
       : `前後平衡型防傾桿：前軟後硬配置。已按${tire.label}橫向修正率 (${round(arbTireMod, 2)}x) 微調側傾剛度。`;
 
   // ─── SPRINGS (自然頻率 Natural Frequency 物理推導 × 輪胎橫向係數) ───
-  let fnF = style === 'grip' ? 1.88 : style === 'touge' ? 1.80 : 2.10;
-  let fnR = style === 'grip' ? 1.80 : style === 'touge' ? 1.74 : 1.90;
+  let fnF, fnR;
+  if (customHz.enabled) {
+    fnF = customHz.f;
+    fnR = customHz.r;
+  } else {
+    fnF = style === 'grip' ? 1.88 : style === 'touge' ? 1.80 : 2.10;
+    fnR = style === 'grip' ? 1.80 : style === 'touge' ? 1.74 : 1.90;
+    // 同步回自定義狀態作為初始值
+    customHz.f = fnF;
+    customHz.r = fnR;
+  }
   
   const massF = (car.weight * fb) / 2;
   const massR = (car.weight * rb) / 2;
@@ -2663,7 +2791,7 @@ function generateRec() {
   sprF = round(clamp(sprF, rng.spr.min, rng.spr.max), 1);
   sprR = round(clamp(sprR, rng.spr.min, rng.spr.max), 1);
   
-  const sprNote = `基於自然頻率 (前 ${fnF} Hz / 後 ${fnR} Hz) 與車重 (${car.weight} kg) 計算，已按${tire.label}橫向修正率 (${round(sprTireMod, 2)}x) 微調支撐剛度。`;
+  const sprNote = `基於自然頻率 (${customHz.enabled ? '自定義 ' : ''}前 ${fnF.toFixed(2)} Hz / 後 ${fnR.toFixed(2)} Hz) 與車重 (${car.weight} kg) 計算，已按${tire.label}橫向修正率 (${round(sprTireMod, 2)}x) 微調支撐剛度。`;
 
   // ─── RIDE HEIGHT ───
   let rhF, rhR;
@@ -2691,22 +2819,59 @@ function generateRec() {
   let bumpFactor;
   let dampNote = '';
   
-  if (style === 'inertial_drift') {
+  // 決定採用的公式算法
+  // 1. weight_ratio (車重比例分配)
+  // 2. legacy (傳統經驗公式)
+  // 3. ref_scaling (基準車比例校正)
+  let activeFormula = 'legacy';
+  if (customDamp.enabled) {
+    activeFormula = customDamp.formula;
+  } else {
+    if (style === 'inertial_drift') {
+      activeFormula = 'weight_ratio';
+    } else {
+      activeFormula = 'legacy';
+    }
+  }
+
+  if (activeFormula === 'weight_ratio') {
     drF = (rng.dr.max - rng.dr.min) * fb + rng.dr.min;
     drR = (rng.dr.max - rng.dr.min) * rb + rng.dr.min;
-    bumpFactor = 0.5;
-    dampNote = '回彈阻尼以車前重比線性分配，壓縮阻尼固定為回彈阻尼的 50%。';
-  } else {
+    bumpFactor = customDamp.weightRatioBumpFactor;
+    const formulaSource = customDamp.enabled ? '自定義選擇：' : '風格限制：';
+    dampNote = `採用原本的車重比公式 (Inertial Drift) 進行線性分配 (${formulaSource}回彈依前後重比，壓縮比為 ${Math.round(bumpFactor * 100)}%)。`;
+  } else if (activeFormula === 'legacy') {
+    // 原本經驗公式
     drF = Math.sqrt(sprF) * 1.15 * 1.03;
     drR = Math.sqrt(sprR) * 1.15 * 0.97;
     
     // 高滑移窗口輪胎 (如甩尾胎/拉力胎)：適度放鬆後輪回彈阻尼
     if (tire.slip > 1.2) {
-      drR *= 0.95;
+      drR *= TIRE_SLIP_DAMPING_MOD;
     }
     
-    bumpFactor = style === 'angle_drift' ? 0.70 : (style === 'touge' ? 0.48 : 0.55);
-    dampNote = `回彈阻尼根據彈簧剛度動態耦合（${Math.round(bumpFactor * 100)}%）。${tire.slip > 1.2 ? `${tire.label}具寬滑移窗口 (${tire.slip}x)，後輪回彈已放鬆 5% 以配合平緩的滑移過渡。` : ''}`;
+    bumpFactor = style === 'angle_drift' ? BUMP_FACTOR_DRIFT : (style === 'touge' ? BUMP_FACTOR_TOUGE : BUMP_FACTOR_DEFAULT);
+    
+    dampNote = `採用原本經驗阻尼公式。回彈與彈簧動態耦合（${Math.round(bumpFactor * 100)}%）。${tire.slip > 1.2 ? `${tire.label}具寬滑移窗口 (${tire.slip}x)，後輪回彈已放鬆 5%。` : ''}`;
+  } else {
+    // 基準車比例校正公式 (Reference Scaling / 新物理公式)
+    const refSpF = customDamp.refSpringF;
+    const refSpR = customDamp.refSpringR;
+    const refDaF = customDamp.refDampingF;
+    const refDaR = customDamp.refDampingR;
+
+    drF = refDaF * Math.sqrt(sprF / refSpF);
+    drR = refDaR * Math.sqrt(sprR / refSpR);
+    
+    // 高滑移窗口輪胎 (如甩尾胎/拉力胎)：適度放鬆後輪回彈阻尼
+    if (tire.slip > 1.2) {
+      drR *= TIRE_SLIP_DAMPING_MOD;
+    }
+    
+    bumpFactor = style === 'angle_drift' ? BUMP_FACTOR_DRIFT : (style === 'touge' ? BUMP_FACTOR_TOUGE : BUMP_FACTOR_DEFAULT);
+    
+    const baselineName = customDamp.refCar === 'custom' ? '自定義基準' : `${customDamp.refCar.toUpperCase()} 實測基準`;
+    dampNote = `採用新阻尼公式：${baselineName}比例校正模型（彈簧比 $\sqrt{k}$），且與壓縮阻尼進行風格動態耦合 (${Math.round(bumpFactor * 100)}%)。${tire.slip > 1.2 ? `${tire.label}具寬滑移窗口 (${tire.slip}x)，後輪回彈已放鬆 5%。` : ''}`;
   }
   
   drF = round(clamp(drF, rng.dr.min, rng.dr.max), 1);
@@ -2773,7 +2938,7 @@ function makeRangeBar(value, min, max, color) {
   `;
 }
 
-function recCard(title, frontVal, rearVal, unit, min, max, note, color='var(--acc2)', label1='前', label2='後') {
+function recCard(title, frontVal, rearVal, unit, min, max, note, color='var(--acc2)', label1='前', label2='後', extraHtml='') {
   const hasRear = rearVal !== null && rearVal !== undefined;
   const minF = (typeof min === 'object' && min !== null) ? min.f : min;
   const minR = (typeof min === 'object' && min !== null) ? min.r : min;
@@ -2796,6 +2961,7 @@ function recCard(title, frontVal, rearVal, unit, min, max, note, color='var(--ac
         </div>` : ''}
       </div>
       <div class="rec-note">${note}</div>
+      ${extraHtml}
     </div>
   `;
 }
@@ -2803,6 +2969,264 @@ function recCard(title, frontVal, rearVal, unit, min, max, note, color='var(--ac
 // ═══════════════════════════════════════════
 // TIRE INFO CARD
 // ═══════════════════════════════════════════
+// ─── SPRING ADVANCED FREQUENCY HELPERS ───
+const hzPresets = {
+  FF: {
+    grip:  { f: 2.00, r: 2.30 }, // 後軸硬 15% 增加車尾旋轉性 (Rotation) 以改善前驅推頭
+    touge: { f: 1.85, r: 2.10 }, // 稍降剛性以應對山路顛簸起伏，仍維持後軸偏硬
+    drift: { f: 2.10, r: 2.45 }  // 極端後硬以強行製造後軸側傾滑動
+  },
+  FR: {
+    grip:  { f: 2.10, r: 2.00 }, // 前略硬，保持制動穩定與出彎循跡性 (Forward Bite)
+    touge: { f: 2.05, r: 2.05 }, // 接近 1:1 的中性平衡設定，靠差速器與定位調整動態
+    drift: { f: 2.15, r: 2.05 }  // 前硬後軟：前輪提供反打響應，後輪貼地推進避免打滑
+  },
+  AWD: {
+    grip:  { f: 2.10, r: 2.20 }, // 後軸稍硬，改善 AWD 的動力轉向不足 (Power Understeer)
+    touge: { f: 2.00, r: 2.10 }, // 柔韌貼地以防顛簸，維持後軸偏硬的旋轉傾向
+    drift: { f: 2.15, r: 2.10 }  // 四驅甩尾：前硬後軟，確保大角度反打指向與驅動力
+  }
+};
+
+function renderSpringAdvanced() {
+  const car = getCarData();
+  const dt = car.drivetrain || 'FR';
+  const presets = hzPresets[dt] || hzPresets.FR;
+
+  return `
+    <button type="button" class="rec-card-adv-btn" onclick="toggleSpringAdvanced(this)">
+      <span>${springAdvancedExpanded ? '▲ 隱藏進階頻率設定' : '▼ 展開進階頻率設定'}</span>
+    </button>
+    <div class="rec-card-adv-panel" id="spring-advanced-panel" style="display: ${springAdvancedExpanded ? 'flex' : 'none'};">
+      <div class="rec-card-adv-row" style="margin-bottom: 4px;">
+        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; min-width: auto;">
+          <input type="checkbox" id="custom-hz-enable" ${customHz.enabled ? 'checked' : ''} onchange="toggleCustomHz(this.checked)" style="width: auto; cursor: pointer; margin-right: 4px;">
+          <span>啟用自定義自然頻率</span>
+        </label>
+      </div>
+      <div class="rec-card-adv-row">
+        <label for="custom-hz-f">前軸自然頻率 (fnF):</label>
+        <input type="number" id="custom-hz-f" value="${customHz.f.toFixed(2)}" step="0.05" min="0.5" max="8.0" onchange="updateCustomHz('f', this.value)" ${!customHz.enabled ? 'disabled' : ''}>
+        <span style="font-size: 11px; color: var(--text3); min-width: 20px;">Hz</span>
+      </div>
+      <div class="rec-card-adv-row">
+        <label for="custom-hz-r">後軸自然頻率 (fnR):</label>
+        <input type="number" id="custom-hz-r" value="${customHz.r.toFixed(2)}" step="0.05" min="0.5" max="8.0" onchange="updateCustomHz('r', this.value)" ${!customHz.enabled ? 'disabled' : ''}>
+        <span style="font-size: 11px; color: var(--text3); min-width: 20px;">Hz</span>
+      </div>
+      
+      <div style="font-size: 11px; color: var(--text3); margin-top: 6px; font-weight: 600;">快速預設風格頻率 (${dt} 配置)：</div>
+      <div class="rec-card-adv-presets">
+        <span class="preset-badge" onclick="applyHzPreset('grip')">抓地 Grip (${presets.grip.f.toFixed(2)}/${presets.grip.r.toFixed(2)} Hz)</span>
+        <span class="preset-badge" onclick="applyHzPreset('touge')">山道 Touge (${presets.touge.f.toFixed(2)}/${presets.touge.r.toFixed(2)} Hz)</span>
+        <span class="preset-badge" onclick="applyHzPreset('drift')">甩尾 Drift (${presets.drift.f.toFixed(2)}/${presets.drift.r.toFixed(2)} Hz)</span>
+      </div>
+      
+      <div style="font-size: 11px; color: var(--text3); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; line-height: 1.45;">
+        💡 <strong>自然頻率 (Hz) 調校物理效應指引：</strong><br>
+        • <strong>等頻或微差 (差 0.1~0.2 Hz 以內) — 同步起伏 (Flat Ride)</strong>：<br>
+        &nbsp;&nbsp;車身極度平衡可預測，無神經質擺動。因前輪先壓到顛簸產生時間差，後軸頻率微高 0.1~0.2 Hz，可使後軸震動在高速下快速追上並收斂前軸震動，穩固空氣動力學平台。<br>
+        • <strong>前硬後軟 (數值差距大) — 轉向不足 (推頭)</strong>：<br>
+        &nbsp;&nbsp;過彎側傾機械應力瞬間砸在「外側前輪」上使其過早飽和、失去抓地力；而偏軟的後軸牢牢抓地，導致進彎時前輪尖叫滑行，車頭指向性極差。<br>
+        • <strong>前軟後硬 (數值差距大) — 轉向過度 (甩尾傾向)</strong>：<br>
+        &nbsp;&nbsp;後軸缺乏側傾柔韌性，負載瞬間重擊並扯斷外側後輪抓地力，使其空轉；同時偏軟的前輪像吸盤般咬住地面，提供極強指向力，車尾迅速起甩。<br>
+        • <strong>重量轉移鐵律</strong>：自然頻率無法改變穩態下的「總重量轉移量」（由重心高度、軸距、加速度決定），僅影響重量轉移的「速度」與車身點頭/後蹲的「姿態」。
+      </div>
+    </div>
+  `;
+}
+
+function toggleSpringAdvanced(btn) {
+  springAdvancedExpanded = !springAdvancedExpanded;
+  const panel = $('spring-advanced-panel');
+  if (panel) {
+    panel.style.display = springAdvancedExpanded ? 'flex' : 'none';
+  }
+  if (btn) {
+    const span = btn.querySelector('span');
+    if (span) {
+      span.innerHTML = springAdvancedExpanded ? '▲ 隱藏進階頻率設定' : '▼ 展開進階頻率設定';
+    }
+  }
+}
+
+function toggleCustomHz(enabled) {
+  customHz.enabled = enabled;
+  generateRec();
+}
+
+function updateCustomHz(type, val) {
+  const num = parseFloat(val);
+  if (!isNaN(num)) {
+    customHz[type] = clamp(num, 0.5, 8.0);
+  }
+  generateRec();
+}
+
+function applyHzPreset(presetType) {
+  const car = getCarData();
+  const dt = car.drivetrain || 'FR';
+  const preset = hzPresets[dt] ? hzPresets[dt][presetType] : hzPresets.FR[presetType];
+  
+  customHz.enabled = true;
+  customHz.f = preset.f;
+  customHz.r = preset.r;
+  generateRec();
+}
+
+// ─── DAMPING ADVANCED REFERENCE HELPERS ───
+const dampPresets = {
+  fd3s:  { name: "FD3S (山道平衡)", sf: 109.3, sr: 89.5, df: 10.5, dr: 10.5 },
+  r34:   { name: "R34 GT-R (重型四驅)", sf: 135.0, sr: 120.0, df: 11.5, dr: 10.5 },
+  ae86:  { name: "AE86 (輕量後驅)", sf: 65.0, sr: 55.0, df: 8.5, dr: 7.5 }
+};
+
+function renderDampingAdvanced() {
+  const isScaling = customDamp.formula === 'ref_scaling';
+  const isWeightRatio = customDamp.formula === 'weight_ratio';
+  
+  const showScalingInputs = customDamp.enabled && isScaling;
+  const showWeightRatioInputs = customDamp.enabled && isWeightRatio;
+
+  return `
+    <button type="button" class="rec-card-adv-btn" onclick="toggleDampingAdvanced(this)">
+      <span>${dampingAdvancedExpanded ? '▲ 隱藏阻尼進階設定' : '▼ 展開阻尼進階設定'}</span>
+    </button>
+    <div class="rec-card-adv-panel" id="damping-advanced-panel" style="display: ${dampingAdvancedExpanded ? 'flex' : 'none'};">
+      <div class="rec-card-adv-row" style="margin-bottom: 4px;">
+        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; min-width: auto;">
+          <input type="checkbox" id="custom-damp-enable" ${customDamp.enabled ? 'checked' : ''} onchange="toggleCustomDamp(this.checked)" style="width: auto; cursor: pointer; margin-right: 4px;">
+          <span>啟用自定義阻尼設定</span>
+        </label>
+      </div>
+
+      <div class="rec-card-adv-row" style="margin-bottom: 8px;">
+        <label for="custom-damp-formula">計算公式算法:</label>
+        <select id="custom-damp-formula" onchange="updateDampFormula(this.value)" ${!customDamp.enabled ? 'disabled' : ''} style="flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 4px; padding: 4px 8px; font-size: 12px; outline: none; font-family: inherit;">
+          <option value="ref_scaling" ${customDamp.formula === 'ref_scaling' ? 'selected' : ''}>新阻尼公式 (基準車比例校正)</option>
+          <option value="weight_ratio" ${customDamp.formula === 'weight_ratio' ? 'selected' : ''}>車重比公式 (Inertial Drift 線性)</option>
+        </select>
+      </div>
+
+      <div id="damping-ref-inputs" style="display: ${showScalingInputs ? 'flex' : 'none'}; flex-direction: column; gap: 10px;">
+        <div class="rec-card-adv-row">
+          <label for="custom-damp-sf">基準前彈簧 (refSpringF):</label>
+          <input type="number" id="custom-damp-sf" value="${customDamp.refSpringF.toFixed(1)}" step="0.5" min="20.0" max="500.0" onchange="updateCustomDamp('refSpringF', this.value)">
+          <span style="font-size: 11px; color: var(--text3); min-width: 25px;">kgf</span>
+        </div>
+        <div class="rec-card-adv-row">
+          <label for="custom-damp-sr">基準後彈簧 (refSpringR):</label>
+          <input type="number" id="custom-damp-sr" value="${customDamp.refSpringR.toFixed(1)}" step="0.5" min="20.0" max="500.0" onchange="updateCustomDamp('refSpringR', this.value)">
+          <span style="font-size: 11px; color: var(--text3); min-width: 25px;">kgf</span>
+        </div>
+        <div class="rec-card-adv-row">
+          <label for="custom-damp-df">基準前回彈 (refDampingF):</label>
+          <input type="number" id="custom-damp-df" value="${customDamp.refDampingF.toFixed(1)}" step="0.1" min="1.0" max="20.0" onchange="updateCustomDamp('refDampingF', this.value)">
+          <span style="font-size: 11px; color: var(--text3); min-width: 25px;">/20</span>
+        </div>
+        <div class="rec-card-adv-row">
+          <label for="custom-damp-dr">基準後回彈 (refDampingR):</label>
+          <input type="number" id="custom-damp-dr" value="${customDamp.refDampingR.toFixed(1)}" step="0.1" min="1.0" max="20.0" onchange="updateCustomDamp('refDampingR', this.value)">
+          <span style="font-size: 11px; color: var(--text3); min-width: 25px;">/20</span>
+        </div>
+      </div>
+
+      <div id="damping-weight-ratio-inputs" style="display: ${showWeightRatioInputs ? 'flex' : 'none'}; flex-direction: column; gap: 10px;">
+        <div class="rec-card-adv-row">
+          <label for="custom-damp-wrbump">車重比壓縮比例 (Bump/Rebound):</label>
+          <input type="number" id="custom-damp-wrbump" value="${(customDamp.weightRatioBumpFactor * 100).toFixed(0)}" step="5" min="20" max="100" onchange="updateWeightRatioBump(this.value)">
+          <span style="font-size: 11px; color: var(--text3); min-width: 25px;">%</span>
+        </div>
+      </div>
+      
+      <div style="font-size: 11px; color: var(--text3); margin-top: 6px; font-weight: 600;">快速選擇預設模式：</div>
+      <div class="rec-card-adv-presets">
+        <span class="preset-badge" onclick="applyDampPreset('fd3s')">新公式: FD3S 經典 (FR 基準)</span>
+        <span class="preset-badge" onclick="applyDampPreset('r34')">新公式: R34 重四驅 (AWD 基準)</span>
+        <span class="preset-badge" onclick="applyDampPreset('ae86')">新公式: AE86 輕後驅 (輕量基準)</span>
+      </div>
+      
+      <div style="font-size: 11px; color: var(--text3); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; line-height: 1.45;">
+        💡 <strong>計算公式算法物理意義說明：</strong><br>
+        • <strong>原本阻尼公式 (傳統經驗比)</strong>：回彈阻尼以 <code>Math.sqrt(Spring) * 經驗常數</code> 計算。為原本最平滑均衡的底盤設定。<br>
+        • <strong>新物理公式 (基準車比例校正)</strong>：阻尼隨物理彈簧剛度開根號（$\\sqrt{k}$）成正比例縮放。以玩家實測均衡的基準車為錨定點，在車重與 Hz 劇烈改變時能維持相同的阻尼比（Damping Ratio），提供極佳的貼地性與可控性。<br>
+        • <strong>車重比公式 (Inertial Drift 線性)</strong>：完全依車輛前後重量比線性分配阻尼範圍，壓縮阻尼比例可自定義調整（預設 50%）。
+      </div>
+    </div>
+  `;
+}
+
+function toggleDampingAdvanced(btn) {
+  dampingAdvancedExpanded = !dampingAdvancedExpanded;
+  const panel = $('damping-advanced-panel');
+  if (panel) {
+    panel.style.display = dampingAdvancedExpanded ? 'flex' : 'none';
+  }
+  if (btn) {
+    const span = btn.querySelector('span');
+    if (span) {
+      span.innerHTML = dampingAdvancedExpanded ? '▲ 隱藏阻尼進階設定' : '▼ 展開阻尼進階設定';
+    }
+  }
+}
+
+function toggleCustomDamp(enabled) {
+  customDamp.enabled = enabled;
+  generateRec();
+}
+
+function updateDampFormula(formula) {
+  customDamp.formula = formula;
+  generateRec();
+}
+
+if (typeof updateWeightRatioBump !== 'function') {
+  // We can just embed this in content
+}
+
+function updateCustomDamp(type, val) {
+  const num = parseFloat(val);
+  if (!isNaN(num)) {
+    if (type.startsWith('refSpring')) {
+      customDamp[type] = clamp(num, 20.0, 500.0);
+    } else {
+      customDamp[type] = clamp(num, 1.0, 20.0);
+    }
+    // 手動變更時，將基準車標記為自定義
+    customDamp.refCar = 'custom';
+  }
+  generateRec();
+}
+
+function updateWeightRatioBump(val) {
+  const num = parseFloat(val);
+  if (!isNaN(num)) {
+    customDamp.weightRatioBumpFactor = clamp(num / 100, 0.20, 1.00);
+  }
+  generateRec();
+}
+
+function applyDampPreset(presetType) {
+  if (presetType === 'legacy') {
+    customDamp.enabled = true;
+    customDamp.formula = 'legacy';
+  } else if (presetType === 'weight_ratio') {
+    customDamp.enabled = true;
+    customDamp.formula = 'weight_ratio';
+  } else {
+    const preset = dampPresets[presetType];
+    if (preset) {
+      customDamp.enabled = true;
+      customDamp.formula = 'ref_scaling';
+      customDamp.refCar = presetType;
+      customDamp.refSpringF = preset.sf;
+      customDamp.refSpringR = preset.sr;
+      customDamp.refDampingF = preset.df;
+      customDamp.refDampingR = preset.dr;
+    }
+  }
+  generateRec();
+}
 function updateTireCard() {
   const tireKey = $('car-tire-type').value;
   const tire = tireProfile[tireKey] || tireProfile.semislick;
@@ -2869,7 +3293,7 @@ function renderRec(rec, rng) {
 
   $('rec-suspension').innerHTML =
     recCard('防傾桿 (ARB)', rec.arb.f, rec.arb.r, '', rng.arb.min, rng.arb.max, rec.arb.note, 'var(--orange)') +
-    recCard('彈簧 (Spring)', rec.spr.f, rec.spr.r, 'kgf', rng.spr.min, rng.spr.max, rec.spr.note, 'var(--acc3)');
+    recCard('彈簧 (Spring)', rec.spr.f, rec.spr.r, 'kgf', rng.spr.min, rng.spr.max, rec.spr.note, 'var(--acc3)', '前', '後', renderSpringAdvanced());
 
   const isDrift = rec.style === 'angle_drift' || rec.style === 'inertial_drift';
   const rakeOk = isDrift ? (Math.abs(rec.rh.rake) < 0.15) : (rec.rh.rake >= 0.2);
@@ -2891,8 +3315,8 @@ function renderRec(rec, rng) {
       : `<div class="callout c-danger"><span class="callout-icon">⚠</span><span>Rake 警告：後車高 ${rec.rh.r} cm ${rec.rh.rake >= 0 ? '≈' : '<'} 前車高 ${rec.rh.f} cm，差值 ${rec.rh.rake} cm。制動推頭風險高，請手動調整。</span></div>`);
 
   $('rec-damping').innerHTML =
-    recCard('阻尼回彈 (Rebound)', rec.dr.f, rec.dr.r, '', rng.dr.min, rng.dr.max, '', 'var(--green)') +
-    recCard('阻尼壓縮 (Bump)', rec.db.f, rec.db.r, '', rng.db.min, rng.db.max, rec.db.note, 'var(--blue)');
+    recCard('阻尼回彈 (Rebound)', rec.dr.f, rec.dr.r, '', rng.dr.min, rng.dr.max, '', 'var(--green)', '前', '後', renderDampingAdvanced()) +
+    recCard('阻尼壓縮 (Bump)', rec.db.f, rec.db.r, '', rng.db.min, rng.db.max, rec.db.note, 'var(--blue)', '前', '後');
 
   $('rec-differential').innerHTML =
     recCard('差速器 (LSD)', rec.diff.acc, rec.diff.dec, '%', 0, 100, rec.diff.note, 'var(--acc)', '加速', '減速');
@@ -3375,56 +3799,172 @@ function showToast(msg) {
 // TELEMETRY DIAGNOSIS
 // ═══════════════════════════════════════════
 const symptomsData = {
-  overspin: {
-    title: "出彎大腳油門：後輪空轉打滑/起步冒煙",
-    icon: "💨",
-    cause: "<strong>LSD 加速鎖定率過高</strong>，或<strong>後輪胎壓過高/後彈簧過硬</strong>。當大馬力輸出瞬間傳遞給窄胎時，過高的鎖定率會強迫左右驅動輪完全鎖死，強行扯斷抓地力而打滑；過硬的後部懸吊則會限制車身縱向重心轉移，使後輪無法獲得足夠的「下蹲載重」壓實地面。",
-    actions: [
-      { priority: "A 級", badgeClass: "badge-a", title: "降低差速器加速鎖定率", text: "將加速鎖定由 60%-70% 調降至 <strong>45% - 50%</strong>，容許驅動輪適度差速，出彎動力釋放更平順線性。" },
-      { priority: "B 級", badgeClass: "badge-b", title: "降低後輪胎壓", text: "將後胎壓微調至 <strong>27.0 - 27.5 PSI</strong>，以增加接地面積並加寬輪胎工作溫度窗口。" },
-      { priority: "C 級", badgeClass: "badge-c", title: "放軟後側彈簧與阻尼", text: "將後側彈簧剛度降低 <strong>5% - 10%</strong>（例如調至 80-82 kg/mm），並調軟後側壓縮阻尼 (Bump)，使車尾更容易下蹲。" }
-    ]
-  },
-  understeer: {
-    title: "彎中轉向不足：前輪推頭/轉向不足/不願進彎",
+  entry_understeer: {
+    title: "入彎階段 (Entry) — 車頭推頭 / 不願進彎",
     icon: "🚗",
-    cause: "<strong>前防傾桿 (ARB) 或前彈簧過硬</strong>，導致轉向時側傾負載瞬間集中在前外側輪，使前胎迅速飽和打滑；或<strong>前外傾角不足</strong>，過彎側傾時前輪胎面無法平整切入地面；或<strong>前輪束角為內束</strong>導致入彎響應遲鈍。",
+    phase: "entry",
+    cause: "入彎階段的轉向不足通常與<strong>前輪束角不當</strong>、<strong>前外傾角 (Camber) 不足</strong>、<strong>前防傾桿過硬</strong>或<strong>煞車配比過於靠前</strong>有關。在此瞬態下，重心尚未完全建立，前外側胎未被壓實，或前束角未能激發進彎靈敏度。",
     actions: [
-      { priority: "A 級", badgeClass: "badge-a", title: "調整防傾桿比例", text: "軟化前部防傾桿（如調至 <strong>21.0 - 23.0</strong>），或加硬後防傾桿（如調至 <strong>25.0 - 27.0</strong>），利用後軸的側向負載轉移輔助車頭指向。" },
-      { priority: "B 級", badgeClass: "badge-b", title: "調整前輪束角", text: "將前輪束角設定為微幅<strong>外束 (Toe-out, 正號 +0.1)</strong>，大幅提升切彎的指向性與靈敏度。" },
-      { priority: "B 級", badgeClass: "badge-b", title: "增加前外傾角", text: "將前外傾角調深至 <strong>-2.6° 至 -3.0°</strong>，以對抗過彎時的輪胎變形，保持最大接地面積。" }
+      { priority: "1 級", badgeClass: "badge-s", title: "微調前輪束角 (Toe-out)", text: "將前輪束角調整為微幅外束 <strong>+0.1° 至 +0.2°</strong>，可最快且無害地提升進彎初始指向性。" },
+      { priority: "2 級", badgeClass: "badge-b", title: "增加前外傾角 (Camber)", text: "將前外傾角調深 <strong>-0.2° 至 -0.5°</strong> (例如至 -2.6°)，確保過彎前側胎面能貼平地面。" },
+      { priority: "3 級", badgeClass: "badge-a", title: "調軟前防傾桿 (ARB)", text: "降低前防傾桿剛度 2-3 單位，減緩進彎時側傾機械載重瞬間砸在前外側輪產生的打滑。" },
+      { priority: "4 級", badgeClass: "badge-c", title: "後移煞車平衡 (Brake Bias)", text: "將煞車平衡向後移 1% - 2%，減輕重煞轉彎時前外側胎的縱向制動力負荷。" },
+      { priority: "4 級", badgeClass: "badge-c", title: "放軟前壓縮阻尼 (Bump)", text: "調軟前側 Bump，加速重煞時避震下沉的速度，快速壓實前輪獲得抓地力。" }
     ]
   },
-  snap: {
-    title: "煞車或收油：後軸無預警甩出 (Snap Oversteer)",
+  entry_snap: {
+    title: "入彎階段 (Entry) — 重煞/收油車尾暴甩 (Snap Oversteer)",
     icon: "⚠️",
-    cause: "<strong>前傾幾何車高 (Rake) 過大</strong>導致重煞車時重心劇烈前移，使後輪瞬間失去負載；且<strong>後彈簧或後防傾桿過硬</strong>，使後輪在失重時極易發生跳動打滑；或<strong>LSD 減速鎖定率過低</strong>，回油煞車時無引擎制動同步，導致後軸產生不穩定滑差。",
+    phase: "entry",
+    cause: "重煞車或收油入彎時，重量劇烈前移使後軸失重。此時若<strong>後輪束角朝外</strong>、<strong>LSD 減速鎖定率過低</strong>、或<strong>前後車高差 (Rake) 過大</strong>，後輪極易在外載驟減時跳動或產生滑差進而導致車尾暴甩失控。",
     actions: [
-      { priority: "A 級", badgeClass: "badge-a", title: "增加差速器減速鎖定率", text: "將減速鎖定提高至 <strong>15% - 22%</strong>，在收油或重煞車時提供穩定的雙輪同步牽引效應。" },
-      { priority: "A/C 級", badgeClass: "badge-a", title: "降低後軸側向剛性", text: "適度放軟後防傾桿（調至 <strong>21.0 - 22.0</strong>）與後彈簧（調至 <strong>80.0 - 82.0 kg/mm</strong>），確保後軸不易跳胎。" },
-      { priority: "B 級", badgeClass: "badge-b", title: "增加後輪內束", text: "將後輪束角設定為微幅<strong>內束 (Toe-in, 負號 -0.1)</strong>，在重煞車時產生類似船錨的對齊穩定效應。" }
+      { priority: "1 級", badgeClass: "badge-s", title: "增加後輪內束 (Toe-in)", text: "調深後輪內束至 <strong>-0.1° 至 -0.2°</strong>，在後軸失重時提供如同船錨般的對齊效應拉直車身。" },
+      { priority: "2 級", badgeClass: "badge-c", title: "提高差速器減速鎖定率 (Decel Lock)", text: "將減速鎖定率調高至 <strong>15% - 22%</strong>，在收油或重煞車時提供引擎煞車同步阻力，穩定後軸。" },
+      { priority: "3 級", badgeClass: "badge-d", title: "縮小前後車高差距 (Rake)", text: "降低後車高或升高前車高，減小前後高度差，延緩煞車時後軸過快失重的動態。" },
+      { priority: "4 級", badgeClass: "badge-c", title: "提高後回彈阻尼 (Rebound)", text: "調硬後 Rebound，延緩重煞時後避震器被拉伸的速度，鎖住後輪抓地力。" },
+      { priority: "5 級", badgeClass: "badge-a", title: "放軟後防傾桿 (ARB) 與後彈簧", text: "降低後防傾桿剛度或降低後軸自然頻率 (Hz)，確保失重時後避震仍能貼地吸收衝擊。" }
     ]
   },
-  boat: {
-    title: "連續過彎或變線：車身像船一樣晃動/上下擺盪",
+  entry_sluggish: {
+    title: "入彎階段 (Entry) — 進彎響應遲鈍 / 反應像慢一拍",
+    icon: "⏱️",
+    phase: "entry",
+    cause: "進彎慢一拍通常是<strong>前避震阻尼過軟</strong>，導致重心前移與側傾姿態建立過慢；或<strong>前後傾角 (Caster) 過大</strong>造成轉向物理慣性阻力大；或<strong>前胎壓過低</strong>導致胎壁支撐不足產生滯後。",
+    actions: [
+      { priority: "1 級", badgeClass: "badge-s", title: "增加前輪外束 (Toe-out)", text: "設定微幅外束 <strong>+0.1°</strong>，直接激發敏銳的進彎響應。" },
+      { priority: "2 級", badgeClass: "badge-b", title: "增加前輪胎壓", text: "將前胎壓提高 <strong>0.5 - 1.0 PSI</strong>，提升輪胎胎壁支撐力與響應速度。" },
+      { priority: "3 級", badgeClass: "badge-c", title: "調硬前壓縮阻尼 (Bump)", text: "增加前側 Bump 阻尼，加快進彎時前避震器壓縮建立轉向姿態的速度。" },
+      { priority: "4 級", badgeClass: "badge-b", title: "微降前後傾角 (Caster)", text: "將 Caster 微調降低 <strong>0.2° - 0.5°</strong>，減少轉向時的物理慣性阻力與回正力矩。" }
+    ]
+  },
+  mid_understeer: {
+    title: "彎心階段 (Mid) — 彎中穩態轉向不足 (Understeer)",
+    icon: "🚗",
+    phase: "mid",
+    cause: "彎心處於穩態過彎，<strong>前後防傾桿 (ARB) 側傾剛性分配不均</strong>（前過硬/後過軟）是主因，使重量過度砸在前輪；或<strong>前外傾角 (Camber) 不足</strong>，側傾時胎壁變形導致前輪貼地接觸面縮小。",
+    actions: [
+      { priority: "1 級", badgeClass: "badge-a", title: "調整防傾桿比例 (ARB Balance)", text: "<strong>放軟前防傾桿</strong>（如 21-23）或<strong>加硬後防傾桿</strong>（如 25-27），平衡側傾負荷以釋放前輪抓地。" },
+      { priority: "2 級", badgeClass: "badge-b", title: "加深前外傾角 (Camber)", text: "將前外傾角調深 <strong>-0.2° 至 -0.4°</strong>，保證在穩態側傾時，前外側輪有 100% 貼地接觸面。" },
+      { priority: "3 級", badgeClass: "badge-b", title: "微調前輪胎壓", text: "若前胎已過熱，調降 <strong>0.5 - 1.0 PSI</strong>；若溫度不足則調高，使胎壓回到最佳工作區間。" },
+      { priority: "4 級", badgeClass: "badge-d", title: "放軟前彈簧 (fnF)", text: "降低前自然頻率 0.05~0.10 Hz，放軟前彈簧，提高前軸橫向附著極限。" }
+    ]
+  },
+  mid_oversteer: {
+    title: "彎心階段 (Mid) — 彎中車尾太滑 (Oversteer)",
+    icon: "🔄",
+    phase: "mid",
+    cause: "彎心車尾不穩定通常是<strong>後防傾桿或後彈簧過硬</strong>，使後外側輪瞬間超載而側滑；或<strong>後外傾角 (Camber) 不足/過度</strong>，使得車子在側傾時後輪胎面無法大面積貼地。",
+    actions: [
+      { priority: "1 級", badgeClass: "badge-a", title: "放軟後防傾桿 (ARB)", text: "將後防傾桿降低 2-4 單位（例如調至 20-22），增加車尾側向附著窗口。" },
+      { priority: "2 級", badgeClass: "badge-s", title: "增加後輪內束 (Toe-in)", text: "微調後輪內束至 <strong>-0.2°</strong>，利用八字幾何強制拉回往外甩的車尾。" },
+      { priority: "3 級", badgeClass: "badge-b", title: "修正後外傾角 (Camber)", text: "後 Camber 保持在合理的 <strong>-0.8° 至 -1.2°</strong>，確保過彎側傾時胎面能扁平貼地。" },
+      { priority: "4 級", badgeClass: "badge-d", title: "放軟後彈簧 (fnR)", text: "降低後軸自然頻率 0.05~0.10 Hz，提升後軸穩態抗滑極限。" }
+    ]
+  },
+  mid_boat: {
+    title: "變線及過彎 (Mid) — 車身像船一樣晃動/上下擺盪",
     icon: "⛵",
-    cause: "<strong>阻尼回彈硬度 (Rebound) 太低</strong>，無法及時拉住彈簧釋放的多餘能量，造成車身連續晃動；或<strong>壓縮阻尼 (Bump) 過低</strong>，重煞時前沉過快，車身動態不穩定。",
+    phase: "mid",
+    cause: "變線或連續過彎時的擺盪主要是<strong>阻尼回彈硬度 (Rebound) 太低</strong>，無法及時拉住避震彈簧釋放的多餘能量，導致車身產生連續晃動。",
     actions: [
-      { priority: "C 級", badgeClass: "badge-c", title: "提高阻尼回彈硬度", text: "前/後回彈調高至 <strong>9.0 - 10.0</strong>，快速拉住車身拉平動態。" },
-      { priority: "C 級", badgeClass: "badge-c", title: "微調阻尼壓縮硬度", text: "將壓縮調至回彈的 50% - 60% 之間（維持 2:1 黃金比例，約 <strong>4.5 - 5.0</strong>）。" }
+      { priority: "1 級", badgeClass: "badge-c", title: "大幅調硬阻尼回彈 (Rebound)", text: "前/後回彈阻尼提高至 <strong>9.0 - 10.5</strong>，快速拉住並收斂避震彈簧的多次起伏擺盪。" },
+      { priority: "2 級", badgeClass: "badge-c", title: "微調阻尼壓縮 (Bump)", text: "將 Bump 壓縮阻尼調至 Rebound 的 <strong>50% - 60%</strong>，保持阻尼動態黃金配比（約 4.5 - 5.5）。" }
     ]
   },
-  bumpy: {
-    title: "壓到路肩或凹凸：車輪跳動劇烈/失去抓地/煞車提早作動",
+  mid_bumpy: {
+    title: "凹凸路面 (Mid) — 壓到路肩劇烈跳動/失去貼地/煞車早鎖",
     icon: "⛰️",
-    cause: "<strong>避震彈簧與防傾桿過硬</strong>，或<strong>阻尼壓縮硬度 (Bump) 過高</strong>，車輛在顛簸路段直接彈離地面；或<strong>車高太低觸底</strong>，避震行程耗盡，直接將衝擊硬碰硬傳給車架。",
+    phase: "mid",
+    cause: "避震彈簧與防傾桿過硬，或<strong>壓縮阻尼 (Bump) 過高</strong>，車輛在顛簸路段直接彈離地面；或<strong>車高太低觸底</strong>，避震行程耗盡，直接將衝擊硬碰硬傳給車架。",
     actions: [
-      { priority: "C 級", badgeClass: "badge-c", title: "降低彈簧剛度", text: "將彈簧下修 15% - 20%（回歸山道 1.8 Hz 黃金自然頻率，如 <strong>80 - 90 kg/mm</strong>），增加輪胎貼地抓地時間。" },
-      { priority: "C 級", badgeClass: "badge-c", title: "放軟阻尼壓縮", text: "將 Bump 降低（如 <strong>4.1 - 4.5</strong>），使其能快速吸收凹凸凹陷。" },
-      { priority: "D 級", badgeClass: "badge-d", title: "升高車高預留避震行程", text: "提升 <strong>0.5 - 1.0 cm</strong>，確保預留充足避震緩衝行程，防止車底硬觸底。" }
+      { priority: "1 級", badgeClass: "badge-d", title: "升高車高預留避震行程", text: "前後車高微幅提升 <strong>0.5 - 1.0 cm</strong>，確保預留充足避震行程，防止避震器硬觸底。" },
+      { priority: "2 級", badgeClass: "badge-c", title: "放軟阻尼壓縮 (Bump)", text: "降低前後 Bump（如 <strong>4.0 - 4.5</strong>），使其能快速縮回吸收路面凸起凹陷。" },
+      { priority: "3 級", badgeClass: "badge-d", title: "降低彈簧剛度 (fn)", text: "調低前後自然頻率（fn，回歸山道 1.8 Hz 等級），增加輪胎貼地抓地時間。" }
+    ]
+  },
+  exit_power_under: {
+    title: "出彎階段 (Exit) — 大腳油門動力推頭 (Power Understeer)",
+    icon: "🚗",
+    phase: "exit",
+    cause: "出彎踩油門推頭在 AWD 或大馬力 FR 車上很常見。原因通常是<strong>加速時重心後移，前輪抓地減弱，而差速器鎖定不當</strong>；或是<strong>後避震太軟</strong>，加速重心過度後蹲使車頭飄起失抓。",
+    actions: [
+      { priority: "1 級", badgeClass: "badge-c", title: "調整差速器加速鎖定率 (LSD)", text: "對於 AWD，調低前加速鎖定率（至 30%-40%）以釋放前輪轉向力；對於 FR，微調加速鎖定至 <strong>45% - 50%</strong>。" },
+      { priority: "2 級", badgeClass: "badge-c", title: "調硬後回彈與前壓縮阻尼", text: "調硬後 Rebound 限制重心過快後蹲；調硬前 Bump 支撐前輪載重，確保前輪依然能壓在路面。" },
+      { priority: "3 級", badgeClass: "badge-a", title: "加硬後防傾桿 (ARB)", text: "加硬後 ARB 或放軟前 ARB，促進後軸向外旋轉 (Rotation) 抵消推頭。" }
+    ]
+  },
+  exit_power_over: {
+    title: "出彎階段 (Exit) — 大腳油門後軸打滑/起步冒煙 (Power Oversteer)",
+    icon: "💨",
+    phase: "exit",
+    cause: "大腳油門後軸打滑通常是 <strong>LSD 加速鎖定率過高</strong>強迫雙輪鎖死空轉；或<strong>後避震過硬</strong>，重心後移時避震無法下蹲扭力，直接重擊胎面使其打滑；或<strong>後胎壓過高</strong>降低了抓地力極限。",
+    actions: [
+      { priority: "1 級", badgeClass: "badge-c", title: "降低差速器加速鎖定率 (Acc Lock)", text: "調低加速鎖定率至 <strong>45% - 50%</strong>（甩尾車除外），容許左右輪滑差，讓扭力釋放更平順。" },
+      { priority: "2 級", badgeClass: "badge-b", title: "降低後輪胎壓", text: "後輪胎壓降至 <strong>27.0 - 27.5 PSI</strong>，最大化接地面積與胎溫容忍度。" },
+      { priority: "3 級", badgeClass: "badge-c", title: "調軟後壓縮阻尼 (Bump)", text: "調軟後 Bump，允許後懸吊在加速重量後移時更柔順地壓縮，吸收驅動應力。" },
+      { priority: "4 級", badgeClass: "badge-d", title: "放軟後側彈簧 (fnR)", text: "調低後自然頻率 0.05~0.10 Hz，提高後軸的縱向載重附著極限。" }
+    ]
+  },
+  exit_too_grip: {
+    title: "出彎階段 (Exit) — 車尾太穩 / 轉向不足 / 甩尾車起飄困難",
+    icon: "🏁",
+    phase: "exit",
+    cause: "車尾過於穩定（抓地車過彎太呆、甩尾車出彎給油無法起飄）是由於<strong>後輪抓地極限遠高於前輪</strong>；或<strong>LSD 加速鎖定率過低</strong>，扭力分配無法強行扯斷兩側後胎的靜摩擦力。",
+    actions: [
+      { priority: "1 級", badgeClass: "badge-c", title: "提高差速器加速鎖定率", text: "提高加速鎖定至 <strong>65% - 80%</strong> (甩尾車直接拉到 <strong>100%</strong>)，出彎全油門強制內側輪空轉扯斷抓地力。" },
+      { priority: "2 級", badgeClass: "badge-a", title: "加硬後防傾桿 (ARB)", text: "將後防傾桿調硬 2-4 單位，增加後軸側傾負荷分擔，逼迫後胎提早飽和滑動。" },
+      { priority: "3 級", badgeClass: "badge-s", title: "後輪往外束 (Toe-out) 微調", text: "將後輪束角朝 <strong>0.0° 或外束 +0.1°</strong> 調整，消除內八字天生的直道安定感，讓車尾更容易起甩。" },
+      { priority: "4 級", badgeClass: "badge-b", title: "調高後輪胎壓", text: "將後輪胎壓大幅推高（如 <strong>36 - 42 PSI</strong>），使胎面中心鼓起，減少接觸面積以利燒胎起飄。" }
     ]
   }
 };
+
+let currentDiagPhase = 'entry';
+
+function switchDiagPhase(phase) {
+  currentDiagPhase = phase;
+  
+  // Update phase buttons active class
+  document.querySelectorAll('.phase-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.id === 'phase-btn-' + phase);
+  });
+  
+  // Render corresponding symptoms in sidebar
+  const listContainer = $('diag-symptom-list');
+  if (!listContainer) return;
+  
+  let html = '';
+  for (const key in symptomsData) {
+    const item = symptomsData[key];
+    if (item.phase === phase) {
+      // Stripping HTML tags for description
+      const descText = item.cause.replace(/<[^>]*>/g, '').substring(0, 32);
+      html += `
+        <div class="symptom-item" id="sym-${key}" onclick="diagnose('${key}')">
+          <span class="symptom-icon-wrap">${item.icon}</span>
+          <div class="symptom-text">
+            <span class="symptom-name">${item.title.split(' — ')[1]}</span>
+            <span class="symptom-desc">${descText}...</span>
+          </div>
+        </div>
+      `;
+    }
+  }
+  listContainer.innerHTML = html;
+  
+  // Reset diagnostic workspace placeholder
+  const ws = $('diag-workspace');
+  if (ws) {
+    ws.classList.remove('has-result');
+    ws.innerHTML = `
+      <div class="diag-placeholder">
+        <div class="diag-placeholder-icon">🔍</div>
+        <p style="color: var(--text2); font-weight: 500;">已切換至【${phase === 'entry' ? '入彎' : phase === 'mid' ? '彎心' : '出彎'}】階段，請點選症狀開始診斷...</p>
+        <p style="font-size: 11px; color: var(--text3); margin-top: 4px;">公路最速理論診斷引擎</p>
+      </div>
+    `;
+  }
+}
 
 function diagnose(symptom) {
   const ws = $('diag-workspace');
@@ -3471,7 +4011,7 @@ function diagnose(symptom) {
     </div>
 
     <div class="diag-section">
-      <div class="diag-section-title">🛠️ 技師推薦調整方案 (按優先級操作)</div>
+      <div class="diag-section-title">🛠️ 技師推薦調整方案 (按微調優先級操作)</div>
       <div class="diag-steps">${stepsHtml}</div>
     </div>
   `;
@@ -3504,6 +4044,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // 初始化進階參數為鎖定狀態
   rangesUnlocked = true;
   toggleRangesUnlock();
+
+  // 初始化診斷面板側欄
+  switchDiagPhase('entry');
 });
 </script>
 </div>
