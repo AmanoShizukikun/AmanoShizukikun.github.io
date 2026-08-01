@@ -649,3 +649,92 @@ body.custom-cursor-active textarea {
 /* ============================================
    宇宙星圖 — canvas-based，無需額外 CSS（由 JS BackgroundManager.startStar 管理）
    ============================================ */
+
+/* ============================================
+   全站通用客製化 WebKit 滾動條 (Global Custom WebKit Scrollbar)
+   修復多重/重複箭頭問題，呈現單一頂部青色 ▲ 與單一底部洋紅 ▼ 箭頭
+   ============================================ */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(5, 10, 20, 0.85);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--primary-cyan, #00d4ff), var(--primary-magenta, #ff0080));
+    border-radius: 4px;
+    box-shadow: 0 0 6px rgba(0, 212, 255, 0.4);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #00ffff, #ff0055);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+}
+
+/* 徹底關閉所有 WebKit 多餘/重複的雙箭頭 (:start:increment / :end:decrement) */
+::-webkit-scrollbar-button:start:increment,
+::-webkit-scrollbar-button:end:decrement,
+::-webkit-scrollbar-button:vertical:start:increment,
+::-webkit-scrollbar-button:vertical:end:decrement,
+::-webkit-scrollbar-button:horizontal:start:increment,
+::-webkit-scrollbar-button:horizontal:end:decrement {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* 頂部單一向上箭頭 (Cyan ▲) */
+::-webkit-scrollbar-button:vertical:decrement:single-button,
+::-webkit-scrollbar-button:vertical:start:decrement {
+    display: block !important;
+    width: 12px;
+    height: 12px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 8px 8px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpolygon points='5,2 1,8 9,8' fill='%2300ffff'/%3E%3C/svg%3E");
+}
+
+/* 底部單一向下箭頭 (Magenta ▼) */
+::-webkit-scrollbar-button:vertical:increment:single-button,
+::-webkit-scrollbar-button:vertical:end:increment {
+    display: block !important;
+    width: 12px;
+    height: 12px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 8px 8px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpolygon points='5,8 1,2 9,2' fill='%23ff00ff'/%3E%3C/svg%3E");
+}
+
+/* 水平滾動條左箭頭 (Cyan ◄) */
+::-webkit-scrollbar-button:horizontal:decrement:single-button,
+::-webkit-scrollbar-button:horizontal:start:decrement {
+    display: block !important;
+    width: 12px;
+    height: 12px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 8px 8px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpolygon points='2,5 8,1 8,9' fill='%2300ffff'/%3E%3C/svg%3E");
+}
+
+/* 水平滾動條右箭頭 (Magenta ►) */
+::-webkit-scrollbar-button:horizontal:increment:single-button,
+::-webkit-scrollbar-button:horizontal:end:increment {
+    display: block !important;
+    width: 12px;
+    height: 12px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 8px 8px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpolygon points='8,5 2,1 2,9' fill='%23ff00ff'/%3E%3C/svg%3E");
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
