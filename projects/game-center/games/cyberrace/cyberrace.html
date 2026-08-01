@@ -4025,7 +4025,7 @@
                 name: 'AE86 Sprinter Trueno (原廠 180匹)',
                 driver: '藤原拓海',
                 hp: 180, peakHpRpm: 6600, torqueNm: 162, peakTorqueRpm: 5200,
-                maxRpm: 8000, idleRpm: 900,
+                redlineRpm: 7500, gaugeMaxRpm: 8000, maxRpm: 8000, idleRpm: 900,
                 aspirationType: 'NA', boostPSI: 0, boostLagMs: 0,
                 gearRatios: { '-1': 3.48, '1': 2.47, '2': 1.70, '3': 1.24, '4': 1.00, '5': 0.86 },
                 finalDrive: 4.1, tireRadius: 0.29, maxGear: 5,
@@ -4039,14 +4039,14 @@
                 optimalTireTemp: 85, tireCompound: 'sport',
                 dragCoefficient: 0.34, frontalArea: 1.80, downforceCoefficient: 0.05,
                 color: 0xffffff, accentColor: 0x111111,
-                desc: '原廠 180 匹馬力 Trueno！0~97km/h 6.960s，極速 224.8km/h，煞車 97~0 45.4m，側向 0.91G，重心轉移慣性甩尾。'
+                desc: '原廠 180 匹 Trueno！8000 RPM 轉速表 (7500 RPM 紅線)，極速 224.8km/h。'
             },
             fd3s_early: {
                 id: 'fd3s_early',
                 name: 'RX-7 FD3S (早期型 350匹)',
                 driver: '高橋啟介',
                 hp: 350, peakHpRpm: 6500, torqueNm: 392, peakTorqueRpm: 5000,
-                maxRpm: 8000, idleRpm: 850,
+                redlineRpm: 7500, gaugeMaxRpm: 9000, maxRpm: 8000, idleRpm: 850,
                 aspirationType: 'TwinTurbo', boostPSI: 10, boostLagMs: 350,
                 gearRatios: { '-1': 3.48, '1': 3.48, '2': 2.02, '3': 1.39, '4': 1.00, '5': 0.76 },
                 finalDrive: 4.3, tireRadius: 0.31, maxGear: 5,
@@ -4060,14 +4060,14 @@
                 optimalTireTemp: 88, tireCompound: 'sport',
                 dragCoefficient: 0.31, frontalArea: 1.79, downforceCoefficient: 0.10,
                 color: 0xffcc00, accentColor: 0x111111,
-                desc: '赤城 RedSuns 啟介座駕！0~97km/h 4.732s，極速 293.1km/h，煞車 97~0 34.8m，側向 1.03G，過彎抓地強悍。'
+                desc: '赤城 RedSuns 啟介座駕！9000 RPM 轉速表 (7500 RPM 紅線)，雙渦輪轉子引擎。'
             },
             ae86_race: {
                 id: 'ae86_race',
                 name: 'AE86 Sprinter Trueno (TRD 萬轉賽車引擎)',
                 driver: '藤原拓海',
                 hp: 240, peakHpRpm: 8800, torqueNm: 196, peakTorqueRpm: 7500,
-                maxRpm: 11000, idleRpm: 1100,
+                redlineRpm: 11000, gaugeMaxRpm: 13000, maxRpm: 11000, idleRpm: 1100,
                 aspirationType: 'NA', boostPSI: 0, boostLagMs: 0,
                 gearRatios: { '-1': 3.48, '1': 2.47, '2': 1.70, '3': 1.24, '4': 1.00, '5': 0.86 },
                 finalDrive: 4.1, tireRadius: 0.29, maxGear: 5,
@@ -4081,14 +4081,14 @@
                 optimalTireTemp: 88, tireCompound: 'semiSlick',
                 dragCoefficient: 0.33, frontalArea: 1.78, downforceCoefficient: 0.08,
                 color: 0xffffff, accentColor: 0x222222, isCarbonHood: true,
-                desc: '換裝 TRD 萬轉競速引擎！0~97km/h 5.120s，極速 252km/h，高亢 11000 RPM 萬轉斷油！'
+                desc: 'TRD 萬轉賽車引擎！經典 13000 RPM 轉速表 (11000 RPM 紅線標示)，萬轉狂轟極速！'
             },
             fd3s_late: {
                 id: 'fd3s_late',
                 name: 'RX-7 FD3S (RE雨宮寬體改裝版)',
                 driver: '高橋啟介',
                 hp: 450, peakHpRpm: 7000, torqueNm: 460, peakTorqueRpm: 5500,
-                maxRpm: 8000, idleRpm: 900,
+                redlineRpm: 7500, gaugeMaxRpm: 9000, maxRpm: 8000, idleRpm: 900,
                 aspirationType: 'TwinTurbo', boostPSI: 14, boostLagMs: 280,
                 gearRatios: { '-1': 3.48, '1': 3.48, '2': 2.02, '3': 1.39, '4': 1.00, '5': 0.76 },
                 finalDrive: 4.1, tireRadius: 0.32, maxGear: 5,
@@ -4102,14 +4102,14 @@
                 optimalTireTemp: 90, tireCompound: 'semiSlick',
                 dragCoefficient: 0.30, frontalArea: 1.82, downforceCoefficient: 0.22,
                 color: 0xffaa00, accentColor: 0x00ffff, isReAmemiya: true,
-                desc: 'Project D 遠征仕樣！450匹馬力，0~97km/h 3.820s，極速 318.5km/h，RE雨宮空力極速高抓地。'
+                desc: 'Project D 遠征仕樣！450匹馬力，9000 RPM 轉速表 (7500 RPM 紅線)，RE雨宮空力高抓地。'
             },
             fc3s_early: {
                 id: 'fc3s_early',
                 name: 'RX-7 FC3S (早期型)',
                 driver: '高橋涼介',
-                hp: 260, peakHpRpm: 6500, torqueNm: 294, peakTorqueRpm: 4000,
-                maxRpm: 6500, idleRpm: 800,
+                hp: 260, peakHpRpm: 7000, torqueNm: 294, peakTorqueRpm: 4000,
+                redlineRpm: 7000, gaugeMaxRpm: 8000, maxRpm: 7000, idleRpm: 800,
                 aspirationType: 'Turbo', boostPSI: 7, boostLagMs: 400,
                 gearRatios: { '-1': 3.39, '1': 3.48, '2': 2.02, '3': 1.39, '4': 1.00, '5': 0.77 },
                 finalDrive: 3.91, tireRadius: 0.30, maxGear: 5,
@@ -4123,14 +4123,14 @@
                 optimalTireTemp: 85, tireCompound: 'sport',
                 dragCoefficient: 0.32, frontalArea: 1.82, downforceCoefficient: 0.08,
                 color: 0xf5f5f5, accentColor: 0x222222,
-                desc: '赤城白色彗星涼介座駕！0~97km/h 5.850s，極速 255km/h，轉子引擎平順切入路線精準。'
+                desc: '赤城白色彗星涼介座駕！8000 RPM 轉速表 (7000 RPM 紅線)，轉子引擎切入路線精準。'
             },
             fc3s_late: {
                 id: 'fc3s_late',
                 name: 'RX-7 FC3S (RE雨宮套件進化版)',
                 driver: '高橋涼介',
-                hp: 350, peakHpRpm: 6500, torqueNm: 382, peakTorqueRpm: 4500,
-                maxRpm: 6500, idleRpm: 850,
+                hp: 350, peakHpRpm: 7000, torqueNm: 382, peakTorqueRpm: 4500,
+                redlineRpm: 7000, gaugeMaxRpm: 8000, maxRpm: 7000, idleRpm: 850,
                 aspirationType: 'Turbo', boostPSI: 12, boostLagMs: 320,
                 gearRatios: { '-1': 3.39, '1': 3.48, '2': 2.02, '3': 1.39, '4': 1.00, '5': 0.77 },
                 finalDrive: 4.1, tireRadius: 0.31, maxGear: 5,
@@ -4144,20 +4144,20 @@
                 optimalTireTemp: 88, tireCompound: 'semiSlick',
                 dragCoefficient: 0.30, frontalArea: 1.80, downforceCoefficient: 0.18,
                 color: 0xffffff, accentColor: 0xff0055, isReAmemiya: true,
-                desc: '涼介親自理論調校！0~97km/h 4.800s，極速 285km/h，極限穩定性與高下壓力。'
+                desc: '涼介親自理論調校！8000 RPM 轉速表 (7000 RPM 紅線)，高下壓力極限穩定。'
             },
             gc8_sti: {
                 id: 'gc8_sti',
                 name: 'Impreza WRX STi GC8 (四驅版)',
                 driver: '藤原文太',
                 hp: 280, peakHpRpm: 6500, torqueNm: 343, peakTorqueRpm: 4000,
-                maxRpm: 6500, idleRpm: 800,
+                redlineRpm: 7900, gaugeMaxRpm: 9000, maxRpm: 8000, idleRpm: 800,
                 aspirationType: 'Turbo', boostPSI: 15, boostLagMs: 380,
                 gearRatios: { '-1': 3.55, '1': 3.08, '2': 1.83, '3': 1.31, '4': 0.97, '5': 0.76 },
                 finalDrive: 4.44, tireRadius: 0.31, maxGear: 5,
                 weight: 1250, frontWeightRatio: 0.58, driveType: 'AWD',
                 wheelbase: 2.52, trackWidthAxle: 1.46,
-                awdSplit: 0.40, // 前輪扭力分配比 (40:60 前:後)
+                awdSplit: 0.40,
                 topSpeedKMH: 260.0, accel0to97Sec: 4.650, accel0to161Sec: 11.200,
                 braking97Dist: 35.0, braking161Dist: 86.5,
                 lateralG97: 1.02, lateralG193: 1.05,
@@ -4166,7 +4166,7 @@
                 optimalTireTemp: 85, tireCompound: 'sport',
                 dragCoefficient: 0.35, frontalArea: 1.95, downforceCoefficient: 0.08,
                 color: 0x0044cc, accentColor: 0xffea00, isAWD: true,
-                desc: '藤原文太拉力四驅戰車！0~97km/h 4.650s，極速 260km/h，全時四驅出彎循跡無敵，不出甩尾失控。'
+                desc: '藤原文太拉力戰車！9000 RPM 轉速表 (最大馬力 6500 RPM / 8000 RPM 引擎極限)，全時四驅出彎循跡無敵。'
             }
         };
 
@@ -4636,32 +4636,36 @@
 
         // ===== 擬真物理引擎核心模組 (Realistic Physics Engine Core) =====
 
-        // --- 引擎扭力曲線 (Engine Torque Curve) ---
-        // 基於 peakTorqueRpm 和 peakHpRpm 建構拋物線扭力曲線
+        // --- 引擎扭力曲線與超越紅線動力不穩定模擬 (Unstable Power & Overrev Torque Curve) ---
         function getEngineTorque(rpm, model) {
             const maxRpm = model.maxRpm || 8000;
             const idleRpm = model.idleRpm || 900;
             const peakTqRpm = model.peakTorqueRpm || 5000;
             const peakTq = model.torqueNm || 200;
             const peakHpRpm = model.peakHpRpm || 6500;
+            const redlineRpm = model.redlineRpm || 7500;
 
             if (rpm < idleRpm) rpm = idleRpm;
-            if (rpm > maxRpm) return peakTq * 0.1; // 斷油
+            if (rpm > maxRpm) return peakTq * 0.05; // 斷油點 Rev limiter cutoff
 
             // 正規化 RPM 到 [0, 1]
             const rpmNorm = (rpm - idleRpm) / (maxRpm - idleRpm);
             const peakTqNorm = (peakTqRpm - idleRpm) / (maxRpm - idleRpm);
 
             // 拋物線扭力曲線: 在 peakTqNorm 達到峰值 1.0
-            // 使用二次曲線: curve = 1 - k * (rpmNorm - peakTqNorm)^2
             const k = 1.0 / Math.max(0.01, peakTqNorm * peakTqNorm + (1 - peakTqNorm) * (1 - peakTqNorm));
             let curve = 1.0 - k * (rpmNorm - peakTqNorm) * (rpmNorm - peakTqNorm);
-            curve = Math.max(0.68, Math.min(1.0, curve));
+            curve = Math.max(0.65, Math.min(1.0, curve));
 
-            // 高 RPM 過斷油點後急劇下降
-            if (rpm > peakHpRpm) {
-                const dropoff = (rpm - peakHpRpm) / (maxRpm - peakHpRpm);
-                curve *= Math.max(0.1, 1.0 - dropoff * 0.7);
+            // 超越 Peak HP 與紅線轉速：扭力衰退 + 輸出不穩定脈衝波動 (Rev Limiter & Overrev Flutter)
+            if (rpm > redlineRpm) {
+                const overrevRatio = (rpm - redlineRpm) / (maxRpm - redlineRpm);
+                // 波動震盪：模擬高轉速汽門浮彈、爆震與斷油間的扭力脈衝抖動
+                const flutter = 0.78 + Math.random() * 0.40 * (1.0 - overrevRatio * 0.4);
+                curve *= Math.max(0.20, 1.0 - overrevRatio * 0.55) * flutter;
+            } else if (rpm > peakHpRpm) {
+                const dropoff = (rpm - peakHpRpm) / (redlineRpm - peakHpRpm);
+                curve *= Math.max(0.72, 1.0 - dropoff * 0.22);
             }
 
             return peakTq * curve;
@@ -4722,28 +4726,25 @@
             return Fy;
         }
 
-        // --- 輪胎溫度模型 (外側輪與內側輪受力不對稱、外傾角壓實發熱與強效氣流散熱) ---
+        // --- 輪胎溫度模型 (前輪轉向/煞車摩擦發熱優化、外側輪與內側輪受力不對稱與強效氣流散熱) ---
         function updateTireTemperature(tire, slipMagnitude, speedMS, dt, compound, isFront = false, driveType = 'FR', isOuterWheel = false, isInnerWheel = false, throttle = 1.0) {
             const tc = TIRE_COMPOUNDS[compound] || TIRE_COMPOUNDS.sport;
             const ambientTemp = 25; // 環境溫度 °C
 
-            // 1. 前輪在 FR/MR/AWD 車種不承受驅動打滑，發熱量大幅降低
+            // 1. 寫實前輪發熱：前輪轉向切角 (Steering Slip) 與進彎煞車產生大量側向摩擦，保持 0.85x 生熱率 (避免前輪胎溫過低)
             let effectiveSlip = slipMagnitude;
             if (isFront && (driveType === 'FR' || driveType === 'MR' || driveType === 'AWD')) {
-                effectiveSlip *= 0.30;
+                effectiveSlip *= 0.50;
             }
 
-            // 2. 鬆油門/無打滑時，摩擦生熱隨油門比例快速歸零
-            if (throttle < 0.8) {
-                effectiveSlip *= (throttle <= 0.05 ? 0.0 : throttle);
-            }
+            // 2. 鬆油門/進彎煞車時，轉向與煞車側向滑移摩擦仍正常發熱 (不因油門為 0 而強制歸零)
 
             const zones = ['inner', 'mid', 'outer'];
             for (const zone of zones) {
-                // 3. 摩擦生熱 (平滑平衡發熱率：正常巡航維持 70°C~85°C 最佳區域)
-                let heatGeneration = effectiveSlip * 20.0 * tc.heatRate;
+                // 3. 摩擦生熱 (平滑平衡發熱率：正常巡航與彎道維持 75°C~95°C 最佳工作溫區)
+                let heatGeneration = effectiveSlip * 11.0 * tc.heatRate;
 
-                // 4. 外側輪 vs 內側輪受力不對稱 + 外傾角接觸: 重心轉移使外側輪承載 1.18x，內側輪 0.72x (維持 20°C~25°C 極致寫實溫差)
+                // 4. 外側輪 vs 內側輪受力不對稱 + 外傾角接觸: 重心轉移使外側輪承載 1.50x (外側 zone)，內側輪 0.60x
                 if (isOuterWheel) {
                     if (zone === 'outer') heatGeneration *= 1.50;
                     if (zone === 'mid')   heatGeneration *= 1.28;
@@ -4759,11 +4760,11 @@
                     if (zone === 'outer') heatGeneration *= 0.90;
                 }
 
-                // 5. 寫實自然散熱對流 (溫差 ΔT 散熱：甩尾結束鬆油門後約 2.0s 順滑降回 85°C 最佳工作溫區)
+                // 5. 寫實自然散熱對流
                 const tempDiff = Math.max(0.0, tire.temperature[zone] - ambientTemp);
-                const windFactor = 1.0 + (speedMS * 3.6 / 80.0);
-                const highTempBurst = Math.max(0.0, tempDiff - 55.0) * 0.12;
-                const coolingRate = tempDiff * (0.10 + 0.05 * windFactor) + highTempBurst;
+                const windFactor = 1.0 + (speedMS * 3.6 / 90.0);
+                const highTempBurst = Math.max(0.0, tempDiff - 65.0) * 0.10;
+                const coolingRate = tempDiff * (0.07 + 0.04 * windFactor) + highTempBurst;
 
                 tire.temperature[zone] += (heatGeneration - coolingRate) * dt;
                 tire.temperature[zone] = Math.max(ambientTemp, Math.min(220, tire.temperature[zone]));
@@ -4919,7 +4920,7 @@
                 load: 0,
                 lateralForce: 0,
                 longitudinalForce: 0,
-                temperature: { inner: 45, mid: 45, outer: 45 },
+                temperature: { inner: 60, mid: 60, outer: 60 },
                 pressure: 220,
                 wear: { inner: 1.0, mid: 1.0, outer: 1.0 },
                 camber: camberDeg || 0,
@@ -6277,6 +6278,7 @@
         // ===== 統一車輛物理引擎 (Unified Vehicle Physics Engine) =====
         function updateVehiclePhysics(car, controls, dt) {
             car.currentSteerInput = controls.steerInput || 0;
+            car.currentBrakeInput = controls.brakeInput || 0;
 
             const steerInput = controls.steerInput || 0;
             const throttleInput = controls.throttleInput || 0;
@@ -7941,21 +7943,15 @@
                 }
             }
 
-            // 儀表盤繪製 — 使用物理引擎 RPM
+            // 儀表盤繪製 — 使用車款專屬轉速表規格 (轉速表上限, 紅線起點, 引擎極限)
             let currentGearDisplay = getGearDisplayString(player.gear || 1);
             const model = player.model || CAR_MODELS.ae86_stock;
-            const carMaxRpm = model.maxRpm || 8000;
             const playerRpm = player.engineRpm || (model.idleRpm || 900);
-            let rpmPct = Math.min(1.0, playerRpm / carMaxRpm);
+            const gMax = model.gaugeMaxRpm || 8000;
+            const rLine = model.redlineRpm || 7500;
+            const mRpm = model.maxRpm || 8000;
 
-            // 斷油跳動效果
-            if (playerRpm >= carMaxRpm * 0.96) {
-                rpmPct = 0.94 + (Math.random() * 0.06);
-            }
-
-            currentGearDisplay = getGearDisplayString(player.gear);
-
-            drawGaugeCanvas(speedKMH, rpmPct, currentGearDisplay, nitroPct, player.nitroActive, player.isDrifting, player.clutch || 0, carMaxRpm);
+            drawGaugeCanvas(speedKMH, playerRpm, currentGearDisplay, nitroPct, player.nitroActive, player.isDrifting, player.clutch || 0, gMax, rLine, mRpm);
 
             // 頭文字D 漫畫擬聲詞動態更新
             updateDriftSFX(dt);
@@ -8125,27 +8121,30 @@
             }
         }
 
-        // ===== 單一巨型競速儀表盤 Canvas 繪製 (一個大轉速表) =====
+        // ===== 單一巨型競速儀表盤 Canvas 繪製 (動態支援紅線與轉速表上限獨立繪製) =====
         let gaugeStyle = localStorage.getItem('gaugeStyle') || 'analog';
         window._setGaugeStyle = function(style) { gaugeStyle = style; };
 
-        function drawGaugeCanvas(speedKMH, rpmRatio, gear, nitroPct, nitroActive, isDrifting, clutchVal = 0, maxRpmVal = 8000) {
+        function drawGaugeCanvas(speedKMH, currentRpm, gear, nitroPct, nitroActive, isDrifting, clutchVal = 0, gaugeMaxRpm = 8000, redlineRpm = 7500, maxRpm = 8000) {
             const canvas = document.getElementById('gaugeCanvas');
             const digital = document.getElementById('gaugeDigital');
             if (!canvas || !digital) return;
 
-            const displayMaxRpm = maxRpmVal || 8000;
+            const displayMaxRpm = gaugeMaxRpm || 8000;
+            const rpmRatio = Math.min(1.0, Math.max(0.0, currentRpm / displayMaxRpm));
 
             if (gaugeStyle === 'digital') {
                 canvas.style.display = 'none';
                 digital.style.display = 'block';
-                const rpmVal = Math.floor(rpmRatio * displayMaxRpm);
                 const digiRPM = document.getElementById('digiRPM');
                 const digiGear = document.getElementById('digiGear');
                 const digiSpeed = document.getElementById('digiSpeed');
                 const digiBoostFill = document.getElementById('digiBoostFill');
                 const digiNitroPct = document.getElementById('digiNitroPct');
-                if (digiRPM) digiRPM.textContent = rpmVal.toString().padStart(4, '0');
+                if (digiRPM) {
+                    digiRPM.textContent = Math.floor(currentRpm).toString().padStart(5, '0');
+                    digiRPM.style.color = currentRpm >= redlineRpm ? '#ff2255' : '#ffffff';
+                }
                 if (digiGear) digiGear.textContent = gear;
                 if (digiSpeed) digiSpeed.textContent = speedKMH.toString().padStart(3, '0');
                 if (digiBoostFill) digiBoostFill.style.width = nitroPct + '%';
@@ -8177,7 +8176,7 @@
             ctx.stroke();
             ctx.shadowBlur = 0;
 
-            // 3. 轉速弧 (動態支援 11000 RPM / 8000 RPM / 6500 RPM)
+            // 3. 轉速弧 (動態支援 13000 / 9000 / 8000 RPM)
             const startAng = Math.PI * 0.75; // 135deg
             const sweepAng = Math.PI * 1.5;  // 270deg
 
@@ -8189,22 +8188,26 @@
             ctx.lineCap = 'round';
             ctx.stroke();
 
-            // 紅線 (末端 25% 轉速區域)
-            const redlineAng = startAng + sweepAng * 0.75;
+            // 紅線區域背景弧 (從 redlineRpm 到轉速表上限 displayMaxRpm)
+            const redlineRatio = Math.min(1.0, redlineRpm / displayMaxRpm);
+            const redlineStartAng = startAng + sweepAng * redlineRatio;
             ctx.beginPath();
-            ctx.arc(cx, cy, r - 12, redlineAng, startAng + sweepAng);
-            ctx.strokeStyle = 'rgba(255, 30, 60, 0.35)';
+            ctx.arc(cx, cy, r - 12, redlineStartAng, startAng + sweepAng);
+            ctx.strokeStyle = 'rgba(255, 30, 60, 0.45)';
             ctx.lineWidth = 14;
             ctx.stroke();
 
-            // 刻度與數字 (根據當前車款極限轉速動態計算)
+            // 刻度與數字 (根據 displayMaxRpm 動態分段刻度)
             const maxTicks = Math.ceil(displayMaxRpm / 1000);
             for (let i = 0; i <= maxTicks; i++) {
-                const ratio = i / maxTicks;
-                const ang = startAng + ratio * sweepAng;
-                const isRed = ratio >= 0.75;
+                const tickRpm = i * 1000;
+                const ratio = tickRpm / displayMaxRpm;
+                if (ratio > 1.0) break;
 
-                const isMajor = (maxTicks > 9) ? (i % 2 === 0 || i === maxTicks) : true;
+                const ang = startAng + ratio * sweepAng;
+                const isRed = tickRpm >= redlineRpm;
+
+                const isMajor = (maxTicks > 10) ? (i % 2 === 0 || i === maxTicks || tickRpm === redlineRpm) : true;
                 const tickLen = isMajor ? 14 : 8;
                 const rInner = r - 18 - tickLen;
                 const rOuter = r - 18;
@@ -8213,14 +8216,14 @@
                 ctx.moveTo(cx + Math.cos(ang) * rInner, cy + Math.sin(ang) * rInner);
                 ctx.lineTo(cx + Math.cos(ang) * rOuter, cy + Math.sin(ang) * rOuter);
                 ctx.strokeStyle = isRed ? '#ff2255' : 'rgba(255, 255, 255, 0.65)';
-                ctx.lineWidth = isMajor ? 3 : 1.5;
+                ctx.lineWidth = isRed ? (isMajor ? 3.5 : 2) : (isMajor ? 3 : 1.5);
                 ctx.stroke();
 
                 if (isMajor) {
                     const numR = r - 42;
                     const nx = cx + Math.cos(ang) * numR;
                     const ny = cy + Math.sin(ang) * numR;
-                    ctx.font = '700 15px Orbitron, sans-serif';
+                    ctx.font = (maxTicks > 10 ? '700 13px Orbitron' : '700 15px Orbitron') + ', sans-serif';
                     ctx.fillStyle = isRed ? '#ff4466' : '#ffffff';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
@@ -8232,27 +8235,31 @@
             if (rpmRatio > 0.01) {
                 const rpmGrad = ctx.createLinearGradient(cx - r, cy, cx + r, cy);
                 rpmGrad.addColorStop(0, '#00ffff');
-                rpmGrad.addColorStop(0.7, '#ffcc00');
+                rpmGrad.addColorStop(Math.min(0.8, redlineRatio * 0.9), '#ffcc00');
                 rpmGrad.addColorStop(1, '#ff0055');
 
                 ctx.beginPath();
                 ctx.arc(cx, cy, r - 12, startAng, startAng + sweepAng * rpmRatio);
                 ctx.strokeStyle = rpmGrad;
                 ctx.lineWidth = 12;
-                ctx.shadowColor = rpmRatio > 0.75 ? '#ff0055' : '#00ffff';
-                ctx.shadowBlur = 14;
+                ctx.shadowColor = currentRpm >= redlineRpm ? '#ff0055' : '#00ffff';
+                ctx.shadowBlur = currentRpm >= redlineRpm ? 20 : 12;
                 ctx.stroke();
                 ctx.shadowBlur = 0;
             }
 
-            // 高精度霓虹指針
-            const needleAng = startAng + sweepAng * Math.min(1.0, rpmRatio);
+            // 高精度霓虹指針 (超越紅線過轉時脈衝震盪)
+            let renderRatio = rpmRatio;
+            if (currentRpm >= maxRpm * 0.97) {
+                renderRatio += (Math.random() - 0.5) * 0.025; // 斷油跳動
+            }
+            const needleAng = startAng + sweepAng * Math.min(1.05, Math.max(0.0, renderRatio));
             const needleLen = r - 24;
             ctx.save();
             ctx.beginPath();
             ctx.moveTo(cx, cy);
             ctx.lineTo(cx + Math.cos(needleAng) * needleLen, cy + Math.sin(needleAng) * needleLen);
-            ctx.strokeStyle = rpmRatio > 0.8 ? '#ff2255' : '#00ffcc';
+            ctx.strokeStyle = currentRpm >= redlineRpm ? '#ff1144' : '#00ffcc';
             ctx.lineWidth = 4.5;
             ctx.shadowColor = ctx.strokeStyle;
             ctx.shadowBlur = 18;
@@ -8598,13 +8605,28 @@
                 // 四輪獨立真實物理胎煙發射系統：冒煙 = 輪胎打滑(Slip) × 接地壓力(Load) × 溫度汽化係數(Temp)
                 if (car.isPlayer) {
                     const normalLoadPerWheel = ((car.model && car.model.mass) || 1200) * 9.81 / 4;
+                    const driveType = (car.model && car.model.driveType) || 'FR';
+                    const playerBrake = car.currentBrakeInput || 0;
+
                     for (let w = 0; w < 4; w++) {
                         const tire = car.tires[w];
                         if (!tire) continue;
 
-                        const slip = tire.slipMag || 0;
-                        // 無實質滑移打滑時 絕對不冒煙！(解決 100°C+ 高速巡航直線誤冒煙問題)
-                        if (slip < 0.15) continue;
+                        const isFront = w < 2;
+                        const isDrivenWheel = isFront
+                            ? (driveType === 'FF' || driveType === 'AWD')
+                            : (driveType === 'FR' || driveType === 'MR' || driveType === 'AWD');
+
+                        let slip = tire.slipMag || 0;
+
+                        // 非驅動輪 (如 FR/MR 後驅車型的前輪) 沒有引擎動力打滑
+                        // 甩尾與過彎時前輪僅隨動與反打滾動，100% 絕不發煙！只有在重踩煞車鎖死 (ABS 鎖死) 時才發少量煙。
+                        if (!isDrivenWheel) {
+                            if (playerBrake < 0.25) continue; // 未重踩腳煞車時，前輪 100% 絕對不發煙！
+                            slip = playerBrake * 0.8;
+                        } else {
+                            if (slip < 0.15) continue; // 驅動輪 (後驅車後輪 / AWD 四輪) 動力打滑與甩尾正常發濃煙
+                        }
 
                         const avgTemp = (tire.temperature.inner + tire.temperature.mid + tire.temperature.outer) / 3;
 
