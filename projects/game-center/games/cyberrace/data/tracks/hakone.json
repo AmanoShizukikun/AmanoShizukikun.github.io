@@ -1,11 +1,20 @@
 {
   "id": "hakone",
-  "name": "hakone",
+  "name": "箱根",
   "nameEn": "Hakone",
+  "nameJa": "箱根",
   "type": "linear",
   "length": "10764m",
-  "stars": 3,
+  "difficulty": 2,
+  "elev": "981m",
   "trackWidth": 18,
+  "startIndex": 6,
+  "finishIndex": 131,
+  "checkpoints": [
+    36,
+    64,
+    96
+  ],
   "points": [
     [
       -3081.0,

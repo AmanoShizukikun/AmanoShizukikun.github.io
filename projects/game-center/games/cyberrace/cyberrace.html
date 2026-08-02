@@ -2923,7 +2923,16 @@
             height: 100%;
         }
 
-        .track-stats-row, .car-stats-row {
+        .track-stats-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            background: rgba(0,0,0,0.4);
+            padding: 8px;
+            border-left: 3px solid var(--neon-orange);
+        }
+
+        .car-stats-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
@@ -3427,8 +3436,11 @@
                             <div class="track-list" id="track-list-container"></div>
 
                             <div class="track-preview-panel">
-                                <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <span id="preview-track-title" style="font-size:22px; font-weight:bold; color:#fff;">秋名 (AKINA)</span>
+                                <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                                    <div>
+                                        <span id="preview-track-title" style="font-size:22px; font-weight:bold; color:#fff;">秋名</span>
+                                        <span id="preview-track-sub" style="font-size:13px; color:#aaa; font-weight:normal; margin-left:8px;">[ Akina / Haruna | 秋名 ]</span>
+                                    </div>
                                     <span id="preview-track-stars" style="color:var(--neon-yellow);">★★★★☆</span>
                                 </div>
 
@@ -3442,11 +3454,7 @@
                                         <div class="lbl">LENGTH</div>
                                     </div>
                                     <div class="stat-box">
-                                        <div class="val" id="stat-corners">31</div>
-                                        <div class="lbl">CORNERS</div>
-                                    </div>
-                                    <div class="stat-box">
-                                        <div class="val" id="stat-elev">280m</div>
+                                        <div class="val" id="stat-elev">350m</div>
                                         <div class="lbl">ELEVATION</div>
                                     </div>
                                 </div>
@@ -3916,7 +3924,7 @@
         // ===== 常數 =====
         const TRACK_SAMPLES = 2400;
         const TOTAL_LAPS = 3;
-        const CHECKPOINT_RATIOS = [0.205, 0.445, 0.695];
+        let CHECKPOINT_RATIOS = [0.205, 0.445, 0.695];
         const CAR_COLORS = [0x00ffff, 0xff4444, 0xffcc00, 0x44ff44];
         const CAR_NAMES = ['PLAYER', 'CRIMSON', 'SOLAR', 'EMERALD'];
 
@@ -5574,8 +5582,52 @@
                 });
             });
         }
+        function getSampleIndexForControlPoint(cpIndex, pts) {
+            if (!pts || pts.length === 0 || !trackSamples || trackSamples.length === 0) return 0;
+            let effectiveIdx = cpIndex;
+            if (selectedTrackDirection === 'reverse') {
+                effectiveIdx = pts.length - 1 - cpIndex;
+            }
+            effectiveIdx = Math.max(0, Math.min(pts.length - 1, effectiveIdx));
+            
+            const targetPt = pts[effectiveIdx];
+            let bestIdx = 0;
+            let minSqDist = Infinity;
+            
+            for (let i = 0; i < TRACK_SAMPLES; i++) {
+                const sample = trackSamples[i];
+                const dx = sample.x - targetPt.x;
+                const dy = sample.y - targetPt.y;
+                const dz = sample.z - targetPt.z;
+                const sqDist = dx * dx + dy * dy + dz * dz;
+                if (sqDist < minSqDist) {
+                    minSqDist = sqDist;
+                    bestIdx = i;
+                }
+            }
+            return bestIdx;
+        }
+
         function buildStartFinishLine() {
-            const startIdx = trackType === 'linear' ? Math.floor(TRACK_SAMPLES * 0.008) : 0;
+            let startIdx = 0;
+            let endIdx = TRACK_SAMPLES - 1;
+
+            if (currentTrackData && currentTrackData.points && currentTrackData.points.length > 0) {
+                const pts = currentTrackData.points;
+                const stIndex = currentTrackData.startIndex !== undefined ? currentTrackData.startIndex : 0;
+                const fnIndex = currentTrackData.finishIndex !== undefined ? currentTrackData.finishIndex : (pts.length - 1);
+                
+                startIdx = getSampleIndexForControlPoint(stIndex, pts);
+                endIdx = getSampleIndexForControlPoint(fnIndex, pts);
+            } else {
+                startIdx = trackType === 'linear' ? Math.floor(TRACK_SAMPLES * 0.008) : 0;
+                endIdx = Math.floor(TRACK_SAMPLES * 0.995);
+            }
+
+            if (trackType === 'linear' && startIdx < 20) {
+                startIdx = 20;
+            }
+
             const pt = trackSamples[startIdx];
             const n = trackNormals[startIdx];
             const tan = trackTangents[startIdx];
@@ -5613,7 +5665,6 @@
 
             // 線性賽道的終點線與拱門
             if (trackType === 'linear') {
-                const endIdx = Math.floor(TRACK_SAMPLES * 0.995);
                 const ept = trackSamples[endIdx];
                 const en = trackNormals[endIdx];
                 const etan = trackTangents[endIdx];
@@ -5650,19 +5701,34 @@
             }
         }
 
-        
         let checkpointMeshes = [];
         let checkpointIndices = [];
 
         function buildCheckpoints() {
             checkpointMeshes = [];
             checkpointIndices = [];
-            const ratios = CHECKPOINT_RATIOS;
-            
-            ratios.forEach((ratio, cpIdx) => {
-                const idx = Math.floor(TRACK_SAMPLES * ratio);
-                checkpointIndices.push(idx);
-                
+
+            if (trackType === 'circuit') {
+                CHECKPOINT_RATIOS = [];
+                return;
+            }
+
+            if (currentTrackData && Array.isArray(currentTrackData.checkpoints) && currentTrackData.points && currentTrackData.points.length > 0) {
+                const pts = currentTrackData.points;
+                currentTrackData.checkpoints.forEach((cpIndex) => {
+                    const idx = getSampleIndexForControlPoint(cpIndex, pts);
+                    checkpointIndices.push(idx);
+                });
+                CHECKPOINT_RATIOS = checkpointIndices.map(idx => idx / TRACK_SAMPLES);
+            } else {
+                const defaultRatios = [0.205, 0.445, 0.695];
+                CHECKPOINT_RATIOS = defaultRatios;
+                defaultRatios.forEach(ratio => {
+                    checkpointIndices.push(Math.floor(TRACK_SAMPLES * ratio));
+                });
+            }
+
+            checkpointIndices.forEach((idx, cpIdx) => {
                 const pt = trackSamples[idx];
                 const n = trackNormals[idx];
                 const tan = trackTangents[idx];
@@ -5673,7 +5739,7 @@
                 const trackAngle = Math.atan2(tan.x, tan.z);
 
                 const cpArchGroup = new THREE.Group();
-                
+
                 // 地面發光橫向劃線
                 const lineGeo = new THREE.PlaneGeometry(width, 2.5);
                 const lineMat = new THREE.MeshStandardMaterial({
@@ -7066,7 +7132,16 @@
             let throttleInput = 1.0; // 直道預設 100% 全油門衝刺
             let brakeInput = 0;
 
-            if (maxCurv > 10 && distToApex <= (requiredBrakeSamples + 10) && distToApex > 2) {
+            if (car.finished) {
+                // 完賽車輛：無縫切換自動駕駛，沿賽道平滑煞車減速直到完全停止
+                throttleInput = 0;
+                if (Math.abs(car.speed) > 0.05) {
+                    brakeInput = 0.7;
+                } else {
+                    brakeInput = 1.0;
+                    car.speed = 0;
+                }
+            } else if (maxCurv > 10 && distToApex <= (requiredBrakeSamples + 10) && distToApex > 2) {
                 if (currentSpeedGame > safeSpeedGame + 0.03) {
                     brakeInput = Math.min(1.0, 0.4 + (currentSpeedGame - safeSpeedGame) * 3.5);
                     throttleInput = 0;
@@ -7853,10 +7928,11 @@
             if (posEl) posEl.textContent = position;
             if (posSufEl) posSufEl.textContent = '/' + cars.length;
 
-            // 比賽計時器
-            const mins = Math.floor(raceTime / 60);
-            const secs = Math.floor(raceTime % 60);
-            const ms = Math.floor((raceTime % 1) * 10);
+            // 比賽計時器：玩家衝過終點線後，計時器立即凍結在玩家完賽時間 (finishTime)
+            const displayTime = (player && player.finishTime > 0) ? player.finishTime : raceTime;
+            const mins = Math.floor(displayTime / 60);
+            const secs = Math.floor(displayTime % 60);
+            const ms = Math.floor((displayTime % 1) * 10);
             const timerEl = document.getElementById('hudTimer');
             if (timerEl) {
                 timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${ms}`;
@@ -8353,6 +8429,8 @@
                 c.checkpointsPassed = [false, false, false];
                 c.checkpointTimes = [0, 0, 0];
                 c.finished = false;
+                c.crossedFinishLine = false;
+                c.resultTriggered = false;
                 c.finishTime = 0;
                 c.lap = 0;
                 c.isDrifting = false;
@@ -8403,24 +8481,47 @@
             let allFinished = true;
 
             for (const car of cars) {
-                if (car.finished) continue;
-                allFinished = false;
-                let isFinished = false;
-                if (trackType === 'linear') {
-                    // 線性賽道：車輛必須完全跨越終點線拱門 (t >= 0.995 且比賽進行 5 秒以上)
-                    isFinished = raceTime > 5.0 && car.totalProgress >= 0.995;
-                    if (isFinished) car.totalProgress = 1.0; // 完賽設定為 100%
-                } else {
-                    // 環道：完成指定圈數 (且比賽已進行 5 秒以上)
-                    isFinished = raceTime > 5.0 && car.lap >= TOTAL_LAPS;
-                }
-                if (isFinished) {
-                    car.finished = true;
-                    car.finishTime = raceTime;
+                if (!car.finished) {
+                    allFinished = false;
 
-                    // 玩家完賽
-                    if (car.isPlayer) {
-                        setTimeout(() => showRaceResult(), 600);
+                    if (trackType === 'linear') {
+                        let finishSampleIdx = Math.floor(TRACK_SAMPLES * 0.995);
+                        if (currentTrackData && currentTrackData.points && currentTrackData.points.length > 0) {
+                            const fnIndex = currentTrackData.finishIndex !== undefined ? currentTrackData.finishIndex : (currentTrackData.points.length - 1);
+                            finishSampleIdx = getSampleIndexForControlPoint(fnIndex, currentTrackData.points);
+                        }
+
+                        const carSampleIdx = Math.round((car.lastT || 0) * TRACK_SAMPLES);
+
+                        // 1. 車輛實際跨越終點線瞬間：記錄完賽時間，並【馬上彈出結算面板】
+                        if (!car.crossedFinishLine && raceTime > 3.0 && carSampleIdx >= finishSampleIdx) {
+                            car.crossedFinishLine = true;
+                            car.finishTime = raceTime;
+
+                            if (car.isPlayer && !car.resultTriggered) {
+                                car.resultTriggered = true;
+                                showRaceResult(); // 衝線馬上浮現結算面板！
+                            }
+                        }
+
+                        // 2. 車輛保持原本衝刺速度向前順暢滾動約 5 米 (約 3-4 個取樣點) 後完全停止
+                        if (car.crossedFinishLine && (carSampleIdx >= finishSampleIdx + 4 || raceTime - car.finishTime > 0.3)) {
+                            car.finished = true;
+                            car.speed = 0;
+                            car.totalProgress = 1.0;
+                        }
+                    } else {
+                        // 環道：完成指定圈數 (且比賽已進行 3 秒以上)
+                        if (raceTime > 3.0 && car.lap >= TOTAL_LAPS) {
+                            car.finished = true;
+                            car.speed = 0;
+                            car.finishTime = raceTime;
+
+                            if (car.isPlayer && !car.resultTriggered) {
+                                car.resultTriggered = true;
+                                showRaceResult();
+                            }
+                        }
                     }
                 }
             }
@@ -8433,7 +8534,6 @@
 
         function showRaceResult() {
             gameState = 'finished';
-            cancelAnimationFrame(animId);
 
             const player = cars[0];
             const sorted = [...cars].sort((a, b) => {
@@ -8572,7 +8672,7 @@
                 return;
             }
 
-            if (gameState !== 'playing') {
+            if (gameState === 'menu' || gameState === 'paused') {
                 renderer.render(scene, camera);
                 return;
             }
@@ -8581,7 +8681,10 @@
 
             // 更新所有車輛
             for (const car of cars) {
-                if (car.finished) continue;
+                if (car.finished) {
+                    car.speed = 0; // 完賽車輛衝過終點線一小段後直接完全停止
+                    continue;
+                }
 
                 if (car.isPlayer) {
                     handlePlayerInput(car, dt);
@@ -8729,9 +8832,9 @@
             selectedTrackKey = trackKey || 'akina';
             aiDifficulty = aiDiff || 'normal';
 
-            const trackData = await loadTrackData(selectedTrackKey);
-            trackWidth = trackData.trackWidth;
-            trackType = trackData.type;
+            currentTrackData = await loadTrackData(selectedTrackKey);
+            trackWidth = currentTrackData.trackWidth;
+            trackType = currentTrackData.type;
             const diffConfig = AI_DIFFICULTY[aiDifficulty] || AI_DIFFICULTY.normal;
             const aiCount = (typeof selectedGameMode !== 'undefined' && selectedGameMode === 'time_attack') ? 0 : diffConfig.aiCount;
 
@@ -8748,23 +8851,39 @@
             await createTrack();
             createParticleSystems();
 
-            // 建造車輛 - 在起跑線排列
-            // 線性賽道: t 值對應 TRACK_SAMPLES=2400 個取樣點
-            // 間距縮小, 讓所有車輛緊密排在起跑線後方 (約 6-7m 間隔)
-            const startPositions = trackType === 'linear' ? [
-                { t: 0.001, lateral: 2 },
-                { t: 0.003, lateral: -2 },
-                { t: 0.005, lateral: 2 },
-                { t: 0.007, lateral: -2 },
-            ] : [
-                { t: 0.998, lateral: 2 },
-                { t: 0.994, lateral: -2 },
-                { t: 0.990, lateral: 2 },
-                { t: 0.986, lateral: -2 },
-            ];
+            // 建造車輛 - 排列順序：AI 車輛在前方，玩家車輛在最後方
+            let startSampleIdx = 0;
+            if (currentTrackData && currentTrackData.points && currentTrackData.points.length > 0) {
+                const stIndex = currentTrackData.startIndex !== undefined ? currentTrackData.startIndex : 0;
+                startSampleIdx = getSampleIndexForControlPoint(stIndex, currentTrackData.points);
+            } else {
+                startSampleIdx = Math.floor(TRACK_SAMPLES * 0.008);
+            }
+            if (trackType === 'linear' && startSampleIdx < 20) {
+                startSampleIdx = 20;
+            }
+            const startRatio = startSampleIdx / TRACK_SAMPLES;
 
-            for (let i = 0; i <= aiCount; i++) {
-                const sp = startPositions[i];
+            const totalCars = aiCount + 1;
+            const gridSlots = [];
+            for (let slot = 0; slot < totalCars; slot++) {
+                const offset = 0.002 * (slot + 1); // 0.002, 0.004, 0.006, 0.008...
+                const lateral = (slot % 2 === 0) ? 2 : -2;
+                let tVal = startRatio - offset;
+                if (trackType === 'linear') {
+                    tVal = Math.max(0.0005, tVal);
+                } else {
+                    tVal = (1.0 + tVal) % 1.0;
+                }
+                gridSlots.push({ t: tVal, lateral: lateral });
+            }
+
+            cars = [];
+            for (let i = 0; i < totalCars; i++) {
+                // i == 0 代表玩家，分配到最右/最次排 (gridSlots[totalCars - 1])，即最後方
+                // i >= 1 代表 AI 車輛，分配到 gridSlots[i - 1]，即前方
+                const slotIdx = (i === 0) ? (totalCars - 1) : (i - 1);
+                const sp = gridSlots[slotIdx];
                 const car = createCar(i, sp.t, sp.lateral, i === 0 ? selectedCarKey : null);
                 cars.push(car);
             }
@@ -8895,7 +9014,7 @@
                 for (const key of ['akina', 'akagi', 'irohazaka', 'happogahara', 'tsukuba', 'tsuchisaka', 'shomaru', 'lakeakina', 'odawara', 'lihpao']) {
                     const v = await loadTrackData(key);
                     if (v) {
-                        info[key] = { name: v.name, nameEn: v.nameEn, type: v.type, length: v.length, stars: v.stars, points: v.points.map(p => ({x: p.x, z: p.z})) };
+                        info[key] = { name: v.name, nameEn: v.nameEn, nameJa: v.nameJa, type: v.type, length: v.length, difficulty: v.difficulty !== undefined ? v.difficulty : v.stars, elev: v.elev, points: v.points.map(p => ({x: p.x, z: p.z})) };
                     }
                 }
                 return info;
@@ -8931,13 +9050,11 @@
     }
     function sfxBack() { playBeep(400, 0.12, 'sawtooth'); }
 
-    // Helper: 將數字型態的星級 (1~5) 動態轉為視覺星星字串 ('★★★★☆')
+    // Helper: 將數字型態的難度/星級 (1~5) 動態轉為視覺星星字串 ('★★★★☆')
     function formatStarRating(stars) {
-        if (typeof stars === 'number') {
-            const count = Math.max(0, Math.min(5, Math.round(stars)));
-            return '★'.repeat(count) + '☆'.repeat(5 - count);
-        }
-        return stars || '★★★☆☆';
+        const rating = typeof stars === 'number' ? stars : (parseInt(stars) || 3);
+        const count = Math.max(0, Math.min(5, Math.round(rating)));
+        return '★'.repeat(count) + '☆'.repeat(5 - count);
     }
 
     // Data Models (動態載入，資料源為 ./data/tracks/tracks_index.json)
@@ -9042,6 +9159,7 @@
     let focusIndex = 0;
     let currentFocusables = [];
     let lastPadTimestamp = 0;
+    let currentTrackData = null;
     let selectedTrackObj = null;
     let selectedCarObj = carData[1];
     let selectedTrackDirection = 'forward';
@@ -9414,15 +9532,18 @@
                 return;
             }
 
-            listContainer.innerHTML = filtered.map((t, idx) => `
+            listContainer.innerHTML = filtered.map((t, idx) => {
+                const diffVal = t.difficulty !== undefined ? t.difficulty : (typeof t.stars === 'number' ? t.stars : 3);
+                return `
                 <div class="arcade-card track-item ${idx === 0 ? 'selected' : ''}" data-id="${t.id}" onclick="onTrackCardClick('${t.id}', this)">
                     <div>
                         <span class="track-name">${t.name}</span>
                         <span class="track-type-tag">[${t.type}]</span>
                     </div>
-                    <span class="track-stars">${formatStarRating(t.stars)}</span>
+                    <span class="track-stars">${formatStarRating(diffVal)}</span>
                 </div>
-            `).join('');
+            `;
+            }).join('');
 
             updateFocusableElements();
             if (filtered[0]) {
@@ -9517,15 +9638,21 @@
             selectedTrackObj = trackObj;
             
             const titleEl = document.getElementById('preview-track-title');
+            const subEl = document.getElementById('preview-track-sub');
             const starsEl = document.getElementById('preview-track-stars');
             const lenEl = document.getElementById('stat-len');
-            const cornersEl = document.getElementById('stat-corners');
             const elevEl = document.getElementById('stat-elev');
 
             if (titleEl) titleEl.innerText = trackObj.name || '';
-            if (starsEl) starsEl.innerText = formatStarRating(trackObj.stars);
+            if (subEl) {
+                const subParts = [];
+                if (trackObj.nameEn) subParts.push(trackObj.nameEn);
+                if (trackObj.nameJa && trackObj.nameJa !== trackObj.name) subParts.push(trackObj.nameJa);
+                subEl.innerText = subParts.length > 0 ? `[ ${subParts.join(' | ')} ]` : '';
+            }
+            const diffVal = trackObj.difficulty !== undefined ? trackObj.difficulty : (typeof trackObj.stars === 'number' ? trackObj.stars : 3);
+            if (starsEl) starsEl.innerText = formatStarRating(diffVal);
             if (lenEl) lenEl.innerText = trackObj.len || trackObj.length || '-';
-            if (cornersEl) cornersEl.innerText = trackObj.corners !== undefined ? trackObj.corners : '-';
             if (elevEl) elevEl.innerText = trackObj.elev !== undefined ? trackObj.elev : '-';
 
             drawTrackCanvas(trackObj);

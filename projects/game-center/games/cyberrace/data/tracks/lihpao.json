@@ -1,10 +1,12 @@
 {
   "id": "lihpao",
-  "name": "lihpao",
+  "name": "麗寶",
   "nameEn": "Lihpao",
+  "nameJa": "麗宝",
   "type": "circuit",
   "length": "3562m",
-  "stars": 3,
+  "difficulty": 2,
+  "elev": "16m",
   "trackWidth": 18,
   "points": [
     [
@@ -302,5 +304,8 @@
       8.5,
       -76.5
     ]
-  ]
+  ],
+  "startIndex": 0,
+  "finishIndex": 58,
+  "checkpoints": []
 }
