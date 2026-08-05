@@ -99,6 +99,50 @@
     "elev": "16m"
   },
   {
+    "id": "manazuru",
+    "name": "真鶴",
+    "nameEn": "Manazuru",
+    "nameJa": "真鶴",
+    "type": "Circuit",
+    "difficulty": 3,
+    "region": "日本",
+    "len": "3,574m",
+    "elev": "0m"
+  },
+  {
+    "id": "momiji",
+    "name": "紅葉",
+    "nameEn": "Momiji Line",
+    "nameJa": "もみじライン",
+    "type": "PTP",
+    "difficulty": 4,
+    "region": "日本",
+    "len": "6,176m",
+    "elev": "332m"
+  },
+  {
+    "id": "nagao",
+    "name": "長尾",
+    "nameEn": "Nagao",
+    "nameJa": "長尾",
+    "type": "PTP",
+    "difficulty": 4,
+    "region": "日本",
+    "len": "6,558m",
+    "elev": "313m"
+  },
+  {
+    "id": "nanamagari",
+    "name": "七曲",
+    "nameEn": "Nanamagari",
+    "nameJa": "七曲り",
+    "type": "PTP",
+    "difficulty": 4,
+    "region": "日本",
+    "len": "5,870m",
+    "elev": "389m"
+  },
+  {
     "id": "odawara",
     "name": "小田原",
     "nameEn": "Odawara",
@@ -110,6 +154,39 @@
     "elev": "120m"
   },
   {
+    "id": "shinmaze",
+    "name": "真・間瀬",
+    "nameEn": "Shin Maze",
+    "nameJa": "真・間瀬",
+    "type": "PTP",
+    "difficulty": 4,
+    "region": "日本",
+    "len": "3,168m",
+    "elev": "160m"
+  },
+  {
+    "id": "shintsubaki",
+    "name": "真・椿",
+    "nameEn": "Shin Tsubaki",
+    "nameJa": "真・椿ライン",
+    "type": "PTP",
+    "difficulty": 5,
+    "region": "日本",
+    "len": "13,142m",
+    "elev": "743m"
+  },
+  {
+    "id": "shinusui",
+    "name": "真・碓氷",
+    "nameEn": "Shin Usui",
+    "nameJa": "真・碓氷",
+    "type": "PTP",
+    "difficulty": 5,
+    "region": "日本",
+    "len": "7,429m",
+    "elev": "191m"
+  },
+  {
     "id": "shomaru",
     "name": "正丸",
     "nameEn": "Shomaru",
@@ -119,6 +196,17 @@
     "region": "日本",
     "len": "5,812m",
     "elev": "193m"
+  },
+  {
+    "id": "tsubaki",
+    "name": "椿",
+    "nameEn": "Tsubaki",
+    "nameJa": "椿ライン",
+    "type": "PTP",
+    "difficulty": 4,
+    "region": "日本",
+    "len": "7,312m",
+    "elev": "392m"
   },
   {
     "id": "tsuchisaka",
