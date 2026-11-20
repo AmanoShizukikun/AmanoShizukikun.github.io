@@ -26,7 +26,6 @@ header {
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
                 opacity 0.4s ease,
                 position 0.3s ease,
-                height 0.3s ease,
                 padding 0.3s ease;
 }
 
@@ -314,13 +313,25 @@ header > a:hover::after {
 }
 
 [data-theme="light"] .settings-title {
-    color: #cc0066;
-    text-shadow: none;
+    color: #cc0066 !important;
+    text-shadow: none !important;
+    filter: none !important;
+}
+
+[data-theme="light"] .settings-title::before {
+    color: #0099cc !important;
+    text-shadow: none !important;
+    filter: none !important;
 }
 
 [data-theme="light"] .settings-section-title {
-    color: #0099cc;
-    text-shadow: none;
+    color: #0099cc !important;
+    text-shadow: none !important;
+    filter: none !important;
+}
+
+[data-theme="light"] .settings-header {
+    border-bottom-color: rgba(204, 0, 102, 0.25) !important;
 }
 
 [data-theme="light"] .setting-label {
@@ -352,20 +363,24 @@ header > a:hover::after {
     border-bottom: 2px solid rgba(255, 0, 128, 0.3);
 }
 
-.settings-title {
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    color: var(--primary-magenta);
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    text-shadow: var(--neon-glow) var(--primary-magenta);
+.settings-title,
+[data-theme="dark"] .settings-title {
+    font-family: var(--font-display, 'Orbitron', sans-serif) !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: var(--primary-magenta, #ff00ff) !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    text-shadow: 0 0 10px rgba(255, 0, 255, 0.6), 0 0 20px rgba(255, 0, 255, 0.4) !important;
 }
 
-.settings-title::before {
-    content: '◆';
-    color: var(--primary-cyan);
+.settings-title::before,
+[data-theme="dark"] .settings-title::before {
+    content: '\25C6' !important;
+    color: var(--primary-cyan, #00ffff) !important;
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.7) !important;
 }
 
 .settings-section {
@@ -657,7 +672,7 @@ header > a:hover::after {
 }
 
 .select-control::after {
-    content: '▼';
+    content: '\25BC';
     position: absolute;
     right: 0.8rem;
     top: 50%;
@@ -938,7 +953,7 @@ header > a:hover::after {
 }
 
 .nav-title::before {
-    content: '◆';
+    content: '\25C6';
     color: #cc0066;
 }
 
