@@ -1,0 +1,146 @@
+[
+  {
+    "id": "ae86_stock",
+    "brand": "TOYOTA",
+    "model": "Toyota Sprinter Trueno 3door GT-APEX (AE86)",
+    "year": 1983,
+    "drivetrain": "FR",
+    "transmission": "5-MT",
+    "spec": "STOCK",
+    "hp": 180,
+    "weight": "960 kg",
+    "torque": "16.5 kgm",
+    "topSpeed": 75,
+    "accel": 70,
+    "handling": 90,
+    "drift": 92,
+    "colors": [
+      "#ffffff",
+      "#111111"
+    ]
+  },
+  {
+    "id": "ae86_race",
+    "brand": "TOYOTA",
+    "model": "Toyota Sprinter Trueno 3door GT-APEX (TRD)",
+    "year": 1983,
+    "drivetrain": "FR",
+    "transmission": "5-MT",
+    "spec": "FULL-SPEC",
+    "hp": 240,
+    "weight": "900 kg",
+    "torque": "19.6 kgm",
+    "topSpeed": 82,
+    "accel": 80,
+    "handling": 96,
+    "drift": 98,
+    "colors": [
+      "#ffffff",
+      "#222222",
+      "#ffea00"
+    ]
+  },
+  {
+    "id": "fd3s_early",
+    "brand": "MAZDA",
+    "model": "Mazda RX-7 (FD3S)",
+    "year": 1992,
+    "drivetrain": "FR",
+    "transmission": "5-MT",
+    "spec": "TUNED",
+    "hp": 350,
+    "weight": "1260 kg",
+    "torque": "39.2 kgm",
+    "topSpeed": 92,
+    "accel": 88,
+    "handling": 92,
+    "drift": 90,
+    "colors": [
+      "#ffcc00",
+      "#111111",
+      "#ffffff"
+    ]
+  },
+  {
+    "id": "fd3s_late",
+    "brand": "MAZDA",
+    "model": "Mazda RX-7 FD3S Spirit R (RE Amemiya)",
+    "year": 1998,
+    "drivetrain": "FR",
+    "transmission": "5-MT",
+    "spec": "FULL-SPEC",
+    "hp": 450,
+    "weight": "1200 kg",
+    "torque": "46.0 kgm",
+    "topSpeed": 98,
+    "accel": 96,
+    "handling": 98,
+    "drift": 94,
+    "colors": [
+      "#ffaa00",
+      "#00ffff",
+      "#111111"
+    ]
+  },
+  {
+    "id": "fc3s_early",
+    "brand": "MAZDA",
+    "model": "Mazda Savanna RX-7 (FC3S)",
+    "year": 1986,
+    "drivetrain": "FR",
+    "transmission": "5-MT",
+    "spec": "STOCK",
+    "hp": 260,
+    "weight": "1280 kg",
+    "torque": "29.4 kgm",
+    "topSpeed": 84,
+    "accel": 78,
+    "handling": 88,
+    "drift": 86,
+    "colors": [
+      "#f5f5f5",
+      "#222222"
+    ]
+  },
+  {
+    "id": "fc3s_late",
+    "brand": "MAZDA",
+    "model": "Mazda Savanna RX-7 (RE Amemiya)",
+    "year": 1989,
+    "drivetrain": "FR",
+    "transmission": "5-MT",
+    "spec": "TUNED",
+    "hp": 350,
+    "weight": "1230 kg",
+    "torque": "38.2 kgm",
+    "topSpeed": 90,
+    "accel": 86,
+    "handling": 92,
+    "drift": 92,
+    "colors": [
+      "#ffffff",
+      "#ff0055"
+    ]
+  },
+  {
+    "id": "gc8_sti",
+    "brand": "SUBARU",
+    "model": "Subaru Impreza WRX STI (GC8)",
+    "year": 1999,
+    "drivetrain": "4WD",
+    "transmission": "5-MT",
+    "spec": "FULL-SPEC",
+    "hp": 280,
+    "weight": "1250 kg",
+    "torque": "34.3 kgm",
+    "topSpeed": 86,
+    "accel": 90,
+    "handling": 94,
+    "drift": 84,
+    "colors": [
+      "#0044cc",
+      "#ffea00",
+      "#111111"
+    ]
+  }
+]

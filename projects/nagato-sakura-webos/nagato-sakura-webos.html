@@ -2,6 +2,18 @@
 <html lang="zh-TW">
     <head>
         <meta charset="UTF-8" />
+        <script>
+            (function() {
+                try {
+                    var theme = localStorage.getItem('theme') || 'dark';
+                    document.documentElement.setAttribute('data-theme', theme);
+                    var hh = localStorage.getItem('headerHeight');
+                    if (hh) {
+                        document.documentElement.style.setProperty('--header-height', parseInt(hh) + 'px');
+                    }
+                } catch(e) {}
+            })();
+        </script>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="description" content="天野靜樹的 OS 網頁模擬器" />
         <meta name="author" content="天野靜樹" />
@@ -9909,7 +9921,8 @@ Nagato Sakura Terminal [版本 1.0.0]
         ></script>
 
         <script>
-            document.addEventListener("DOMContentLoaded", () => {
+            (function () {
+                const initWebOS = () => {
                 // --- 0. 獲取 DOM 元素 ---
                 // 修改：獲取模擬器容器
                 const simulatorContainer = document.getElementById(
@@ -11009,7 +11022,7 @@ Nagato Sakura Terminal [版本 1.0.0]
                 let _lastBackgroundVideoObjectUrl = null;
 
                 const DEFAULT_PERSONALIZATION = {
-                    theme: "dark",
+                    theme: localStorage.getItem("theme") || "dark",
                     accentColor:
                         getComputedStyle(document.documentElement)
                             .getPropertyValue("--primary-cyan")
@@ -11080,11 +11093,16 @@ Nagato Sakura Terminal [版本 1.0.0]
                 }
 
                 function applyPersonalizationSettings(settings) {
+                    const currentGlobalTheme =
+                        localStorage.getItem("theme") || "dark";
                     const s = Object.assign(
                         {},
                         DEFAULT_PERSONALIZATION,
                         settings || {}
                     );
+                    if (!s.theme) {
+                        s.theme = currentGlobalTheme;
+                    }
                     // Theme
                     if (s.theme) {
                         document.documentElement.setAttribute(
@@ -12037,10 +12055,17 @@ Nagato Sakura Terminal [版本 1.0.0]
 
                 function loadPersonalizationSettings() {
                     try {
-                        return JSON.parse(
+                        const data = JSON.parse(
                             localStorage.getItem(PERSONALIZATION_STORAGE_KEY) ||
                                 "null"
                         );
+                        if (data) {
+                            // 始終與全域主題保持同步，確保外部切換淺色/深色模式後進入 WebOS 保持一致
+                            const currentTheme =
+                                localStorage.getItem("theme") || "dark";
+                            data.theme = currentTheme;
+                        }
+                        return data;
                     } catch (e) {
                         return null;
                     }
@@ -12247,9 +12272,12 @@ Nagato Sakura Terminal [版本 1.0.0]
                     personalizationControls.bgReset.addEventListener(
                         "click",
                         () => {
+                            const currentTheme =
+                                localStorage.getItem("theme") || "dark";
                             const s = Object.assign(
                                 {},
-                                DEFAULT_PERSONALIZATION
+                                DEFAULT_PERSONALIZATION,
+                                { theme: currentTheme }
                             );
                             applyPersonalizationSettings(s);
                             savePersonalizationSettings(s);
@@ -12466,9 +12494,15 @@ Nagato Sakura Terminal [版本 1.0.0]
 
                 // Initialize personalization at startup
                 try {
+                    const currentTheme =
+                        localStorage.getItem("theme") || "dark";
                     const savedPersonalization = loadPersonalizationSettings();
                     const settings =
-                        savedPersonalization || DEFAULT_PERSONALIZATION;
+                        savedPersonalization ||
+                        Object.assign({}, DEFAULT_PERSONALIZATION, {
+                            theme: currentTheme,
+                        });
+                    settings.theme = currentTheme;
                     applyPersonalizationSettings(settings);
                     // 同步主題設定到 navigation.js 使用的 localStorage key，確保兩個系統保持一致
                     if (settings.theme) {
@@ -12638,6 +12672,22 @@ Nagato Sakura Terminal [版本 1.0.0]
                         }
                     });
                 }
+
+                // 監聽全域主題切換（跨分頁或外部設定更新），即時同步 WebOS 主題
+                window.addEventListener("storage", (e) => {
+                    if (e.key === "theme" && e.newValue) {
+                        const s =
+                            loadPersonalizationSettings() ||
+                            DEFAULT_PERSONALIZATION;
+                        s.theme = e.newValue;
+                        if (s.backgroundMode === "default") {
+                            _lastBackgroundMode = null;
+                            _lastBackgroundValue = null;
+                        }
+                        applyPersonalizationSettings(s);
+                        savePersonalizationSettings(s);
+                    }
+                });
 
                 // --- Right-side settings panel: open/close panels (background, fonts) ---
                 const personalizationSection =
@@ -18205,7 +18255,14 @@ Nagato Sakura Terminal [版本 1.0.0]
                         focusWindow(browserWindow);
                     }
                 });
-            });
+            };
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initWebOS);
+            } else {
+                initWebOS();
+            }
+            })();
         </script>
 
         <!-- Weather widget script (supports multiple instances) -->
@@ -18868,7 +18925,7 @@ Nagato Sakura Terminal [版本 1.0.0]
                     return new Intl.DateTimeFormat("zh-TW", opts).format(d);
                 }
 
-                document.addEventListener("DOMContentLoaded", () => {
+                const initAboutHelpers = () => {
                     const verEl = document.getElementById("about-version");
                     const version = verEl ? verEl.textContent.trim() : "v?";
                     const buildDateEl =
@@ -19110,7 +19167,13 @@ Nagato Sakura Terminal [版本 1.0.0]
                             setAutoCheck(obj);
                         }
                     }, 5 * 60 * 1000);
-                });
+                };
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initAboutHelpers);
+                } else {
+                    initAboutHelpers();
+                }
             })();
 
             // ========== 記事本應用 ==========
@@ -20362,12 +20425,18 @@ Nagato Sakura Terminal [版本 1.0.0]
             };
 
             // 初始化新應用
-            document.addEventListener("DOMContentLoaded", () => {
+            const initApps = () => {
                 notepadApp.init();
                 terminalApp.init();
                 photosApp.init();
                 playerApp.init();
-            });
+            };
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initApps);
+            } else {
+                initApps();
+            }
         </script>
     </body>
 </html>

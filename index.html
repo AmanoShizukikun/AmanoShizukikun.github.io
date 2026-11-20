@@ -2,6 +2,18 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+                var hh = localStorage.getItem('headerHeight');
+                if (hh) {
+                    document.documentElement.style.setProperty('--header-height', parseInt(hh) + 'px');
+                }
+            } catch(e) {}
+        })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="天野靜樹的賽博科技領域">
     <meta name="author" content="天野靜樹">
@@ -1258,7 +1270,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="mailto:3b017128@gm.student.ncut.edu.tw" class="social-link">
+                        <a href="mailto:hackamsk@gmail.com" class="social-link">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
                                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                                 <polyline points="22,6 12,13 2,6"></polyline>
@@ -1449,7 +1461,7 @@
                             </div>
                         </div>
                         <h2 class="profile-name">天野靜樹</h2>
-                        <p class="profile-title">國立勤益科技大學 - 四技日間部資訊工程系 - 四訊延</p>
+                        <p class="profile-title">國立勤益科技大學 - 四技日間部資訊工程系 - 畢業</p>
                         <div class="profile-stats">
                             <div class="stat-item">
                                 <div class="stat-number" data-target="12" data-suffix="+">0</div>
@@ -1468,8 +1480,8 @@
                                 <div class="stat-label">創新熱忱</div>
                             </div>
                         </div>
-                        <a href="mailto:3b017128@gm.student.ncut.edu.tw" class="contact-link" data-email="3b017128@gm.student.ncut.edu.tw">
-                            <span class="contact-email">3b017128@gm.student.ncut.edu.tw</span>
+                        <a href="mailto:hackamsk@gmail.com" class="contact-link" data-email="hackamsk@gmail.com">
+                            <span class="contact-email">hackamsk@gmail.com</span>
                             <span class="copy-btn" role="button" tabindex="0" aria-label="複製電子郵件" title="複製電子郵件">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -1559,8 +1571,8 @@
                     </span>
                     <h3 class="contact-title">電子郵件</h3>
                     <p class="contact-info">透過郵件聯絡我，我會盡快回覆</p>
-                    <a href="mailto:3b017128@gm.student.ncut.edu.tw" class="contact-link">
-                        3b017128@gm.student.ncut.edu.tw
+                    <a href="mailto:hackamsk@gmail.com" class="contact-link">
+                        hackamsk@gmail.com
                     </a>
                 </div>
 

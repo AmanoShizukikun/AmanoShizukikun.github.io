@@ -495,6 +495,8 @@ const Navigation = {
 
             if (header) {
                 const headerHeight = hideNavbar ? '0px' : settings.headerHeight + 'px';
+                // 暫時關閉動畫過渡，確保頁面初始化時 header 直接渲染為正確高度，無高度縮放/變形滑動
+                header.style.transition = 'none';
                 header.style.height = headerHeight;
                 if (hideNavbar) {
                     header.style.minHeight = '0';
@@ -508,14 +510,11 @@ const Navigation = {
 
             // Header 固定 - 可選擇跳過
             if (header && !skipHeaderFixed) {
-                // 添加過渡效果
-                header.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease, position 0.3s ease, height 0.3s ease, padding 0.3s ease';
-                
                 if (settings.headerFixed) {
                     header.style.position = 'fixed';
                     header.style.transform = 'translateY(0)';
                     header.style.opacity = '1';
-                    document.body.style.paddingTop = settings.headerHeight + 'px';
+                    document.body.style.paddingTop = hideNavbar ? '0' : settings.headerHeight + 'px';
                 } else {
                     header.style.position = 'relative';
                     header.style.transform = 'translateY(0)';
@@ -523,10 +522,11 @@ const Navigation = {
                     document.body.style.paddingTop = '0';
                 }
 
-                // 如果顯示設定要求隱藏導航欄，覆寫任何 paddingTop
-                if (hideNavbar) {
-                    document.body.style.paddingTop = '0';
-                }
+                // 強制 reflow 並在下一幀恢復滑順動畫過渡
+                void header.offsetHeight;
+                requestAnimationFrame(() => {
+                    header.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease, position 0.3s ease, height 0.3s ease, padding 0.3s ease';
+                });
             }
 
             // 主題模式
@@ -659,8 +659,8 @@ const Navigation = {
 
             // 處理 DOM 粒子 (Particle Storm)
             const particlesContainer = document.querySelector('.particles');
-            // 如果目前是 star（宇宙星圖）或 bubble（氣泡派對）模式，由 BackgroundManager 自行管理粒子容器，此處不覆蓋
-            const isStarMode = Core.BackgroundManager && ['star', 'bubble', 'circuit', 'sakura', 'glitch', 'laser', 'fleet'].includes(Core.BackgroundManager.current);
+            // 如果目前是 star（宇宙星圖）、city（賽博都市）等模式，由 BackgroundManager 自行管理粒子容器，此處不覆蓋
+            const isStarMode = Core.BackgroundManager && ['star', 'bubble', 'circuit', 'sakura', 'glitch', 'laser', 'fleet', 'city', 'cyber-city'].includes(Core.BackgroundManager.current);
             
             if (settings.animationStrength === 0) {
                 // 關閉所有動畫
@@ -1255,10 +1255,13 @@ const Navigation = {
         if (hideNavbar) {
             document.documentElement.style.setProperty('--header-height', '0px');
         } else {
-            // 獲取 header 的實際高度（包括 padding 和邊框）
-            const headerHeight = header.offsetHeight;
-            // 設置 CSS 變數
-            document.documentElement.style.setProperty('--header-height', headerHeight + 'px');
+            // 優先讀取使用者儲存的 headerHeight 設定，避免被未初始化的預設 DOM offsetHeight 覆寫跳動
+            const savedHeaderHeight = parseInt(localStorage.getItem('headerHeight'));
+            const targetHeight = (savedHeaderHeight && !isNaN(savedHeaderHeight)) ? savedHeaderHeight : header.offsetHeight;
+            if (targetHeight) {
+                header.style.height = targetHeight + 'px';
+                document.documentElement.style.setProperty('--header-height', targetHeight + 'px');
+            }
         }
 
         // 在窗口大小改變時重新計算（若隱藏則不需要重算）

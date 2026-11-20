@@ -2,6 +2,18 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
+<script>
+    (function() {
+        try {
+            var theme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            var hh = localStorage.getItem('headerHeight');
+            if (hh) {
+                document.documentElement.style.setProperty('--header-height', parseInt(hh) + 'px');
+            }
+        } catch(e) {}
+    })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FH6 通用調教計算器 - Cyber Nexus</title>
 <meta name="description" content="Forza Horizon 6 通用簡易調教計算器 — 齒比、懸吊、輪胎全方位推薦">

@@ -10,6 +10,10 @@
     <link rel="stylesheet" href="../../../../assets/css/core.css">
     <link rel="stylesheet" href="../../../../assets/css/components.css">
     <link rel="stylesheet" href="../../../../assets/css/animations.css">
+    <link rel="stylesheet" href="../../css/sidebar.css">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -23,302 +27,32 @@
             height: calc(100vh - var(--header-height, 75px));
             display: flex;
             overflow: hidden;
-        }
-
-        /* ========== 左側導覽欄 ========== */
-        .gc-sidebar {
-            width: 300px;
-            height: 100%;
-            position: absolute;
-            left: 0;
-            top: 0;
-            background: linear-gradient(180deg, rgba(10, 10, 20, 0.9), rgba(20, 5, 40, 0.9));
-            border-right: 2px solid rgba(0, 255, 255, 0.2);
-            padding: 40px 30px;
-            overflow-y: auto;
-            overflow-x: hidden;
-            animation: sidebarSlideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both;
-            flex-shrink: 0;
-            transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                        padding 0.3s ease,
-                        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-                        top 0.01s ease-out,
-                        height 0.01s ease-out;
-            z-index: 900;
-        }
-
-        @keyframes sidebarSlideIn {
-            0% { opacity: 0; transform: translateX(-50px); }
-            100% { opacity: 1; transform: translateX(0); }
-        }
-
-        .gc-sidebar.collapsed {
-            width: 70px;
-            padding: 40px 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .gc-sidebar.hidden {
-            transform: translateX(-100%);
-            width: 0;
-            padding: 0;
-            border: none;
-        }
-
-        [data-theme="light"] .gc-sidebar {
-            background: linear-gradient(180deg, rgba(240, 245, 252, 0.95), rgba(235, 240, 248, 0.95));
-            border-right-color: rgba(0, 150, 150, 0.2);
-        }
-
-        .gc-sidebar-title { display: none; }
-        .gc-sidebar-menu { list-style: none; padding: 0; margin: 0; }
-        .gc-sidebar-item { margin-bottom: 8px; transition: all 0.3s ease; }
-
-        .gc-sidebar-link {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0;
-            padding: 10px;
-            color: var(--text-secondary);
-            background: none;
-            border: none;
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border-left: 3px solid transparent;
-            border-radius: 4px;
-            width: 44px;
-            height: 44px;
-            text-align: center;
-            margin: 0 auto 8px auto;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-            text-decoration: none;
-        }
-
-        [data-theme="light"] .gc-sidebar-link { color: #666; }
-
-        .gc-sidebar-link::before {
-            content: attr(data-icon);
-            display: inline-flex;
-            width: 24px;
-            height: 24px;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            flex-shrink: 0;
-        }
-
-        .gc-sidebar-link span {
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            white-space: nowrap;
-            overflow: hidden;
-            width: 0;
-        }
-
-        .gc-sidebar:not(.collapsed) .gc-sidebar-link {
-            width: 100%;
-            justify-content: flex-start;
-            gap: 15px;
-            margin-bottom: 8px;
-            flex-direction: row;
-        }
-
-        .gc-sidebar:not(.collapsed) .gc-sidebar-link span { opacity: 1; width: auto; overflow: visible; }
-        .gc-sidebar.collapsed .gc-sidebar-link span { opacity: 0; width: 0; overflow: hidden; margin: 0; }
-        .gc-sidebar.collapsed .gc-sidebar-link { width: 44px; height: 44px; margin: 0 auto 8px auto; padding: 10px; }
-
-        .gc-sidebar-link:hover {
-            color: var(--accent-cyan);
-            border-left-color: transparent;
-            background: rgba(0, 255, 255, 0.1);
-            transform: scale(1.1);
-            border-radius: 8px;
-        }
-
-        .gc-sidebar:not(.collapsed) .gc-sidebar-link:hover {
-            border-left-color: var(--accent-cyan);
-            transform: translateX(5px);
-        }
-
-        .gc-sidebar.collapsed .gc-sidebar-link:hover {
-            transform: scale(1.1);
-            border-left-color: transparent;
-            padding: 12px;
-        }
-
-        [data-theme="light"] .gc-sidebar-link:hover {
-            color: #009999;
-            border-left-color: #009999;
-            background: rgba(0, 150, 150, 0.1);
-        }
-
-        #hideSidebarBtn:hover {
-            color: #ff0055 !important;
-            border-left-color: #ff0055 !important;
-            background: rgba(255, 0, 85, 0.1) !important;
-        }
-
-        [data-theme="light"] #hideSidebarBtn:hover {
-            color: #cc0044 !important;
-            border-left-color: #cc0044 !important;
-            background: rgba(204, 0, 68, 0.1) !important;
-        }
-
-        /* ========== OSD 面板 ========== */
-        .fps-osd {
-            position: fixed;
-            top: 90px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.9);
-            border: 2px solid var(--accent-cyan);
-            border-radius: 12px;
-            padding: 0;
-            font-family: 'Orbitron', monospace;
-            z-index: 9999;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
-            display: none;
-            animation: osdSlideIn 0.3s ease-out;
-            width: 280px;
-            height: auto;
-            min-width: 150px;
-            min-height: 80px;
-            max-width: 600px;
-            max-height: 80vh;
-            resize: both;
-            overflow: hidden;
-            cursor: move;
-        }
-
-        @keyframes osdSlideIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .fps-osd.active { display: block; }
-        .fps-osd.dragging { cursor: grabbing; user-select: none; }
-        .fps-osd.resizing { transition: none; }
-
-        .osd-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
-            cursor: move;
-            user-select: none;
-        }
-
-        .osd-header:active { cursor: grabbing; }
-
-        .osd-title {
-            font-size: 0.85rem;
-            color: var(--accent-cyan);
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            font-weight: 700;
-        }
-
-        .osd-mode-switcher { display: flex; gap: 5px; }
-
-        .osd-mode-btn {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            background: rgba(0, 255, 255, 0.3);
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .osd-mode-btn.active {
-            background: var(--accent-cyan);
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
-        }
-
-        .osd-content { display: flex; flex-direction: column; gap: 10px; padding: 15px; }
-
-        .osd-item { display: flex; justify-content: space-between; align-items: center; }
-
-        .osd-label {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
-
-        .osd-value {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--accent-cyan);
-            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
-        }
-
-        .osd-value.large { font-size: 2.2rem; line-height: 1; }
-        .osd-unit { font-size: 0.8rem; color: var(--accent-cyan); margin-left: 3px; opacity: 0.7; }
-        .osd-icon { font-size: 0.9rem; margin-right: 5px; }
-
-        .osd-progress {
-            width: 100%; height: 4px;
-            background: rgba(0, 255, 255, 0.2);
-            border-radius: 2px;
-            overflow: hidden;
-            margin-top: 3px;
-        }
-
-        .osd-progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
-            border-radius: 2px;
-            transition: width 0.3s ease;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
-        }
-
-        [data-theme="light"] .fps-osd {
-            background: rgba(255, 255, 255, 0.95);
-            border-color: #009999;
-            box-shadow: 0 0 30px rgba(0, 150, 150, 0.4);
-        }
-
-        [data-theme="light"] .osd-header { border-bottom-color: rgba(0, 150, 150, 0.3); }
-
-        [data-theme="light"] .osd-title,
-        [data-theme="light"] .osd-value {
-            color: #009999;
-            text-shadow: 0 0 15px rgba(0, 150, 150, 0.4);
-        }
-
-        [data-theme="light"] .osd-mode-btn { background: rgba(0, 150, 150, 0.3); }
-
-        [data-theme="light"] .osd-mode-btn.active {
-            background: #009999;
-            box-shadow: 0 0 10px rgba(0, 150, 150, 0.8);
+            z-index: 10;
         }
 
         /* ========== 遊戲容器 ========== */
         .game-container {
-            margin-left: 300px;
             flex: 1;
             height: 100%;
+            margin-left: 220px;
             position: relative;
-            background: #05050e;
+            background: #050508;
+            overflow: hidden;
             transition: margin-left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        /* 當側邊欄收合時調整遊戲容器 */
         .gc-sidebar.collapsed ~ .game-container {
-            margin-left: 70px;
+            margin-left: 72px !important;
+        }
+
+        .gc-sidebar.hidden ~ .game-container,
+        .gc-sidebar.hidden-sidebar ~ .game-container {
+            margin-left: 0 !important;
         }
 
         @media (max-width: 768px) {
             .game-container {
-                margin-left: 70px !important;
+                margin-left: 72px !important;
             }
         }
 
@@ -795,23 +529,54 @@
             <div class="osd-header">
                 <div class="osd-title" id="osdTitle">FPS</div>
                 <div class="osd-mode-switcher">
-                    <button class="osd-mode-btn active" data-mode="performance" title="FPS模式"></button>
-                    <button class="osd-mode-btn" data-mode="game" title="遊戲模式"></button>
-                    <button class="osd-mode-btn" data-mode="simple" title="完整模式"></button>
+                    <button class="osd-mode-btn active" data-mode="fps" title="FPS 模式"></button>
+                    <button class="osd-mode-btn" data-mode="advanced" title="進階模式"></button>
+                    <button class="osd-mode-btn" data-mode="full" title="完整模式"></button>
                 </div>
             </div>
             <div class="osd-content" id="osdContent"></div>
         </div>
 
-        <!-- 左側導覽欄 -->
-        <aside class="gc-sidebar" id="gcSidebar">
+        <!-- 左側導覽欄 Sidebar (預設摺疊) -->
+        <aside class="gc-sidebar collapsed" id="gcSidebar">
             <ul class="gc-sidebar-menu">
-                <li class="gc-sidebar-item"><a class="gc-sidebar-link" id="sidebarToggle" data-icon="◀" title="側邊欄摺疊"><span>摺疊</span></a></li>
-                <li class="gc-sidebar-item"><a class="gc-sidebar-link" id="gcBackBtn" data-icon="🏠" title="返回遊戲中心"><span>遊戲中心</span></a></li>
-                <li class="gc-sidebar-item"><a class="gc-sidebar-link" id="fpsOSDToggle" data-icon="📊" title="顯示幀數"><span>幀數顯示</span></a></li>
-                <li class="gc-sidebar-item"><a class="gc-sidebar-link" id="hideSidebarBtn" data-icon="✕" title="關閉左側欄"><span>關閉左側欄</span></a></li>
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="sidebarToggle" title="展開側邊欄">
+                        <i data-lucide="chevron-right" class="sidebar-icon"></i>
+                        <span class="sidebar-text">展開</span>
+                    </a>
+                </li>
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="gcBackBtn" title="返回遊戲中心">
+                        <i data-lucide="layout-grid" class="sidebar-icon"></i>
+                        <span class="sidebar-text">遊戲中心</span>
+                    </a>
+                </li>
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="fpsOSDToggle" title="顯示幀數監控">
+                        <i data-lucide="activity" class="sidebar-icon"></i>
+                        <span class="sidebar-text">幀數顯示</span>
+                    </a>
+                </li>
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="hideSidebarBtn" title="隱藏左側欄">
+                        <i data-lucide="eye-off" class="sidebar-icon"></i>
+                        <span class="sidebar-text">關閉左側欄</span>
+                    </a>
+                </li>
             </ul>
         </aside>
+        <script>
+            (function() {
+                try {
+                    const sc = localStorage.getItem('sidebarCollapsed') ?? localStorage.getItem('gcSidebarCollapsed');
+                    if (sc === 'false') {
+                        const sb = document.getElementById('gcSidebar');
+                        if (sb) sb.classList.remove('collapsed');
+                    }
+                } catch(e) {}
+            })();
+        </script>
 
         <!-- 遊戲容器 -->
         <div class="game-container">
@@ -1448,62 +1213,11 @@ for (let i = 0; i < 20; i++) {
     (Math.random() - 0.5) * 450
   );
   
-  // ──【雲層投影核心技術】：使用自訂 Shader 深度材質，利用 Bayer 4x4 矩陣進行抖動 (Dithering) 寫入，
-  // 完美解決傳統陰影深度圖「非黑即白」的問題，實作自然半透明的柔和雲彩投影！ ──
-  const depthUniforms = THREE.UniformsUtils.clone(THREE.ShaderLib.depth.uniforms);
-  depthUniforms.map.value = cloudTex;
-  
-  const depthMat = new THREE.ShaderMaterial({
-    vertexShader: THREE.ShaderLib.depth.vertexShader,
-    fragmentShader: `
-      #define DEPTH_PACKING 3201
-      #define USE_MAP
-      #include <common>
-      #include <packing>
-      #include <uv_pars_fragment>
-      #include <map_pars_fragment>
-      
-      // Bayer 4x4 抖動矩陣
-      bool dither(vec2 pos, float alpha) {
-        int x = int(mod(pos.x, 4.0));
-        int y = int(mod(pos.y, 4.0));
-        int index = x + y * 4;
-        float limit = 0.0;
-        
-        if (index == 0) limit = 0.0625;
-        else if (index == 8) limit = 0.5625;
-        else if (index == 2) limit = 0.1875;
-        else if (index == 10) limit = 0.6875;
-        else if (index == 12) limit = 0.8125;
-        else if (index == 4) limit = 0.3125;
-        else if (index == 14) limit = 0.9375;
-        else if (index == 6) limit = 0.4375;
-        else if (index == 3) limit = 0.25;
-        else if (index == 11) limit = 0.75;
-        else if (index == 1) limit = 0.125;
-        else if (index == 9) limit = 0.625;
-        else if (index == 15) limit = 1.0;
-        else if (index == 7) limit = 0.5;
-        else if (index == 13) limit = 0.875;
-        else if (index == 5) limit = 0.375;
-        
-        // 將雲影最大濃度控制在約 20%，薄處成比例變淡，完美符合自然界半透明雲影特徵
-        return (alpha * 0.20) < limit;
-      }
-
-      void main() {
-        #include <clipping_planes_fragment>
-        vec4 diffuseColor = vec4( 1.0 );
-        #include <map_fragment>
-        
-        if (dither(gl_FragCoord.xy, diffuseColor.a)) {
-          discard;
-        }
-        
-        #include <depth_frag>
-      }
-    `,
-    uniforms: depthUniforms,
+  // ──【雲層投影深度材質】：使用 Three.js 原生 MeshDepthMaterial 支援透明度裁剪投影 ──
+  const depthMat = new THREE.MeshDepthMaterial({
+    depthPacking: THREE.RGBADepthPacking,
+    map: cloudTex,
+    alphaTest: 0.15,
     side: THREE.DoubleSide
   });
   mesh.customDepthMaterial = depthMat;
@@ -2743,21 +2457,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.getElementById('gcSidebar');
     const mainGameContainer = document.querySelector('.game-container');
 
-    // 摺疊/展開左側欄
-    const sidebarState = localStorage.getItem('gcSidebarCollapsed');
-    if (sidebarState === 'true') {
-        if (sidebar) {
-            sidebar.classList.add('collapsed');
-            const toggleBtn = document.getElementById('sidebarToggle');
-            if (toggleBtn) {
-                toggleBtn.setAttribute('data-icon', '▶');
-                const span = toggleBtn.querySelector('span');
-                if (span) span.textContent = '展開';
-            }
+    // 摺疊/展開左側欄狀態恢復
+    const isSidebarCollapsed = (localStorage.getItem('sidebarCollapsed') === 'false' || localStorage.getItem('gcSidebarCollapsed') === 'false') ? false : true;
+    if (sidebar) {
+        sidebar.classList.toggle('collapsed', isSidebarCollapsed);
+        const toggleBtn = document.getElementById('sidebarToggle');
+        if (toggleBtn) {
+            toggleBtn.setAttribute('title', isSidebarCollapsed ? '展開側邊欄' : '摺疊側邊欄');
+            const span = toggleBtn.querySelector('.sidebar-text') || toggleBtn.querySelector('span');
+            if (span) span.textContent = isSidebarCollapsed ? '展開' : '摺疊';
         }
     }
 
-    // 徧權狀態轉變後第一時間就更新尺寨
+    // 狀態轉變後第一時間就更新尺寸
     requestAnimationFrame(() => {
         updateLayout();
     });
@@ -2770,7 +2482,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function syncSidebarState() {
         if (!sidebar) return;
-        const isHidden = sidebar.style.display === 'none';
+        const isHidden = sidebar.style.display === 'none' || sidebar.classList.contains('hidden-sidebar');
         applyGameContainerMarginHidden(isHidden);
     }
 
@@ -2801,11 +2513,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sidebar) sidebar.style.display = e.detail.visible ? '' : 'none'; 
         updateLayout(); 
     });
+    window.addEventListener('sidebarVisibilityChange', e => { 
+        if (sidebar) sidebar.style.display = e.detail.visible ? '' : 'none'; 
+        updateLayout(); 
+    });
+    window.addEventListener('sidebarCollapseChange', e => { 
+        if (sidebar && e && e.detail) {
+            sidebar.classList.toggle('collapsed', e.detail.collapsed);
+        }
+        updateLayout(); 
+    });
     window.addEventListener('storage', e => { 
         if (e.key === 'showSidebar') { 
             if (sidebar) sidebar.style.display = (e.newValue !== 'false') ? '' : 'none'; 
             updateLayout(); 
-        } 
+        } else if (e.key === 'sidebarCollapsed' || e.key === 'gcSidebarCollapsed') {
+            if (sidebar) sidebar.classList.toggle('collapsed', e.newValue !== 'false');
+            updateLayout();
+        }
     });
 
     // 標題選單按鈕事件
@@ -2853,246 +2578,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 側邊欄控制
-    const sidebarToggleBtn = document.getElementById('sidebarToggle');
-    if (sidebarToggleBtn) {
-        sidebarToggleBtn.addEventListener('click', e => {
-            e.preventDefault();
-            if (sidebar) {
-                sidebar.classList.toggle('collapsed');
-                const isCollapsed = sidebar.classList.contains('collapsed');
-                sidebarToggleBtn.setAttribute('data-icon', isCollapsed ? '▶' : '◀');
-                const span = sidebarToggleBtn.querySelector('span');
-                if (span) span.textContent = isCollapsed ? '展開' : '摺疊';
-                localStorage.setItem('gcSidebarCollapsed', isCollapsed);
-                syncSidebarState();
-                
-                // 動畫過程中也進行平滑更新 (每 50ms 更新一次，持續 300ms)
-                let count = 0;
-                const interval = setInterval(() => {
-                    updateLayout();
-                    count++;
-                    if (count >= 6) clearInterval(interval);
-                }, 50);
-            }
-        });
-    }
-
-    document.getElementById('gcBackBtn').addEventListener('click', e => {
-        e.preventDefault();
-        sessionStorage.setItem('skipEntranceAnimation', 'true');
-        window.location.href = '../../game-center.html';
-    });
-
-    document.getElementById('hideSidebarBtn').addEventListener('click', e => {
-        e.preventDefault();
-        if (sidebar) sidebar.style.display = 'none';
-        const settingToggle = document.getElementById('showSidebar');
-        if (settingToggle) settingToggle.classList.remove('active');
-        localStorage.setItem('showSidebar', 'false');
-        window.dispatchEvent(new CustomEvent('sidebarToggle', { detail: { visible: false } }));
-        syncSidebarState();
-    });
-
-    // ========= OSD 系統 =========
-    const fpsOSD = document.getElementById('fpsOSD');
-    const savedOSDVisible = localStorage.getItem('fpsOSDVisible');
-    const savedOSDMode = localStorage.getItem('osdMode') || 'performance';
-    const savedOSDPosition = JSON.parse(localStorage.getItem('osdPosition') || '{"top":"90px","right":"20px","left":"auto","bottom":"auto"}');
-    const savedOSDSize = JSON.parse(localStorage.getItem('osdSize') || '{"width":"280px","height":"auto"}');
-
-    if (fpsOSD) {
-        if (savedOSDPosition.top !== 'auto') fpsOSD.style.top = savedOSDPosition.top;
-        if (savedOSDPosition.right !== 'auto') fpsOSD.style.right = savedOSDPosition.right;
-        if (savedOSDPosition.left !== 'auto') fpsOSD.style.left = savedOSDPosition.left;
-        if (savedOSDPosition.bottom !== 'auto') fpsOSD.style.bottom = savedOSDPosition.bottom;
-        if (savedOSDSize.width !== 'auto') fpsOSD.style.width = savedOSDSize.width;
-        if (savedOSDSize.height !== 'auto') fpsOSD.style.height = savedOSDSize.height;
-        if (savedOSDVisible === 'true') fpsOSD.classList.add('active');
-    }
-
-    const fpsOSDToggleBtn = document.getElementById('fpsOSDToggle');
-    if (fpsOSDToggleBtn) {
-        fpsOSDToggleBtn.addEventListener('click', e => {
-            e.preventDefault();
-            if (fpsOSD) {
-                fpsOSD.classList.toggle('active');
-                const isActive = fpsOSD.classList.contains('active');
-                localStorage.setItem('fpsOSDVisible', isActive);
-                if (isActive) startOSDMonitoring(); else stopOSDMonitoring();
-            }
-        });
-    }
-
-    let osdState = {
-        currentMode: savedOSDMode,
-        lastTime: performance.now(),
-        frames: 0,
-        fps: 0,
-        sessionStart: Date.now(),
-        animationId: null
-    };
-
-    function initOSDModes(initialMode) {
-        const modeBtns = document.querySelectorAll('.osd-mode-btn');
-        const osdTitle = document.getElementById('osdTitle');
-        osdState.currentMode = initialMode;
-
-        modeBtns.forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.mode === initialMode);
-            btn.addEventListener('click', () => {
-                modeBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                osdState.currentMode = btn.dataset.mode;
-                localStorage.setItem('osdMode', btn.dataset.mode);
-                const titles = { performance: 'FPS', game: '攀爬資訊', simple: '完整顯示' };
-                if (osdTitle) osdTitle.textContent = titles[btn.dataset.mode];
-                updateOSDContent();
-            });
-        });
-
-        const titles = { performance: 'FPS', game: '攀爬資訊', simple: '完整顯示' };
-        if (osdTitle) osdTitle.textContent = titles[initialMode];
-    }
-
-    function updateOSDContent() {
-        const content = document.getElementById('osdContent');
-        if (!content) return;
-        const mode = osdState.currentMode;
-
-        if (mode === 'performance') {
-            content.innerHTML = `<div class="osd-item"><div><span class="osd-icon">📊</span><span class="osd-label">FPS</span></div><div><span class="osd-value large" id="osdFPS">000</span><span class="osd-unit">FPS</span></div></div>`;
-        } else if (mode === 'game') {
-            content.innerHTML = `
-                <div class="osd-item"><span class="osd-label">攀爬高度</span><span class="osd-value" id="osdScore">0.0 m</span></div>
-                <div class="osd-item"><span class="osd-label">動作狀態</span><span class="osd-value" id="osdDifficulty">地面</span></div>`;
-        } else {
-            const sessionTime = Math.floor((Date.now() - osdState.sessionStart) / 1000);
-            content.innerHTML = `
-                <div class="osd-item"><div><span class="osd-icon">📊</span><span class="osd-label">FPS</span></div><div><span class="osd-value large" id="osdFPSFull">000</span><span class="osd-unit">FPS</span></div></div>
-                <div class="osd-item"><span class="osd-label">攀爬高度</span><span class="osd-value" id="osdScoreFull">0.0 m</span></div>
-                <div class="osd-item"><span class="osd-label">動作狀態</span><span class="osd-value" id="osdDifficultyFull">地面</span></div>
-                <div class="osd-item"><div><span class="osd-icon">⏱️</span><span class="osd-label">遊玩時間</span></div><span class="osd-value" id="osdPlayTime">${Math.floor(sessionTime/60).toString().padStart(2,'0')}:${(sessionTime%60).toString().padStart(2,'0')}</span></div>`;
-        }
-    }
-
-    function updateOSDMonitoring() {
-        const now = performance.now();
-        osdState.frames++;
-        if (now >= osdState.lastTime + 1000) {
-            osdState.fps = Math.round((osdState.frames * 1000) / (now - osdState.lastTime));
-            osdState.frames = 0;
-            osdState.lastTime = now;
-            updateOSDValues();
-        }
-        osdState.animationId = requestAnimationFrame(updateOSDMonitoring);
-    }
-
-    function updateOSDValues() {
-        const mode = osdState.currentMode;
-        const fpsStr = osdState.fps.toString().padStart(3, '0');
-        const heightVal = Math.max(0, player.pos.y - player.height).toFixed(1) + ' m';
-        
-        let stateLabel = '地面';
-        if (player.onGround) {
-            if (player.sliding) stateLabel = '滑鏟';
-            else if (player.crouching) stateLabel = '蹲下';
-            else if (player.sprinting && Math.sqrt(player.vel.x*player.vel.x + player.vel.z*player.vel.z) > 0) stateLabel = '奔跑';
-            else if (Math.sqrt(player.vel.x*player.vel.x + player.vel.z*player.vel.z) > 0) stateLabel = '步行';
-        } else {
-            if (player.climbing) stateLabel = '爬牆';
-            else if (player.wallRunning) stateLabel = '跑牆';
-            else stateLabel = '空中';
-        }
-
-        if (mode === 'performance') {
-            const el = document.getElementById('osdFPS'); if (el) el.textContent = fpsStr;
-        } else if (mode === 'game') {
-            const s = document.getElementById('osdScore'); if (s) s.textContent = heightVal;
-            const d = document.getElementById('osdDifficulty'); if (d) d.textContent = stateLabel;
-        } else {
-            const f = document.getElementById('osdFPSFull'); if (f) f.textContent = fpsStr;
-            const s = document.getElementById('osdScoreFull'); if (s) s.textContent = heightVal;
-            const d = document.getElementById('osdDifficultyFull'); if (d) d.textContent = stateLabel;
-            const sessionTime = Math.floor((Date.now() - osdState.sessionStart) / 1000);
-            const pt = document.getElementById('osdPlayTime');
-            if (pt) pt.textContent = `${Math.floor(sessionTime/60).toString().padStart(2,'0')}:${(sessionTime%60).toString().padStart(2,'0')}`;
-        }
-
-        const fv = document.getElementById('fpsValue'); if (fv) fv.textContent = fpsStr;
-    }
-
-    function startOSDMonitoring() {
-        if (osdState.animationId) return;
-        osdState.lastTime = performance.now();
-        osdState.frames = 0;
-        updateOSDContent();
-        updateOSDMonitoring();
-    }
-
-    function stopOSDMonitoring() {
-        if (osdState.animationId) { cancelAnimationFrame(osdState.animationId); osdState.animationId = null; }
-    }
-
-    initOSDModes(savedOSDMode);
-    if (fpsOSD) {
-        initOSDDragging(fpsOSD);
-        initOSDResizing(fpsOSD);
-    }
-    if (savedOSDVisible === 'true') startOSDMonitoring();
-
-    function initOSDDragging(osd) {
-        const header = osd.querySelector('.osd-header');
-        if (!header) return;
-        let isDragging = false, initialX, initialY;
-        header.addEventListener('mousedown', dragStart);
-        header.addEventListener('touchstart', dragStart, { passive: false });
-        document.addEventListener('mouseup', dragEnd);
-        document.addEventListener('touchend', dragEnd);
-        document.addEventListener('mousemove', drag);
-        document.addEventListener('touchmove', drag, { passive: false });
-
-        function dragStart(e) {
-            if (e.target.closest('.osd-mode-switcher')) return;
-            isDragging = true; osd.classList.add('dragging');
-            const rect = osd.getBoundingClientRect();
-            initialX = (e.type === 'touchstart' ? e.touches[0].clientX : e.clientX) - rect.left;
-            initialY = (e.type === 'touchstart' ? e.touches[0].clientY : e.clientY) - rect.top;
-            osd.style.right = 'auto'; osd.style.bottom = 'auto';
-            e.preventDefault();
-        }
-
-        function drag(e) {
-            if (!isDragging) return;
-            const cx = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-            const cy = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
-            osd.style.left = Math.max(0, Math.min(cx - initialX, window.innerWidth - osd.offsetWidth)) + 'px';
-            osd.style.top = Math.max(0, Math.min(cy - initialY, window.innerHeight - osd.offsetHeight)) + 'px';
-            e.preventDefault();
-        }
-
-        function dragEnd() {
-            if (!isDragging) return;
-            isDragging = false; osd.classList.remove('dragging');
-            saveOSDPosition(osd);
-        }
-    }
-
-    function initOSDResizing(osd) {
-        if (typeof ResizeObserver !== 'undefined') {
-            new ResizeObserver(() => saveOSDSize(osd)).observe(osd);
-        }
-    }
-
-    function saveOSDPosition(osd) {
-        localStorage.setItem('osdPosition', JSON.stringify({
-            top: osd.style.top || 'auto', right: osd.style.right || 'auto',
-            left: osd.style.left || 'auto', bottom: osd.style.bottom || 'auto'
-        }));
-    }
-
-    function saveOSDSize(osd) {
-        localStorage.setItem('osdSize', JSON.stringify({ width: osd.style.width || 'auto', height: osd.style.height || 'auto' }));
+    if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
     }
 });
 
@@ -3120,5 +2607,7 @@ canvas.addEventListener('click', () => {
 <script src="../../../../assets/js/live2d-manager.js"></script>
 <script src="../../../../assets/js/navigation.js"></script>
 <script src="../../../../assets/js/animations.js"></script>
+<script src="../../js/sidebar.js"></script>
+<script src="../../js/fps-osd.js"></script>
 </body>
 </html>

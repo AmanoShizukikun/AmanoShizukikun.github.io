@@ -7,10 +7,14 @@
     <meta name="description" content="賽博貪食蛇 - 經典遊戲的未來版本">
     <title>Cyber Snake - Cyber Nexus</title>
     <link rel="icon" href="../../../../assets/images/logo.png" type="image/png">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../../../assets/css/core.css">
     <link rel="stylesheet" href="../../../../assets/css/components.css">
     <link rel="stylesheet" href="../../../../assets/css/animations.css">
+    <link rel="stylesheet" href="../../css/sidebar.css">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
         /* ========== 遊戲容器整體布局 ========== */
@@ -27,410 +31,7 @@
             height: 100vh;
             display: flex;
             overflow: hidden;
-        }
-
-        /* ========== 左側導覽欄 ========== */
-        .gc-sidebar {
-            width: 300px;
-            height: calc(100vh - var(--header-height, 75px));
-            position: fixed;
-            left: 0;
-            top: var(--header-height, 75px);
-            background: linear-gradient(180deg, rgba(10, 10, 20, 0.9), rgba(20, 5, 40, 0.9));
-            border-right: 2px solid rgba(0, 255, 255, 0.2);
-            padding: 40px 30px;
-            overflow-y: auto;
-            overflow-x: hidden;
-            animation: sidebarSlideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both;
-            flex-shrink: 0;
-            transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                        padding 0.3s ease,
-                        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-                        top 0.01s ease-out,
-                        height 0.01s ease-out;
-            z-index: 900;
-        }
-
-        @keyframes sidebarSlideIn {
-            0% {
-                opacity: 0;
-                transform: translateX(-50px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .gc-sidebar.collapsed {
-            width: 70px;
-            padding: 40px 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .gc-sidebar.hidden {
-            transform: translateX(-100%);
-            width: 0;
-            padding: 0;
-            border: none;
-        }
-
-        [data-theme="light"] .gc-sidebar {
-            background: linear-gradient(180deg, rgba(240, 245, 252, 0.95), rgba(235, 240, 248, 0.95));
-            border-right-color: rgba(0, 150, 150, 0.2);
-        }
-
-        .gc-sidebar-title {
-            display: none;
-        }
-
-        .gc-sidebar-menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .gc-sidebar-item {
-            margin-bottom: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .gc-sidebar-link {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0;
-            padding: 10px;
-            color: var(--text-secondary);
-            background: none;
-            border: none;
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border-left: 3px solid transparent;
-            border-radius: 4px;
-            width: 44px;
-            height: 44px;
-            text-align: center;
-            margin: 0 auto 8px auto;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-            text-decoration: none;
-        }
-
-        [data-theme="light"] .gc-sidebar-link {
-            color: #666;
-        }
-
-        .gc-sidebar-link::before {
-            content: attr(data-icon);
-            display: inline-flex;
-            width: 24px;
-            height: 24px;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            flex-shrink: 0;
-        }
-
-        .gc-sidebar-link span {
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            white-space: nowrap;
-            overflow: hidden;
-            width: 0;
-        }
-
-        .gc-sidebar:not(.collapsed) .gc-sidebar-link {
-            width: 100%;
-            justify-content: flex-start;
-            gap: 15px;
-            margin-bottom: 8px;
-            flex-direction: row;
-        }
-
-        .gc-sidebar:not(.collapsed) .gc-sidebar-link span {
-            opacity: 1;
-            width: auto;
-            overflow: visible;
-        }
-
-        .gc-sidebar.collapsed .gc-sidebar-link span {
-            opacity: 0;
-            width: 0;
-            overflow: hidden;
-            margin: 0;
-        }
-
-        .gc-sidebar.collapsed .gc-sidebar-link {
-            width: 44px;
-            height: 44px;
-            margin: 0 auto 8px auto;
-            padding: 10px;
-        }
-
-        .gc-sidebar-link:hover {
-            color: var(--accent-cyan);
-            border-left-color: transparent;
-            background: rgba(0, 255, 255, 0.1);
-            transform: scale(1.1);
-            border-radius: 8px;
-        }
-
-        .gc-sidebar:not(.collapsed) .gc-sidebar-link:hover {
-            border-left-color: var(--accent-cyan);
-            transform: translateX(5px);
-        }
-
-        .gc-sidebar.collapsed .gc-sidebar-link:hover {
-            transform: scale(1.1);
-            border-left-color: transparent;
-            padding: 12px;
-        }
-
-        [data-theme="light"] .gc-sidebar-link:hover {
-            color: #009999;
-            border-left-color: #009999;
-            background: rgba(0, 150, 150, 0.1);
-        }
-
-
-        /* 關閉左側欄按鈕的特殊樣式 */
-        #hideSidebarBtn {
-            margin-top: auto; /* 推到底部 */
-        }
-
-        #hideSidebarBtn:hover {
-            color: #ff0055 !important;
-            border-left-color: #ff0055 !important;
-            background: rgba(255, 0, 85, 0.1) !important;
-        }
-
-        [data-theme="light"] #hideSidebarBtn:hover {
-            color: #cc0044 !important;
-            border-left-color: #cc0044 !important;
-            background: rgba(204, 0, 68, 0.1) !important;
-        }
-
-        /* OSD 多功能顯示面板 */
-        .fps-osd {
-            position: fixed;
-            top: 90px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.9);
-            border: 2px solid var(--accent-cyan);
-            border-radius: 12px;
-            padding: 0;
-            font-family: 'Orbitron', monospace;
-            z-index: 9999;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
-            display: none;
-            animation: osdSlideIn 0.3s ease-out;
-            width: 280px;
-            height: auto;
-            min-width: 150px;
-            min-height: 80px;
-            max-width: 600px;
-            max-height: 80vh;
-            resize: both;
-            overflow: hidden;
-            cursor: move;
-            container-type: size;
-        }
-
-        @keyframes osdSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .fps-osd.active {
-            display: block;
-        }
-
-        .fps-osd.dragging {
-            cursor: grabbing;
-            user-select: none;
-        }
-
-        .fps-osd.resizing {
-            transition: none;
-        }
-
-        /* OSD 標題區 */
-        .osd-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: clamp(8px, 3cqw, 20px);
-            padding-bottom: clamp(5px, 2cqw, 10px);
-            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
-            cursor: move;
-            user-select: none;
-        }
-
-        .osd-header:active {
-            cursor: grabbing;
-        }
-
-        .osd-title {
-            font-size: clamp(0.6rem, 3cqw, 0.9rem);
-            color: var(--accent-cyan);
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            font-weight: 700;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .osd-mode-switcher {
-            display: flex;
-            gap: clamp(3px, 1cqw, 5px);
-            flex-shrink: 0;
-        }
-
-        .osd-mode-btn {
-            width: clamp(6px, 2cqw, 8px);
-            height: clamp(6px, 2cqw, 8px);
-            border-radius: 50%;
-            background: rgba(0, 255, 255, 0.3);
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
-        }
-
-        .osd-mode-btn.active {
-            background: var(--accent-cyan);
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
-        }
-
-        .osd-mode-btn:hover {
-            background: rgba(0, 255, 255, 0.6);
-            transform: scale(1.2);
-        }
-
-        /* OSD 內容區 */
-        .osd-content {
-            display: flex;
-            flex-direction: column;
-            gap: clamp(6px, 2cqw, 12px);
-            padding: clamp(8px, 3cqw, 20px);
-            padding-top: clamp(6px, 2cqw, 15px);
-        }
-
-        .osd-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: clamp(4px, 2cqw, 8px);
-        }
-
-        .osd-label {
-            font-size: clamp(0.5rem, 2.5cqw, 0.75rem);
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            white-space: nowrap;
-        }
-
-        .osd-value {
-            font-size: clamp(0.7rem, 4cqw, 1.2rem);
-            font-weight: 700;
-            color: var(--accent-cyan);
-            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
-            white-space: nowrap;
-        }
-
-        .osd-value.large {
-            font-size: clamp(1.2rem, 6cqw, 2.5rem);
-            line-height: 1;
-        }
-
-        .osd-unit {
-            font-size: clamp(0.5rem, 3cqw, 0.9rem);
-            color: var(--accent-cyan);
-            margin-left: clamp(2px, 0.5cqw, 5px);
-            opacity: 0.7;
-        }
-
-        .osd-icon {
-            font-size: clamp(0.7rem, 3cqw, 1rem);
-            margin-right: clamp(3px, 1cqw, 5px);
-        }
-
-        /* OSD 進度條 */
-        .osd-progress {
-            width: 100%;
-            height: clamp(3px, 1cqw, 4px);
-            background: rgba(0, 255, 255, 0.2);
-            border-radius: clamp(2px, 0.5cqw, 2px);
-            overflow: hidden;
-            margin-top: clamp(2px, 1cqw, 5px);
-        }
-
-        .osd-progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
-            border-radius: clamp(2px, 0.5cqw, 2px);
-            transition: width 0.3s ease;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
-        }
-
-        /* OSD 圖示 */
-        .osd-icon {
-            font-size: clamp(0.7rem, 3cqw, 1rem);
-            margin-right: clamp(4px, 2cqw, 8px);
-            opacity: 0.8;
-        }
-
-        /* 淺色主題適配 */
-        [data-theme="light"] .fps-osd {
-            background: rgba(255, 255, 255, 0.95);
-            border-color: #009999;
-            box-shadow: 0 0 30px rgba(0, 150, 150, 0.4);
-        }
-
-        [data-theme="light"] .osd-header {
-            border-bottom-color: rgba(0, 150, 150, 0.3);
-        }
-
-        [data-theme="light"] .osd-title,
-        [data-theme="light"] .osd-value {
-            color: #009999;
-            text-shadow: 0 0 15px rgba(0, 150, 150, 0.4);
-        }
-
-        [data-theme="light"] .osd-mode-btn {
-            background: rgba(0, 150, 150, 0.3);
-        }
-
-        [data-theme="light"] .osd-mode-btn.active {
-            background: #009999;
-            box-shadow: 0 0 10px rgba(0, 150, 150, 0.8);
-        }
-
-        [data-theme="light"] .osd-progress {
-            background: rgba(0, 150, 150, 0.2);
-        }
-
-        [data-theme="light"] .osd-progress-bar {
-            background: linear-gradient(90deg, #009999, #990099);
-        }
-
-        [data-theme="light"] .osd-unit {
-            color: #009999;
+            z-index: 10;
         }
 
         /* ========== 主遊戲容器 ========== */
@@ -438,7 +39,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            margin-left: 300px;
+            margin-left: 220px;
             margin-top: var(--header-height, 75px);
             height: calc(100vh - var(--header-height, 75px));
             transition: margin-left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -447,10 +48,11 @@
         }
 
         .gc-sidebar.collapsed ~ .game-container {
-            margin-left: 70px;
+            margin-left: 72px;
         }
 
-        .gc-sidebar.hidden ~ .game-container {
+        .gc-sidebar.hidden ~ .game-container,
+        .gc-sidebar.hidden-sidebar ~ .game-container {
             margin-left: 0 !important;
         }
 
@@ -1331,7 +933,7 @@
                         display: none;
                     }
                     .game-container {
-                        margin-left: 70px !important;
+                        margin-left: 72px !important;
                     }
                     .title-screen {
                         padding: 10px;
@@ -1638,9 +1240,9 @@
             <div class="osd-header">
                 <div class="osd-title" id="osdTitle">FPS</div>
                 <div class="osd-mode-switcher">
-                    <button class="osd-mode-btn active" data-mode="performance" title="FPS模式"></button>
-                    <button class="osd-mode-btn" data-mode="game" title="遊戲模式"></button>
-                    <button class="osd-mode-btn" data-mode="simple" title="完整模式"></button>
+                    <button class="osd-mode-btn active" data-mode="fps" title="FPS 模式"></button>
+                    <button class="osd-mode-btn" data-mode="advanced" title="進階模式"></button>
+                    <button class="osd-mode-btn" data-mode="full" title="完整模式"></button>
                 </div>
             </div>
             <div class="osd-content" id="osdContent">
@@ -1648,31 +1250,46 @@
             </div>
         </div>
 
-        <!-- 左側導覽欄 -->
-        <aside class="gc-sidebar" id="gcSidebar">
+        <!-- 左側導覽欄 Sidebar (預設摺疊) -->
+        <aside class="gc-sidebar collapsed" id="gcSidebar">
             <ul class="gc-sidebar-menu">
                 <li class="gc-sidebar-item">
-                    <a class="gc-sidebar-link" id="sidebarToggle" data-icon="◀" title="側邊欄摺疊">
-                        <span>摺疊</span>
+                    <a class="gc-sidebar-link" id="sidebarToggle" title="展開側邊欄">
+                        <i data-lucide="chevron-right" class="sidebar-icon"></i>
+                        <span class="sidebar-text">展開</span>
                     </a>
                 </li>
                 <li class="gc-sidebar-item">
-                    <a class="gc-sidebar-link" id="gcBackBtn" data-icon="🏠" title="返回遊戲中心">
-                        <span>遊戲中心</span>
+                    <a class="gc-sidebar-link" id="gcBackBtn" title="返回遊戲中心">
+                        <i data-lucide="layout-grid" class="sidebar-icon"></i>
+                        <span class="sidebar-text">遊戲中心</span>
                     </a>
                 </li>
                 <li class="gc-sidebar-item">
-                    <a class="gc-sidebar-link" id="fpsOSDToggle" data-icon="📊" title="顯示幀數">
-                        <span>幀數顯示</span>
+                    <a class="gc-sidebar-link" id="fpsOSDToggle" title="顯示幀數監控">
+                        <i data-lucide="activity" class="sidebar-icon"></i>
+                        <span class="sidebar-text">幀數顯示</span>
                     </a>
                 </li>
                 <li class="gc-sidebar-item">
-                    <a class="gc-sidebar-link" id="hideSidebarBtn" data-icon="✕" title="關閉左側欄">
-                        <span>關閉左側欄</span>
+                    <a class="gc-sidebar-link" id="hideSidebarBtn" title="隱藏左側欄">
+                        <i data-lucide="eye-off" class="sidebar-icon"></i>
+                        <span class="sidebar-text">關閉左側欄</span>
                     </a>
                 </li>
             </ul>
         </aside>
+        <script>
+            (function() {
+                try {
+                    const sc = localStorage.getItem('sidebarCollapsed') ?? localStorage.getItem('gcSidebarCollapsed');
+                    if (sc === 'false') {
+                        const sb = document.getElementById('gcSidebar');
+                        if (sb) sb.classList.remove('collapsed');
+                    }
+                } catch(e) {}
+            })();
+        </script>
 
         <!-- 遊戲容器 -->
         <div class="game-container">
@@ -1805,6 +1422,8 @@
     <script src="../../../../assets/js/live2d-manager.js"></script>
     <script src="../../../../assets/js/navigation.js"></script>
     <script src="../../../../assets/js/animations.js"></script>
+    <script src="../../js/fps-osd.js"></script>
+    <script src="../../js/sidebar.js"></script>
 
     <script>
         // ========== 遊戲核心邏輯 ==========
@@ -2088,20 +1707,15 @@
             } else {
                 sidebar.style.display = '';
                 // 恢復摺疊狀態 - 在隱藏狀態之後檢查摺疊
-                const savedCollapsedState = localStorage.getItem('gcSidebarCollapsed') === 'true';
-                if (savedCollapsedState) {
-                    sidebar.classList.add('collapsed');
-                    const toggleBtn = document.getElementById('sidebarToggle');
-                    toggleBtn.setAttribute('data-icon', '▶');
-                    toggleBtn.querySelector('span').textContent = '展開';
-                    applyGameContainerMarginHidden(false);
-                } else {
-                    sidebar.classList.remove('collapsed');
-                    const toggleBtn = document.getElementById('sidebarToggle');
-                    toggleBtn.setAttribute('data-icon', '◀');
-                    toggleBtn.querySelector('span').textContent = '摺疊';
-                    applyGameContainerMarginHidden(false);
+                const savedCollapsedState = (localStorage.getItem('sidebarCollapsed') === 'false' || localStorage.getItem('gcSidebarCollapsed') === 'false') ? false : true;
+                sidebar.classList.toggle('collapsed', savedCollapsedState);
+                const toggleBtn = document.getElementById('sidebarToggle');
+                if (toggleBtn) {
+                    toggleBtn.setAttribute('title', savedCollapsedState ? '展開側邊欄' : '摺疊側邊欄');
+                    const span = toggleBtn.querySelector('.sidebar-text') || toggleBtn.querySelector('span');
+                    if (span) span.textContent = savedCollapsedState ? '展開' : '摺疊';
                 }
+                applyGameContainerMarginHidden(false);
             }
 
             // ========== 全域側邊欄控制 - 與系統設定同步 ==========
@@ -2167,6 +1781,13 @@
                 syncSidebarState();
             });
 
+            window.addEventListener('sidebarCollapseChange', (e) => {
+                if (sidebar && e && e.detail) {
+                    sidebar.classList.toggle('collapsed', e.detail.collapsed);
+                }
+                updateLayoutOnResize();
+            });
+
             // 監聽 localStorage 變化 (從系統設定面板或其他標籤頁)
             window.addEventListener('storage', (e) => {
                 if (e.key === 'showSidebar') {
@@ -2177,6 +1798,9 @@
                         sidebar.style.display = 'none';
                     }
                     syncSidebarState();
+                } else if (e.key === 'sidebarCollapsed' || e.key === 'gcSidebarCollapsed') {
+                    if (sidebar) sidebar.classList.toggle('collapsed', e.newValue !== 'false');
+                    updateLayoutOnResize();
                 }
             });
 
@@ -2255,466 +1879,9 @@
                 document.getElementById('titleScreen').classList.remove('hidden');
             });
 
-            // 側邊欄摺疊控制
-            document.getElementById('sidebarToggle').addEventListener('click', (e) => {
-                e.preventDefault();
-                sidebar.classList.toggle('collapsed');
-                const icon = document.getElementById('sidebarToggle');
-                const isCollapsed = sidebar.classList.contains('collapsed');
-                icon.setAttribute('data-icon', isCollapsed ? '▶' : '◀');
-                icon.querySelector('span').textContent = isCollapsed ? '展開' : '摺疊';
-                // 保存摺疊狀態到 localStorage
-                localStorage.setItem('gcSidebarCollapsed', isCollapsed);
-                syncSidebarState();
-            });
-
-            document.getElementById('gcBackBtn').addEventListener('click', (e) => {
-                e.preventDefault();
-                // 設置標誌，防止播放進入動畫
-                sessionStorage.setItem('skipEntranceAnimation', 'true');
-                window.location.href = '../../game-center.html';
-            });
-
-            // 側邊欄隱藏控制 - 與系統設定同步
-            document.getElementById('hideSidebarBtn').addEventListener('click', (e) => {
-                e.preventDefault();
-                sidebar.style.display = 'none';
-                const isHidden = true;
-                
-                // 同步更新系統設定面板中的 toggle
-                const settingToggle = document.getElementById('showSidebar');
-                if (settingToggle) {
-                    settingToggle.classList.remove('active');
-                }
-                
-                // 保存狀態到 localStorage - 統一使用 showSidebar key
-                localStorage.setItem('showSidebar', 'false');
-                
-                // 觸發全局事件通知其他頁面
-                const event = new CustomEvent('sidebarToggle', { detail: { visible: false } });
-                window.dispatchEvent(event);
-                
-                syncSidebarState();
-            });
-
-            // ========== OSD 控制系統 ==========
-            const fpsOSD = document.getElementById('fpsOSD');
-            
-            // 從 localStorage 恢復 OSD 狀態
-            const savedOSDVisible = localStorage.getItem('fpsOSDVisible');
-            const savedOSDMode = localStorage.getItem('osdMode') || 'performance';
-            const savedOSDPosition = JSON.parse(localStorage.getItem('osdPosition') || '{"top": "90px", "right": "20px", "left": "auto", "bottom": "auto"}');
-            const savedOSDSize = JSON.parse(localStorage.getItem('osdSize') || '{"width": "280px", "height": "auto"}');
-            
-            // 恢復 OSD 位置和大小
-            if (savedOSDPosition.top !== 'auto') fpsOSD.style.top = savedOSDPosition.top;
-            if (savedOSDPosition.right !== 'auto') fpsOSD.style.right = savedOSDPosition.right;
-            if (savedOSDPosition.left !== 'auto') fpsOSD.style.left = savedOSDPosition.left;
-            if (savedOSDPosition.bottom !== 'auto') fpsOSD.style.bottom = savedOSDPosition.bottom;
-            if (savedOSDSize.width !== 'auto') fpsOSD.style.width = savedOSDSize.width;
-            if (savedOSDSize.height !== 'auto') fpsOSD.style.height = savedOSDSize.height;
-            
-            // 恢復顯示狀態
-            if (savedOSDVisible === 'true') {
-                fpsOSD.classList.add('active');
+            if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+                lucide.createIcons();
             }
-            
-            // OSD 切換按鈕
-            document.getElementById('fpsOSDToggle').addEventListener('click', (e) => {
-                e.preventDefault();
-                fpsOSD.classList.toggle('active');
-                const isActive = fpsOSD.classList.contains('active');
-                localStorage.setItem('fpsOSDVisible', isActive);
-                
-                // 如果顯示 OSD，啟動監控；隱藏則停止
-                if (isActive) {
-                    startOSDMonitoring();
-                } else {
-                    stopOSDMonitoring();
-                }
-            });
-
-            // OSD 狀態管理
-            let osdState = {
-                currentMode: savedOSDMode,
-                lastTime: performance.now(),
-                frames: 0,
-                fps: 0,
-                sessionStart: Date.now(),
-                animationId: null,
-                gameScore: 0,
-                gameDifficulty: '-'
-            };
-
-            // 初始化 OSD 模式
-            function initOSDModes(initialMode) {
-                const modeBtns = document.querySelectorAll('.osd-mode-btn');
-                const osdTitle = document.getElementById('osdTitle');
-                
-                // 設定初始模式
-                osdState.currentMode = initialMode;
-                
-                modeBtns.forEach(btn => {
-                    if (btn.dataset.mode === initialMode) {
-                        btn.classList.add('active');
-                    } else {
-                        btn.classList.remove('active');
-                    }
-                    
-                    btn.addEventListener('click', () => {
-                        // 更新按鈕狀態
-                        modeBtns.forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        
-                        // 切換模式
-                        osdState.currentMode = btn.dataset.mode;
-                        localStorage.setItem('osdMode', btn.dataset.mode);
-                        
-                        // 更新標題
-                        const titles = {
-                            performance: 'FPS',
-                            game: '遊戲資訊',
-                            simple: '完整顯示'
-                        };
-                        osdTitle.textContent = titles[btn.dataset.mode];
-                        
-                        // 更新顯示內容
-                        updateOSDContent();
-                    });
-                });
-                
-                // 初始化標題
-                const titles = {
-                    performance: 'FPS',
-                    game: '遊戲資訊',
-                    simple: '完整顯示'
-                };
-                osdTitle.textContent = titles[initialMode];
-            }
-
-            // 更新 OSD 內容
-            function updateOSDContent() {
-                const content = document.getElementById('osdContent');
-                if (!content) return;
-                
-                const mode = osdState.currentMode;
-                
-                if (mode === 'performance') {
-                    // FPS 模式：只顯示 FPS
-                    content.innerHTML = `
-                        <div class="osd-item">
-                            <div>
-                                <span class="osd-icon">📊</span>
-                                <span class="osd-label">FPS</span>
-                            </div>
-                            <div>
-                                <span class="osd-value large" id="osdFPS">000</span>
-                                <span class="osd-unit">FPS</span>
-                            </div>
-                        </div>
-                    `;
-                } else if (mode === 'game') {
-                    // 遊戲模式：顯示遊戲相關資訊
-                    content.innerHTML = `
-                        <div class="osd-item">
-                            <span class="osd-label">分數</span>
-                            <span class="osd-value" id="osdScore">0</span>
-                        </div>
-                        <div class="osd-item">
-                            <span class="osd-label">難度</span>
-                            <span class="osd-value" id="osdDifficulty">-</span>
-                        </div>
-                    `;
-                } else if (mode === 'simple') {
-                    // 完整模式：FPS + 遊戲資訊 + 遊玩時間
-                    const sessionTime = Math.floor((Date.now() - osdState.sessionStart) / 1000);
-                    const minutes = Math.floor(sessionTime / 60);
-                    const seconds = sessionTime % 60;
-                    
-                    content.innerHTML = `
-                        <div class="osd-item">
-                            <div>
-                                <span class="osd-icon">📊</span>
-                                <span class="osd-label">FPS</span>
-                            </div>
-                            <div>
-                                <span class="osd-value large" id="osdFPSFull">000</span>
-                                <span class="osd-unit">FPS</span>
-                            </div>
-                        </div>
-                        <div class="osd-item">
-                            <span class="osd-label">分數</span>
-                            <span class="osd-value" id="osdScoreFull">0</span>
-                        </div>
-                        <div class="osd-item">
-                            <span class="osd-label">難度</span>
-                            <span class="osd-value" id="osdDifficultyFull">-</span>
-                        </div>
-                        <div class="osd-item">
-                            <div>
-                                <span class="osd-icon">⏱️</span>
-                                <span class="osd-label">遊玩時間</span>
-                            </div>
-                            <span class="osd-value" id="osdPlayTime">${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}</span>
-                        </div>
-                    `;
-                }
-            }
-
-            // OSD 監控更新
-            function updateOSDMonitoring() {
-                const now = performance.now();
-                osdState.frames++;
-                
-                // 每秒更新一次
-                if (now >= osdState.lastTime + 1000) {
-                    osdState.fps = Math.round((osdState.frames * 1000) / (now - osdState.lastTime));
-                    osdState.frames = 0;
-                    osdState.lastTime = now;
-                    
-                    // 更新顯示
-                    updateOSDValues();
-                }
-                
-                osdState.animationId = requestAnimationFrame(updateOSDMonitoring);
-            }
-
-            // 更新 OSD 數值
-            function updateOSDValues() {
-                const mode = osdState.currentMode;
-                
-                if (mode === 'performance') {
-                    // FPS 模式：只更新 FPS
-                    const fpsEl = document.getElementById('osdFPS');
-                    if (fpsEl) {
-                        fpsEl.textContent = osdState.fps.toString().padStart(3, '0');
-                    }
-                    
-                } else if (mode === 'game') {
-                    // 遊戲模式：更新遊戲資訊
-                    const scoreEl = document.getElementById('osdScore');
-                    const difficultyEl = document.getElementById('osdDifficulty');
-                    
-                    if (scoreEl) scoreEl.textContent = osdState.gameScore;
-                    if (difficultyEl) difficultyEl.textContent = osdState.gameDifficulty;
-                    
-                } else if (mode === 'simple') {
-                    // 完整模式：更新所有項目
-                    
-                    // 更新 FPS
-                    const fpsFull = document.getElementById('osdFPSFull');
-                    if (fpsFull) {
-                        fpsFull.textContent = osdState.fps.toString().padStart(3, '0');
-                    }
-                    
-                    // 更新遊戲資訊
-                    const scoreFull = document.getElementById('osdScoreFull');
-                    const difficultyFull = document.getElementById('osdDifficultyFull');
-                    
-                    if (scoreFull) scoreFull.textContent = osdState.gameScore;
-                    if (difficultyFull) difficultyFull.textContent = osdState.gameDifficulty;
-                    
-                    // 更新遊玩時間
-                    const sessionTime = Math.floor((Date.now() - osdState.sessionStart) / 1000);
-                    const minutes = Math.floor(sessionTime / 60);
-                    const seconds = sessionTime % 60;
-                    const playTimeEl = document.getElementById('osdPlayTime');
-                    if (playTimeEl) {
-                        playTimeEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                    }
-                }
-                
-                // 同步更新設定面板中的 FPS 顯示
-                const fpsValue = document.getElementById('fpsValue');
-                if (fpsValue) {
-                    fpsValue.textContent = osdState.fps.toString().padStart(3, '0');
-                }
-            }
-
-            // 啟動 OSD 監控
-            function startOSDMonitoring() {
-                if (osdState.animationId) return; // 已經在運行
-                osdState.lastTime = performance.now();
-                osdState.frames = 0;
-                updateOSDContent();
-                updateOSDMonitoring();
-            }
-
-            // 停止 OSD 監控
-            function stopOSDMonitoring() {
-                if (osdState.animationId) {
-                    cancelAnimationFrame(osdState.animationId);
-                    osdState.animationId = null;
-                }
-            }
-
-            // 初始化 OSD 模式
-            initOSDModes(savedOSDMode);
-            
-            // 初始化 OSD 拖曳功能
-            initOSDDragging(fpsOSD);
-            
-            // 初始化 OSD 調整大小功能
-            initOSDResizing(fpsOSD);
-            
-            // 如果 OSD 是顯示狀態，啟動監控
-            if (savedOSDVisible === 'true') {
-                startOSDMonitoring();
-            }
-
-            // OSD 拖曳功能
-            function initOSDDragging(osd) {
-                const header = osd.querySelector('.osd-header');
-                let isDragging = false;
-                let currentX;
-                let currentY;
-                let initialX;
-                let initialY;
-
-                // 滑鼠事件
-                header.addEventListener('mousedown', (e) => {
-                    // 只在 header 區域且不是按鈕時才能拖動
-                    if (e.target.closest('.osd-mode-switcher')) return;
-                    
-                    startDragging(e.clientX, e.clientY);
-                });
-
-                // 觸控事件
-                header.addEventListener('touchstart', (e) => {
-                    // 只在 header 區域且不是按鈕時才能拖動
-                    if (e.target.closest('.osd-mode-switcher')) return;
-                    
-                    const touch = e.touches[0];
-                    startDragging(touch.clientX, touch.clientY);
-                    e.preventDefault(); // 防止滾動
-                });
-
-                function startDragging(clientX, clientY) {
-                    isDragging = true;
-                    osd.classList.add('dragging');
-                    
-                    // 獲取當前位置
-                    const rect = osd.getBoundingClientRect();
-                    initialX = clientX - rect.left;
-                    initialY = clientY - rect.top;
-                    
-                    // 移除 right/bottom 定位，改用 left/top
-                    osd.style.right = 'auto';
-                    osd.style.bottom = 'auto';
-                }
-
-                // 滑鼠移動
-                document.addEventListener('mousemove', (e) => {
-                    if (!isDragging) return;
-                    
-                    e.preventDefault();
-                    updatePosition(e.clientX, e.clientY);
-                });
-
-                // 觸控移動
-                document.addEventListener('touchmove', (e) => {
-                    if (!isDragging) return;
-                    
-                    const touch = e.touches[0];
-                    updatePosition(touch.clientX, touch.clientY);
-                    e.preventDefault();
-                }, { passive: false });
-
-                function updatePosition(clientX, clientY) {
-                    currentX = clientX - initialX;
-                    currentY = clientY - initialY;
-                    
-                    // 限制在視窗範圍內
-                    const maxX = window.innerWidth - osd.offsetWidth;
-                    const maxY = window.innerHeight - osd.offsetHeight;
-                    
-                    currentX = Math.max(0, Math.min(currentX, maxX));
-                    currentY = Math.max(0, Math.min(currentY, maxY));
-                    
-                    osd.style.left = currentX + 'px';
-                    osd.style.top = currentY + 'px';
-                }
-
-                // 滑鼠放開
-                document.addEventListener('mouseup', () => {
-                    if (isDragging) {
-                        endDragging();
-                    }
-                });
-
-                // 觸控結束
-                document.addEventListener('touchend', () => {
-                    if (isDragging) {
-                        endDragging();
-                    }
-                });
-
-                function endDragging() {
-                    isDragging = false;
-                    osd.classList.remove('dragging');
-                    
-                    // 保存位置
-                    saveOSDPosition(osd);
-                }
-            }
-
-            // OSD 調整大小功能
-            function initOSDResizing(osd) {
-                // 使用 ResizeObserver 監聽大小變化
-                const resizeObserver = new ResizeObserver(() => {
-                    // 保存新的大小
-                    saveOSDSize(osd);
-                });
-                
-                resizeObserver.observe(osd);
-                
-                // 當開始調整大小時添加 class
-                let isResizing = false;
-                osd.addEventListener('mousedown', (e) => {
-                    // 檢查是否點擊在右下角（resize handle 區域）
-                    const rect = osd.getBoundingClientRect();
-                    const offsetX = rect.right - e.clientX;
-                    const offsetY = rect.bottom - e.clientY;
-                    
-                    if (offsetX < 20 && offsetY < 20) {
-                        isResizing = true;
-                        osd.classList.add('resizing');
-                    }
-                });
-                
-                document.addEventListener('mouseup', () => {
-                    if (isResizing) {
-                        isResizing = false;
-                        osd.classList.remove('resizing');
-                    }
-                });
-            }
-
-            // 保存 OSD 位置
-            function saveOSDPosition(osd) {
-                const position = {
-                    top: osd.style.top || 'auto',
-                    right: osd.style.right || 'auto',
-                    left: osd.style.left || 'auto',
-                    bottom: osd.style.bottom || 'auto'
-                };
-                localStorage.setItem('osdPosition', JSON.stringify(position));
-            }
-
-            // 保存 OSD 大小
-            function saveOSDSize(osd) {
-                const size = {
-                    width: osd.style.width || 'auto',
-                    height: osd.style.height || 'auto'
-                };
-                localStorage.setItem('osdSize', JSON.stringify(size));
-            }
-
-            // 暴露更新遊戲資訊的介面給遊戲邏輯使用
-            window.updateOSDGameInfo = function(score, difficulty) {
-                osdState.gameScore = score;
-                osdState.gameDifficulty = difficulty;
-            };
         });
     </script>
 </body>

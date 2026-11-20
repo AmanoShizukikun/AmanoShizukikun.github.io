@@ -62,7 +62,17 @@ const Core = {
         }
 
         // 根據儲存的偏好套用背景樣式
-        const style = this.storage.get('backgroundStyle') || 'dom';
+        let style = this.storage.get('backgroundStyle') || 'dom';
+        if (style === 'city' || style === 'cyber-city') {
+            style = 'dom';
+            this.storage.set('backgroundStyle', 'dom');
+        }
+        // 清理任何殘留的都市 DOM 元素
+        const legacyCity = document.getElementById('global-city-bg');
+        if (legacyCity) legacyCity.remove();
+        const legacyGcCity = document.getElementById('city-bg-container');
+        if (legacyGcCity) legacyGcCity.remove();
+
         const savedStrength = (typeof this.storage.get('animationStrength') === 'number') ? this.storage.get('animationStrength') : 2;
         // 延後套用以確保 DOM 已經穩定（eg. 在內容載入階段）
         if (!this.BackgroundManager) this._createBackgroundManager();
@@ -76,7 +86,7 @@ const Core = {
 
     /**
      * 背景樣式管理器
-     * 支援：dom (預設粒子)、network (canvas 連線粒子)、magnet (磁力連線)、off (關閉)
+     * 支援：dom (預設粒子)、network (canvas 連線粒子)、magnet (磁力連線)、star (宇宙星圖) 等
      */
     _createBackgroundManager() {
         // avoid recreating
@@ -91,11 +101,15 @@ const Core = {
             mouse: { x: -10000, y: -10000 },
             connectionDist: 140,
             mouseDist: 300,
-            _mouseEnabled: true, // new: 是否允許滑鼠影響背景（可由設定切換）
+            _mouseEnabled: true,
             dpr: 1,
 
             apply(style, opts = {}) {
-                if (this.current === style) return;
+                if (style === 'city' || style === 'cyber-city') {
+                    style = 'dom';
+                    try { localStorage.setItem('backgroundStyle', 'dom'); } catch (e) {}
+                }
+                if (!opts.force && this.current === style) return;
                 this.stop();
                 this.current = style;
 
@@ -170,7 +184,7 @@ const Core = {
                     this.canvas.style.width = '100%';
                     this.canvas.style.height = '100%';
                     this.canvas.style.display = 'block';
-                    this.canvas.style.zIndex = '0';
+                    this.canvas.style.zIndex = '-8';
                     this.canvas.style.pointerEvents = 'none';
                     this.canvas.setAttribute('aria-hidden', 'true');
                     document.body.insertBefore(this.canvas, document.body.firstChild);
@@ -345,7 +359,7 @@ const Core = {
                     this.canvas.style.width = '100%';
                     this.canvas.style.height = '100%';
                     this.canvas.style.display = 'block';
-                    this.canvas.style.zIndex = '0';
+                    this.canvas.style.zIndex = '-8';
                     this.canvas.style.pointerEvents = 'none';
                     this.canvas.setAttribute('aria-hidden', 'true');
                     document.body.insertBefore(this.canvas, document.body.firstChild);
@@ -528,7 +542,7 @@ const Core = {
                         this.domCanvas.style.width = '100%';
                         this.domCanvas.style.height = '100%';
                         this.domCanvas.style.display = 'block';
-                        this.domCanvas.style.zIndex = '-7';
+                        this.domCanvas.style.zIndex = '-8';
                         this.domCanvas.style.pointerEvents = 'none';
                         this.domCanvas.setAttribute('aria-hidden', 'true');
                         document.body.insertBefore(this.domCanvas, document.body.firstChild);
@@ -772,7 +786,7 @@ const Core = {
                 if (!this.starCanvas) {
                     this.starCanvas = document.createElement('canvas');
                     this.starCanvas.id = 'bg-star-canvas';
-                    this.starCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-7;pointer-events:none;';
+                    this.starCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-8;pointer-events:none;';
                     this.starCanvas.setAttribute('aria-hidden', 'true');
                     document.body.insertBefore(this.starCanvas, document.body.firstChild);
                 }
@@ -1368,9 +1382,9 @@ const Core = {
                 if (!this.circuitCanvas) {
                     this.circuitCanvas = document.createElement('canvas');
                     this.circuitCanvas.id = 'bg-circuit-canvas';
-                    this.circuitCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-7;pointer-events:none;';
+                    this.circuitCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-8;pointer-events:none;';
                     this.circuitCanvas.setAttribute('aria-hidden', 'true');
-                    document.body.appendChild(this.circuitCanvas);
+                    document.body.insertBefore(this.circuitCanvas, document.body.firstChild);
                 }
                 const canvas = this.circuitCanvas;
                 const ctx = canvas.getContext('2d');
@@ -1744,9 +1758,9 @@ const Core = {
                 if (!this.sakuraCanvas) {
                     this.sakuraCanvas = document.createElement('canvas');
                     this.sakuraCanvas.id = 'bg-sakura-canvas';
-                    this.sakuraCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-7;pointer-events:none;';
+                    this.sakuraCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-8;pointer-events:none;';
                     this.sakuraCanvas.setAttribute('aria-hidden', 'true');
-                    document.body.appendChild(this.sakuraCanvas);
+                    document.body.insertBefore(this.sakuraCanvas, document.body.firstChild);
                 }
                 const canvas = this.sakuraCanvas;
                 const ctx = canvas.getContext('2d');
@@ -2001,9 +2015,9 @@ const Core = {
                 if (!this.glitchCanvas) {
                     this.glitchCanvas = document.createElement('canvas');
                     this.glitchCanvas.id = 'bg-glitch-canvas';
-                    this.glitchCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-7;pointer-events:none;';
+                    this.glitchCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-8;pointer-events:none;';
                     this.glitchCanvas.setAttribute('aria-hidden', 'true');
-                    document.body.appendChild(this.glitchCanvas);
+                    document.body.insertBefore(this.glitchCanvas, document.body.firstChild);
                 }
                 const canvas = this.glitchCanvas;
                 const ctx = canvas.getContext('2d');
@@ -2247,9 +2261,9 @@ const Core = {
                 if (!this.laserCanvas) {
                     this.laserCanvas = document.createElement('canvas');
                     this.laserCanvas.id = 'bg-laser-canvas';
-                    this.laserCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-7;pointer-events:none;';
+                    this.laserCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-8;pointer-events:none;';
                     this.laserCanvas.setAttribute('aria-hidden', 'true');
-                    document.body.appendChild(this.laserCanvas);
+                    document.body.insertBefore(this.laserCanvas, document.body.firstChild);
                 }
                 const canvas = this.laserCanvas;
                 const ctx = canvas.getContext('2d');
@@ -2621,9 +2635,9 @@ const Core = {
                 if (!this.fleetCanvas) {
                     this.fleetCanvas = document.createElement('canvas');
                     this.fleetCanvas.id = 'bg-fleet-canvas';
-                    this.fleetCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-7;pointer-events:none;';
+                    this.fleetCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-8;pointer-events:none;';
                     this.fleetCanvas.setAttribute('aria-hidden', 'true');
-                    document.body.appendChild(this.fleetCanvas);
+                    document.body.insertBefore(this.fleetCanvas, document.body.firstChild);
                 }
                 const canvas = this.fleetCanvas;
                 const ctx = canvas.getContext('2d');
@@ -3093,7 +3107,7 @@ const Core = {
                         this.bubbleCanvas.style.width = '100%';
                         this.bubbleCanvas.style.height = '100%';
                         this.bubbleCanvas.style.display = 'block';
-                        this.bubbleCanvas.style.zIndex = '-7';
+                        this.bubbleCanvas.style.zIndex = '-8';
                         this.bubbleCanvas.style.pointerEvents = 'none';
                         this.bubbleCanvas.setAttribute('aria-hidden', 'true');
                         document.body.insertBefore(this.bubbleCanvas, document.body.firstChild);
@@ -3295,7 +3309,24 @@ const Core = {
                 this.stopNetwork();
             },
 
+            startCity() {
+                this.apply('dom');
+            },
+
+            stopCity() {
+                const container = document.getElementById('global-city-bg');
+                if (container) container.remove();
+                const gameCenterCityBg = document.getElementById('city-bg-container');
+                if (gameCenterCityBg) gameCenterCityBg.remove();
+                const cyberBg = document.querySelector('.cyber-bg');
+                if (cyberBg) cyberBg.style.opacity = '1';
+                const gridOverlay = document.querySelector('.grid-overlay');
+                if (gridOverlay) gridOverlay.style.opacity = '0.4';
+            },
+
             stop() {
+                // 停止 city 背景（若存在）
+                this.stopCity();
                 // 停止 network 並清除 DOM 粒子 / canvas
                 this.stopNetwork();
                 if (typeof this.stopDomCanvas === 'function') this.stopDomCanvas();
@@ -3543,3 +3574,10 @@ const Core = {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = Core;
 }
+
+// 自動初始化 BackgroundManager，確保 Core.BackgroundManager 於載入時即隨時可用
+try {
+    if (typeof Core !== 'undefined' && typeof Core._createBackgroundManager === 'function') {
+        Core._createBackgroundManager();
+    }
+} catch (e) {}
