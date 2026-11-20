@@ -1,0 +1,2257 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <!-- nx-reskinned: colours, fonts and script hosts moved to the site's own (tools/reskin-games.mjs) -->
+    <meta charset="UTF-8">
+    <script src="/assets/js/embed.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Cyber Racer - 3D 漂移賽車遊戲">
+    <title>Cyber Racer - Cyber Nexus</title>
+    <link rel="icon" href="../../../../assets/images/logo.png" type="image/png">
+<link rel="stylesheet" href="../../../../assets/css/core.css">
+    <link rel="stylesheet" href="../../../../assets/css/components.css">
+    <link rel="stylesheet" href="../../../../assets/css/animations.css">
+    <link rel="stylesheet" href="../../css/sidebar.css">
+    
+    <script>
+        // 儲存防護 (防止瀏覽器 Tracking Prevention 封鎖 storage 造成腳本異常)
+        (function() {
+            try {
+                const testKey = '__test_storage__';
+                window.localStorage.setItem(testKey, testKey);
+                window.localStorage.removeItem(testKey);
+            } catch (e) {
+                console.warn('Storage blocked by tracking prevention, using memory fallback');
+                const memStore = {};
+                try {
+                    Object.defineProperty(window, 'localStorage', {
+                        value: {
+                            getItem: (k) => (memStore.hasOwnProperty(k) ? memStore[k] : null),
+                            setItem: (k, v) => { memStore[k] = String(v); },
+                            removeItem: (k) => { delete memStore[k]; },
+                            clear: () => { for (const k in memStore) delete memStore[k]; }
+                        },
+                        configurable: true,
+                        writable: true
+                    });
+                } catch (err) {}
+            }
+        })();
+    </script>
+    
+    <script src="/assets/vendor/three-r128/three.min.js"></script>
+    <script src="/assets/vendor/three-r128/OrbitControls.js"></script>
+    <script src="/assets/vendor/lucide/lucide.min.js"></script>
+    <link rel="stylesheet" href="./css/track-telemetry-analyzer.css">
+    <script src="./js/track-telemetry-analyzer.js"></script>
+    
+    <link rel="stylesheet" href="./css/cyberrace.css">
+    <script src="./js/physics.js"></script>
+    <script src="./js/track-builder.js"></script>
+    <script src="./js/hud.js"></script>
+    <script src="./js/car-builder.js"></script>
+    <script src="./js/particle-system.js"></script>
+    <script src="./js/camera-controller.js"></script>
+    <script src="./js/input-haptics.js"></script>
+    <script src="./js/vehicle-dynamics.js"></script>
+    <script src="./js/ui-controller.js"></script>
+</head>
+<body>
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+
+    <div class="cyber-bg"></div>
+    <div class="grid-overlay"></div>
+    <div class="particles" id="particles"></div>
+
+    <!-- 頂部導覽列 -->
+    <header>
+        <a href="../../../../index.html">
+            <div style="margin-left: 30px; font-family: 'Orbitron', sans-serif;">『 AMANO SHIZUKI 』</div>
+        </a>
+        <div class="nav-container">
+            <ul class="nav-links">
+                <div class="nav-header"><h2 class="nav-title">選單導航</h2></div>
+                <div class="search-box">
+                    <input type="text" id="navSearch" class="search-input" placeholder="搜尋頁面...">
+                    <button class="search-btn" aria-label="Search">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="nav-section">
+                    <h3 class="nav-section-title">主要頁面</h3>
+                    <li><a href="../../../../index.html">◆ HOME</a></li>
+                    <li><a href="../../../../pages/about.html">◆ ABOUT</a></li>
+                    <li><a href="../../../../pages/experience.html">◆ EXPERIENCE</a></li>
+                    <li><a href="../../../../pages/skills.html">◆ SKILLS</a></li>
+                </div>
+                <div class="nav-section">
+                    <h3 class="nav-section-title">特別內容</h3>
+                    <li><a href="../../game-center.html">◆ GAME CENTER</a></li>
+                    <li><a href="../../../nagato-sakura-webos/nagato-sakura-webos.html">◆ WEB OS</a></li>
+                    <li><a href="../../../music-player/music-player.html">◆ MUSIC PLAYER</a></li>
+                    <li><a href="../../../forza-tuning-calculator/forza-tuning-calculator.html">◆ FORZA CALC</a></li>
+                </div>
+                <div class="nav-section">
+                    <h3 class="nav-section-title">更多連結</h3>
+                    <li><a href="https://www.youtube.com/@Amano_Shizuki_Kun" target="_blank" rel="noopener noreferrer" class="social-link">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right:8px;vertical-align:middle;"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>YouTube</a></li>
+                    <li><a href="https://github.com/AmanoShizukikun" target="_blank" rel="noopener noreferrer" class="social-link">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right:8px;vertical-align:middle;"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>GitHub</a></li>
+                    <li><a href="https://discord.gg/jac8eAFzjz" target="_blank" rel="noopener noreferrer" class="social-link">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right:8px;vertical-align:middle;"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>Discord</a></li>
+                    <li><a href="mailto:3b017128@gm.student.ncut.edu.tw" class="social-link">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;vertical-align:middle;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>Email</a></li>
+                </div>
+            </ul>
+        </div>
+        <div class="header-actions">
+            <button class="settings-toggle" aria-label="Settings"></button>
+            <button class="menu-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+        </div>
+    </header>
+
+    <!-- 設定面板 -->
+    <div class="settings-panel">
+        <div class="settings-header"><h2 class="settings-title">系統設定</h2></div>
+        <div class="settings-section">
+            <h3 class="settings-section-title">顯示設定</h3>
+            <div class="setting-item"><div class="setting-label"><span>固定導航欄</span><span class="setting-description">保持導航欄在頂部固定</span></div><div class="toggle-switch" id="headerFixed"></div></div>
+            <div class="setting-item"><div class="setting-label"><span>導航欄高度</span><span class="setting-description">調整頂部導航欄的高度</span></div><div class="slider-control"><div class="slider-value" id="headerHeightValue">75px</div><input type="range" class="slider-range" id="headerHeight" min="50" max="100" value="75" step="5"><div class="slider-marks"><span data-value="50">小</span><span data-value="75">中</span><span data-value="100">大</span></div></div></div>
+            <div class="setting-item"><div class="setting-label"><span>側邊欄文字顯示</span><span class="setting-description">是否持續顯示側邊欄文字標題</span></div><div class="toggle-switch active" id="sideNavTextVisible"></div></div>
+            <div class="setting-item"><div class="setting-label"><span>顯示左側導覽欄</span><span class="setting-description">顯示或隱藏遊戲中心左側導覽欄</span></div><div class="toggle-switch active" id="showSidebar"></div></div>
+            <div class="setting-item"><div class="setting-label"><span>主題模式</span><span class="setting-description">切換深色/淺色模式</span></div><div class="select-control"><select id="themeMode"><option value="dark">深色模式</option><option value="light">淺色模式</option></select></div></div>
+            <div class="setting-item"><div class="setting-label"><span>看板娘 (Live2D)</span><span class="setting-description">啟用或停用頁面上的 Live2D 看板娘</span></div><div class="toggle-switch" id="live2dToggle" role="switch" aria-checked="false" tabindex="0" aria-label="看板娘 (Live2D)"></div></div>
+            <div class="setting-item"><div class="setting-label"><span>背景樣式</span><span class="setting-description">選擇背景動畫樣式</span></div><div class="select-control"><select id="backgroundStyle" title="背景樣式" aria-label="背景樣式"><option value="dom">粒子風暴</option><option value="network">網格連線</option><option value="magnet">磁力連線</option><option value="star">宇宙星圖</option><option value="bubble">氣泡派對</option><option value="circuit">電路脈衝</option><option value="sakura">櫻花飄落</option><option value="glitch">故障雜訊</option><option value="laser">雷射禁地</option><option value="fleet">宇宙戰艦</option><option value="off">關閉</option></select></div></div>
+        </div>
+        <div class="settings-section">
+            <h3 class="settings-section-title">效能設定</h3>
+            <div class="setting-item"><div class="setting-label"><span>動畫強度</span><span class="setting-description">調整頁面動畫效果強度</span></div><div class="slider-control"><div class="slider-value" id="animationValue">強</div><input type="range" class="slider-range" id="animationStrength" min="0" max="2" value="2" step="1"><div class="slider-marks"><span data-value="0">關</span><span data-value="1">低</span><span data-value="2">強</span></div></div></div>
+            <div class="setting-item fps-monitor"><div class="setting-label"><span>幀數監控</span><span class="setting-description">即時顯示頁面渲染幀率</span></div><div class="fps-display"><span class="fps-value" id="fpsValue">000</span><span class="fps-unit">FPS</span></div></div>
+        </div>
+        <div class="settings-section">
+            <h3 class="settings-section-title">音效設定</h3>
+            <div class="setting-item"><div class="setting-label"><span>音效開關</span><span class="setting-description">啟用/關閉互動音效</span></div><div class="toggle-switch active" id="soundEnabled"></div></div>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="game-center-wrapper">
+        <!-- OSD 面板 -->
+        <div class="fps-osd" id="fpsOSD">
+            <div class="osd-header">
+                <div class="osd-title" id="osdTitle">FPS</div>
+                <div class="osd-mode-switcher">
+                    <button class="osd-mode-btn active" data-mode="fps" title="FPS 模式"></button>
+                    <button class="osd-mode-btn" data-mode="advanced" title="進階模式"></button>
+                    <button class="osd-mode-btn" data-mode="full" title="完整模式"></button>
+                </div>
+            </div>
+            <div class="osd-content" id="osdContent"></div>
+        </div>
+
+        <!-- 左側導覽欄 Sidebar (預設摺疊) -->
+        <aside class="gc-sidebar collapsed" id="gcSidebar">
+            <ul class="gc-sidebar-menu">
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="sidebarToggle" title="展開側邊欄">
+                        <i data-lucide="chevron-right" class="sidebar-icon"></i>
+                        <span class="sidebar-text">展開</span>
+                    </a>
+                </li>
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="gcBackBtn" title="返回遊戲中心">
+                        <i data-lucide="layout-grid" class="sidebar-icon"></i>
+                        <span class="sidebar-text">遊戲中心</span>
+                    </a>
+                </li>
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="fpsOSDToggle" title="顯示幀數監控">
+                        <i data-lucide="activity" class="sidebar-icon"></i>
+                        <span class="sidebar-text">幀數顯示</span>
+                    </a>
+                </li>
+                <li class="gc-sidebar-item">
+                    <a class="gc-sidebar-link" id="hideSidebarBtn" title="隱藏左側欄">
+                        <i data-lucide="eye-off" class="sidebar-icon"></i>
+                        <span class="sidebar-text">關閉左側欄</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        <script>
+            (function() {
+                try {
+                    const sc = localStorage.getItem('sidebarCollapsed') ?? localStorage.getItem('gcSidebarCollapsed');
+                    if (sc === 'false') {
+                        const sb = document.getElementById('gcSidebar');
+                        if (sb) sb.classList.remove('collapsed');
+                    }
+                } catch(e) {}
+            })();
+        </script>
+
+        <!-- 遊戲容器 -->
+        <div class="game-container">
+            <div class="arcade-screen-container">
+                <div class="crt-scanlines"></div>
+
+                <!-- Main Body / Dynamic Screens -->
+                <main class="screen-body">
+
+                    <!-- 1. 主選單模式 (Mode Select) -->
+                    <section id="screen-mode" class="menu-screen active">
+                        <h2 class="page-title">MODE SELECT</h2>
+                        <div class="mode-grid">
+                            <div class="arcade-card mode-card selected" onclick="selectMode('battle')" data-nav="mode" data-mode="battle">
+                                <div class="mode-title">AI BATTLE</div>
+                                <div class="mode-desc">AI 對戰模式<br>挑戰各地山道強者，獲取更高的名次</div>
+                            </div>
+                            <div class="arcade-card mode-card" onclick="selectMode('time_attack')" data-nav="mode" data-mode="time_attack">
+                                <div class="mode-title">TIME ATTACK</div>
+                                <div class="mode-desc">計時賽模式<br>極限追求最速路線與完美的入彎角度</div>
+                            </div>
+                            <div class="arcade-card mode-card" onclick="goBackHome()" data-nav="mode">
+                                <div class="mode-title">GAME CENTER</div>
+                                <div class="mode-desc">返回中心<br>結束遊戲並返回主選單中心</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 2. 賽道選擇 (Course Select) -->
+                    <section id="screen-track" class="menu-screen">
+                        <h2 class="page-title">COURSE SELECT</h2>
+                        
+                        <div class="track-filter-bar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <div class="tag-nav-badge" onclick="switchTrackFilter(-1)" title="上一頁標籤">
+                                    <span class="key-badge" id="track-lb-badge">Q</span>
+                                </div>
+                                <div id="filter-tabs-container" style="display:flex; gap:6px;"></div>
+                                <div class="tag-nav-badge" onclick="switchTrackFilter(1)" title="下一頁標籤">
+                                    <span class="key-badge" id="track-rb-badge">E</span>
+                                </div>
+                            </div>
+
+                            <div id="sort-mode-label" style="font-weight: bold; color: var(--neon-blue); font-size: 14px; letter-spacing: 1px;">
+                                排序: 名稱 A-Z
+                            </div>
+                        </div>
+
+                        <div class="track-layout">
+                            <div class="track-list" id="track-list-container"></div>
+
+                            <div class="track-preview-panel">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <div>
+                                        <span id="preview-track-title" style="font-size:22px; font-weight:bold; color:#fff;"></span>
+                                        <span id="preview-track-sub" style="font-size:14px; font-weight:normal; color:#aaa9a5; margin-left:8px;"></span>
+                                    </div>
+                                    <span id="preview-track-stars" style="color:var(--neon-yellow);"></span>
+                                </div>
+
+                                <div class="canvas-container analyzer-container-box">
+                                    <!-- 3D WebGL Telemetry Analyzer (Project D) -->
+                                    <div class="scanlines absolute inset-0 z-10 pointer-events-none"></div>
+
+                                    <!-- 3D WebGL Canvas Container -->
+                                    <div id="analyzer-canvas-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; cursor: grab;"></div>
+
+                                    <!-- Real-Time SVG Screen Overlay for Waypoint Leader Lines & Labels -->
+                                    <svg id="hud-svg-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; overflow: visible;"></svg>
+
+                                    <!-- TOP-RIGHT: Initial D Tactical Compass Dial -->
+                                    <div style="position: absolute; top: 16px; right: 16px; z-index: 30; pointer-events: auto; display: flex; flex-direction: column; align-items: flex-end;">
+                                        <div class="compass-dial-box" style="position: relative; width: 112px; height: 112px; display: flex; align-items: center; justify-content: center; perspective: 350px; margin: 4px 8px;">
+                                            <div id="compass-dial" style="width: 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center; transform-style: preserve-3d; transform: perspective(350px) rotateX(52deg) rotateZ(0deg);">
+                                                <svg style="width: 100%; height: 100%; overflow: visible;" viewBox="0 0 100 100">
+                                                    <circle cx="50" cy="50" r="46" stroke="rgba(255, 255, 255, 0.6)" stroke-width="0.9" fill="none" stroke-dasharray="1.2 3.2"/>
+                                                    <path d="M 27 50 A 23 23 0 0 1 73 50" stroke="rgba(255, 255, 255, 0.5)" stroke-width="0.8" fill="none" stroke-dasharray="0.8 2.2"/>
+                                                    <path d="M 50 9 L 58 19 A 32 32 0 1 1 42 19 Z M 50 23.5 A 26.5 26.5 0 1 0 50 76.5 A 26.5 26.5 0 1 0 50 23.5 Z" fill="#ffffff" fill-rule="evenodd" />
+                                                    <text x="50" y="5" fill="#ff6a1a" font-size="9" font-family="Orbitron, sans-serif" font-weight="900" text-anchor="middle">N</text>
+                                                    <text x="96" y="53" fill="#ffffff" font-size="8" font-family="Orbitron, sans-serif" font-weight="700" text-anchor="middle">E</text>
+                                                    <path d="M 81 50 L 87 47 L 87 53 Z M 87 50 L 90 50" stroke="rgba(255,255,255,0.9)" stroke-width="0.8" fill="rgba(255,255,255,0.9)"/>
+                                                    <text x="50" y="99" fill="#ffffff" font-size="8" font-family="Orbitron, sans-serif" font-weight="700" text-anchor="middle">S</text>
+                                                    <text x="4" y="53" fill="#ffffff" font-size="8" font-family="Orbitron, sans-serif" font-weight="700" text-anchor="middle">W</text>
+                                                    <path d="M 10 52 L 13 47 L 16 51 L 19 45 L 22 52 Z" stroke="rgba(255,255,255,0.9)" fill="none" stroke-width="0.9"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- BOTTOM-LEFT PANEL: Scrubber Playbar -->
+                                    <div style="position: absolute; bottom: 16px; left: 16px; z-index: 20; pointer-events: none;">
+                                        <div id="playbar-container" class="hud-panel" style="padding: 6px 8px; border-radius: 8px; pointer-events: auto; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(224, 223, 217, 0.4); height: 44px; transition: all 0.3s ease;">
+                                            <button id="btn-play-pause" style="width: 32px; height: 32px; border-radius: 4px; background: #e0dfd9; color: #000; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 0 10px rgba(224,223,217,0.4);" title="播放 / 暫停">
+                                                <i data-lucide="pause" style="width: 16px; height: 16px;" id="play-icon"></i>
+                                            </button>
+                                            <button id="btn-restart" style="width: 32px; height: 32px; border-radius: 4px; background: rgba(11, 11, 11, 0.9); color: #e0dfd9; border: 1px solid rgba(224, 223, 217, 0.4); cursor: pointer; display: flex; align-items: center; justify-content: center;" title="重播">
+                                                <i data-lucide="rotate-ccw" style="width: 14px; height: 14px;"></i>
+                                            </button>
+                                            <button id="btn-toggle-scrubber" style="width: 32px; height: 32px; border-radius: 4px; background: rgba(11, 11, 11, 0.9); color: #e0dfd9; border: 1px solid rgba(224, 223, 217, 0.4); cursor: pointer; display: flex; align-items: center; justify-content: center;" title="展開/折疊進度條">
+                                                <i data-lucide="sliders-horizontal" style="width: 14px; height: 14px;" id="toggle-scrubber-icon"></i>
+                                            </button>
+
+                                            <!-- Collapsible Scrubber Section -->
+                                            <div id="scrubber-wrapper" class="max-w-0 opacity-0 pointer-events-none" style="overflow: hidden; transition: all 0.3s ease; display: flex; align-items: center; height: 100%;">
+                                                <div style="width: 220px; padding-left: 8px; border-left: 1px solid rgba(224, 223, 217, 0.3); display: flex; flex-direction: column; justify-content: center; gap: 2px;">
+                                                    <div style="font-size: 9px; color: rgba(224, 223, 217, 0.8); display: flex; justify-content: space-between; font-family: monospace;">
+                                                        <span>PATH TELEMETRY POSITION</span>
+                                                        <span id="progress-percent" class="glow-white" style="color: #fff; font-weight: bold;">0.0%</span>
+                                                    </div>
+                                                    <input type="range" id="scrubber-slider" min="0" max="1000" value="0" style="width: 100%; cursor: pointer; height: 4px; accent-color: #ffffff;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- BOTTOM-RIGHT PANEL: Perspective Controls -->
+                                    <div style="position: absolute; bottom: 16px; right: 16px; z-index: 20; pointer-events: none; display: flex; flex-direction: column; align-items: flex-end;">
+                                        <div id="perspective-wrapper" class="max-h-0 opacity-0 pointer-events-none mb-2" style="overflow: hidden; transition: all 0.3s ease;">
+                                            <div class="hud-panel" style="padding: 10px; border-radius: 8px; border: 1px solid rgba(224, 223, 217, 0.4); display: flex; flex-direction: column; gap: 8px; width: 220px; pointer-events: auto;">
+                                                <div style="font-size: 9px; font-family: 'Orbitron', sans-serif; color: #e0dfd9; letter-spacing: 1px; display: flex; align-items: center; justify-content: space-between; font-weight: bold;">
+                                                    <span>PERSPECTIVE & DISPLAY</span>
+                                                    <i data-lucide="camera" style="width: 12px; height: 12px; color: #e0dfd9;"></i>
+                                                </div>
+                                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                                                    <button id="cam-iso" class="cam-btn active">
+                                                        ISO
+                                                    </button>
+                                                    <button id="cam-follow" class="cam-btn">
+                                                        TRACER
+                                                    </button>
+                                                    <button id="cam-top" class="cam-btn">
+                                                        TOP
+                                                    </button>
+                                                    <button id="cam-free" class="cam-btn">
+                                                        FREE
+                                                    </button>
+                                                </div>
+
+                                                <div style="border-top: 1px solid rgba(224, 223, 217, 0.2); padding-top: 6px; display: flex; flex-direction: column; gap: 4px; font-size: 10px;">
+                                                    <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; color: #f0efea;">
+                                                        <span>3D Height Wall (立體壁面)</span>
+                                                        <input type="checkbox" id="toggle-wall" checked style="accent-color: #e0dfd9;">
+                                                    </label>
+                                                    <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; color: #f0efea;">
+                                                        <span>Tactical Grid (戰術網格)</span>
+                                                        <input type="checkbox" id="toggle-grid" checked style="accent-color: #e0dfd9;">
+                                                    </label>
+                                                    <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; color: #f0efea;">
+                                                        <span>Checkpoints & Nodes</span>
+                                                        <input type="checkbox" id="toggle-nodes" checked style="accent-color: #e0dfd9;">
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="hud-panel" style="padding: 6px 8px; border-radius: 8px; pointer-events: auto; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(224, 223, 217, 0.4); height: 44px; transition: all 0.3s ease;">
+                                            <button id="btn-toggle-perspective" style="width: 32px; height: 32px; border-radius: 4px; background: rgba(11, 11, 11, 0.9); color: #e0dfd9; border: 1px solid rgba(224, 223, 217, 0.4); cursor: pointer; display: flex; align-items: center; justify-content: center;" title="展開/折疊視角與控制設定">
+                                                <i data-lucide="camera" style="width: 14px; height: 14px; color: #e0dfd9;" id="toggle-perspective-icon"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="track-stats-row">
+                                    <div class="stat-box">
+                                        <div class="val" id="stat-len">7,552m</div>
+                                        <div class="lbl">LENGTH</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="val" id="stat-elev">280m</div>
+                                        <div class="lbl">ELEVATION</div>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; flex-direction:column; gap:8px;">
+                                    <div id="settings-hint" style="font-size:12px; color:var(--neon-yellow); font-weight:bold; display:none;"></div>
+                                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                                        <div class="opt-group" id="opt-group-dir">
+                                            <div class="opt-label">方向</div>
+                                            <div class="opt-btns">
+                                                <div class="opt-btn active" id="opt-dir-forward" onclick="setOpt('dir', 'forward', this)">往路 (正向)</div>
+                                                <div class="opt-btn" id="opt-dir-reverse" onclick="setOpt('dir', 'reverse', this)">復路 (逆向)</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="opt-group" id="opt-group-weather">
+                                            <div class="opt-label">氣候</div>
+                                            <div class="opt-btns">
+                                                <div class="opt-btn active" id="opt-weather-dry" onclick="setOpt('weather', 'dry', this)">晴天</div>
+                                                <div class="opt-btn" id="opt-weather-wet" onclick="setOpt('weather', 'wet', this)">雨天</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button class="btn-confirm-course" onclick="confirmCourse()">
+                                    CONFIRM COURSE
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 3. 車輛選擇 (Car Select) -->
+                    <section id="screen-car" class="menu-screen">
+                        <h2 class="page-title">CAR SELECT</h2>
+                        
+                        <div class="car-filter-bar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <div class="tag-nav-badge" onclick="switchCarFilter(-1)" title="上一頁標籤">
+                                    <span class="key-badge" id="car-lb-badge">Q</span>
+                                </div>
+                                <div id="car-filter-tabs-container" style="display:flex; gap:6px;"></div>
+                                <div class="tag-nav-badge" onclick="switchCarFilter(1)" title="下一頁標籤">
+                                    <span class="key-badge" id="car-rb-badge">E</span>
+                                </div>
+                            </div>
+
+                            <div id="car-sort-mode-label" style="font-weight: bold; color: var(--neon-blue); font-size: 14px; letter-spacing: 1px;">
+                                排序: 名稱 A-Z
+                            </div>
+                        </div>
+
+                        <div class="car-layout">
+                            <div class="car-list" id="car-list-container"></div>
+
+                            <div class="car-preview-panel">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <div>
+                                        <span id="preview-car-brand" style="font-size:12px; color:var(--neon-orange); font-weight:bold; font-family:'Orbitron';">TOYOTA</span>
+                                        <div id="preview-car-title" style="font-size:20px; font-weight:bold; color:#fff;">TRUENO AE86 (萬轉賽車引擎)</div>
+                                    </div>
+                                    <span id="preview-car-drive" style="color:var(--neon-yellow); font-family:'Orbitron'; font-weight:bold; font-size:16px;">FR / 5-MT</span>
+                                </div>
+
+                                <div class="canvas-container">
+                                    <canvas id="carCanvas"></canvas>
+                                </div>
+
+                                <div class="car-stats-row">
+                                    <div class="stat-box">
+                                        <div class="val" id="stat-car-hp">240 PS</div>
+                                        <div class="lbl">POWER</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="val" id="stat-car-weight">900 kg</div>
+                                        <div class="lbl">WEIGHT</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="val" id="stat-car-year">1983</div>
+                                        <div class="lbl">MODEL YEAR</div>
+                                    </div>
+                                </div>
+
+                                <div class="car-perf-grid">
+                                    <div class="perf-bar-group">
+                                        <div class="perf-bar-label"><span>TOP SPEED</span><span id="val-bar-speed">82</span></div>
+                                        <div class="perf-bar-track"><div class="perf-bar-fill" id="bar-speed" style="width: 82%;"></div></div>
+                                    </div>
+                                    <div class="perf-bar-group">
+                                        <div class="perf-bar-label"><span>ACCELERATION</span><span id="val-bar-accel">80</span></div>
+                                        <div class="perf-bar-track"><div class="perf-bar-fill" id="bar-accel" style="width: 80%;"></div></div>
+                                    </div>
+                                    <div class="perf-bar-group">
+                                        <div class="perf-bar-label"><span>HANDLING</span><span id="val-bar-handling">96</span></div>
+                                        <div class="perf-bar-track"><div class="perf-bar-fill" id="bar-handling" style="width: 96%;"></div></div>
+                                    </div>
+                                    <div class="perf-bar-group">
+                                        <div class="perf-bar-label"><span>DRIFT CAPABILITY</span><span id="val-bar-drift">98</span></div>
+                                        <div class="perf-bar-track"><div class="perf-bar-fill" id="bar-drift" style="width: 98%;"></div></div>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:8px 12px; border:1px solid rgba(224,223,217,0.15);">
+                                    <span style="font-size:11px; color:var(--neon-blue); font-family:'Orbitron';">BODY COLORS AVAILABLE</span>
+                                    <div class="color-dots-row" id="car-color-dots"></div>
+                                </div>
+
+                                <button class="btn-confirm-car" onclick="confirmCar()">
+                                    CONFIRM CAR
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 4. AI 難度選擇 (Rival Select) -->
+                    <section id="screen-ai" class="menu-screen">
+                        <div style="margin-bottom: 5px;">
+                            <h2 class="page-title">SELECT AI RIVAL</h2>
+                            <p style="color: #aaa; font-style: italic; font-size: 14px; margin-top: -8px; margin-left: 14px;">選擇挑戰對手難度，準備進入山道</p>
+                        </div>
+                        <div class="ai-grid">
+                            <div class="arcade-card ai-card selected" data-level="easy" data-nav="ai" onclick="startGame('easy')">
+                                <div class="ai-avatar">1</div>
+                                <div>
+                                    <div style="font-size: 26px; font-weight: 900; font-family: 'Orbitron', sans-serif; font-style: italic; transform: skewX(10deg);">BEGINNER</div>
+                                    <div style="font-size: 13px; color: var(--neon-blue); font-weight: bold; letter-spacing: 2px; transform: skewX(10deg); margin-top: 2px;">初級</div>
+                                </div>
+                                <div class="ai-card-divider"></div>
+                                <div class="ai-card-desc">當地實力一般的車手。適合熟悉操作與賽道特點。</div>
+                            </div>
+                            <div class="arcade-card ai-card" data-level="normal" data-nav="ai" onclick="startGame('normal')">
+                                <div class="ai-avatar">2</div>
+                                <div>
+                                    <div style="font-size: 26px; font-weight: 900; font-family: 'Orbitron', sans-serif; font-style: italic; transform: skewX(10deg);">NORMAL</div>
+                                    <div style="font-size: 13px; color: #cecdc8; font-weight: bold; letter-spacing: 2px; transform: skewX(10deg); margin-top: 2px;">普通</div>
+                                </div>
+                                <div class="ai-card-divider"></div>
+                                <div class="ai-card-desc">區域小有名氣。具備基本的防禦線路與超車技術。</div>
+                            </div>
+                            <div class="arcade-card ai-card" data-level="hard" data-nav="ai" onclick="startGame('hard')">
+                                <div class="ai-avatar">3</div>
+                                <div>
+                                    <div style="font-size: 26px; font-weight: 900; font-family: 'Orbitron', sans-serif; font-style: italic; transform: skewX(10deg);">EXPERT</div>
+                                    <div style="font-size: 13px; color: var(--neon-yellow); font-weight: bold; letter-spacing: 2px; transform: skewX(10deg); margin-top: 2px;">高手</div>
+                                </div>
+                                <div class="ai-card-divider"></div>
+                                <div class="ai-card-desc">賽車隊主力。極具攻擊性的線路選擇，對錯誤容忍度低。</div>
+                            </div>
+                            <div class="arcade-card ai-card" data-level="legend" data-nav="ai" onclick="startGame('legend')">
+                                <div class="ai-avatar">4</div>
+                                <div>
+                                    <div style="font-size: 26px; font-weight: 900; font-family: 'Orbitron', sans-serif; font-style: italic; color: var(--neon-red); transform: skewX(10deg);">LEGEND</div>
+                                    <div style="font-size: 13px; color: var(--neon-red); font-weight: bold; letter-spacing: 2px; transform: skewX(10deg); margin-top: 2px;">傳說</div>
+                                </div>
+                                <div class="ai-card-divider"></div>
+                                <div class="ai-card-desc">不敗的山道紀錄保持者。幾乎完美的過彎控制與反應速度。</div>
+                            </div>
+                        </div>
+                    </section>
+
+                </main>
+
+                <!-- 5. 遊戲內 Overlay HUD & 3D Scene -->
+                <div id="screen-game" style="display: none !important; pointer-events: none !important;">
+                    <div id="game-canvas-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"></div>
+                    <!-- 比賽 HUD -->
+                    <div class="race-hud" id="raceHUD">
+                        <!-- ↖️ 左上角一體化資訊面板 (完成度 & 名次 & 視角切換) -->
+                        <!-- ↖️ 左上角一體化資訊面板 (完成度 / 圈數 & 名次 & 視角切換) -->
+                        <div class="hud-top-left">
+                            <div class="hud-card-header">
+                                <span class="hud-card-title" id="hudProgressTitle">PROGRESS</span>
+                                <span class="hud-progress-val" id="hudProgress">0%</span>
+                            </div>
+                            <div class="hud-pos-block">
+                                <span class="hud-pos-label">POS</span>
+                                <div class="hud-position"><span id="hudPosition">1</span><span class="pos-suffix" id="hudPosSuffix">/4</span></div>
+                            </div>
+                            <button class="hud-cam-btn" id="hudCamBtn" title="切換攝影機視角 [按 C 鍵]" onclick="Game.cycleCameraMode()">
+                                <span>🎥</span>
+                                <span id="hudCamName">車後方 (近)</span>
+                                <span class="cam-key-hint">C</span>
+                            </button>
+                        </div>
+
+                        <!-- 攝影機視角提示浮報 -->
+                        <div class="hud-cam-toast" id="hudCamToast">
+                            <span>🎥</span>
+                            <span>視角：<strong id="camToastName">車後方 (近)</strong></span>
+                        </div>
+
+                        <!-- ⚙️ 換檔與離合器提示浮報 -->
+                        <div class="hud-shift-toast" id="hudShiftToast">
+                            <span id="shiftToastIcon">⚙️</span>
+                            <span id="shiftToastMsg">GEAR 1</span>
+                        </div>
+
+                        <!-- ↗️ 右上角一體化資訊面板 (時間、圈數 & 檢查點 / 圈耗時即時成績) -->
+                        <div class="hud-top-right">
+                            <div class="hud-top-right-header">
+                                <div class="hud-lap-badge" id="hudRightLapBadge" style="display:none;">
+                                    <div class="hud-lap-label">LAP</div>
+                                    <div class="hud-lap-value" id="hudRightLapVal">0/3</div>
+                                </div>
+                                <div class="hud-timer">
+                                    <div class="hud-timer-label">⏱ TIME</div>
+                                    <div class="hud-timer-value" id="hudTimer">00:00.0</div>
+                                </div>
+                            </div>
+                            <div class="hud-right-divider"></div>
+                            <div class="hud-cp-panel" id="hudCPPanel">
+                                <div class="cp-panel-title" id="hudRightPanelTitle">SECTOR SPLITS</div>
+                                <div class="cp-rows" id="hudRightPanelRows">
+                                    <div class="cp-row-item" id="cpRowItem1"><span class="cp-row-name" id="cpName1">區間1</span><span class="cp-row-time" id="cpTime1">--:--.-</span><span class="cp-row-split" id="cpSplit1"></span></div>
+                                    <div class="cp-row-item" id="cpRowItem2"><span class="cp-row-name" id="cpName2">區間2</span><span class="cp-row-time" id="cpTime2">--:--.-</span><span class="cp-row-split" id="cpSplit2"></span></div>
+                                    <div class="cp-row-item" id="cpRowItem3"><span class="cp-row-name" id="cpName3">區間3</span><span class="cp-row-time" id="cpTime3">--:--.-</span><span class="cp-row-split" id="cpSplit3"></span></div>
+                                    <div class="cp-row-item" id="cpRowItem4"><span class="cp-row-name" id="cpName4">區間4</span><span class="cp-row-time" id="cpTime4">--:--.-</span><span class="cp-row-split" id="cpSplit4"></span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 輪胎遙測 HUD 面板 (快捷鍵 T 開關) -->
+                        <div class="telemetry-panel" id="telemetryPanel">
+                            <div class="tel-header">
+                                <span>TIRE TELEMETRY [T]</span>
+                                <span id="telCompound">SPORT</span>
+                            </div>
+                            <div class="tel-grid">
+                                <div class="tel-wheel-card">
+                                    <div class="tel-wheel-name"><span>FL</span><span id="telCamFL">-1.0°</span></div>
+                                    <div class="tel-temp-zones">
+                                        <div class="tel-temp-box" id="telTempFL_O">45</div>
+                                        <div class="tel-temp-box" id="telTempFL_M">45</div>
+                                        <div class="tel-temp-box" id="telTempFL_I">45</div>
+                                    </div>
+                                    <div class="tel-info-row"><span>PRESS</span><span class="tel-info-val" id="telPressFL">220 kPa</span></div>
+                                    <div class="tel-info-row"><span>WEAR</span><span class="tel-info-val" id="telWearFL">100%</span></div>
+                                </div>
+                                <div class="tel-wheel-card">
+                                    <div class="tel-wheel-name"><span>FR</span><span id="telCamFR">-1.0°</span></div>
+                                    <div class="tel-temp-zones">
+                                        <div class="tel-temp-box" id="telTempFR_I">45</div>
+                                        <div class="tel-temp-box" id="telTempFR_M">45</div>
+                                        <div class="tel-temp-box" id="telTempFR_O">45</div>
+                                    </div>
+                                    <div class="tel-info-row"><span>PRESS</span><span class="tel-info-val" id="telPressFR">220 kPa</span></div>
+                                    <div class="tel-info-row"><span>WEAR</span><span class="tel-info-val" id="telWearFR">100%</span></div>
+                                </div>
+                                <div class="tel-wheel-card">
+                                    <div class="tel-wheel-name"><span>RL</span><span id="telCamRL">-0.5°</span></div>
+                                    <div class="tel-temp-zones">
+                                        <div class="tel-temp-box" id="telTempRL_O">45</div>
+                                        <div class="tel-temp-box" id="telTempRL_M">45</div>
+                                        <div class="tel-temp-box" id="telTempRL_I">45</div>
+                                    </div>
+                                    <div class="tel-info-row"><span>PRESS</span><span class="tel-info-val" id="telPressRL">220 kPa</span></div>
+                                    <div class="tel-info-row"><span>WEAR</span><span class="tel-info-val" id="telWearRL">100%</span></div>
+                                </div>
+                                <div class="tel-wheel-card">
+                                    <div class="tel-wheel-name"><span>RR</span><span id="telCamRR">-0.5°</span></div>
+                                    <div class="tel-temp-zones">
+                                        <div class="tel-temp-box" id="telTempRR_I">45</div>
+                                        <div class="tel-temp-box" id="telTempRR_M">45</div>
+                                        <div class="tel-temp-box" id="telTempRR_O">45</div>
+                                    </div>
+                                    <div class="tel-info-row"><span>PRESS</span><span class="tel-info-val" id="telPressRR">220 kPa</span></div>
+                                    <div class="tel-info-row"><span>WEAR</span><span class="tel-info-val" id="telWearRR">100%</span></div>
+                                </div>
+                            </div>
+                            <div class="tel-g-meter">
+                                <span>LAT G: <b id="telLatG" style="color:#e9e7e2;">0.00</b></span>
+                                <span>LONG G: <b id="telLongG" style="color:#ffc300;">0.00</b></span>
+                            </div>
+                        </div>
+
+                        <!-- ↙️ 左下角: 圓形小地圖 -->
+                        <div class="hud-bottom-left">
+                            <div class="minimap-container circular">
+                                <canvas class="minimap-canvas" id="minimapCanvas" width="300" height="300"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- ↘️ 右下角: 單一巨型賽車儀表板 -->
+                        <div class="hud-bottom-right">
+                            <div class="gauge-cluster" id="gaugeCluster">
+                                <canvas class="gauge-canvas" id="gaugeCanvas" width="300" height="300"></canvas>
+                                <div class="gauge-digital" id="gaugeDigital" style="display:none;">
+                                    <div class="digi-row">
+                                        <div class="digi-block">
+                                            <div class="digi-label">RPM</div>
+                                            <div class="digi-value" id="digiRPM">0000</div>
+                                        </div>
+                                        <div class="digi-gear-block">
+                                            <div class="digi-label">GEAR</div>
+                                            <div class="digi-gear" id="digiGear">1</div>
+                                        </div>
+                                        <div class="digi-block">
+                                            <div class="digi-label">KM/H</div>
+                                            <div class="digi-value" id="digiSpeed">000</div>
+                                        </div>
+                                    </div>
+                                    <div class="digi-boost-row">
+                                        <div class="digi-boost-label">N2O</div>
+                                        <div class="digi-boost-bar"><div class="digi-boost-fill" id="digiBoostFill"></div></div>
+                                        <div class="digi-nitro-pct" id="digiNitroPct">0%</div>
+                                    </div>
+                                </div>
+                                <div style="display:none;">
+                                    <span id="hudSpeed">0</span>
+                                    <div id="hudBoostFill"></div>
+                                    <div id="rpmBarFill"></div>
+                                    <span id="rpmGearValue">1</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 中央飄移指示 -->
+                        <div class="hud-drift-indicator" id="hudDrift">DRIFT!</div>
+
+                        <!-- 檢查點動畫彈窗 -->
+                        <div class="hud-checkpoint-banner" id="hudCPBanner">
+                            <div class="cp-banner-title" id="cpBannerTitle">CHECKPOINT 1</div>
+                            <div class="cp-banner-time" id="cpBannerTime">00:00.0</div>
+                            <div class="cp-banner-split" id="cpBannerSplit">--</div>
+                        </div>
+                    </div>
+
+                    <!-- 速度暈影效果 -->
+                    <div class="speed-vignette" id="speedVignette"></div>
+
+                    <!-- 倒數計時 -->
+                    <div class="countdown-overlay" id="countdownOverlay">
+                        <div class="countdown-text" id="countdownText">3</div>
+                    </div>
+
+                    <!-- 比賽結果面板 -->
+                    <div class="race-result-panel" id="raceResultPanel">
+                        <div class="result-title" id="resultTitle">FINISH!</div>
+                        <div class="result-position" id="resultPosition">1st</div>
+                        <div class="result-stats" id="resultStats"></div>
+                        <div class="result-buttons">
+                            <button class="title-btn" id="restartBtn" onclick="restartCurrentRace()"><span>再來一局</span></button>
+                            <button class="title-btn" id="menuBtn" onclick="exitToMenu()"><span>返回選單</span></button>
+                        </div>
+                    </div>
+
+                    <!-- 退出確認 -->
+                    <div class="exit-confirm-panel" id="exitConfirmPanel">
+                        <h3 class="exit-confirm-title">確定要退出嗎？</h3>
+                        <p class="exit-confirm-message">當前比賽將不會保存</p>
+                        <div class="exit-confirm-buttons">
+                            <button class="exit-confirm-btn cancel-btn" id="exitCancelBtn" onclick="hideExitConfirm()">取消</button>
+                            <button class="exit-confirm-btn confirm-btn" id="exitConfirmBtn" onclick="exitToMenu()">確定退出</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 內部暫停與遊戲設定選單 (Horizon 地平線 3欄多頁面風格 - 全域浮覆，跨頁面共享) -->
+                <div class="pause-menu-overlay" id="pauseHint">
+                    <div class="pause-menu-panel">
+                        <div class="pause-menu-header">
+                            <h2 class="pause-menu-title" id="pauseHeaderTitle">⏸ PAUSED</h2>
+                            <span class="pause-menu-badge" id="pauseHeaderBadge">CYBER RACER</span>
+                        </div>
+
+                        <!-- 頁面 1: 主暫停選單 (繼續、重新開始、遊戲設定、退出比賽) -->
+                        <div class="pause-page active" id="pausePageMain">
+                            <div class="pause-main-list">
+                                <button class="pause-main-btn pause-main-item focused" id="btnResumeRace" onclick="Game.togglePause()">
+                                    <span>繼續比賽</span>
+                                </button>
+                                <button class="pause-main-btn pause-main-item" id="btnRestartRace" onclick="restartCurrentRace()">
+                                    <span>重新開始</span>
+                                </button>
+                                <button class="pause-main-btn pause-main-item" id="btnOpenGameSettings" onclick="openGameSettingsPage()">
+                                    <span>遊戲設定</span>
+                                </button>
+                                <button class="pause-main-btn pause-main-btn-exit pause-main-item" id="btnExitRace" onclick="exitToMenu()">
+                                    <span>退出比賽</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 頁面 2: 地平線風格 3欄式遊戲設定頁 (Horizon Split Settings) -->
+                        <div class="pause-page" id="pausePageSettings">
+                            <div class="horizon-split-container">
+                                <!-- 左欄: 類別清單 -->
+                                <div class="horizon-cat-col" id="horizonCatList">
+                                    <div class="horizon-cat-item active" data-cat="controls">
+                                        <span class="horizon-cat-name">控制與震動</span>
+                                        <span class="horizon-cat-arrow">►</span>
+                                    </div>
+                                    <div class="horizon-cat-item" data-cat="physics">
+                                        <span class="horizon-cat-name">駕駛與物理</span>
+                                        <span class="horizon-cat-arrow">►</span>
+                                    </div>
+                                    <div class="horizon-cat-item" data-cat="display">
+                                        <span class="horizon-cat-name">顯示與遙測</span>
+                                        <span class="horizon-cat-arrow">►</span>
+                                    </div>
+                                </div>
+
+                                <!-- 中欄: 設定列表 -->
+                                <div class="horizon-settings-col" id="horizonSettingsList">
+                                    <!-- 設定項目會由 JS 動態填入 -->
+                                </div>
+
+                                <!-- 右欄: 地平線 說明面板 -->
+                                <div class="horizon-desc-col">
+                                    <div class="horizon-desc-header">說明</div>
+                                    <div class="horizon-desc-body">
+                                        <div class="horizon-desc-title" id="horizonDescTitle">手把震動</div>
+                                        <div id="horizonDescText">設定手把震動開關與力回饋強度。強烈的震動效果可提供車輛失控、踩煞車與路面摩擦的實時路感。</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 頁尾控制提示 -->
+                        <div class="pause-gamepad-hints" id="pauseGamepadHints">
+                            <span><span class="key-badge">↑↓ / WASD</span> 選擇</span>
+                            <span><span class="key-badge">←→ / AD</span> 調整選項</span>
+                            <span><span class="key-badge">A / ENTER</span> 變更</span>
+                            <span><span class="key-badge">B / ESC</span> 返回</span>
+                            <span><span class="key-badge">☰</span> 暫停/設定</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <footer class="arcade-footer">
+                    <div class="control-hints" id="footer-hints-container"></div>
+                    <div class="credits-box" id="connection-status-label">
+                        STATUS: [KEYBOARD_READY]
+                    </div>
+                </footer>
+            </div>
+
+            <!-- Modal Bulletin & Guide -->
+            <div class="modal-overlay" id="modal-controls">
+                <div class="modal-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid var(--neon-blue); padding-bottom: 12px; margin-bottom: 15px;">
+                        <h2 style="color:var(--neon-blue); font-family:'Orbitron'; font-size:22px; text-shadow:0 0 10px var(--neon-blue);">
+                            SYSTEM BULLETIN & GUIDE (系統公告與操作說明)
+                        </h2>
+                        <div style="font-size:12px; color:var(--neon-yellow); font-weight:bold;">
+                            [ ↑↓ : 切換主題 | B / ESC : 關閉 ]
+                        </div>
+                    </div>
+
+                    <div class="modal-body-grid">
+                        <div class="modal-sidebar" id="modal-tab-container"></div>
+                        <div class="modal-detail-panel" id="modal-detail-content"></div>
+                    </div>
+
+                    <div style="margin-top: 15px; overflow: hidden;">
+                        <button class="btn-action" onclick="toggleModal(false)">
+                            CLOSE
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- 網站核心腳本 -->
+    <script src="../../../../assets/js/core.js"></script>
+    <script src="../../../../assets/js/live2d-manager.js"></script>
+    <script src="../../../../assets/js/navigation.js"></script>
+    <script src="../../../../assets/js/animations.js"></script>
+    <script src="../../js/fps-osd.js"></script>
+    <script src="../../js/sidebar.js"></script>
+
+
+    <!-- 遊戲邏輯腳本 -->
+    <script>
+    // ===== 全域控制與選單狀態變數 =====
+    let lastPauseToggleTime = 0;
+    let isOpenedFromOutsideRace = false;
+
+    // ==================== CYBER RACER - 漂移賽車核心引擎 ====================
+    const Game = (() => {
+        // 解構獨立物理引擎常數與運算
+        const { PHYSICS, TIRE_COMPOUNDS } = window.CyberRacePhysics;
+
+        // 常數
+        const TRACK_SAMPLES = 2400;
+        const TOTAL_LAPS = 3;
+        const CHECKPOINT_RATIOS = [0.205, 0.445, 0.695];
+
+        const TRACKS = {};
+        const CAR_MODELS = {
+            ae86_stock: {
+                id: 'ae86_stock',
+                name: 'Toyota Sprinter Trueno (AE86 原廠)',
+                driver: '藤原拓海',
+                hp: 180, peakHpRpm: 6600, torqueNm: 162, peakTorqueRpm: 5200,
+                redlineRpm: 7500, gaugeMaxRpm: 8000, maxRpm: 8000, idleRpm: 900,
+                aspirationType: 'NA', boostPSI: 0, boostLagMs: 0,
+                gearRatios: { '-1': 3.48, '1': 2.47, '2': 1.70, '3': 1.24, '4': 1.00, '5': 0.86 },
+                finalDrive: 4.1, tireRadius: 0.29, maxGear: 5,
+                weight: 960, frontWeightRatio: 0.53, driveType: 'FR',
+                wheelbase: 2.40, trackWidthAxle: 1.40,
+                topSpeedKMH: 224.8, accel0to97Sec: 6.960, accel0to161Sec: 17.519,
+                braking97Dist: 45.4, braking161Dist: 112.5,
+                lateralG97: 0.91, lateralG193: 0.91,
+                suspStiffF: 28000, suspStiffR: 24000, antiRollF: 0.45, antiRollR: 0.30,
+                tireGripBase: 1.00, tireCamberF: -0.8, tireCamberR: -0.3,
+                optimalTireTemp: 85, tireCompound: 'sport',
+                dragCoefficient: 0.34, frontalArea: 1.80, downforceCoefficient: 0.05,
+                color: 0xffffff, accentColor: 0x111111
+            },
+            ae86_race: {
+                id: 'ae86_race',
+                name: 'AE86 Sprinter Trueno (TRD 賽道版)',
+                driver: '藤原拓海',
+                hp: 240, peakHpRpm: 8800, torqueNm: 196, peakTorqueRpm: 7500,
+                redlineRpm: 11000, gaugeMaxRpm: 13000, maxRpm: 11000, idleRpm: 1100,
+                aspirationType: 'NA', boostPSI: 0, boostLagMs: 0,
+                gearRatios: { '-1': 3.48, '1': 2.47, '2': 1.70, '3': 1.24, '4': 1.00, '5': 0.86 },
+                finalDrive: 4.1, tireRadius: 0.29, maxGear: 5,
+                weight: 900, frontWeightRatio: 0.52, driveType: 'FR',
+                wheelbase: 2.40, trackWidthAxle: 1.42,
+                topSpeedKMH: 252.0, accel0to97Sec: 5.120, accel0to161Sec: 11.850,
+                braking97Dist: 41.2, braking161Dist: 102.0,
+                lateralG97: 0.96, lateralG193: 0.96,
+                suspStiffF: 42000, suspStiffR: 38000, antiRollF: 0.55, antiRollR: 0.40,
+                tireGripBase: 1.12, tireCamberF: -1.5, tireCamberR: -0.8,
+                optimalTireTemp: 88, tireCompound: 'semiSlick',
+                dragCoefficient: 0.33, frontalArea: 1.78, downforceCoefficient: 0.08,
+                color: 0xffffff, accentColor: 0x222222, isCarbonHood: true
+            },
+            fd3s_early: {
+                id: 'fd3s_early',
+                name: 'RX-7 FD3S (初期型)',
+                driver: '高橋啟介',
+                hp: 350, peakHpRpm: 6500, torqueNm: 360, peakTorqueRpm: 5000,
+                redlineRpm: 7500, gaugeMaxRpm: 9000, maxRpm: 8000, idleRpm: 900,
+                aspirationType: 'TwinTurbo', boostPSI: 10, boostLagMs: 350,
+                gearRatios: { '-1': 3.48, '1': 3.48, '2': 2.02, '3': 1.39, '4': 1.00, '5': 0.76 },
+                finalDrive: 4.1, tireRadius: 0.32, maxGear: 5,
+                weight: 1260, frontWeightRatio: 0.50, driveType: 'FR',
+                wheelbase: 2.43, trackWidthAxle: 1.46,
+                topSpeedKMH: 278.0, accel0to97Sec: 4.600, accel0to161Sec: 10.500,
+                braking97Dist: 34.2, braking161Dist: 84.0,
+                lateralG97: 1.02, lateralG193: 1.05,
+                suspStiffF: 38000, suspStiffR: 34000, antiRollF: 0.55, antiRollR: 0.40,
+                tireGripBase: 1.28, tireCamberF: -1.2, tireCamberR: -0.8,
+                optimalTireTemp: 88, tireCompound: 'sport',
+                dragCoefficient: 0.31, frontalArea: 1.79, downforceCoefficient: 0.10,
+                color: 0xffc300, accentColor: 0x111111
+            },
+            fd3s_late: {
+                id: 'fd3s_late',
+                name: 'RX-7 FD3S (RE雨宮仕様)',
+                driver: '高橋啟介',
+                hp: 450, peakHpRpm: 7000, torqueNm: 460, peakTorqueRpm: 5500,
+                redlineRpm: 7500, gaugeMaxRpm: 9000, maxRpm: 8000, idleRpm: 900,
+                aspirationType: 'TwinTurbo', boostPSI: 14, boostLagMs: 280,
+                gearRatios: { '-1': 3.48, '1': 3.48, '2': 2.02, '3': 1.39, '4': 1.00, '5': 0.76 },
+                finalDrive: 4.1, tireRadius: 0.32, maxGear: 5,
+                weight: 1200, frontWeightRatio: 0.49, driveType: 'FR',
+                wheelbase: 2.43, trackWidthAxle: 1.50,
+                topSpeedKMH: 318.5, accel0to97Sec: 3.820, accel0to161Sec: 8.150,
+                braking97Dist: 31.5, braking161Dist: 76.4,
+                lateralG97: 1.08, lateralG193: 1.15,
+                suspStiffF: 48000, suspStiffR: 44000, antiRollF: 0.65, antiRollR: 0.50,
+                tireGripBase: 1.45, tireCamberF: -2.0, tireCamberR: -1.2,
+                optimalTireTemp: 90, tireCompound: 'semiSlick',
+                dragCoefficient: 0.30, frontalArea: 1.82, downforceCoefficient: 0.22,
+                color: 0xffc300, accentColor: 0xecebe6, isReAmemiya: true
+            },
+            fd3s_project_d: {
+                id: 'fd3s_project_d',
+                name: 'RX-7 FD3S (RE雨宮仕様)',
+                driver: '高橋啟介',
+                hp: 450, peakHpRpm: 7000, torqueNm: 460, peakTorqueRpm: 5500,
+                redlineRpm: 7500, gaugeMaxRpm: 9000, maxRpm: 8000, idleRpm: 900,
+                aspirationType: 'TwinTurbo', boostPSI: 14, boostLagMs: 280,
+                gearRatios: { '-1': 3.48, '1': 3.48, '2': 2.02, '3': 1.39, '4': 1.00, '5': 0.76 },
+                finalDrive: 4.1, tireRadius: 0.32, maxGear: 5,
+                weight: 1200, frontWeightRatio: 0.49, driveType: 'FR',
+                wheelbase: 2.43, trackWidthAxle: 1.50,
+                topSpeedKMH: 318.5, accel0to97Sec: 3.820, accel0to161Sec: 8.150,
+                braking97Dist: 31.5, braking161Dist: 76.4,
+                lateralG97: 1.08, lateralG193: 1.15,
+                suspStiffF: 48000, suspStiffR: 44000, antiRollF: 0.65, antiRollR: 0.50,
+                tireGripBase: 1.45, tireCamberF: -2.0, tireCamberR: -1.2,
+                optimalTireTemp: 90, tireCompound: 'semiSlick',
+                dragCoefficient: 0.30, frontalArea: 1.82, downforceCoefficient: 0.22,
+                color: 0xffc300, accentColor: 0xecebe6, isReAmemiya: true
+            },
+            fc3s_early: {
+                id: 'fc3s_early',
+                name: 'RX-7 FC3S (白)',
+                driver: '高橋涼介',
+                hp: 260, peakHpRpm: 7000, torqueNm: 294, peakTorqueRpm: 4000,
+                redlineRpm: 7000, gaugeMaxRpm: 8000, maxRpm: 7000, idleRpm: 800,
+                aspirationType: 'Turbo', boostPSI: 7, boostLagMs: 400,
+                gearRatios: { '-1': 3.39, '1': 3.48, '2': 2.02, '3': 1.39, '4': 1.00, '5': 0.77 },
+                finalDrive: 3.91, tireRadius: 0.30, maxGear: 5,
+                weight: 1280, frontWeightRatio: 0.51, driveType: 'FR',
+                wheelbase: 2.43, trackWidthAxle: 1.44,
+                topSpeedKMH: 255.0, accel0to97Sec: 5.850, accel0to161Sec: 13.800,
+                braking97Dist: 38.5, braking161Dist: 96.0,
+                lateralG97: 0.94, lateralG193: 0.95,
+                suspStiffF: 32000, suspStiffR: 28000, antiRollF: 0.50, antiRollR: 0.35,
+                tireGripBase: 1.15, tireCamberF: -1.0, tireCamberR: -0.5,
+                optimalTireTemp: 85, tireCompound: 'sport',
+                dragCoefficient: 0.32, frontalArea: 1.82, downforceCoefficient: 0.08,
+                color: 0xf5f5f5, accentColor: 0x222222
+            },
+            fc3s_late: {
+                id: 'fc3s_late',
+                name: 'RX-7 FC3S (RE雨宮仕様)',
+                driver: '高橋涼介',
+                hp: 350, peakHpRpm: 7000, torqueNm: 382, peakTorqueRpm: 4500,
+                redlineRpm: 7000, gaugeMaxRpm: 8000, maxRpm: 7000, idleRpm: 850,
+                aspirationType: 'Turbo', boostPSI: 12, boostLagMs: 320,
+                gearRatios: { '-1': 3.39, '1': 3.48, '2': 2.02, '3': 1.39, '4': 1.00, '5': 0.77 },
+                finalDrive: 4.1, tireRadius: 0.31, maxGear: 5,
+                weight: 1230, frontWeightRatio: 0.50, driveType: 'FR',
+                wheelbase: 2.43, trackWidthAxle: 1.46,
+                topSpeedKMH: 285.0, accel0to97Sec: 4.800, accel0to161Sec: 10.900,
+                braking97Dist: 34.5, braking161Dist: 85.0,
+                lateralG97: 0.98, lateralG193: 1.01,
+                suspStiffF: 42000, suspStiffR: 38000, antiRollF: 0.60, antiRollR: 0.45,
+                tireGripBase: 1.10, tireCamberF: -1.5, tireCamberR: -0.8,
+                optimalTireTemp: 88, tireCompound: 'semiSlick',
+                dragCoefficient: 0.30, frontalArea: 1.80, downforceCoefficient: 0.18,
+                color: 0xffffff, accentColor: 0xffc300, isReAmemiya: true
+            },
+            gc8_sti: {
+                id: 'gc8_sti',
+                name: 'Impreza WRX STi GC8 (四驅版)',
+                driver: '藤原文太',
+                hp: 280, peakHpRpm: 6500, torqueNm: 343, peakTorqueRpm: 4000,
+                redlineRpm: 7900, gaugeMaxRpm: 9000, maxRpm: 8000, idleRpm: 800,
+                aspirationType: 'Turbo', boostPSI: 15, boostLagMs: 380,
+                gearRatios: { '-1': 3.55, '1': 3.08, '2': 1.83, '3': 1.31, '4': 0.97, '5': 0.76 },
+                finalDrive: 4.44, tireRadius: 0.31, maxGear: 5,
+                weight: 1250, frontWeightRatio: 0.58, driveType: 'AWD',
+                wheelbase: 2.52, trackWidthAxle: 1.46,
+                isAWD: true, awdSplit: 0.40,
+                topSpeedKMH: 260.0, accel0to97Sec: 4.650, accel0to161Sec: 11.200,
+                braking97Dist: 35.0, braking161Dist: 86.5,
+                lateralG97: 1.02, lateralG193: 1.05,
+                suspStiffF: 36000, suspStiffR: 34000, antiRollF: 0.55, antiRollR: 0.50,
+                tireGripBase: 1.10, tireCamberF: -1.0, tireCamberR: -0.5,
+                optimalTireTemp: 85, tireCompound: 'sport',
+                dragCoefficient: 0.35, frontalArea: 1.95, downforceCoefficient: 0.08,
+                color: 0x555452, accentColor: 0xffc300
+            }
+        };
+
+        const DEFAULT_CAR_MODEL = CAR_MODELS.ae86_race;
+
+        // AI 難度配置 (4 個等級: easy, normal, hard, legend)
+        const AI_DIFFICULTY = {
+            easy:   { aiSpeedMul: 0.72, aiCount: 3, label: '初級' },
+            normal: { aiSpeedMul: 0.86, aiCount: 3, label: '普通' },
+            hard:   { aiSpeedMul: 1.02, aiCount: 3, label: '高手' },
+            legend: { aiSpeedMul: 1.16, aiCount: 3, label: '傳說' }
+        };
+
+        let savedVib = localStorage.getItem('vibrationIntensity');
+        if (savedVib === '0.15' || savedVib === null) {
+            savedVib = '0.10';
+            localStorage.setItem('vibrationIntensity', '0.10');
+        }
+
+        function setTelemetryVisible(visible) {
+            const isVis = !!visible;
+            if (window.gameSettings) window.gameSettings.telemetryVisible = isVis;
+            try { localStorage.setItem('telemetryVisible', isVis ? 'true' : 'false'); } catch (e) {}
+            const panel = document.getElementById('telemetryPanel');
+            if (panel) {
+                panel.classList.toggle('active', isVis);
+                panel.style.display = isVis ? 'block' : 'none';
+            }
+        }
+        window.setTelemetryVisible = setTelemetryVisible;
+
+        let gameSettings = {
+            tireWearEnabled: localStorage.getItem('tireWearEnabled') === 'true' ? true : false,
+            telemetryVisible: localStorage.getItem('telemetryVisible') === 'true' ? true : false,
+            vibrationEnabled: localStorage.getItem('vibrationEnabled') !== 'false',
+            vibrationIntensity: parseFloat(savedVib),
+            transmissionMode: localStorage.getItem('transmissionMode') || 'auto',
+        };
+        window.gameSettings = gameSettings;
+        setTelemetryVisible(gameSettings.telemetryVisible);
+
+        let scene, camera, renderer, clock, container;
+        let trackCurve, trackSamples, trackTangents, trackNormals, trackCurvatures;
+        let trackWidthsLeft, trackWidthsRight;
+        let trackWidth = 14;
+        let selectedTrackKey = 'akina';
+        let selectedTrackDirection = 'forward';
+        let aiDifficulty = 'normal';
+        let gameMode = 'battle'; // 'battle' | 'time_attack'
+        let trackType = 'circuit';
+        let altRouteSamples = [];
+        let altRouteJunctions = [];
+
+        let cars = [];
+        let gameState = 'menu';
+        let raceTime = 0;
+        let countdownTimer = 3.5;
+        let animId = null;
+        let selectedCarKey = 'ae86_race';
+
+        let keys = {};
+        let keyPressed = {};
+
+        function consumePressedKey(key) {
+            if (!keyPressed[key]) return false;
+            keyPressed[key] = false;
+            return true;
+        }
+
+        // ===== 賽道取樣點最近距離查詢 Helper =====
+        function getClosestTrackInfo(x, z, hintIdx = 0, speed = 0, fineSearch = false) {
+            if (!trackSamples || trackSamples.length === 0) {
+                return { idx: 0, t: 0, dist: 0, lateral: 0, trackAngle: 0 };
+            }
+            const N = TRACK_SAMPLES;
+            let bestDistSq = Infinity;
+            let bestIdx = hintIdx;
+
+            const win = fineSearch ? Math.round(180 * (N / 600)) : Math.round(50 * (N / 600));
+            const startI = (hintIdx - win + N) % N;
+            const endI = (hintIdx + win) % N;
+
+            let i = startI;
+            while (true) {
+                const pt = trackSamples[i];
+                const dx = x - pt.x;
+                const dz = z - pt.z;
+                const dSq = dx * dx + dz * dz;
+                if (dSq < bestDistSq) {
+                    bestDistSq = dSq;
+                    bestIdx = i;
+                }
+                if (i === endI) break;
+                i = (i + 1) % N;
+            }
+
+            // 若與局部搜尋最佳點距離大於等於 40m（如行駛捷徑或大幅偏離），執行全域搜尋備援
+            if (Math.sqrt(bestDistSq) >= 40) {
+                bestDistSq = Infinity;
+                for (let j = 0; j < N; j++) {
+                    const pt = trackSamples[j];
+                    const dx = x - pt.x;
+                    const dz = z - pt.z;
+                    const dSq = dx * dx + dz * dz;
+                    if (dSq < bestDistSq) {
+                        bestDistSq = dSq;
+                        bestIdx = j;
+                    }
+                }
+            }
+
+            const pt = trackSamples[bestIdx];
+            const tan = trackTangents[bestIdx];
+            const norm = trackNormals[bestIdx];
+            const dx = x - pt.x;
+            const dz = z - pt.z;
+            const lateral = dx * norm.x + dz * norm.z;
+            const trackAngle = Math.atan2(tan.x, tan.z);
+
+            return {
+                idx: bestIdx,
+                t: bestIdx / N,
+                dist: Math.sqrt(bestDistSq),
+                lateral,
+                trackAngle
+            };
+        }
+
+        // ===== 賽道與環境生成 (委派至獨立模組 CyberRaceTrackBuilder) =====
+        let checkpointMeshes = [];
+        let checkpointIndices = [];
+
+        function createTrack() {
+            const trackData = TRACKS[selectedTrackKey];
+            let pts = trackData.points.map(p => p.clone());
+            if (selectedTrackDirection === 'reverse') {
+                pts.reverse();
+            }
+            trackType = trackData.type;
+            const isClosed = trackType === 'circuit';
+
+            trackCurve = new THREE.CatmullRomCurve3(pts, isClosed, 'centripetal', 0.5);
+            trackCurve.arcLengthDivisions = 5000;
+
+            trackSamples = [];
+            trackTangents = [];
+            trackNormals = [];
+            const sampleStep = 2;
+            for (let i = 0; i < TRACK_SAMPLES; i++) {
+                const u = i / TRACK_SAMPLES;
+                const pt = trackCurve.getPointAt(u);
+
+                const uPrev = isClosed
+                    ? ((i - sampleStep + TRACK_SAMPLES) % TRACK_SAMPLES) / TRACK_SAMPLES
+                    : Math.max(0, (i - sampleStep) / TRACK_SAMPLES);
+                const uNext = isClosed
+                    ? ((i + sampleStep) % TRACK_SAMPLES) / TRACK_SAMPLES
+                    : Math.min(1, (i + sampleStep) / TRACK_SAMPLES);
+
+                const pPrev = trackCurve.getPointAt(uPrev);
+                const pNext = trackCurve.getPointAt(uNext);
+                const dir = new THREE.Vector3().subVectors(pNext, pPrev).normalize();
+                if (dir.lengthSq() === 0) dir.set(0, 0, 1);
+
+                const tan = new THREE.Vector3(dir.x, 0, dir.z).normalize();
+                const normal = new THREE.Vector3(-tan.z, 0, tan.x);
+                trackSamples.push(pt);
+                trackTangents.push(tan);
+                trackNormals.push(normal);
+            }
+
+            trackCurvatures = new Float32Array(TRACK_SAMPLES);
+            const curvWindow = Math.round(10 * (TRACK_SAMPLES / 600));
+            for (let i = 0; i < TRACK_SAMPLES; i++) {
+                const i1 = (i - curvWindow + TRACK_SAMPLES) % TRACK_SAMPLES;
+                const i2 = (i + curvWindow) % TRACK_SAMPLES;
+                const t1 = trackTangents[i1];
+                const t2 = trackTangents[i2];
+                const dot = t1.x * t2.x + t1.z * t2.z;
+                trackCurvatures[i] = Math.acos(Math.max(-1, Math.min(1, dot))) * (180 / Math.PI);
+            }
+
+            // 保持賽道平滑等寬 (與 d.html 一致)，避免在過彎處產生忽窄忽寬的折角
+            const hw = trackWidth / 2;
+            trackWidthsLeft = new Float32Array(TRACK_SAMPLES).fill(hw);
+            trackWidthsRight = new Float32Array(TRACK_SAMPLES).fill(hw);
+
+            // 支線捷徑計算 (需在 CyberRaceTrackBuilder.init / buildTrackMesh / buildTrackEdges 前準備好)
+            altRouteSamples = [];
+            altRouteJunctions = [];
+            if (trackData && trackData.altRoutes && trackData.altRoutes.length > 0) {
+                trackData.altRoutes.forEach((ar, arIdx) => {
+                    let arPts = ar.points.map(p => (p instanceof THREE.Vector3 ? p.clone() : new THREE.Vector3(p[0], p[1], p[2])));
+                    if (selectedTrackDirection === 'reverse') arPts.reverse();
+                    const arCurve = new THREE.CatmullRomCurve3(arPts, false, 'centripetal');
+                    const count = Math.max(40, Math.round(TRACK_SAMPLES / 5));
+                    const samples = [];
+                    for (let i = 0; i <= count; i++) {
+                        const t = i / count;
+                        const pt = arCurve.getPoint(t);
+                        const tan = arCurve.getTangent(t).normalize();
+                        const norm = new THREE.Vector3(-tan.z, 0, tan.x);
+                        samples.push({ pt, tan, norm });
+                    }
+                    altRouteSamples.push(samples);
+
+                    // 入口/出口最接近的主線 idx
+                    const startPt = samples[0].pt;
+                    const endPt = samples[samples.length - 1].pt;
+                    let bestStartIdx = 0, minSD = Infinity;
+                    let bestEndIdx = 0, minED = Infinity;
+                    for (let i = 0; i < TRACK_SAMPLES; i++) {
+                        const ds = startPt.distanceTo(trackSamples[i]);
+                        if (ds < minSD) { minSD = ds; bestStartIdx = i; }
+                        const de = endPt.distanceTo(trackSamples[i]);
+                        if (de < minED) { minED = de; bestEndIdx = i; }
+                    }
+                    // 判斷入口與出口分支線相對於主線方向 (1=左/內側, -1=右/外側)
+                    const startBranchSample = samples[Math.min(5, Math.floor(samples.length * 0.2))];
+                    const startMainPt = trackSamples[bestStartIdx];
+                    const startMainNorm = trackNormals[bestStartIdx];
+                    const sLeft = new THREE.Vector3(startMainPt.x + startMainNorm.x * 10, startMainPt.y, startMainPt.z + startMainNorm.z * 10);
+                    const sRight = new THREE.Vector3(startMainPt.x - startMainNorm.x * 10, startMainPt.y, startMainPt.z - startMainNorm.z * 10);
+                    const startSide = startBranchSample.pt.distanceTo(sLeft) < startBranchSample.pt.distanceTo(sRight) ? 1 : -1;
+
+                    const endBranchSample = samples[Math.max(0, samples.length - 1 - Math.min(5, Math.floor(samples.length * 0.2)))];
+                    const endMainPt = trackSamples[bestEndIdx];
+                    const endMainNorm = trackNormals[bestEndIdx];
+                    const eLeft = new THREE.Vector3(endMainPt.x + endMainNorm.x * 10, endMainPt.y, endMainPt.z + endMainNorm.z * 10);
+                    const eRight = new THREE.Vector3(endMainPt.x - endMainNorm.x * 10, endMainPt.y, endMainPt.z - endMainNorm.z * 10);
+                    const endSide = endBranchSample.pt.distanceTo(eLeft) < endBranchSample.pt.distanceTo(eRight) ? 1 : -1;
+
+                    // 開口半徑：主線寬度的 1.5 倍，確保開口足夠大
+                    const openRadius = (trackWidth || 18) * 1.5;
+
+                    // 計算三不管路網交接點與切線點
+                    const N_alt = samples.length - 1;
+                    const S = startSide;
+                    const hw = (trackWidth || 18) / 2;
+
+                    // 1. 外線入口交點 (uEntryOuter, iEntryOuter)
+                    let uEntryOuter = 0;
+                    let iEntryOuter = bestStartIdx;
+                    let foundEntryOuter = false;
+                    for (let u = 0; u < Math.floor(N_alt / 2); u++) {
+                        const outerPt = new THREE.Vector3(
+                            samples[u].pt.x + samples[u].norm.x * hw * S,
+                            samples[u].pt.y,
+                            samples[u].pt.z + samples[u].norm.z * hw * S
+                        );
+                        let bestI = bestStartIdx;
+                        let minDI = Infinity;
+                        for (let i = -20; i <= 20; i++) {
+                            const idx = (bestStartIdx + i + TRACK_SAMPLES) % TRACK_SAMPLES;
+                            const pt = trackSamples[idx];
+                            const n = trackNormals[idx];
+                            const w = S === 1 ? trackWidthsLeft[idx] : trackWidthsRight[idx];
+                            const mPt = new THREE.Vector3(pt.x + n.x * w * S, pt.y, pt.z + n.z * w * S);
+                            const d = mPt.distanceTo(outerPt);
+                            if (d < minDI) {
+                                minDI = d;
+                                bestI = idx;
+                            }
+                        }
+                        const mainPt = trackSamples[bestI];
+                        const mainN = trackNormals[bestI];
+                        const mainW = S === 1 ? trackWidthsLeft[bestI] : trackWidthsRight[bestI];
+                        const dx = outerPt.x - mainPt.x, dz = outerPt.z - mainPt.z;
+                        const latDist = dx * mainN.x + dz * mainN.z;
+                        if (S * latDist >= mainW - 0.2) {
+                            uEntryOuter = u;
+                            iEntryOuter = bestI;
+                            foundEntryOuter = true;
+                            break;
+                        }
+                    }
+                    if (!foundEntryOuter) {
+                        uEntryOuter = 0;
+                        iEntryOuter = bestStartIdx;
+                    }
+
+                    // 2. 外線出口交點 (uExitOuter, iExitOuter)
+                    let uExitOuter = N_alt;
+                    let iExitOuter = bestEndIdx;
+                    let foundExitOuter = false;
+                    for (let u = N_alt; u > Math.floor(N_alt / 2); u--) {
+                        const outerPt = new THREE.Vector3(
+                            samples[u].pt.x + samples[u].norm.x * hw * S,
+                            samples[u].pt.y,
+                            samples[u].pt.z + samples[u].norm.z * hw * S
+                        );
+                        let bestI = bestEndIdx;
+                        let minDI = Infinity;
+                        for (let i = -20; i <= 20; i++) {
+                            const idx = (bestEndIdx + i + TRACK_SAMPLES) % TRACK_SAMPLES;
+                            const pt = trackSamples[idx];
+                            const n = trackNormals[idx];
+                            const w = S === 1 ? trackWidthsLeft[idx] : trackWidthsRight[idx];
+                            const mPt = new THREE.Vector3(pt.x + n.x * w * S, pt.y, pt.z + n.z * w * S);
+                            const d = mPt.distanceTo(outerPt);
+                            if (d < minDI) {
+                                minDI = d;
+                                bestI = idx;
+                            }
+                        }
+                        const mainPt = trackSamples[bestI];
+                        const mainN = trackNormals[bestI];
+                        const mainW = S === 1 ? trackWidthsLeft[bestI] : trackWidthsRight[bestI];
+                        const dx = outerPt.x - mainPt.x, dz = outerPt.z - mainPt.z;
+                        const latDist = dx * mainN.x + dz * mainN.z;
+                        if (S * latDist >= mainW - 0.2) {
+                            uExitOuter = u;
+                            iExitOuter = bestI;
+                            foundExitOuter = true;
+                            break;
+                        }
+                    }
+                    if (!foundExitOuter) {
+                        uExitOuter = N_alt;
+                        iExitOuter = bestEndIdx;
+                    }
+
+                    // 3. 入口 V 型分流尖端 (uEntryApex, iEntryApex)
+                    let uEntryApex = 0;
+                    let iEntryApex = bestStartIdx;
+                    let foundEntryApex = false;
+                    for (let u = 0; u < Math.floor(N_alt / 2); u++) {
+                        const innerPt = new THREE.Vector3(
+                            samples[u].pt.x - samples[u].norm.x * hw * S,
+                            samples[u].pt.y,
+                            samples[u].pt.z - samples[u].norm.z * hw * S
+                        );
+                        let bestI = bestStartIdx;
+                        let minDI = Infinity;
+                        for (let i = -10; i <= 35; i++) {
+                            const idx = (bestStartIdx + i + TRACK_SAMPLES) % TRACK_SAMPLES;
+                            const pt = trackSamples[idx];
+                            const n = trackNormals[idx];
+                            const w = S === 1 ? trackWidthsLeft[idx] : trackWidthsRight[idx];
+                            const mPt = new THREE.Vector3(pt.x + n.x * w * S, pt.y, pt.z + n.z * w * S);
+                            const d = mPt.distanceTo(innerPt);
+                            if (d < minDI) {
+                                minDI = d;
+                                bestI = idx;
+                            }
+                        }
+                        const mainPt = trackSamples[bestI];
+                        const mainN = trackNormals[bestI];
+                        const mainW = S === 1 ? trackWidthsLeft[bestI] : trackWidthsRight[bestI];
+                        const dx = innerPt.x - mainPt.x, dz = innerPt.z - mainPt.z;
+                        const latDist = dx * mainN.x + dz * mainN.z;
+                        if (S * latDist >= mainW - 0.8) {
+                            uEntryApex = u;
+                            iEntryApex = bestI;
+                            foundEntryApex = true;
+                            break;
+                        }
+                    }
+                    if (!foundEntryApex) {
+                        uEntryApex = Math.max(1, Math.floor(N_alt * 0.12));
+                        iEntryApex = (bestStartIdx + 8) % TRACK_SAMPLES;
+                    }
+
+                    // 4. 出口 V 型匯流尖端 (uExitApex, iExitApex)
+                    let uExitApex = N_alt;
+                    let iExitApex = bestEndIdx;
+                    let foundExitApex = false;
+                    for (let u = N_alt; u > Math.floor(N_alt / 2); u--) {
+                        const innerPt = new THREE.Vector3(
+                            samples[u].pt.x - samples[u].norm.x * hw * S,
+                            samples[u].pt.y,
+                            samples[u].pt.z - samples[u].norm.z * hw * S
+                        );
+                        let bestI = bestEndIdx;
+                        let minDI = Infinity;
+                        for (let i = -35; i <= 10; i++) {
+                            const idx = (bestEndIdx + i + TRACK_SAMPLES) % TRACK_SAMPLES;
+                            const pt = trackSamples[idx];
+                            const n = trackNormals[idx];
+                            const w = S === 1 ? trackWidthsLeft[idx] : trackWidthsRight[idx];
+                            const mPt = new THREE.Vector3(pt.x + n.x * w * S, pt.y, pt.z + n.z * w * S);
+                            const d = mPt.distanceTo(innerPt);
+                            if (d < minDI) {
+                                minDI = d;
+                                bestI = idx;
+                            }
+                        }
+                        const mainPt = trackSamples[bestI];
+                        const mainN = trackNormals[bestI];
+                        const mainW = S === 1 ? trackWidthsLeft[bestI] : trackWidthsRight[bestI];
+                        const dx = innerPt.x - mainPt.x, dz = innerPt.z - mainPt.z;
+                        const latDist = dx * mainN.x + dz * mainN.z;
+                        if (S * latDist >= mainW - 0.8) {
+                            uExitApex = u;
+                            iExitApex = bestI;
+                            foundExitApex = true;
+                            break;
+                        }
+                    }
+                    if (!foundExitApex) {
+                        uExitApex = Math.min(N_alt - 1, Math.floor(N_alt * 0.88));
+                        iExitApex = (bestEndIdx - 8 + TRACK_SAMPLES) % TRACK_SAMPLES;
+                    }
+
+                    altRouteJunctions.push({
+                        arIdx,
+                        startPt,
+                        endPt,
+                        startMainIdx: bestStartIdx,
+                        endMainIdx: bestEndIdx,
+                        startSide,
+                        endSide,
+                        openRadius,
+                        overlapRadius: (trackWidth || 18) * 1.2,
+                        uEntryOuter,
+                        iEntryOuter,
+                        uExitOuter,
+                        iExitOuter,
+                        uEntryApex,
+                        iEntryApex,
+                        uExitApex,
+                        iExitApex,
+                    });
+                });
+            }
+
+            // 初始化 TrackBuilder Context 並建造 3D 賽道
+            CyberRaceTrackBuilder.init({
+                scene, THREE, renderer,
+                trackSamples, trackNormals, trackTangents, trackCurvatures,
+                trackWidthsLeft, trackWidthsRight,
+                trackType, trackWidth, TRACK_SAMPLES, CHECKPOINT_RATIOS,
+                selectedTrackKey, selectedTrackDirection,
+                altRouteSamples, altRouteJunctions, trackCurve, TRACKS
+            });
+            CyberRaceTrackBuilder.buildTrackMesh();
+            CyberRaceTrackBuilder.buildTrackEdges();
+            CyberRaceTrackBuilder.buildAltRoutes();
+            CyberRaceTrackBuilder.buildStartFinishLine();
+            if (trackType === 'linear') {
+                const cpResult = CyberRaceTrackBuilder.buildCheckpoints();
+                checkpointMeshes = cpResult.checkpointMeshes;
+                checkpointIndices = cpResult.checkpointIndices;
+            } else {
+                checkpointMeshes = [];
+                checkpointIndices = [];
+            }
+            CyberRaceTrackBuilder.buildEnvironment();
+
+            // 初始化 HUD Context
+            CyberRaceHUD.init({
+                cars,
+                trackSamples, trackNormals, trackTangents,
+                trackWidthsLeft, trackWidthsRight,
+                trackType, trackWidth, TRACK_SAMPLES, CHECKPOINT_RATIOS,
+                altRouteSamples,
+                selectedTrackKey, selectedTrackDirection, TRACKS,
+                gameSettings,
+                getGameState: () => gameState,
+                getGameMode: () => gameMode,
+                getTransmissionMode: () => CyberRaceInputHaptics.getTransmissionMode()
+            });
+        }
+
+        function updateCheckpoints(car) {
+            if (car.finished || trackType === 'circuit') return;
+            const info = getClosestTrackInfo(car.mesh.position.x, car.mesh.position.z, Math.round(car.lastT * TRACK_SAMPLES));
+            const currentT = info.t;
+
+            for (let i = 0; i < CHECKPOINT_RATIOS.length; i++) {
+                const cpRatio = CHECKPOINT_RATIOS[i];
+                if (!car.checkpointsPassed[i] && currentT >= cpRatio) {
+                    car.checkpointsPassed[i] = true;
+                    car.checkpointTimes[i] = raceTime;
+
+                    if (car.isPlayer) {
+                        CyberRaceHUD.triggerCPFeedback(i, raceTime, selectedTrackKey, selectedTrackDirection);
+                    }
+                }
+            }
+        }
+
+        function updateLapProgress(car) {
+            const info = getClosestTrackInfo(car.mesh.position.x, car.mesh.position.z, Math.round(car.lastT * TRACK_SAMPLES));
+            const prevT = car.lastT;
+            const currentT = info.t;
+            car.lastT = currentT;
+
+            if (trackType === 'linear') {
+                car.totalProgress = Math.max(car.totalProgress || 0, currentT);
+            } else {
+                // 環道賽 (circuit)
+                if (prevT > 0.80 && currentT < 0.20 && car.lapReady) {
+                    if (car.lap === 0) {
+                        // 首次穿過起跑線：進入第 1 圈
+                        car.lap = 1;
+                        car.started = true;
+                        car.currentLapStartTime = raceTime;
+                        car.lapReady = false;
+                        if (car.isPlayer) {
+                            CyberRaceHUD.triggerLapBanner(1, 0, TOTAL_LAPS, false);
+                        }
+                    } else {
+                        // 完成當前圈
+                        const lapDuration = raceTime - (car.currentLapStartTime || 0);
+                        if (!car.lapTimes) car.lapTimes = [];
+                        car.lapTimes.push(lapDuration);
+                        car.currentLapStartTime = raceTime;
+
+                        if (car.lap >= TOTAL_LAPS) {
+                            // 完成最後一圈（例如第 3 圈），穿過終點線 -> 完賽！
+                            car.finished = true;
+                            car.finishTime = raceTime;
+                            car.totalProgress = TOTAL_LAPS;
+                            car.lapReady = false;
+                            if (car.isPlayer) {
+                                CyberRaceHUD.triggerLapBanner(car.lap, lapDuration, TOTAL_LAPS, true);
+                                setTimeout(() => showRaceResult(), 600);
+                            }
+                        } else {
+                            // 進入下一圈
+                            car.lap++;
+                            car.lapReady = false;
+                            if (car.isPlayer) {
+                                CyberRaceHUD.triggerLapBanner(car.lap, lapDuration, TOTAL_LAPS, false);
+                            }
+                        }
+                    }
+                } else if (currentT > 0.35 && currentT < 0.65) {
+                    // 通過賽道中段，重新武裝計圈判定，防止起終點線重複觸發
+                    car.lapReady = true;
+                }
+
+                if (car.finished) {
+                    car.totalProgress = TOTAL_LAPS;
+                } else if (car.lap === 0) {
+                    // 生成在起跑線後方時為 0 圈，進度為負值（接近起跑線 1.0 時趨近於 0）
+                    car.totalProgress = currentT > 0.7 ? (currentT - 1.0) : 0;
+                } else {
+                    // 正在跑第 car.lap 圈 (1..TOTAL_LAPS)
+                    car.totalProgress = (car.lap - 1) + currentT;
+                }
+            }
+            return info;
+        }
+
+        // ===== 倒數計時 =====
+        function startCountdown() {
+            gameState = 'countdown';
+            countdownTimer = 3.5;
+            raceTime = 0;
+            CyberRaceCamera.resetHeading(cars[0]);
+
+            const overlay = document.getElementById('countdownOverlay');
+            const text = document.getElementById('countdownText');
+            overlay.classList.add('active');
+            text.textContent = '3';
+
+            cars.forEach(c => {
+                c.speed = 0;
+                c.checkpointsPassed = [false, false, false];
+                c.checkpointTimes = [0, 0, 0];
+                c.finished = false;
+                c.finishTime = 0;
+                c.lap = 0;
+                c.lapReady = true;
+                c.lapTimes = [];
+                c.currentLapStartTime = 0;
+                c.started = false;
+                c.totalProgress = trackType === 'circuit' ? (c.lastT - 1.0) : c.lastT;
+                c.isDrifting = false;
+                c.driftCharge = 0;
+                c.nitroEnergy = 0;
+                c.nitroActive = false;
+            });
+
+            try {
+                CyberRaceHUD.updateHUD(0, cars, raceTime, PHYSICS, TOTAL_LAPS, trackType, selectedTrackKey, selectedTrackDirection, TRACKS);
+            } catch (e) {}
+        }
+
+        function updateCountdown(dt) {
+            countdownTimer -= dt;
+            const overlay = document.getElementById('countdownOverlay');
+            const text = document.getElementById('countdownText');
+
+            if (countdownTimer > 2.5) {
+                text.textContent = '3';
+                text.className = 'countdown-text';
+                text.style.animation = 'none';
+                void text.offsetWidth;
+                text.style.animation = 'countPulse 0.8s ease-out';
+            } else if (countdownTimer > 1.5) {
+                text.textContent = '2';
+                text.className = 'countdown-text';
+            } else if (countdownTimer > 0.5) {
+                text.textContent = '1';
+                text.className = 'countdown-text';
+            } else if (countdownTimer > -0.3) {
+                text.textContent = 'GO!';
+                text.className = 'countdown-text go';
+            } else {
+                overlay.classList.remove('active');
+                gameState = 'playing';
+            }
+        }
+
+        // ===== 終點檢查與結算 =====
+        function checkFinish() {
+            let allFinished = true;
+
+            for (const car of cars) {
+                if (car.finished) continue;
+                allFinished = false;
+                if (trackType === 'linear') {
+                    if (raceTime > 5.0 && car.totalProgress >= 0.995) {
+                        car.totalProgress = 1.0;
+                        car.finished = true;
+                        car.finishTime = raceTime;
+                        if (car.isPlayer) {
+                            setTimeout(() => showRaceResult(), 600);
+                        }
+                    }
+                }
+            }
+
+            if (allFinished && gameState === 'playing') {
+                gameState = 'finished';
+            }
+        }
+
+        function showRaceResult() {
+            gameState = 'finished';
+            if (animId) cancelAnimationFrame(animId);
+
+            const player = cars[0];
+            const sorted = [...cars].sort((a, b) => {
+                if (a.finished && !b.finished) return -1;
+                if (!a.finished && b.finished) return 1;
+                if (a.finished && b.finished) return a.finishTime - b.finishTime;
+                return b.totalProgress - a.totalProgress;
+            });
+
+            const position = sorted.findIndex(c => c === player) + 1;
+            const panel = document.getElementById('raceResultPanel');
+            const titleEl = document.getElementById('resultTitle');
+            const posEl = document.getElementById('resultPosition');
+            const statsEl = document.getElementById('resultStats');
+
+            if (gameMode === 'time_attack') {
+                titleEl.textContent = '⏱️ RECORD FINISH!';
+                titleEl.className = 'result-title win';
+                posEl.textContent = 'FINISH';
+            } else {
+                if (position === 1) {
+                    titleEl.textContent = 'VICTORY!';
+                    titleEl.className = 'result-title win';
+                } else {
+                    titleEl.textContent = 'FINISH!';
+                    titleEl.className = 'result-title lose';
+                }
+                const suffixes = ['1st', '2nd', '3rd', '4th'];
+                posEl.textContent = suffixes[position - 1] || '4th';
+            }
+
+            const mins = Math.floor(player.finishTime / 60);
+            const secs = Math.floor(player.finishTime % 60);
+            const ms = Math.floor((player.finishTime % 1) * 100);
+
+            let cpRowsHTML = '';
+            if (trackType === 'circuit') {
+                const lapTimes = player.lapTimes || [];
+                const minLap = lapTimes.length > 0 ? Math.min(...lapTimes) : 0;
+                for (let i = 0; i < TOTAL_LAPS; i++) {
+                    const lTime = lapTimes[i] || 0;
+                    let tStr = '--:--.-';
+                    let splitStr = '--';
+                    let isFast = true;
+                    if (lTime > 0) {
+                        const lMins = Math.floor(lTime / 60);
+                        const lSecs = Math.floor(lTime % 60);
+                        const lMS = Math.floor((lTime % 1) * 10);
+                        tStr = `${lMins.toString().padStart(2, '0')}:${lSecs.toString().padStart(2, '0')}.${lMS}`;
+                        if (lTime === minLap) {
+                            splitStr = 'BEST';
+                            isFast = true;
+                        } else {
+                            const diff = lTime - minLap;
+                            splitStr = `+${diff.toFixed(1)}s`;
+                            isFast = false;
+                        }
+                    }
+                    cpRowsHTML += `<div class="cp-row"><span>第 ${i + 1} 圈</span><span>${tStr}</span><span class="${isFast ? 'fast' : 'slow'}">${splitStr}</span></div>`;
+                }
+                const bestKey = `cyberRacer_best_circuit_lap_${selectedTrackKey}_${selectedTrackDirection}`;
+                const prevBestLap = parseFloat(localStorage.getItem(bestKey) || '0');
+                if (minLap > 0 && (prevBestLap === 0 || minLap < prevBestLap)) {
+                    localStorage.setItem(bestKey, minLap.toString());
+                }
+            } else {
+                const cpLabels = ['區間1 (21%)', '區間2 (45%)', '區間3 (70%)', '區間4 (完賽)'];
+                for (let i = 0; i < CHECKPOINT_RATIOS.length; i++) {
+                    const cpTime = player.checkpointTimes[i];
+                    if (cpTime > 0) {
+                        const cpMins = Math.floor(cpTime / 60);
+                        const cpSecs = Math.floor(cpTime % 60);
+                        const cpMS = Math.floor((cpTime % 1) * 10);
+                        const tStr = `${cpMins.toString().padStart(2, '0')}:${cpSecs.toString().padStart(2, '0')}.${cpMS}`;
+                        const bestKey = `cyberRacer_best_cp_${selectedTrackKey}_${selectedTrackDirection}_${i}`;
+                        const prevBestCP = parseFloat(localStorage.getItem(bestKey) || '0');
+                        let splitStr = '--';
+                        let isFast = true;
+                        if (prevBestCP > 0) {
+                            const diff = cpTime - prevBestCP;
+                            splitStr = diff <= 0 ? `${diff.toFixed(2)}s` : `+${diff.toFixed(2)}s`;
+                            isFast = diff <= 0;
+                        }
+                        cpRowsHTML += `<div class="cp-row"><span>${cpLabels[i]}</span><span>${tStr}</span><span class="${isFast ? 'fast':'slow'}">${splitStr}</span></div>`;
+                    }
+                }
+                if (player.finished && player.finishTime > 0) {
+                    const cpMins = Math.floor(player.finishTime / 60);
+                    const cpSecs = Math.floor(player.finishTime % 60);
+                    const cpMS = Math.floor((player.finishTime % 1) * 10);
+                    const tStr = `${cpMins.toString().padStart(2, '0')}:${cpSecs.toString().padStart(2, '0')}.${cpMS}`;
+                    const bestKey = `cyberRacer_best_cp_${selectedTrackKey}_${selectedTrackDirection}_3`;
+                    const prevBestCP = parseFloat(localStorage.getItem(bestKey) || '0');
+                    let splitStr = '--';
+                    let isFast = true;
+                    if (prevBestCP > 0) {
+                        const diff = player.finishTime - prevBestCP;
+                        splitStr = diff <= 0 ? `${diff.toFixed(2)}s` : `+${diff.toFixed(2)}s`;
+                        isFast = diff <= 0;
+                    }
+                    if (prevBestCP === 0 || player.finishTime < prevBestCP) {
+                        localStorage.setItem(bestKey, player.finishTime.toString());
+                    }
+                    cpRowsHTML += `<div class="cp-row"><span>${cpLabels[3]}</span><span>${tStr}</span><span class="${isFast ? 'fast':'slow'}">${splitStr}</span></div>`;
+                }
+            }
+
+            const suffixes = ['1st', '2nd', '3rd', '4th'];
+            const modeStatHTML = (gameMode === 'time_attack')
+                ? `<div class="result-stat">
+                       <span class="result-stat-label">模式</span>
+                       <span class="result-stat-value" style="color:var(--neon-yellow);">TIME ATTACK (計時賽)</span>
+                   </div>`
+                : `<div class="result-stat">
+                       <span class="result-stat-label">最終名次</span>
+                       <span class="result-stat-value">${suffixes[position - 1] || '4th'}</span>
+                   </div>
+                   <div class="result-stat">
+                       <span class="result-stat-label">AI難度</span>
+                       <span class="result-stat-value">${(AI_DIFFICULTY[aiDifficulty] || AI_DIFFICULTY.normal).label}</span>
+                   </div>`;
+
+            const tableTitle = trackType === 'circuit' ? '⏱️ 單圈成績 (LAP TIMES)' : '⏱️ 檢查點分段成績 (CHECKPOINTS)';
+            const tableCol1 = trackType === 'circuit' ? '圈數' : '分段';
+            statsEl.innerHTML = `
+                <div class="result-cp-table">
+                    <div class="result-cp-title">${tableTitle}</div>
+                    <div class="cp-row header"><span>${tableCol1}</span><span>時間</span><span>分段差</span></div>
+                    ${cpRowsHTML}
+                </div>
+                
+                <div class="result-stat">
+                    <span class="result-stat-label">完賽時間</span>
+                    <span class="result-stat-value">${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}</span>
+                </div>
+                ${modeStatHTML}
+                <div class="result-stat">
+                    <span class="result-stat-label">賽道</span>
+                    <span class="result-stat-value">${TRACKS[selectedTrackKey].name}</span>
+                </div>
+            `;
+
+            panel.classList.add('active');
+        }
+
+        // ===== 主循環 (Animation Loop) =====
+        function animate() {
+            animId = requestAnimationFrame(animate);
+            const dt = Math.min(clock.getDelta(), 0.05);
+
+            if (gameState === 'countdown') {
+                updateCountdown(dt);
+                CyberRaceCamera.update(cars[0], dt, PHYSICS);
+                CyberRaceHUD.updateHUD(dt, cars, raceTime, PHYSICS, TOTAL_LAPS, trackType, selectedTrackKey, selectedTrackDirection, TRACKS);
+                renderer.render(scene, camera);
+                return;
+            }
+
+            if (gameState !== 'playing') {
+                renderer.render(scene, camera);
+                return;
+            }
+
+            raceTime += dt;
+
+            // 輪詢手把輸入
+            const gp = CyberRaceInputHaptics.pollGamepad(gameState, cars, gameSettings);
+
+            const vehicleContext = {
+                keys,
+                gamepadInput: gp,
+                gameState,
+                transmissionMode: CyberRaceInputHaptics.getTransmissionMode(),
+                CAR_MODELS,
+                PHYSICS,
+                TIRE_COMPOUNDS,
+                CyberRacePhysics,
+                CyberRaceInputHaptics,
+                CyberRaceCamera,
+                gameSettings,
+                trackCurve,
+                trackType,
+                trackWidth,
+                trackSamples,
+                trackTangents,
+                trackNormals,
+                trackWidthsLeft,
+                trackWidthsRight,
+                TRACK_SAMPLES,
+                AI_DIFFICULTY,
+                aiDifficulty,
+                altRouteSamples,
+                altRouteJunctions,
+                cars,
+                THREE,
+                getClosestTrackInfo,
+                consumePressedKey,
+                togglePause
+            };
+
+            // 更新所有車輛
+            for (const car of cars) {
+                if (car.finished) continue;
+
+                if (car.isPlayer) {
+                    CyberRaceVehicleDynamics.updatePhysics(car, dt, vehicleContext);
+                } else {
+                    CyberRaceVehicleDynamics.updateAI(car, dt, vehicleContext);
+                }
+
+                CyberRaceVehicleDynamics.handleCollisions(car, vehicleContext);
+                updateCheckpoints(car);
+                const info = updateLapProgress(car);
+
+                if (car.isPlayer && Math.abs(car.speed) > 0.3) {
+                    const wrongWay = (Math.abs(CyberRaceVehicleDynamics.angleDiff(info.trackAngle, car.velAngle)) > Math.PI * 0.88) && (info.dist > 18);
+                    if (wrongWay) {
+                        car.speed *= Math.max(0, 1 - dt * 1.5);
+                        car.velAngle = CyberRaceVehicleDynamics.moveAngleTowards(car.velAngle, info.trackAngle, dt * 2.5);
+                        car.heading = CyberRaceVehicleDynamics.moveAngleTowards(car.heading, info.trackAngle, dt * 2.0);
+                    }
+                }
+
+                // 四輪獨立胎煙與噴射火焰發射 (非驅動輪無動力輪過彎絕不冒煙，僅在重踩煞車時冒煙)
+                if (car.isPlayer) {
+                    const driveType = (car.model && car.model.driveType) || 'FR';
+                    const playerBrake = car.currentBrakeInput || 0;
+
+                    for (let w = 0; w < 4; w++) {
+                        const tire = car.tires[w];
+                        if (!tire) continue;
+
+                        const isFront = w < 2;
+                        const isDrivenWheel = isFront
+                            ? (driveType === 'FF' || driveType === 'AWD')
+                            : (driveType === 'FR' || driveType === 'MR' || driveType === 'AWD');
+
+                        let slip = tire.slipMag || 0;
+
+                        if (!isDrivenWheel) {
+                            if (playerBrake < 0.25) continue; // 未踩煞車時，非驅動輪（如後驅車前輪）100% 絕不冒煙！
+                            slip = playerBrake * 0.8;
+                        } else {
+                            if (slip < 0.15) continue; // 驅動輪正常發煙
+                        }
+
+                        const avgTemp = (tire.temperature.inner + tire.temperature.mid + tire.temperature.outer) / 3;
+                        let tempFactor = Math.max(0.1, (avgTemp - 50.0) / 45.0);
+                        if (avgTemp < 65.0) tempFactor *= 0.3;
+
+                        const normalLoadPerWheel = ((car.model && car.model.weight) || 1000) * 9.81 / 4;
+                        const loadFactor = Math.min(2.0, Math.max(0.6, (tire.load || normalLoadPerWheel) / normalLoadPerWheel));
+                        const smokeIntensity = slip * loadFactor * tempFactor;
+
+                        if (smokeIntensity >= 0.25) {
+                            const smokeTier = smokeIntensity >= 1.4 ? 3 : (smokeIntensity >= 0.7 ? 2 : 1);
+                            CyberRaceParticles.emitTireSmokePerWheel(car.mesh.position, car.heading, w, smokeTier);
+                        }
+                    }
+
+                    if (car.boostTimer > 0 || car.nitroActive) {
+                        CyberRaceParticles.emitBoostFlame(car.mesh.position, car.heading);
+                    }
+                }
+            }
+
+            CyberRaceParticles.update(dt);
+            checkFinish();
+            CyberRaceCamera.update(cars[0], dt, PHYSICS);
+            CyberRaceHUD.updateHUD(dt, cars, raceTime, PHYSICS, TOTAL_LAPS, trackType, selectedTrackKey, selectedTrackDirection, TRACKS);
+
+            renderer.render(scene, camera);
+        }
+
+        // ===== 初始化與生命週期 =====
+        function init(containerEl) {
+            container = containerEl;
+            const w = (container && container.clientWidth > 0) ? container.clientWidth : window.innerWidth;
+            const h = (container && container.clientHeight > 0) ? container.clientHeight : window.innerHeight;
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x121211);
+            scene.fog = new THREE.Fog(0x121211, 150, 380);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(w, h);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = false;
+            container.appendChild(renderer.domElement);
+
+            camera = new THREE.PerspectiveCamera(70, w / h, 0.1, 500);
+            camera.position.set(0, 30, 50);
+
+            CyberRaceCamera.init(camera, THREE);
+
+            clock = new THREE.Clock(false);
+
+            window.addEventListener('keydown', e => {
+                const k = e.key.toLowerCase();
+                if (!keys[k]) keyPressed[k] = true;
+                keys[k] = true;
+                if (k === 'v' && gameState === 'playing') {
+                    CyberRaceCamera.cycleMode(cars[0]);
+                }
+                if (e.key === ' ') e.preventDefault();
+            });
+            window.addEventListener('keyup', e => {
+                keys[e.key.toLowerCase()] = false;
+            });
+
+            window.addEventListener('resize', onResize);
+        }
+
+        function onResize() {
+            if (!renderer || !camera || !container) return;
+            const w = (container.clientWidth > 0) ? container.clientWidth : window.innerWidth;
+            const h = (container.clientHeight > 0) ? container.clientHeight : window.innerHeight;
+            if (w <= 0 || h <= 0) return;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        }
+
+        async function ensureCarInEngine(carKey) {
+            if (!carKey) return;
+            try {
+                const res = await fetch(`./data/cars/${carKey}.json`);
+                if (res.ok) {
+                    const carJson = await res.json();
+                    const existing = CAR_MODELS[carKey] || {};
+                    CAR_MODELS[carKey] = {
+                        ...existing,
+                        ...carJson,
+                        id: carJson.id || carKey,
+                        name: carJson.name || existing.name || carKey,
+                        manufacturer: carJson.manufacturer || carJson.brand || (carKey.startsWith('ae') ? 'TOYOTA' : (carKey.startsWith('fd') || carKey.startsWith('fc') ? 'MAZDA' : 'SUBARU')),
+                        year: carJson.year || existing.year || 1998,
+                        driveType: carJson.driveType || carJson.drivetrain || existing.driveType || 'FR',
+                        isAWD: carJson.driveType === 'AWD' || !!carJson.isAWD || !!existing.isAWD,
+                        awdSplit: carJson.awdSplit !== undefined ? carJson.awdSplit : (existing.awdSplit !== undefined ? existing.awdSplit : 0.5),
+                        hp: carJson.hp || existing.hp || 280,
+                        torqueNm: carJson.torqueNm || existing.torqueNm || (carJson.hp ? Math.round(carJson.hp * 1.35) : 350),
+                        weight: carJson.weight ? (typeof carJson.weight === 'string' ? parseInt(carJson.weight) : carJson.weight) : (existing.weight || 1200),
+                        frontWeightRatio: carJson.frontWeightRatio || existing.frontWeightRatio || 0.53,
+                        wheelbase: carJson.wheelbase || existing.wheelbase || 2.40,
+                        trackWidthAxle: carJson.trackWidthAxle || existing.trackWidthAxle || 1.45,
+                        dragCoefficient: carJson.dragCoefficient || existing.dragCoefficient || 0.32,
+                        downforceCoefficient: carJson.downforceCoefficient !== undefined ? carJson.downforceCoefficient : (existing.downforceCoefficient || 0.15),
+                        frontalArea: carJson.frontalArea || existing.frontalArea || 1.80,
+                        suspStiffF: carJson.suspStiffF || existing.suspStiffF || 36000,
+                        suspStiffR: carJson.suspStiffR || existing.suspStiffR || 32000,
+                        antiRollF: carJson.antiRollF || existing.antiRollF || 0.50,
+                        antiRollR: carJson.antiRollR || existing.antiRollR || 0.35,
+                        optimalTireTemp: carJson.optimalTireTemp || existing.optimalTireTemp || 88,
+                        peakHpRpm: carJson.peakHpRpm || existing.peakHpRpm || 7000,
+                        peakTorqueRpm: carJson.peakTorqueRpm || existing.peakTorqueRpm || 5500,
+                        idleRpm: carJson.idleRpm || existing.idleRpm || 900,
+                        redlineRpm: carJson.redlineRpm || existing.redlineRpm || 7500,
+                        maxRpm: carJson.maxRpm || existing.maxRpm || 8000,
+                        gaugeMaxRpm: carJson.gaugeMaxRpm || existing.gaugeMaxRpm || 9000,
+                        maxGear: carJson.maxGear || existing.maxGear || 5,
+                        accel0to97Sec: carJson.accel0to97Sec || existing.accel0to97Sec || 4.2,
+                        braking97Dist: carJson.braking97Dist || existing.braking97Dist || 32.0,
+                        topSpeedKMH: carJson.topSpeedKMH || existing.topSpeedKMH || 280,
+                        finalDrive: carJson.finalDrive || existing.finalDrive || 4.1,
+                        gearRatios: carJson.gearRatios || existing.gearRatios || { '-1': 3.48, '1': 3.48, '2': 2.02, '3': 1.39, '4': 1.0, '5': 0.76 },
+                        tireCompound: carJson.tireCompound || existing.tireCompound || 'sport',
+                        tireGripBase: carJson.tireGripBase || existing.tireGripBase || 1.25,
+                        tireCamberF: carJson.tireCamberF || existing.tireCamberF || -1.5,
+                        tireCamberR: carJson.tireCamberR || existing.tireCamberR || -1.0,
+                        tireRadius: carJson.tireRadius || existing.tireRadius || 0.31,
+                        color: carJson.color || existing.color || '#ffc300',
+                        isReAmemiya: carJson.isReAmemiya !== undefined ? !!carJson.isReAmemiya : !!existing.isReAmemiya,
+                        isCarbonHood: carJson.isCarbonHood !== undefined ? !!carJson.isCarbonHood : !!existing.isCarbonHood,
+                        aspiration: carJson.aspirationType || carJson.aspiration || existing.aspiration || 'TwinTurbo',
+                        aspirationType: carJson.aspirationType || carJson.aspiration || existing.aspirationType || 'TwinTurbo',
+                        boostPSI: carJson.boostPSI !== undefined ? carJson.boostPSI : (existing.boostPSI || 14),
+                        boostLagMs: carJson.boostLagMs !== undefined ? carJson.boostLagMs : (existing.boostLagMs || 280)
+                    };
+                }
+            } catch (e) {
+                console.warn(`Could not load ./data/cars/${carKey}.json:`, e);
+            }
+        }
+
+        async function ensureAllCarsLoaded(playerCarKey) {
+            const keysToLoad = [playerCarKey, 'ae86_race', 'ae86_stock', 'fd3s_late', 'fd3s_early', 'fc3s_early', 'fc3s_late', 'gc8_sti'].filter(Boolean);
+            await Promise.all(keysToLoad.map(k => ensureCarInEngine(k)));
+        }
+
+        async function ensureTrackInEngine(trackKey) {
+            if (!TRACKS[trackKey]) {
+                const fetchFn = (typeof loadTrackData === 'function') ? loadTrackData : (window.loadTrackData || (async (id) => {
+                    try {
+                        const res = await fetch(`./data/tracks/${id}.json`);
+                        if (res.ok) return await res.json();
+                    } catch (e) {}
+                    return null;
+                }));
+                const fullTrack = await fetchFn(trackKey);
+                if (fullTrack && fullTrack.points && fullTrack.points.length > 1) {
+                    let altRoutes = [];
+                    if (fullTrack.altRoutes && fullTrack.altRoutes.length > 0) {
+                        altRoutes = fullTrack.altRoutes.map(route => ({
+                            ...route,
+                            points: route.points.map(p => (p instanceof THREE.Vector3 ? p : new THREE.Vector3(p[0], p[1], p[2])))
+                        }));
+                    }
+                    TRACKS[trackKey] = {
+                        name: fullTrack.name,
+                        nameEn: fullTrack.nameEn || fullTrack.name,
+                        type: (fullTrack.type === 'Circuit' || fullTrack.type === 'circuit') ? 'circuit' : 'linear',
+                        length: fullTrack.length || '5000m',
+                        stars: fullTrack.difficulty || 3,
+                        trackWidth: fullTrack.trackWidth || 14,
+                        points: fullTrack.points.map(p => (p instanceof THREE.Vector3 ? p : new THREE.Vector3(p[0], p[1], p[2]))),
+                        altRoutes: altRoutes
+                    };
+                }
+            }
+        }
+
+        async function start(trackKey = 'akina', aiDiff = 'normal', direction = 'forward', carKey = null, mode = 'battle') {
+            if (animId) {
+                cancelAnimationFrame(animId);
+                animId = null;
+            }
+            gameMode = mode || 'battle';
+            if (carKey) selectedCarKey = carKey;
+            selectedTrackDirection = direction || 'forward';
+            selectedTrackKey = trackKey || 'akina';
+            aiDifficulty = aiDiff || 'normal';
+
+            await ensureTrackInEngine(selectedTrackKey);
+            await ensureAllCarsLoaded(selectedCarKey);
+
+            const trackData = TRACKS[selectedTrackKey] || TRACKS.akina;
+            trackWidth = trackData.trackWidth || 14;
+            trackType = trackData.type;
+            const diffConfig = AI_DIFFICULTY[aiDifficulty] || AI_DIFFICULTY.normal;
+            const aiCount = (gameMode === 'time_attack') ? 0 : diffConfig.aiCount;
+
+            while (scene.children.length > 0) {
+                scene.remove(scene.children[0]);
+            }
+            cars = [];
+            raceTime = 0;
+            keys = {};
+            keyPressed = {};
+
+            createTrack();
+            CyberRaceParticles.init(scene, THREE);
+
+            const startPositions = trackType === 'linear' ? [
+                { t: 0.001, lateral: (gameMode === 'time_attack' ? 0 : 2) },
+                { t: 0.003, lateral: -2 },
+                { t: 0.005, lateral: 2 },
+                { t: 0.007, lateral: -2 },
+            ] : [
+                { t: 0.998, lateral: (gameMode === 'time_attack' ? 0 : 2) },
+                { t: 0.994, lateral: -2 },
+                { t: 0.990, lateral: 2 },
+                { t: 0.986, lateral: -2 },
+            ];
+
+            const carCreationCtx = {
+                selectedCarKey,
+                CAR_MODELS,
+                DEFAULT_CAR_MODEL,
+                trackCurve,
+                scene,
+                CyberRaceCarBuilder,
+                CyberRacePhysics,
+                THREE
+            };
+
+            for (let i = 0; i <= aiCount; i++) {
+                const sp = startPositions[i];
+                const car = CyberRaceVehicleDynamics.createCar(i, sp.t, sp.lateral, i === 0 ? selectedCarKey : null, carCreationCtx);
+                cars.push(car);
+            }
+
+            const progressEl = document.getElementById('hudProgress');
+            const progressTitleEl = document.getElementById('hudProgressTitle');
+            if (progressTitleEl) progressTitleEl.textContent = trackType === 'circuit' ? 'LAP' : 'PROGRESS';
+            if (progressEl) progressEl.textContent = trackType === 'circuit' ? ('0 / ' + TOTAL_LAPS) : '0%';
+            const rightLapBadge = document.getElementById('hudRightLapBadge');
+            const rightLapVal = document.getElementById('hudRightLapVal');
+            if (rightLapBadge) rightLapBadge.style.display = trackType === 'circuit' ? 'block' : 'none';
+            if (rightLapVal) rightLapVal.textContent = '0 / ' + TOTAL_LAPS;
+
+            const hudLapContainer = document.querySelector('.hud-lap');
+            if (hudLapContainer) {
+                if (trackType === 'linear') {
+                    hudLapContainer.innerHTML = 'PROGRESS <span class="lap-current" id="hudLap">0%</span><span id="hudTotalLaps"></span>';
+                } else {
+                    hudLapContainer.innerHTML = 'LAP <span class="lap-current" id="hudLap">0</span> / <span id="hudTotalLaps">' + TOTAL_LAPS + '</span>';
+                }
+            }
+
+            raceTime = 0;
+            CyberRaceHUD.initMinimap();
+
+            const player = cars[0];
+            CyberRaceCamera.snapToPlayer(player);
+
+            const camNameEl = document.getElementById('hudCamName');
+            if (camNameEl) camNameEl.textContent = CyberRaceCamera.getCurrentMode().name;
+
+            setTelemetryVisible(gameSettings.telemetryVisible);
+            onResize();
+            clock.start();
+
+            startCountdown();
+            animate();
+        }
+
+        function togglePause() {
+            if (typeof lastPauseToggleTime !== 'undefined') {
+                lastPauseToggleTime = performance.now();
+            }
+            if (gameState === 'playing') {
+                gameState = 'paused';
+                clock.stop();
+                const pauseMenu = document.getElementById('pauseHint');
+                if (pauseMenu) pauseMenu.classList.add('active');
+                if (typeof navigateToPausePage === 'function') {
+                    navigateToPausePage('main');
+                }
+            } else if (gameState === 'paused') {
+                gameState = 'playing';
+                clock.start();
+                const pauseMenu = document.getElementById('pauseHint');
+                if (pauseMenu) pauseMenu.classList.remove('active');
+                animate();
+            }
+        }
+
+        function stop() {
+            if (animId) {
+                cancelAnimationFrame(animId);
+                animId = null;
+            }
+            gameState = 'menu';
+            clock.stop();
+        }
+
+        function startFromUI(trackKey, direction, carKey, difficulty, mode) {
+            selectedTrackKey = trackKey || 'akina';
+            selectedTrackDirection = direction || 'forward';
+            selectedCarKey = carKey || 'ae86_race';
+            window.selectedCarKey = selectedCarKey;
+            
+            start(selectedTrackKey, difficulty || 'normal', selectedTrackDirection, selectedCarKey, mode || 'battle');
+            setTimeout(() => { onResize(); }, 50);
+        }
+
+        return {
+            init,
+            start,
+            startFromUI,
+            stop,
+            togglePause,
+            cycleCameraMode: () => CyberRaceCamera.cycleMode(cars[0]),
+            onResize,
+            setTransmissionMode: (m) => CyberRaceInputHaptics.setTransmissionMode(m),
+            updateTransModeButtonsUI: () => CyberRaceInputHaptics.updateTransModeButtonsUI(),
+            showShiftToast: (msg, isWarn) => CyberRaceInputHaptics.showShiftToast(msg, isWarn),
+            cleanGamepadName: (id) => CyberRaceInputHaptics.cleanGamepadName(id),
+            updateGamepadStatusUI: (c, id) => CyberRaceInputHaptics.updateGamepadStatusUI(c, id),
+            getState: () => gameState,
+            getMode: () => gameMode,
+            setMode: (m) => { gameMode = m; },
+            getTrack: () => selectedTrackKey,
+            getAIDifficulty: () => aiDifficulty,
+            TRACKS,
+            CAR_MODELS,
+            getTracksInfo: () => {
+                const info = {};
+                for (const [k, v] of Object.entries(TRACKS)) {
+                    info[k] = { name: v.name, nameEn: v.nameEn, type: v.type, length: v.length, stars: v.stars, points: v.points.map(p => ({x: p.x, z: p.z})) };
+                }
+                return info;
+            }
+        };
+    })();
+    window.Game = Game;
+
+    // ==================== UI 控制 ====================
+    function startUIWhenReady() {
+        if (window.CyberRaceUI && typeof window.CyberRaceUI.init === "function") {
+            window.CyberRaceUI.init();
+        }
+    }
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", startUIWhenReady);
+    } else {
+        startUIWhenReady();
+    }
+</script>
+</body>
+</html>

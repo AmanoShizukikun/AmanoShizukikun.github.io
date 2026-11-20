@@ -1,0 +1,242 @@
+/* ============================================================
+   game-skin.css — the site's visual language for the games and the tuning calculator.
+   Loaded into those documents by assets/js/embed.js (html.nx-skin). Colour literals inside the
+   games were already moved into the palette by tools/reskin-games.mjs; this sheet does shape,
+   type and surface: square corners, hairlines, no glow, the site's typefaces.
+   ============================================================ */
+
+/* the families the games ask for, answered with the fonts the site ships */
+@font-face { font-family: "Orbitron"; font-weight: 100 600; src: url("/assets/fonts/barlow-condensed-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Orbitron"; font-weight: 601 900; src: url("/assets/fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Rajdhani"; font-weight: 100 500; src: url("/assets/fonts/barlow-condensed-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Rajdhani"; font-weight: 501 900; src: url("/assets/fonts/barlow-condensed-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Chakra Petch"; font-weight: 100 500; src: url("/assets/fonts/barlow-condensed-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Chakra Petch"; font-weight: 501 900; src: url("/assets/fonts/barlow-condensed-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-weight: 100 450; src: url("/assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-weight: 451 900; src: url("/assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Share Tech Mono"; font-weight: 100 900; src: url("/assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 400; src: url("/assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 500; src: url("/assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 500; src: url("/assets/fonts/barlow-condensed-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 600; src: url("/assets/fonts/barlow-condensed-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 700; src: url("/assets/fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); }
+
+html.nx-skin {
+  --nx-bg: #0b0c0d; --nx-bg-2: #121416; --nx-bg-3: #1a1d20;
+  --nx-ink: #ecebe5; --nx-ink-2: #a9a79f; --nx-ink-3: #6d6c66;
+  --nx-line: rgb(236 235 229 / 0.14); --nx-line-2: rgb(236 235 229 / 0.3);
+  --nx-signal: #ffc400; --nx-ember: #ff6a1a;
+  --nx-display: "Barlow Condensed", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --nx-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --nx-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", system-ui, sans-serif;
+  --nx-serif: "Noto Serif TC", "Source Han Serif TC", "Songti TC", "PMingLiU", serif;
+  --nx-ease: cubic-bezier(0.22, 0.8, 0.2, 1);
+  /* the old shared stylesheet's variables, pointed at the same palette */
+  --primary-cyan: #ecebe5; --accent-cyan: #ecebe5; --primary-magenta: #ffc400; --accent-pink: #ffc400;
+  --accent-purple: #a9a79f; --primary-yellow: #ffc400; --dark-bg: #0b0c0d; --darker-bg: #0b0c0d;
+  --glass-bg: rgb(236 235 229 / 0.04); --neon-glow: 0 0 0;
+  --font-display: var(--nx-display); --font-body: var(--nx-sans);
+  scrollbar-color: #6d6c66 #0b0c0d; scrollbar-width: thin;
+}
+html.nx-skin, html.nx-skin body { background: var(--nx-bg) !important; color: var(--nx-ink); }
+html.nx-skin body { font-family: var(--nx-sans) !important; -webkit-font-smoothing: antialiased; }
+/* no rounded corners, no glow: every surface is a flat plate with a hairline */
+html.nx-skin *, html.nx-skin *::before, html.nx-skin *::after { border-radius: 0 !important; text-shadow: none !important; }
+html.nx-skin .cyber-bg, html.nx-skin .grid-overlay, html.nx-skin .particles, html.nx-skin .scan-line, html.nx-skin .data-stream { display: none !important; }
+html.nx-skin ::selection { background: var(--nx-signal); color: var(--nx-bg); }
+html.nx-skin :focus-visible { outline: 2px solid var(--nx-signal) !important; outline-offset: 2px; }
+html.nx-skin ::-webkit-scrollbar { width: 8px; height: 8px; }
+html.nx-skin ::-webkit-scrollbar-track { background: var(--nx-bg); }
+html.nx-skin ::-webkit-scrollbar-thumb { background: var(--nx-ink-3); }
+
+/* glow is light the site does not use: plates are lit by contrast alone */
+html.nx-skin *, html.nx-skin *::before, html.nx-skin *::after { box-shadow: none !important; }
+
+/* ---------------- title screens (Neon Snake, Wall Climber) ----------------
+   Laid out like the opening of the home page: the name set large at the left, a short line of
+   instrument type under it, and the choices as a numbered list. */
+html.nx-skin .title-screen {
+  align-items: flex-start !important; justify-content: flex-end !important; text-align: left;
+  padding: 0 clamp(24px, 7vw, 110px) clamp(40px, 12vh, 120px) !important; background: var(--nx-bg) !important; animation: none !important;
+}
+html.nx-skin .title-screen.hidden { display: none !important; }
+html.nx-skin .game-logo {
+  margin: 0 0 14px !important; font: 700 clamp(64px, 13vw, 190px)/0.86 var(--nx-display) !important; letter-spacing: 0.005em !important; text-transform: uppercase; text-align: left !important;
+  color: var(--nx-ink) !important; background: none !important; -webkit-text-fill-color: currentColor !important; filter: none !important; animation: none !important; transform: none !important;
+}
+html.nx-skin .game-subtitle {
+  display: flex; align-items: center; gap: 14px; margin: 0 0 clamp(24px, 5vh, 48px) !important; opacity: 1 !important;
+  font: 500 12px/1.4 var(--nx-mono) !important; letter-spacing: 0.2em !important; text-transform: uppercase; color: var(--nx-ink-2) !important; text-align: left !important;
+}
+html.nx-skin .game-subtitle::before { content: "" !important; flex: none; width: 34px; height: 2px; margin: 0 !important; background: var(--nx-signal); opacity: 1 !important; }
+html.nx-skin .game-subtitle::after { content: none !important; }
+html.nx-skin .title-menu { gap: 0 !important; width: min(460px, 100%) !important; max-width: none !important; padding: 0 !important; border-top: 1px solid var(--nx-line-2); counter-reset: nx-item; }
+html.nx-skin .title-btn {
+  display: flex !important; align-items: baseline; gap: 16px; width: 100%; padding: 15px 12px 15px 0 !important; overflow: visible !important;
+  background: none !important; border: 0 !important; border-bottom: 1px solid var(--nx-line-2) !important; backdrop-filter: none !important; transform: none !important;
+  font: 600 clamp(20px, 2.2vw, 26px)/1 var(--nx-display) !important; letter-spacing: 0.14em !important; text-transform: uppercase; text-align: left; color: var(--nx-ink) !important;
+  transition: background 0.25s, color 0.25s, padding 0.3s var(--nx-ease) !important;
+}
+html.nx-skin .title-btn::before {
+  counter-increment: nx-item; content: "0" counter(nx-item) !important; position: static !important; flex: none; width: 30px !important; height: auto !important; background: none !important; transition: none !important;
+  font: 500 11px/1 var(--nx-mono); letter-spacing: 0.1em; color: var(--nx-signal); opacity: 1 !important; transform: none !important;
+}
+html.nx-skin .title-btn::after { content: "→" !important; position: static !important; margin-left: auto; opacity: 1 !important; transform: none !important; font: 400 18px/1 var(--nx-sans); transition: transform 0.25s var(--nx-ease) !important; }
+html.nx-skin .title-btn span::before { content: none !important; }
+html.nx-skin .title-btn:hover, html.nx-skin .title-btn:focus-visible { background: var(--nx-signal) !important; color: var(--nx-bg) !important; padding-left: 12px !important; }
+html.nx-skin .title-btn:hover::before, html.nx-skin .title-btn:focus-visible::before { color: inherit; }
+html.nx-skin .title-btn:hover::after { transform: translateX(5px) !important; }
+
+/* ---------------- panels, dialogs, pause menus ---------------- */
+html.nx-skin .instructions-panel, html.nx-skin .difficulty-panel, html.nx-skin .game-over-panel, html.nx-skin .exit-confirm-panel,
+html.nx-skin .panel-overlay, html.nx-skin .pause-overlay { background: rgb(8 9 10 / 0.9) !important; backdrop-filter: none !important; }
+html.nx-skin .instructions-content, html.nx-skin .exit-confirm-content, html.nx-skin .pause-menu, html.nx-skin .difficulty-options {
+  background: var(--nx-bg-2) !important; border: 1px solid var(--nx-line-2) !important; backdrop-filter: none !important;
+}
+html.nx-skin .instructions-title, html.nx-skin .difficulty-title, html.nx-skin .game-over-title, html.nx-skin .exit-confirm-title, html.nx-skin .panel-title, html.nx-skin .pause-menu-title, html.nx-skin .pause-menu-logo {
+  font: 600 clamp(26px, 3.4vw, 44px)/1.15 var(--nx-serif) !important; letter-spacing: 0.1em !important; color: var(--nx-ink) !important;
+  background: none !important; -webkit-text-fill-color: currentColor !important; filter: none !important; animation: none !important; text-transform: none !important;
+}
+html.nx-skin .instructions-title::after, html.nx-skin .difficulty-title::after { width: 56px !important; height: 3px !important; background: var(--nx-signal) !important; }
+html.nx-skin .instruction-item, html.nx-skin .difficulty-btn {
+  background: none !important; border: 0 !important; border-top: 1px solid var(--nx-line) !important; transform: none !important; backdrop-filter: none !important; color: var(--nx-ink-2) !important;
+}
+html.nx-skin .instruction-item::before, html.nx-skin .difficulty-btn::before { display: none !important; }
+html.nx-skin .instruction-item:hover, html.nx-skin .difficulty-btn:hover { background: rgb(236 235 229 / 0.05) !important; color: var(--nx-ink) !important; }
+html.nx-skin .difficulty-btn { font-family: var(--nx-display) !important; letter-spacing: 0.1em; color: var(--nx-ink) !important; }
+html.nx-skin .difficulty-desc, html.nx-skin .instruction-text { font-family: var(--nx-sans) !important; color: var(--nx-ink-2) !important; }
+html.nx-skin .instruction-highlight { color: var(--nx-signal) !important; font-family: var(--nx-mono) !important; }
+html.nx-skin .game-btn, html.nx-skin .back-btn, html.nx-skin .cancel-btn, html.nx-skin .exit-confirm-btn, html.nx-skin .pause-menu-btn {
+  background: none !important; border: 1px solid var(--nx-line-2) !important; color: var(--nx-ink) !important; transform: none !important; backdrop-filter: none !important;
+  font: 500 14px/1.4 var(--nx-sans) !important; letter-spacing: 0.08em !important; transition: background 0.2s, color 0.2s, border-color 0.2s !important;
+}
+html.nx-skin .game-btn:hover, html.nx-skin .back-btn:hover, html.nx-skin .cancel-btn:hover, html.nx-skin .exit-confirm-btn:hover, html.nx-skin .pause-menu-btn:hover {
+  background: var(--nx-signal) !important; border-color: var(--nx-signal) !important; color: var(--nx-bg) !important;
+}
+html.nx-skin .pause-menu-btn::before { display: none !important; }
+html.nx-skin .final-score { font-family: var(--nx-mono) !important; color: var(--nx-ink-2) !important; }
+html.nx-skin .final-score span { font: 700 1.6em/1 var(--nx-display) !important; color: var(--nx-signal) !important; }
+
+/* ---------------- in-game instruments ---------------- */
+html.nx-skin .game-header, html.nx-skin .game-info { background: none !important; border-color: var(--nx-line) !important; backdrop-filter: none !important; }
+html.nx-skin .info-item { background: none !important; border: 0 !important; border-left: 1px solid var(--nx-line-2) !important; padding-left: 12px !important; }
+html.nx-skin .info-label { font: 500 10px/1.4 var(--nx-mono) !important; letter-spacing: 0.18em !important; color: var(--nx-ink-3) !important; text-transform: uppercase; }
+html.nx-skin .info-value { font: 600 26px/1 var(--nx-display) !important; letter-spacing: 0.04em !important; color: var(--nx-signal) !important; }
+html.nx-skin .game-canvas-wrapper, html.nx-skin #gameCanvas { border: 1px solid var(--nx-line-2) !important; background: #08090a !important; }
+html.nx-skin #hud, html.nx-skin #hud *, html.nx-skin #time-widget, html.nx-skin #height-display, html.nx-skin #state-indicator, html.nx-skin .pause-hint { font-family: var(--nx-mono) !important; letter-spacing: 0.1em; }
+html.nx-skin #height-display span { font: 600 1.6em/1 var(--nx-display) !important; color: var(--nx-signal) !important; }
+html.nx-skin #stamina-bar { background: rgb(236 235 229 / 0.12) !important; border: 0 !important; }
+html.nx-skin #stamina-fill { background: var(--nx-signal) !important; }
+html.nx-skin #time-widget { background: rgb(11 12 13 / 0.6) !important; border: 1px solid var(--nx-line-2) !important; backdrop-filter: none !important; }
+
+/* ---------------- the games' side rail and telemetry read-out ---------------- */
+html.nx-skin .gc-sidebar { background: var(--nx-bg) !important; border-right: 1px solid var(--nx-line) !important; backdrop-filter: none !important; }
+html.nx-skin .gc-sidebar-link, html.nx-skin .gc-sidebar-toggle { background: none !important; border: 1px solid var(--nx-line-2) !important; color: var(--nx-ink-2) !important; font-family: var(--nx-sans) !important; transform: none !important; }
+html.nx-skin .gc-sidebar-link::before { display: none !important; }
+html.nx-skin .gc-sidebar-link:hover, html.nx-skin .gc-sidebar-toggle:hover, html.nx-skin .gc-sidebar-link.active { background: var(--nx-signal) !important; border-color: var(--nx-signal) !important; color: var(--nx-bg) !important; }
+html.nx-skin .gc-sidebar-link svg { stroke-width: 1.6; }
+html.nx-skin .fps-osd, html.nx-skin .osd-card { background: rgb(11 12 13 / 0.82) !important; border: 1px solid var(--nx-line-2) !important; backdrop-filter: none !important; font-family: var(--nx-mono) !important; }
+html.nx-skin .osd-title, html.nx-skin .osd-label, html.nx-skin .osd-unit { font-family: var(--nx-mono) !important; letter-spacing: 0.14em !important; color: var(--nx-ink-3) !important; }
+html.nx-skin .osd-title::before { background: var(--nx-signal) !important; }
+html.nx-skin .osd-value { font-family: var(--nx-display) !important; color: var(--nx-signal) !important; }
+html.nx-skin .osd-mode-btn { background: none !important; border: 1px solid var(--nx-line-2) !important; color: var(--nx-ink-2) !important; }
+html.nx-skin .osd-mode-btn.active, html.nx-skin .osd-mode-btn:hover { background: var(--nx-signal) !important; border-color: var(--nx-signal) !important; color: var(--nx-bg) !important; }
+html.nx-skin .osd-progress { background: rgb(236 235 229 / 0.12) !important; }
+html.nx-skin .osd-progress-bar { background: var(--nx-signal) !important; }
+
+/* ---------------- shared form controls from the old site ---------------- */
+html.nx-skin .toggle-switch { background: none !important; border: 1px solid var(--nx-line-2) !important; }
+html.nx-skin .toggle-switch::before { background: var(--nx-ink-3) !important; }
+html.nx-skin .toggle-switch.active { border-color: var(--nx-signal) !important; }
+html.nx-skin .toggle-switch.active::before { background: var(--nx-signal) !important; }
+html.nx-skin input[type="range"] { accent-color: var(--nx-signal); }
+html.nx-skin input[type="range"]::-webkit-slider-thumb { background: var(--nx-signal) !important; border: 0 !important; }
+html.nx-skin select, html.nx-skin input[type="text"], html.nx-skin input[type="number"] { background: var(--nx-bg) !important; border: 1px solid var(--nx-line-2) !important; color: var(--nx-ink) !important; font-family: var(--nx-mono) !important; }
+html.nx-skin select:focus, html.nx-skin input:focus { border-color: var(--nx-signal) !important; outline: none; }
+
+/* ---------------- Cyber Piano ---------------- */
+html.nx-skin .piano-controls { background: none !important; border: 0 !important; border-top: 1px solid var(--nx-line-2) !important; border-bottom: 1px solid var(--nx-line-2) !important; backdrop-filter: none !important; }
+html.nx-skin .piano-controls::after { display: none !important; }
+html.nx-skin .piano-title { font: 700 clamp(26px, 3vw, 40px)/1 var(--nx-display) !important; letter-spacing: 0.06em !important; color: var(--nx-ink) !important; background: none !important; -webkit-text-fill-color: currentColor !important; filter: none !important; }
+html.nx-skin .piano-title::before { display: none !important; }
+html.nx-skin .control-label { font: 500 10px/1.4 var(--nx-mono) !important; letter-spacing: 0.18em !important; color: var(--nx-ink-3) !important; }
+html.nx-skin .control-label::before { background: var(--nx-signal) !important; }
+html.nx-skin .waveform-display { background: var(--nx-bg) !important; border: 1px solid var(--nx-line-2) !important; }
+html.nx-skin .piano-wrapper, html.nx-skin .keyboard-wrapper, html.nx-skin .piano-keyboard { background: none !important; border-color: var(--nx-line) !important; backdrop-filter: none !important; }
+html.nx-skin .piano-key.white { background: var(--nx-ink) !important; border: 1px solid var(--nx-bg) !important; }
+html.nx-skin .piano-key.white::before, html.nx-skin .piano-key.white::after, html.nx-skin .piano-key.black::before { display: none !important; }
+html.nx-skin .piano-key.white .key-label { color: var(--nx-bg) !important; }
+html.nx-skin .piano-key.black { background: var(--nx-bg) !important; border: 1px solid var(--nx-ink-3) !important; }
+html.nx-skin .piano-key.black .key-label { color: var(--nx-ink-2) !important; }
+html.nx-skin .piano-key.white:hover { background: #fffef6 !important; }
+html.nx-skin .piano-key.black:hover { background: var(--nx-bg-3) !important; }
+html.nx-skin .piano-key.active, html.nx-skin .piano-key.white.active, html.nx-skin .piano-key.black.active { background: var(--nx-signal) !important; border-color: var(--nx-signal) !important; }
+html.nx-skin .piano-key.active .key-label { color: var(--nx-bg) !important; }
+html.nx-skin .key-label { font: 500 11px/1 var(--nx-mono) !important; letter-spacing: 0.08em; }
+html.nx-skin input[type="range"]::-webkit-slider-thumb { border-radius: 0 !important; box-shadow: none !important; }
+html.nx-skin input[type="range"]::-moz-range-thumb { border-radius: 0 !important; box-shadow: none !important; background: var(--nx-signal) !important; border: 0 !important; }
+
+/* ---------------- FH6 tuning calculator ---------------- */
+html.nx-skin {
+  --bg2: #121416; --bg3: rgb(236 235 229 / 0.03); --bg4: rgb(255 196 0 / 0.06); --bg5: rgb(236 235 229 / 0.07);
+  --border: rgb(236 235 229 / 0.14); --border2: rgb(236 235 229 / 0.3);
+  --acc: #ffc400; --acc-dim: #ffc400; --acc2: #ecebe5; --acc3: #ffc400; --acc4: #a9a79f;
+  --text: #ecebe5; --text2: #a9a79f; --text3: #6d6c66;
+  --green: #ffc400; --red: #ff6a1a; --yellow: #ffc400; --blue: #a9a79f; --orange: #ff6a1a; --cyan: #ecebe5;
+  --glow: none; --radius: 0px;
+}
+html.nx-skin .shell { font-family: var(--nx-sans) !important; }
+html.nx-skin .shell::before { display: none !important; }
+html.nx-skin .hdr { background: none !important; border: 0 !important; border-bottom: 1px solid var(--nx-line-2) !important; padding: 8px 0 22px !important; backdrop-filter: none !important; }
+html.nx-skin .hdr::before, html.nx-skin .hdr::after { display: none !important; }
+html.nx-skin .hdr h1 {
+  font: 600 clamp(28px, 3.8vw, 52px)/1.15 var(--nx-serif) !important; letter-spacing: 0.06em !important; font-style: normal !important;
+  color: var(--nx-ink) !important; background: none !important; -webkit-text-fill-color: currentColor !important; filter: none !important;
+}
+html.nx-skin .hdr-sub, html.nx-skin .hdr-eyebrow, html.nx-skin .hdr-status { font: 500 11px/1.5 var(--nx-mono) !important; letter-spacing: 0.2em !important; color: var(--nx-ink-3) !important; background: none !important; border: 0 !important; }
+html.nx-skin .tabs { gap: 0 !important; padding: 0 !important; background: none !important; border: 0 !important; border-bottom: 1px solid var(--nx-line-2) !important; backdrop-filter: none !important; }
+html.nx-skin .tab { background: none !important; border: 0 !important; color: var(--nx-ink-2) !important; font: 600 16px/1 var(--nx-display) !important; letter-spacing: 0.16em !important; transform: none !important; }
+html.nx-skin .tab:hover { color: var(--nx-ink) !important; }
+html.nx-skin .tab.active { background: var(--nx-signal) !important; color: var(--nx-bg) !important; }
+html.nx-skin .card, html.nx-skin .rec-card, html.nx-skin .priority-card, html.nx-skin .diag-cause-card, html.nx-skin .callout, html.nx-skin .result-cell, html.nx-skin .diag-sidebar, html.nx-skin .diag-workspace {
+  background: var(--nx-bg-2) !important; border: 1px solid var(--nx-line) !important; backdrop-filter: none !important; transform: none !important;
+}
+html.nx-skin .card:hover, html.nx-skin .rec-card:hover, html.nx-skin .result-cell:hover { border-color: var(--nx-line-2) !important; }
+html.nx-skin .card-head, html.nx-skin .diag-header { background: none !important; border-bottom: 1px solid var(--nx-line-2) !important; }
+html.nx-skin .card-title, html.nx-skin .diag-header-text h2, html.nx-skin .rec-title, html.nx-skin .priority-title, html.nx-skin .diag-section-title { font-family: var(--nx-serif) !important; letter-spacing: 0.08em !important; color: var(--nx-ink) !important; }
+html.nx-skin .card-icon, html.nx-skin .diag-header-icon, html.nx-skin .callout-icon { background: none !important; border: 0 !important; }
+html.nx-skin .section-label, html.nx-skin .shell label, html.nx-skin .r-label, html.nx-skin .rec-val-label, html.nx-skin .formula-label { font-family: var(--nx-mono) !important; letter-spacing: 0.12em !important; color: var(--nx-ink-3) !important; }
+html.nx-skin .section-label { color: var(--nx-signal) !important; }
+html.nx-skin .r-val, html.nx-skin .rec-val, html.nx-skin .mono { font-family: var(--nx-display) !important; letter-spacing: 0.04em; }
+html.nx-skin .btn, html.nx-skin .btn-ghost, html.nx-skin .phase-btn, html.nx-skin .style-btn, html.nx-skin .preset-badge, html.nx-skin .rec-card-adv-btn {
+  background: none !important; border: 1px solid var(--nx-line-2) !important; color: var(--nx-ink) !important; transform: none !important; font-family: var(--nx-sans) !important;
+}
+html.nx-skin .btn:hover, html.nx-skin .btn-ghost:hover, html.nx-skin .btn-ghost.active, html.nx-skin .phase-btn.active, html.nx-skin .style-btn.active, html.nx-skin .preset-badge:hover, html.nx-skin .rec-card-adv-btn:hover {
+  background: var(--nx-signal) !important; border-color: var(--nx-signal) !important; color: var(--nx-bg) !important;
+}
+html.nx-skin .symptom-item { background: none !important; border: 0 !important; border-top: 1px solid var(--nx-line) !important; transform: none !important; }
+html.nx-skin .symptom-item:hover { background: rgb(236 235 229 / 0.05) !important; }
+html.nx-skin .symptom-item.active { background: rgb(255 196 0 / 0.1) !important; border-left: 3px solid var(--nx-signal) !important; }
+html.nx-skin .data-table th { font-family: var(--nx-mono) !important; letter-spacing: 0.12em; color: var(--nx-ink-3) !important; background: none !important; border-bottom: 1px solid var(--nx-line-2) !important; }
+html.nx-skin .data-table td { border-color: var(--nx-line) !important; }
+html.nx-skin .rec-range-bar { background: rgb(236 235 229 / 0.12) !important; }
+html.nx-skin .rec-range-fill { background: var(--nx-signal) !important; }
+html.nx-skin .copy-toast { background: var(--nx-signal) !important; color: var(--nx-bg) !important; border: 0 !important; font-family: var(--nx-mono) !important; }
+
+/* ---------------- Cyber Race interface ---------------- */
+html.nx-skin .crt-scanlines, html.nx-skin .scanlines { display: none !important; }
+
+/* overlays take the whole frame, so nothing of the screen underneath shows around them */
+html.nx-skin .instructions-panel.active, html.nx-skin .difficulty-panel.active, html.nx-skin .game-over-panel.active, html.nx-skin .exit-confirm-panel.active, html.nx-skin .panel-overlay.active {
+  position: absolute !important; inset: 0 !important; width: auto !important; height: auto !important; max-width: none !important; max-height: none !important; transform: none !important; margin: 0 !important;
+  display: flex !important; flex-direction: column; align-items: center; justify-content: center; padding: 24px !important; overflow: auto; background: rgb(8 9 10 / 0.96) !important; border: 0 !important; z-index: 50 !important;
+}
+html.nx-skin .instructions-panel.active > *, html.nx-skin .difficulty-panel.active > *, html.nx-skin .panel-overlay.active > * { width: min(560px, 100%); flex: none; }
+html.nx-skin .instruction-icon { display: none !important; }
+html.nx-skin .hdr h1 { margin: 0 0 12px !important; }
+html.nx-skin .hdr-sub { margin: 0 !important; }
+html.nx-skin select { font-family: var(--nx-sans) !important; }
+
+/* gamepad focus inside a game (assets/js/pad-bridge.js) */
+html.nx-skin .nx-pad-focus { outline: 2px solid var(--nx-signal) !important; outline-offset: 3px !important; }
+html.nx-skin .title-btn.nx-pad-focus, html.nx-skin .pause-menu-btn.nx-pad-focus, html.nx-skin .difficulty-btn.nx-pad-focus { border-color: var(--nx-signal) !important; color: var(--nx-signal) !important; }

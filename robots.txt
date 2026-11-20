@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /legacy/
+
+Sitemap: https://amanoshizukikun.github.io/sitemap.xml

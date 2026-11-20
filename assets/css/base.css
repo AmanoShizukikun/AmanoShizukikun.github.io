@@ -1,0 +1,262 @@
+/* ============================================================
+   base.css — tokens, reset, typography, persistent shell
+   ============================================================ */
+@font-face { font-family: "Barlow Condensed"; font-weight: 500; font-display: swap; src: url("/assets/fonts/barlow-condensed-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 600; font-display: swap; src: url("/assets/fonts/barlow-condensed-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 700; font-display: swap; src: url("/assets/fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 400; font-display: swap; src: url("/assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 500; font-display: swap; src: url("/assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); }
+
+:root {
+  --bg: #0b0c0d;
+  --bg-2: #121416;
+  --bg-3: #1a1d20;
+  --ink: #ecebe5;
+  --ink-2: #a9a79f;
+  --ink-3: #6d6c66;
+  --line: rgba(236, 235, 229, 0.14);
+  --line-2: rgba(236, 235, 229, 0.3);
+  --signal: #ffc400;             /* the signal colour as a surface: fills, bars, blocks */
+  --signal-ink: #0b0c0d;
+  --mark: #ffc400;               /* the signal colour as text and thin line-work (darker on paper, to stay legible) */
+  --veil: 8 9 10;                /* what is laid between the world and the copy: rgb(var(--veil) / α) */
+  --matte: #050506;              /* letterbox bars */
+  --ember: #ff6a1a;
+  --violet: #e58cf0;
+
+  --f-display: "Barlow Condensed", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --f-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", system-ui, sans-serif;
+  --f-serif: "Noto Serif TC", "Source Han Serif TC", "Songti TC", "PMingLiU", serif;
+
+  --header-h: 56px;
+  --gutter: clamp(16px, 4vw, 56px);
+  --ease: cubic-bezier(0.22, 0.8, 0.2, 1);
+}
+:root[data-theme="light"] {
+  --bg: #e9e8e2;
+  --bg-2: #dfded7;
+  --bg-3: #d3d2ca;
+  --ink: #101112;
+  --ink-2: #4b4b47;
+  --ink-3: #7c7b75;
+  --line: rgba(16, 17, 18, 0.16);
+  --line-2: rgba(16, 17, 18, 0.36);
+  --signal: #ffc400;
+  --signal-ink: #101112;
+  --mark: #9a6400;
+  --veil: 233 232 226;
+  --matte: #e9e8e2;
+  --ember: #c9480a;
+  --violet: #9a3fa8;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scrollbar-color: var(--ink-3) var(--bg); scrollbar-width: thin; }
+body {
+  margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink);
+  font: 400 16px/1.75 var(--f-sans); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  overflow-x: hidden; transition: background-color 0.6s ease;
+}
+h1, h2, h3, p, ul, ol, dl, dd, figure, blockquote { margin: 0; padding: 0; }
+ul, ol { list-style: none; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
+::selection { background: var(--signal); color: var(--signal-ink); }
+[hidden] { display: none !important; }
+
+.nx-skip { position: fixed; left: 12px; top: -60px; z-index: 30000; padding: 8px 14px; background: var(--signal); color: var(--signal-ink); font: 600 14px var(--f-sans); transition: top 0.2s; }
+.nx-skip:focus { top: 12px; }
+.nx-noscript { padding: 16px var(--gutter); font-size: 14px; }
+.nx-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+main#view { display: block; min-height: 100vh; outline: none; }
+html:not(.js) main#view { padding-top: 0; }
+
+/* ---------------- header ---------------- */
+.nx-header {
+  position: fixed; inset: 0 0 auto 0; z-index: 20050; height: var(--header-h);
+  display: flex; align-items: center; gap: 20px; padding: 0 var(--gutter);
+  color: var(--ink);
+  /* the same bar on every page — a gradient that fades into the view, never a solid strip */
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--bg) 82%, transparent), transparent);
+}
+.nx-header::after { content: ""; position: absolute; left: var(--gutter); right: var(--gutter); bottom: 0; height: 1px; background: var(--line); }
+.nx-brand { display: flex; align-items: center; gap: 10px; font: 600 18px/1 var(--f-display); letter-spacing: 0.14em; white-space: nowrap; }
+.nx-brand img { width: 22px; height: 22px; }
+.nx-brand { flex: none; }
+.nx-brand i { font: 400 12px var(--f-sans); letter-spacing: 0.2em; color: var(--ink-2); font-style: normal; padding-left: 10px; border-left: 1px solid var(--line-2); }
+/* controls that only exist while an application is open: back (in the gutter, left of the logo) and its name */
+html:not(.nx-sub) .nx-sub-only { display: none; }
+.nx-btn.nx-back { flex: none; width: 32px; height: 32px; margin-left: calc(-1 * min(44px, var(--gutter) - 8px)); margin-right: -8px; }
+.nx-here { flex: 0 1 auto; min-width: 0; padding-left: 14px; border-left: 1px solid var(--line-2); font: 500 13px/1.4 var(--f-sans); color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.nx-sub .nx-brand i { display: none; }
+.nx-nav { display: flex; gap: 4px; margin-left: auto; }
+.nx-nav a {
+  position: relative; display: flex; align-items: baseline; gap: 8px; padding: 8px 12px;
+  font: 500 14px/1 var(--f-sans); color: var(--ink-2); transition: color 0.2s; white-space: nowrap;
+}
+.nx-nav a small { font: 500 11px var(--f-mono); letter-spacing: 0.08em; color: var(--ink-3); }
+.nx-nav a::before { content: ""; position: absolute; left: 12px; right: 12px; bottom: 0; height: 2px; background: var(--signal); transform: scaleX(0); transform-origin: left; transition: transform 0.3s var(--ease); }
+.nx-nav a:hover, .nx-nav a[aria-current="page"] { color: var(--ink); }
+.nx-nav a[aria-current="page"]::before, .nx-nav a:hover::before { transform: scaleX(1); }
+.nx-actions { display: flex; gap: 6px; flex: none; }
+/* step down as the bar gets narrower: drop the English sub-labels, then the brand's second name,
+   then swap the link row for the menu button */
+@media (max-width: 1180px) { .nx-nav a small { display: none; } .nx-nav a { padding: 8px 10px; } }
+@media (max-width: 980px) { .nx-brand i { display: none; } }
+.nx-btn {
+  display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--line-2); color: var(--ink);
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.nx-btn:hover, .nx-btn[aria-expanded="true"] { background: var(--signal); color: var(--signal-ink); border-color: var(--signal); }
+.nx-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+.nx-btn--menu { display: none; }
+@media (max-width: 820px) {
+  .nx-nav { display: none; }
+  .nx-actions { margin-left: auto; }
+  .nx-btn--menu { display: grid; }
+  .nx-brand i { display: none; }
+}
+
+/* ---------------- full-screen menu ---------------- */
+.nx-menu {
+  position: fixed; inset: 0; z-index: 20040; display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px;
+  padding: calc(var(--header-h) + 40px) var(--gutter) 40px; background: var(--bg); color: var(--ink);
+  clip-path: inset(0 0 100% 0); visibility: hidden; transition: clip-path 0.55s var(--ease), visibility 0s 0.55s; overflow: auto;
+}
+.nx-menu.is-open { clip-path: inset(0); visibility: visible; transition: clip-path 0.55s var(--ease), visibility 0s; }
+.nx-menu__main a { display: flex; align-items: baseline; gap: 18px; padding: 10px 0; border-bottom: 1px solid var(--line); font: 600 clamp(34px, 7vw, 64px)/1.05 var(--f-display); letter-spacing: 0.02em; }
+.nx-menu__main a i { font: 500 12px var(--f-mono); color: var(--mark); font-style: normal; width: 28px; }
+.nx-menu__main a small { font: 400 15px var(--f-sans); color: var(--ink-2); margin-left: auto; }
+.nx-menu__main a:hover { color: var(--mark); }
+.nx-menu__side h2 { font: 500 11px var(--f-mono); letter-spacing: 0.16em; color: var(--ink-3); margin: 0 0 12px; }
+.nx-menu__side ul { margin-bottom: 32px; }
+.nx-menu__side a { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 15px; color: var(--ink-2); }
+.nx-menu__side a:hover { color: var(--ink); }
+.nx-menu__side a span { font: 400 11px var(--f-mono); color: var(--ink-3); }
+@media (max-width: 820px) { .nx-menu { grid-template-columns: 1fr; gap: 28px; } }
+@media (max-width: 380px) { .nx-brand { font-size: 16px; letter-spacing: 0.1em; } }
+@media (max-width: 460px) { .nx-here { display: none; } }
+/* narrow phones, application open: back + logo mark + three buttons is all that fits */
+@media (max-width: 400px) { html.nx-sub .nx-brand span { display: none; } }
+
+/* ---------------- settings drawer ---------------- */
+.nx-settings {
+  position: fixed; top: var(--header-h); right: 0; bottom: 0; z-index: 20045; width: min(360px, 100vw);
+  padding: 28px 24px; background: var(--bg-2); border-left: 1px solid var(--line-2); color: var(--ink);
+  transform: translateX(102%); visibility: hidden; transition: transform 0.45s var(--ease), visibility 0s 0.45s; overflow: auto;
+}
+.nx-settings.is-open { transform: none; visibility: visible; transition: transform 0.45s var(--ease), visibility 0s; }
+.nx-settings h2 { font: 600 22px/1 var(--f-display); letter-spacing: 0.12em; margin-bottom: 4px; }
+.nx-settings > p { font: 400 11px var(--f-mono); color: var(--ink-3); letter-spacing: 0.1em; margin-bottom: 22px; }
+.nx-set { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-top: 1px solid var(--line); }
+.nx-set b { display: block; font-weight: 500; font-size: 15px; }
+.nx-set span { display: block; font-size: 12px; color: var(--ink-2); line-height: 1.5; }
+.nx-build { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); font: 400 10px var(--f-mono); letter-spacing: 0.16em; color: var(--ink-3); }
+.nx-seg { display: flex; border: 1px solid var(--line-2); flex: none; }
+.nx-seg button { padding: 6px 10px; font: 500 12px var(--f-sans); color: var(--ink-2); }
+.nx-seg button[aria-pressed="true"] { background: var(--signal); color: var(--signal-ink); }
+.nx-switch { position: relative; flex: none; width: 46px; height: 24px; border: 1px solid var(--line-2); }
+.nx-switch::after { content: ""; position: absolute; left: 3px; top: 3px; width: 16px; height: 16px; background: var(--ink-3); transition: transform 0.25s var(--ease), background 0.2s; }
+.nx-switch[aria-checked="true"] { border-color: var(--signal); }
+.nx-switch[aria-checked="true"]::after { transform: translateX(22px); background: var(--signal); }
+
+/* ---------------- the world + route transit ---------------- */
+/* One WebGL canvas behind every page. It is part of the shell, so it never unloads. */
+.nx-world { position: fixed; inset: 0; z-index: -1; width: 100%; height: 100%; opacity: 0; pointer-events: none; transition: opacity 0.9s ease; }
+html.nx-world-on .nx-world { opacity: 1; }
+/* The world has two grades, dark and paper, and follows the theme (home/world.js). WebOS is the exception: it
+   has its own appearance settings, and the place behind it is always the dark grade. */
+:root[data-page="webos"][data-theme] {
+  --bg: #0b0c0d; --bg-2: #121416; --bg-3: #1a1d20;
+  --ink: #ecebe5; --ink-2: #a9a79f; --ink-3: #6d6c66;
+  --line: rgba(236, 235, 229, 0.14); --line-2: rgba(236, 235, 229, 0.3);
+  --signal-ink: #0b0c0d; --mark: #ffc400; --veil: 8 9 10; --matte: #050506; --ember: #ff6a1a; --violet: #e58cf0;
+}
+/* A route change is one continuous shot through the world (see core/router.js). The page being left
+   stays where it was on screen and dissolves while the camera sets off; the next page resolves in as
+   the camera settles. */
+main.nx-ghost { position: fixed; left: 0; right: 0; z-index: 1; margin: 0; pointer-events: none; animation: nx-out 0.5s ease both; }
+main.nx-ghost .pg, main.nx-ghost .app { animation: nx-recede 0.5s ease-in both; }
+main#view.nx-enter { animation: nx-in 0.85s ease 0.55s both; }
+main#view.nx-enter .pg, main#view.nx-enter .app { animation: nx-settle 1.1s var(--ease) 0.55s both; }
+@keyframes nx-out { to { opacity: 0; } }
+@keyframes nx-in { from { opacity: 0; } }
+@keyframes nx-recede { to { transform: translateY(-18px); } }
+@keyframes nx-settle { from { transform: translateY(26px); } }
+html:not(.nx-world-on) main#view.nx-enter, html:not(.nx-world-on) main#view.nx-enter .pg, html:not(.nx-world-on) main#view.nx-enter .app { animation-delay: 0.12s; }
+
+/* ---------------- identity layer (the avatar unlock: shell/unlock.js) ---------------- */
+html[data-identity="alias"] [data-id-show="real"], html[data-identity="real"] [data-id-show="alias"], html:not([data-identity]) [data-id-show="real"] { display: none !important; }
+@keyframes nx-deny { 20% { transform: translateX(-9px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+.nx-note {
+  position: fixed; left: 50%; bottom: 34px; z-index: 20061; max-width: calc(100vw - 24px); padding: 9px 16px; background: #ffc400; color: #0b0c0d;
+  font: 500 12px/1.4 var(--f-mono); letter-spacing: 0.12em; text-align: center; opacity: 0; pointer-events: none; transform: translate(-50%, 12px); transition: opacity 0.3s, transform 0.45s var(--ease);
+}
+.nx-note.is-on { opacity: 1; transform: translate(-50%, 0); }
+
+/* A page whose frame turns into the yellow poster (pages/sakura.js) switches the bar to ink for that moment. */
+html.nx-on-poster .nx-header { background: none; --ink: #0b0c0d; --ink-2: #24241e; --ink-3: #45443a; --line: rgb(11 12 13 / 0.3); --line-2: rgb(11 12 13 / 0.5); --signal: #0b0c0d; --signal-ink: #ffc400; --mark: #0b0c0d; }
+.nx-header, .nx-header a, .nx-btn { transition: color 0.3s, border-color 0.3s, background-color 0.3s; }
+
+/* ---------------- game centre: side rail (shell/sidebar.js) ---------------- */
+/* One rail for the library and every game opened from it. --side-w is the room pages leave for it. */
+:root { --side-w: 0px; }
+html.nx-gc { --side-w: 64px; }
+html.nx-gc.nx-side-wide { --side-w: 200px; }
+html.nx-gc.nx-side-off { --side-w: 0px; }
+.nx-side {
+  position: fixed; left: 0; top: var(--header-h); bottom: 0; z-index: 20038; width: 64px;
+  display: flex; flex-direction: column; gap: 8px; padding: 14px 11px; overflow: hidden;
+  background: color-mix(in srgb, var(--bg) 92%, transparent); border-right: 1px solid var(--line);
+  transition: width 0.3s var(--ease), transform 0.3s var(--ease), visibility 0s;
+}
+html.nx-side-wide .nx-side { width: 200px; }
+html:not(.nx-gc) .nx-side, html.nx-side-off .nx-side { transform: translateX(-102%); visibility: hidden; transition: width 0.3s var(--ease), transform 0.3s var(--ease), visibility 0s 0.3s; }
+.nx-side button { flex: none; display: flex; align-items: center; height: 42px; border: 1px solid var(--line-2); color: var(--ink-2); overflow: hidden; white-space: nowrap; outline-offset: 2px; transition: background 0.2s, color 0.2s, border-color 0.2s; }
+.nx-side svg { flex: none; width: 40px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: square; transition: transform 0.3s var(--ease); }
+.nx-side span { font: 500 13px/1 var(--f-sans); letter-spacing: 0.08em; opacity: 0; transition: opacity 0.2s; }
+html.nx-side-wide .nx-side span { opacity: 1; }
+.nx-side button[aria-pressed="true"] { border-color: var(--signal); color: var(--mark); }
+.nx-side button:hover, .nx-side button.is-focus { background: var(--signal); border-color: var(--signal); color: var(--signal-ink); }
+.nx-side [aria-expanded="true"] svg { transform: scaleX(-1); }
+@media (max-width: 640px) {
+  html.nx-gc { --side-w: 48px; }
+  html.nx-gc.nx-side-wide { --side-w: 168px; }
+  html.nx-gc.nx-side-off { --side-w: 0px; }
+  .nx-side { width: 48px; padding: 10px 5px; }
+  html.nx-side-wide .nx-side { width: 168px; }
+  .nx-side button { height: 38px; }
+  .nx-side svg { width: 36px; }
+}
+/* gamepad: VIEW held inside a game */
+.nx-hold { position: fixed; left: 50%; bottom: 44px; z-index: 20060; padding: 10px 16px 12px; border: 1px solid var(--line-2); background: #121416; color: #ecebe5; font: 500 12px/1.4 var(--f-mono); letter-spacing: 0.12em; white-space: nowrap; pointer-events: none; transform: translateX(-50%); }
+.nx-hold i { display: block; height: 3px; margin-top: 8px; background: linear-gradient(#ffc400, #ffc400) no-repeat left / calc(var(--k, 0) * 100%) 100%, rgba(236, 235, 229, 0.2); }
+
+/* ---------------- frame-rate monitor (shell/osd.js) ---------------- */
+.nx-osd { position: fixed; left: calc(var(--side-w) + 12px); top: calc(var(--header-h) + 12px); z-index: 20044; width: 204px; border: 1px solid rgba(236, 235, 229, 0.3); background: rgb(11 12 13 / 0.86); color: #ecebe5; font: 500 11px/1.4 var(--f-mono); user-select: none; }
+.nx-osd[data-mode="fps"] { width: 124px; }
+.nx-osd__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 5px 5px 10px; border-bottom: 1px solid rgba(236, 235, 229, 0.14); cursor: grab; touch-action: none; }
+.nx-osd__head:active { cursor: grabbing; }
+.nx-osd__head b { font-weight: 500; font-size: 10px; letter-spacing: 0.18em; color: #a9a79f; }
+.nx-osd__modes { display: flex; margin-left: auto; border: 1px solid rgba(236, 235, 229, 0.3); }
+.nx-osd__modes button { padding: 2px 6px; font: 500 9px/1.5 var(--f-mono); letter-spacing: 0.06em; color: #a9a79f; }
+.nx-osd__modes button[aria-pressed="true"] { background: #ffc400; color: #0b0c0d; }
+.nx-osd__fps { display: flex; align-items: baseline; gap: 8px; padding: 8px 12px 7px; }
+.nx-osd__fps strong { font: 600 34px/1 var(--f-display); letter-spacing: 0.02em; color: #ffc400; }
+.nx-osd__fps span { font-size: 10px; letter-spacing: 0.2em; color: #6d6c66; }
+.nx-osd__graph { display: block; width: calc(100% - 24px); height: 36px; margin: 0 12px 8px; }
+.nx-osd__rows { padding: 0 12px 8px; }
+.nx-osd__rows div { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; border-top: 1px solid rgba(236, 235, 229, 0.14); }
+.nx-osd__rows dt { font-size: 10px; letter-spacing: 0.14em; color: #6d6c66; }
+.nx-osd[data-mode="fps"] .nx-osd__graph, .nx-osd[data-mode="fps"] .nx-osd__rows, .nx-osd[data-mode="fps"] .nx-osd__head b { display: none; }
+.nx-osd:not([data-mode="full"]) [data-full] { display: none; }
+.nx-live { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+@media (prefers-reduced-motion: reduce) {
+  .nx-menu, .nx-settings { transition-duration: 0.01s !important; transition-delay: 0s !important; }
+}
+html[data-motion="reduced"] .nx-menu, html[data-motion="reduced"] .nx-settings { transition-duration: 0.01s !important; transition-delay: 0s !important; }

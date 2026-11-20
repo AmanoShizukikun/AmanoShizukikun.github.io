@@ -1,0 +1,167 @@
+/* nx-reskinned: colours moved into the site palette by tools/reskin-games.mjs */
+/* Tactical Canvas Box */
+.analyzer-container-box {
+    position: relative;
+    width: 100%;
+    height: 380px;
+    min-height: 280px;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 1px solid rgba(224, 223, 217, 0.4);
+    background-color: #0b0b0b;
+}
+
+/* Anime Tactical Scanline Overlay */
+.scanlines {
+    background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.28) 50%
+    ), linear-gradient(
+        90deg,
+        rgba(255, 106, 26, 0.015),
+        rgba(255, 195, 0, 0.01),
+        rgba(78, 78, 76, 0.015)
+    );
+    background-size: 100% 3px, 6px 100%;
+    pointer-events: none;
+}
+
+/* Tactical HUD Panel Styling */
+.hud-panel {
+    background: rgba(14, 14, 14, 0.88);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(224, 223, 217, 0.35);
+    box-shadow: 0 0 20px rgba(224, 223, 217, 0.08), inset 0 0 10px rgba(224, 223, 217, 0.05);
+    position: relative;
+}
+
+.hud-panel::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px;
+    width: 7px; height: 7px;
+    border-top: 2px solid #ffffff;
+    border-left: 2px solid #ffffff;
+}
+.hud-panel::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; right: -1px;
+    width: 7px; height: 7px;
+    border-bottom: 2px solid #e0dfd9;
+    border-right: 2px solid #e0dfd9;
+}
+
+/* Glowing Text Utilities */
+.glow-white { text-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 20px rgba(255, 255, 255, 0.4); }
+.glow-cyan { text-shadow: 0 0 8px rgba(224, 223, 217, 0.8), 0 0 16px rgba(224, 223, 217, 0.4); }
+.glow-red { text-shadow: 0 0 8px rgba(255, 106, 26, 0.8); }
+
+/* Compass Dial Styling & Sizing */
+.compass-dial-box {
+    position: relative;
+    width: 112px;
+    height: 112px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 350px;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+}
+#compass-dial {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-style: preserve-3d;
+}
+
+/* Custom Scrollbar for HUD elements if any */
+.analyzer-container-box ::-webkit-scrollbar { width: 4px; height: 4px; }
+.analyzer-container-box ::-webkit-scrollbar-track { background: rgba(13, 13, 13, 0.8); }
+.analyzer-container-box ::-webkit-scrollbar-thumb { background: #e0dfd9; border-radius: 2px; }
+
+/* Camera Mode Button Animations & Active Selection Styles */
+.cam-btn {
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+    background: rgba(11, 11, 11, 0.9);
+    color: #e0dfd9;
+    border: 1px solid rgba(224, 223, 217, 0.4);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+    user-select: none;
+}
+
+.cam-btn:hover {
+    background: rgba(224, 223, 217, 0.25);
+    border-color: #e0dfd9;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(224, 223, 217, 0.5);
+}
+
+.cam-btn:active {
+    transform: scale(0.94);
+}
+
+.cam-btn.active {
+    background: #e0dfd9 !important;
+    color: #000000 !important;
+    border-color: #e0dfd9 !important;
+    font-weight: 900 !important;
+    box-shadow: 0 0 12px rgba(224, 223, 217, 0.8), inset 0 0 4px rgba(255, 255, 255, 0.8) !important;
+    transform: scale(1.02);
+}
+
+/* HUD Button Click Feedback & Hover Animations */
+.hud-panel button, #btn-toggle-perspective {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hud-panel button:active, #btn-toggle-perspective:active {
+    transform: scale(0.92);
+}
+.hud-panel button:hover, #btn-toggle-perspective:hover {
+    box-shadow: 0 0 10px rgba(224, 223, 217, 0.6);
+}
+
+/* Tailwind Utility Fallbacks for Collapsible HUD Panels & Compass */
+.w-28 { width: 7rem !important; }
+.h-28 { height: 7rem !important; }
+.w-full { width: 100% !important; }
+.h-full { height: 100% !important; }
+.flex { display: flex !important; }
+.items-center { align-items: center !important; }
+.justify-center { justify-content: center !important; }
+.max-w-0 {
+    max-width: 0 !important;
+}
+.max-w-xs {
+    max-width: 320px !important;
+}
+.max-h-0 {
+    max-height: 0 !important;
+}
+.max-h-96 {
+    max-height: 24rem !important;
+}
+.opacity-0 {
+    opacity: 0 !important;
+}
+.opacity-100 {
+    opacity: 1 !important;
+}
+.pointer-events-none {
+    pointer-events: none !important;
+}
+.pointer-events-auto {
+    pointer-events: auto !important;
+}
+.mb-2 {
+    margin-bottom: 0.5rem !important;
+}

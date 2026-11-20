@@ -1,0 +1,201 @@
+/* ---------------- music player (/apps/music/) ----------------
+   Markup: src/pages/music.mjs · behaviour: assets/js/pages/music.js
+   With JavaScript the page is one fixed frame, nothing scrolls:
+     wide   copy on the left, the turntable (the eclipse of the world) on the right, the deck along the bottom
+     tall   the turntable on top, the copy under it, the deck at the bottom
+   .mu-stage is only a box: the script seats the eclipse in it and lays .mu-disc over the eclipse.
+   Without JavaScript it is a document: the track list with the browser's own audio controls. */
+.mu { position: relative; z-index: 1; }
+.mu-scrim { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(90deg, rgb(var(--veil) / 0.9) 0%, rgb(var(--veil) / 0.66) 34%, rgb(var(--veil) / 0) 58%), linear-gradient(0deg, rgb(var(--veil) / 0.92) 0, rgb(var(--veil) / 0) 190px); }
+
+/* ---- without JavaScript ---- */
+html:not(.js) .mu { max-width: 760px; margin: 0 auto; padding: calc(var(--header-h) + 40px) var(--gutter) 60px; }
+html:not(.js) .mu-stage, html:not(.js) .mu-deck, html:not(.js) .mu-keys, html:not(.js) .mu-scrim, html:not(.js) .mu-msg, html:not(.js) .mu-now { display: none; }
+html:not(.js) .mu > h1 { position: static; width: auto; height: auto; clip-path: none; margin-bottom: 22px; font: 600 34px/1.3 var(--f-serif); letter-spacing: 0.04em; white-space: normal; }
+html:not(.js) .mu-list li { grid-template-columns: minmax(0, 1fr) auto; padding: 8px 0 14px; }
+html:not(.js) .mu-native { grid-column: 1 / -1; width: 100%; }
+.js .mu-native { display: none; }
+
+/* ---- the frame ---- */
+.js .mu {
+  position: fixed; inset: 0; display: grid; overflow: hidden;
+  grid-template: "copy stage" minmax(0, 1fr) "deck deck" auto "keys keys" auto / minmax(0, min(45%, 700px)) minmax(0, 1fr);
+  column-gap: clamp(16px, 3vw, 48px);
+  padding: calc(var(--header-h) + clamp(8px, 3vh, 34px)) var(--gutter) clamp(10px, 2vh, 18px);
+}
+
+/* the turntable */
+.mu-stage { grid-area: stage; position: relative; min-width: 0; min-height: 0; }
+.mu-disc { position: fixed; left: 0; top: 0; width: 0; height: 0; border-radius: 50%; touch-action: none; opacity: var(--arrive, 1); will-change: transform; }
+.mu-disc canvas { display: block; width: 100%; height: 100%; pointer-events: none; }
+.mu-disc.is-limb { cursor: grab; }
+.mu.is-scrub .mu-disc { cursor: grabbing; }
+/* the dark face of the disc is the play button: 0.84 of the limb, which is 1/1.34 of the box */
+.mu-disc__hit { position: absolute; inset: 18.66%; display: grid; place-items: center; border-radius: 50%; color: var(--ink); }
+.mu-disc__hit svg { grid-area: 1 / 1; width: 17%; height: 17%; fill: currentColor; transition: opacity 0.3s, transform 0.3s var(--ease); }
+.mu-disc__hit svg:first-child { opacity: 0.92; }
+.mu-disc__hit svg:last-child { opacity: 0; }
+.mu.is-playing .mu-disc__hit svg:first-child { opacity: 0; transform: scale(0.7); }
+.mu.is-playing .mu-disc__hit:focus-visible svg:last-child { opacity: 0.8; }
+@media (hover: hover) { .mu.is-playing .mu-disc__hit:hover svg:last-child { opacity: 0.8; } }
+.mu.is-scrub .mu-disc__hit svg { opacity: 0 !important; }
+.mu-disc__hit:focus-visible { outline-offset: -6px; }
+.mu-tag { position: absolute; right: 0; top: 0; display: flex; align-items: center; gap: 10px; font: 500 11px/1.5 var(--f-mono); letter-spacing: 0.14em; color: var(--ink-3); }
+.mu-tag b { font-weight: 500; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.mu-tag span { padding: 1px 8px; border: 1px solid var(--line-2); color: var(--ink-2); }
+.mu.is-playing .mu-tag span, .mu.is-scrub .mu-tag span { border-color: var(--signal); color: var(--mark); }
+
+/* what is on it */
+.mu-copy { grid-area: copy; align-self: center; min-width: 0; max-width: 600px; }
+.mu-now { display: grid; grid-template-columns: clamp(104px, 13.5vw, 196px) minmax(0, 1fr); align-items: end; gap: clamp(14px, 2vw, 28px); margin-bottom: clamp(16px, 4.4vh, 44px); }
+.mu-cover { position: relative; aspect-ratio: 1; border: 1px solid var(--line-2); background: var(--bg-2); }
+.mu-cover img { width: 100%; height: 100%; object-fit: cover; }
+.mu-cover::before, .mu-cover::after { content: ""; position: absolute; width: 9px; height: 9px; border: solid var(--signal); }
+.mu-cover::before { left: -5px; top: -5px; border-width: 2px 0 0 2px; }
+.mu-cover::after { right: -5px; bottom: -5px; border-width: 0 2px 2px 0; }
+.mu-no { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; font: 600 15px/1.4 var(--f-display); letter-spacing: 0.2em; color: var(--mark); }
+.mu-no i { font-style: normal; color: var(--ink-3); }
+/* the title is sized to its column: a six-character title always fits on one line */
+.mu-now__text { min-width: 0; container-type: inline-size; }
+.mu-title { --max: 58px; font: 600 clamp(26px, 3.6vw, 52px)/1.18 var(--f-serif); letter-spacing: 0.04em; overflow-wrap: anywhere; }
+@supports (width: 1cqi) { .mu-title { font-size: clamp(20px, 15.6cqi, var(--max)); } }
+.mu-title small, .mu-track small { margin-left: 0.9em; font: 500 11px/1 var(--f-mono); letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-3); vertical-align: middle; white-space: nowrap; }
+.mu-meta { margin-top: 10px; font: 500 12px/1.6 var(--f-mono); letter-spacing: 0.14em; color: var(--ink-2); }
+.mu-by { margin-top: 2px; font-size: 13px; color: var(--ink-3); }
+.mu-by i { margin-left: 12px; padding-left: 12px; border-left: 1px solid var(--line-2); font: 500 11px var(--f-mono); letter-spacing: 0.12em; font-style: normal; text-transform: uppercase; }
+/* a track change: the copy comes in again */
+.mu.is-swap .mu-cover img, .mu.is-swap .mu-title, .mu.is-swap .mu-meta { animation: mu-in 0.5s var(--ease) both; }
+.mu.is-swap .mu-title { animation-delay: 0.05s; }
+.mu.is-swap .mu-meta { animation-delay: 0.1s; }
+@keyframes mu-in { from { opacity: 0; transform: translateY(10px); } }
+
+.mu-list { border-top: 1px solid var(--line-2); }
+.mu-list li { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; border-bottom: 1px solid var(--line-2); }
+.mu-list li::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--signal); transform: scaleY(0); transition: transform 0.3s var(--ease); }
+.mu-list li.is-on::before { transform: none; }
+.mu-track { display: grid; grid-template-columns: 30px 42px minmax(0, 1fr) auto auto; align-items: center; gap: 14px; width: 100%; padding: 9px 12px; text-align: left; transition: background 0.2s, color 0.2s; }
+.mu-track > i { font: 600 14px var(--f-display); letter-spacing: 0.16em; font-style: normal; color: var(--ink-3); }
+.mu-track__img { aspect-ratio: 1; overflow: hidden; border: 1px solid var(--line); }
+.mu-track__img img { width: 100%; height: 100%; object-fit: cover; }
+.mu-track strong { min-width: 0; font-size: 16px; font-weight: 500; letter-spacing: 0.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mu-track__meta { font: 500 11px var(--f-mono); letter-spacing: 0.1em; color: var(--ink-3); white-space: nowrap; }
+.mu-track > b { font: 500 12px var(--f-mono); letter-spacing: 0.08em; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.mu-list li.is-on .mu-track > i { color: var(--mark); }
+.mu-track:hover, .mu-track:focus-visible { background: var(--signal); color: var(--signal-ink); outline: none; }
+.mu-track:is(:hover, :focus-visible) :is(i, b, small, .mu-track__meta) { color: inherit; }
+.mu-track__ext { padding: 10px 2px 10px 14px; font: 500 11px var(--f-mono); letter-spacing: 0.1em; color: var(--ink-3); white-space: nowrap; transition: color 0.2s; }
+.mu-track__ext:hover, .mu-track__ext:focus-visible { color: var(--mark); }
+.mu-sum { margin-top: 10px; font: 500 11px var(--f-mono); letter-spacing: 0.14em; color: var(--ink-3); }
+
+/* the deck */
+.mu-deck { grid-area: deck; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: clamp(14px, 2.4vw, 36px); padding-top: clamp(8px, 1.6vh, 14px); border-top: 1px solid var(--line-2); }
+.mu-ctl { display: flex; align-items: center; gap: 4px; }
+.mu-ctl button { display: grid; place-items: center; width: 44px; height: 44px; color: var(--ink-2); transition: color 0.2s, background 0.2s, border-color 0.2s; }
+.mu-ctl svg { grid-area: 1 / 1; width: 22px; height: 22px; fill: currentColor; }
+.mu-ctl button:hover { color: var(--mark); }
+.mu-ctl .mu-play { width: 52px; height: 52px; margin: 0 4px; border: 1px solid var(--signal); color: var(--mark); }
+.mu-ctl .mu-play:hover, .mu.is-playing .mu-ctl .mu-play { background: var(--signal); color: var(--signal-ink); }
+.mu-play svg:last-child, .mu.is-playing .mu-play svg:first-child { display: none; }
+.mu.is-playing .mu-play svg:last-child { display: block; }
+.mu-bar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; min-width: 0; }
+.mu-clock { min-width: 2.9em; font: 500 13px var(--f-mono); letter-spacing: 0.06em; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+b.mu-clock { color: var(--ink); text-align: right; }
+.mu-scrub { position: relative; height: clamp(34px, 6vh, 50px); cursor: pointer; touch-action: none; }
+.mu-scrub canvas { display: block; width: 100%; height: 100%; }
+.mu-scrub__head { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--signal); pointer-events: none; }
+.mu-scrub__head::before { content: ""; position: absolute; left: -3px; top: -5px; border: solid transparent; border-width: 5px 4px 0; border-top-color: var(--signal); }
+.mu-scrub__tip { position: absolute; bottom: calc(100% + 8px); padding: 1px 7px; background: var(--ink); color: var(--bg); font: 500 11px/1.6 var(--f-mono); letter-spacing: 0.06em; transform: translateX(-50%); opacity: 0; pointer-events: none; transition: opacity 0.15s; }
+.mu-scrub:hover .mu-scrub__tip, .mu.is-scrub .mu-scrub__tip { opacity: 1; }
+.mu-opt { display: flex; align-items: center; gap: 10px; }
+.mu-txt { display: flex; align-items: baseline; gap: 8px; padding: 7px 10px; border: 1px solid var(--line-2); font: 600 13px/1.4 var(--f-display); letter-spacing: 0.16em; white-space: nowrap; transition: border-color 0.2s, color 0.2s; }
+.mu-txt i { font-style: normal; color: var(--ink-3); }
+.mu-txt b { min-width: 2.4em; font-weight: 600; text-align: left; font-variant-numeric: tabular-nums; }
+.mu-txt:hover { border-color: var(--signal); }
+.mu-txt[aria-pressed="true"] { border-color: var(--signal); color: var(--mark); }
+.mu-range { --v: 80%; width: clamp(64px, 8vw, 120px); height: 28px; margin: 0; background: transparent; -webkit-appearance: none; appearance: none; cursor: pointer; }
+.mu-range::-webkit-slider-runnable-track { height: 2px; background: linear-gradient(90deg, var(--signal) var(--v), var(--line-2) var(--v)); }
+.mu-range::-moz-range-track { height: 2px; background: linear-gradient(90deg, var(--signal) var(--v), var(--line-2) var(--v)); }
+.mu-range::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 14px; margin-top: -6px; background: var(--signal); border: 0; border-radius: 0; }
+.mu-range::-moz-range-thumb { width: 10px; height: 14px; background: var(--signal); border: 0; border-radius: 0; }
+
+.mu-keys { grid-area: keys; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 18px; padding-top: 10px; font: 500 10.5px/1.6 var(--f-mono); letter-spacing: 0.1em; color: var(--ink-3); }
+.mu-keys span { white-space: nowrap; }
+.mu-keys kbd { display: inline-block; min-width: 20px; margin-right: 5px; padding: 0 5px; border: 1px solid var(--line-2); font: inherit; color: var(--ink-2); text-align: center; }
+.mu-keys kbd + kbd { margin-left: -2px; }
+.mu-msg { position: fixed; left: 50%; bottom: 132px; z-index: 6; max-width: calc(100% - 32px); padding: 8px 16px; background: var(--signal); color: var(--signal-ink); font-size: 13.5px; transform: translate(-50%, 8px); opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s var(--ease); }
+.mu.has-msg .mu-msg { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---- narrower wide windows ---- */
+@media (max-width: 1180px) {
+  .mu-track { grid-template-columns: 26px 38px minmax(0, 1fr) auto; gap: 12px; }
+  .mu-track__meta { display: none; }
+}
+@media (max-width: 1020px) {
+  .mu-range { display: none; }
+  .mu-track__ext { font-size: 0; padding-left: 10px; }
+  .mu-track__ext::after { content: "↗"; font-size: 14px; }
+}
+@media (hover: none), (max-width: 900px) { .js .mu-keys { display: none; } }
+
+/* ---- short windows (laptops, phones on their side) ---- */
+@media (max-height: 700px) {
+  .mu-by, .mu-sum { display: none; }
+  .mu-now { grid-template-columns: clamp(84px, 16vh, 120px) minmax(0, 1fr); margin-bottom: clamp(10px, 3vh, 22px); }
+  .mu-title { --max: clamp(24px, 6.4vh, 44px); }
+  .mu-track { padding-top: 6px; padding-bottom: 6px; }
+  .mu-track__img { width: 34px; }
+  .js .mu-keys { display: none; }
+}
+@media (max-height: 480px) {
+  .js .mu { padding-top: calc(var(--header-h) + 4px); padding-bottom: 8px; }
+  .mu .pg-kicker, .mu-meta, .mu-tag, .mu-track__img { display: none; }
+  .mu-now { grid-template-columns: 64px minmax(0, 1fr); align-items: center; margin-bottom: 8px; }
+  .mu-no { margin-bottom: 0; font-size: 12px; }
+  .mu-title { --max: clamp(20px, 7vh, 30px); }
+  .mu-track { grid-template-columns: 24px minmax(0, 1fr) auto; padding-top: 3px; padding-bottom: 3px; }
+  .mu-track strong { font-size: 14px; }
+  .mu-ctl button { width: 38px; height: 38px; }
+  .mu-ctl .mu-play { width: 42px; height: 42px; }
+  .mu-scrub { height: 28px; }
+  .mu-deck { padding-top: 6px; }
+}
+
+/* ---- tall windows: turntable on top, copy under it ---- */
+@media (max-aspect-ratio: 999/1000) {
+  .js .mu { grid-template: "stage" minmax(0, 1fr) "copy" auto "deck" auto / minmax(0, 1fr); row-gap: clamp(8px, 1.6vh, 18px); padding-top: calc(var(--header-h) + 4px); padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+  .mu-scrim { background: linear-gradient(0deg, rgb(var(--veil) / 0.94) 0, rgb(var(--veil) / 0.8) 38%, rgb(var(--veil) / 0) 62%); }
+  .mu-copy { align-self: end; max-width: none; }
+  .mu .pg-kicker, .mu-by, .mu-sum { display: none; }
+  .mu-now { grid-template-columns: clamp(72px, 20vw, 132px) minmax(0, 1fr); gap: 14px; margin-bottom: clamp(10px, 1.8vh, 20px); }
+  .mu-title { --max: 46px; }
+  .mu-meta { margin-top: 6px; }
+  .mu-tag { right: auto; left: 0; }
+  .mu-deck { grid-template: "bar bar" auto "ctl opt" auto / auto minmax(0, 1fr); gap: 8px 12px; }
+  .mu-bar { grid-area: bar; }
+  .mu-ctl { grid-area: ctl; }
+  .mu-opt { grid-area: opt; justify-content: flex-end; }
+  .mu-range { display: block; width: clamp(60px, 18vw, 140px); }
+  .mu-track { grid-template-columns: 26px 38px minmax(0, 1fr) auto; }
+  .mu-msg { bottom: 168px; }
+}
+@media (max-aspect-ratio: 999/1000) and (max-width: 420px) {
+  .mu-range { display: none; }
+  .mu-track__meta { display: none; }
+}
+@media (max-aspect-ratio: 999/1000) and (max-width: 389px) {
+  .mu-ctl { gap: 2px; }
+  .mu-ctl button { width: 34px; height: 40px; }
+  .mu-ctl .mu-play { width: 44px; height: 44px; margin: 0 2px; }
+  .mu-txt { gap: 6px; padding: 6px 7px; font-size: 12px; letter-spacing: 0.08em; }
+  .mu-txt b { min-width: 0; }
+  .mu-opt { gap: 6px; }
+  .mu-deck { column-gap: 8px; }
+}
+@media (max-aspect-ratio: 999/1000) and (max-height: 640px) {
+  .mu-track__img, .mu-meta, .mu-tag { display: none; }
+  .mu-track { grid-template-columns: 24px minmax(0, 1fr) auto; padding-top: 5px; padding-bottom: 5px; }
+  .mu-now { grid-template-columns: 60px minmax(0, 1fr); align-items: center; }
+  .mu-scrub { height: 30px; }
+}
+
+@media (prefers-reduced-motion: reduce) { .mu.is-swap .mu-cover img, .mu.is-swap .mu-title, .mu.is-swap .mu-meta { animation: none; } }

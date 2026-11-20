@@ -1,0 +1,4 @@
+# the real identity in plain text and its access code — never publish these
+private/
+node_modules/
+.DS_Store
