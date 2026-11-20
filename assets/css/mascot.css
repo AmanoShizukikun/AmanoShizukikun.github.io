@@ -1,0 +1,113 @@
+/* ---------------- the mascot (assets/js/shell/mascot.js) ----------------
+   Loaded only when the mascot is switched on. The box is placed by the script:
+     --x / --y   left edge and distance from the bottom of the window      --w / --h   size of the figure
+   .is-left  she stands in the left half: speech and tools open to her right instead of her left
+   .is-high  there is no room above her: the speech opens beside her
+   .is-open  the tool column is showing (the script decides; there is no hover rule)
+   .is-edit  the adjust window is round her: a title bar to move her by, four corners to resize her by
+   The box itself lets the pointer through; only the figure, the tools, the window and the notices take it. */
+/* in front of a page's own fixed bars (the game centre's footer is 20035), behind the shell's menu and drawers */
+.nx-mascot { position: fixed; left: var(--x, auto); bottom: var(--y, 0px); z-index: 20036; width: var(--w, 160px); height: var(--h, 320px); pointer-events: none; -webkit-user-select: none; user-select: none; }
+.nx-mascot.is-away { display: none; }
+.nx-mascot[data-state="off"] { visibility: hidden; transition: visibility 0s 0.55s; }
+
+/* the figure: comes up from under the window, goes back down */
+.mc-body { position: absolute; inset: 0; transform: translateY(calc(100% + var(--y, 0px) + 24px)); transition: transform 0.55s var(--ease); }
+.nx-mascot[data-state="on"]:not(.is-min) .mc-body { transform: none; }
+.nx-mascot.is-drag .mc-body { transition: none; }
+.mc-stage, .mc-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mc-canvas { display: block; transition: opacity 0.18s linear; }
+.nx-mascot.is-swap .mc-canvas { opacity: 0; }
+.mc-hit { position: absolute; inset: 4% 0 0; cursor: grab; touch-action: none; pointer-events: auto; }
+.nx-mascot:not([data-state="on"]) .mc-hit, .nx-mascot.is-min .mc-hit { pointer-events: none; }
+.nx-mascot.is-drag .mc-hit { cursor: grabbing; }
+.mc-hit:focus-visible { outline: 1px dashed var(--signal); outline-offset: -2px; }
+
+/* what she says */
+.mc-say {
+  position: absolute; right: 8%; bottom: calc(100% + 4px); width: max-content; max-width: min(270px, calc(100vw - 24px));
+  padding: 9px 14px 11px; border: 1px solid var(--line-2); background: color-mix(in srgb, var(--bg) 93%, transparent); color: var(--ink);
+  z-index: 2; opacity: 0; transform: translateY(8px); transition: opacity 0.25s, transform 0.4s var(--ease); pointer-events: none;
+}
+.mc-say::before { content: ""; position: absolute; left: -1px; top: -1px; width: 26px; height: 2px; background: var(--signal); }
+.mc-say::after { content: ""; position: absolute; right: 26px; top: 100%; width: 1px; height: 9px; background: var(--line-2); }
+.mc-say__who { display: block; margin-bottom: 3px; font: 500 10px/1.6 var(--f-mono); letter-spacing: 0.16em; color: var(--mark); }
+.mc-say__text { font: 400 13.5px/1.7 var(--f-sans); letter-spacing: 0.02em; overflow-wrap: anywhere; }
+.nx-mascot.is-saying .mc-say { opacity: 1; transform: none; }
+.nx-mascot.is-left .mc-say { right: auto; left: 8%; }
+.nx-mascot.is-left .mc-say::after { right: auto; left: 26px; }
+.nx-mascot.is-high .mc-say { bottom: auto; top: 6%; right: calc(100% + 8px); }
+.nx-mascot.is-high .mc-say::after { top: 18px; right: -9px; width: 9px; height: 1px; }
+.nx-mascot.is-high.is-left .mc-say { right: auto; left: calc(100% + 8px); }
+.nx-mascot.is-high.is-left .mc-say::after { right: auto; left: -9px; }
+
+/* tools: a column inside her box, on the side that faces the edge of the window. Nothing lies between her and
+   the buttons, so the pointer never leaves the mascot on the way to one. */
+.mc-tools { position: absolute; z-index: 3; top: 8%; right: 0; display: grid; grid-auto-flow: column; grid-template-rows: repeat(var(--rows, 7), auto); gap: 4px; opacity: 0; visibility: hidden; transform: translateX(6px); transition: opacity 0.18s, transform 0.25s var(--ease), visibility 0s 0.25s; }
+.nx-mascot.is-left .mc-tools { right: auto; left: 0; transform: translateX(-6px); }
+.nx-mascot.is-open .mc-tools { opacity: 1; visibility: visible; transform: none; pointer-events: auto; transition-delay: 0s; }
+.nx-mascot.is-drag .mc-tools { opacity: 0; }
+.mc-tools button { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--line-2); background: color-mix(in srgb, var(--bg) 92%, transparent); color: var(--ink); transition: background 0.2s, color 0.2s, border-color 0.2s; }
+.mc-tools button:is(:hover, :focus-visible) { background: var(--signal); border-color: var(--signal); color: var(--signal-ink); outline: none; }
+.mc-tools svg, .mc-tab svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: square; pointer-events: none; }
+
+/* the adjust window */
+/* The window is the title bar plus her box: the frame starts above the box by the height of the bar, so the
+   corners at the top are the top corners of the window. (.is-tight: no room above — the bar lies over her head.) */
+.mc-frame { position: absolute; inset: -30px 0 0; display: none; border: 1px solid var(--signal); background: color-mix(in srgb, var(--bg) 26%, transparent); }
+.nx-mascot.is-tight .mc-frame { inset: 0; }
+.nx-mascot.is-edit .mc-frame { display: block; }
+.nx-mascot.is-edit .mc-body { z-index: 5; }                         /* she stands in front of the window's backing … */
+.nx-mascot.is-edit .mc-bar, .nx-mascot.is-edit .mc-frame i { z-index: 6; }   /* … and its controls in front of her */
+.mc-bar { position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; justify-content: space-between; gap: 6px; height: 29px; padding: 0 12px 0 12px; border-bottom: 1px solid var(--signal); background: color-mix(in srgb, var(--bg) 94%, transparent); cursor: move; touch-action: none; pointer-events: auto; }
+
+.mc-bar b { min-width: 0; overflow: hidden; font: 500 11.5px/1 var(--f-sans); letter-spacing: 0.06em; color: var(--ink); white-space: nowrap; text-overflow: ellipsis; pointer-events: none; }
+.mc-bar b::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 8px; background: var(--signal); vertical-align: 1px; }
+.mc-bar span { display: flex; flex: none; gap: 3px; margin-left: auto; }
+.mc-bar button { display: grid; place-items: center; width: 22px; height: 22px; border: 1px solid var(--line-2); color: var(--ink); transition: background 0.2s, color 0.2s, border-color 0.2s; }
+.mc-bar svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linejoin: round; stroke-linecap: square; pointer-events: none; }
+.mc-bar button:is(:hover, :focus-visible) { background: var(--signal); border-color: var(--signal); color: var(--signal-ink); outline: none; }
+.mc-frame i { position: absolute; width: 22px; height: 22px; touch-action: none; pointer-events: auto; }
+.mc-frame i::after { content: ""; position: absolute; width: 9px; height: 9px; background: var(--signal); }
+.mc-frame i[data-grip="nw"] { left: -11px; top: -11px; cursor: nwse-resize; }
+.mc-frame i[data-grip="se"] { right: -11px; bottom: -11px; cursor: nwse-resize; }
+.mc-frame i[data-grip="ne"] { right: -11px; top: -11px; cursor: nesw-resize; }
+.mc-frame i[data-grip="sw"] { left: -11px; bottom: -11px; cursor: nesw-resize; }
+.mc-frame i[data-grip="nw"]::after { left: 7px; top: 7px; }
+.mc-frame i[data-grip="ne"]::after { right: 7px; top: 7px; }
+.mc-frame i[data-grip="sw"]::after { left: 7px; bottom: 7px; }
+.mc-frame i[data-grip="se"]::after { right: 7px; bottom: 7px; }
+.nx-mascot.is-edit .mc-hit { cursor: move; }
+
+/* notices: loading, failed */
+.mc-note { position: absolute; right: 0; bottom: 14px; display: none; align-items: center; gap: 10px; width: max-content; max-width: calc(100vw - 24px); padding: 7px 12px; border: 1px solid var(--line-2); background: color-mix(in srgb, var(--bg) 93%, transparent); font: 500 11px/1.6 var(--f-mono); letter-spacing: 0.14em; color: var(--ink-2); pointer-events: auto; }
+.nx-mascot.is-left .mc-note { right: auto; left: 0; }
+.nx-mascot:is([data-state="loading"], [data-state="failed"], .has-note) .mc-note { display: flex; }
+.nx-mascot[data-state="on"] .mc-note { bottom: auto; top: -34px; font-family: var(--f-sans); letter-spacing: 0.04em; font-size: 12.5px; color: var(--ink); pointer-events: none; }
+.nx-mascot[data-state="on"] .mc-note button { display: none; }
+.nx-mascot[data-state="loading"] .mc-note::before { content: ""; width: 7px; height: 7px; background: var(--signal); animation: mc-blink 1s steps(2, jump-none) infinite; }
+.nx-mascot[data-state="loading"] .mc-note button { display: none; }
+.nx-mascot[data-state="failed"] .mc-note { border-color: var(--signal); color: var(--ink); font-family: var(--f-sans); letter-spacing: 0.04em; font-size: 12.5px; }
+.mc-note button { padding: 2px 9px; border: 1px solid var(--line-2); font: 500 12px/1.6 var(--f-sans); color: var(--ink); transition: background 0.2s, color 0.2s, border-color 0.2s; }
+.mc-note button:hover, .mc-note button:focus-visible { background: var(--signal); border-color: var(--signal); color: var(--signal-ink); outline: none; }
+@keyframes mc-blink { to { opacity: 0.15; } }
+
+/* stepped aside: a tab on the edge of the window brings her back */
+.mc-tab { position: absolute; right: 0; bottom: 0; display: flex; align-items: center; gap: 7px; padding: 6px 11px 6px 9px; border: 1px solid var(--line-2); border-bottom: 0; background: color-mix(in srgb, var(--bg) 93%, transparent); color: var(--ink-2); font: 500 10.5px/1.6 var(--f-mono); letter-spacing: 0.16em; opacity: 0; transform: translateY(calc(100% + var(--y, 0px))); pointer-events: none; transition: opacity 0.25s, transform 0.4s var(--ease), background 0.2s, color 0.2s, border-color 0.2s; }
+.nx-mascot.is-left .mc-tab { right: auto; left: 0; }
+.nx-mascot[data-state="on"].is-min .mc-tab { opacity: 1; transform: translateY(var(--y, 0px)); pointer-events: auto; transition-delay: 0.25s, 0.25s, 0s, 0s, 0s; }
+.mc-tab:hover, .mc-tab:focus-visible { background: var(--signal); border-color: var(--signal); color: var(--signal-ink); outline: none; }
+
+@media (max-width: 560px) {
+  .mc-say { max-width: min(230px, calc(100vw - 24px)); padding: 7px 11px 9px; }
+  .mc-say__text { font-size: 12.5px; }
+  .mc-tools button { width: 36px; height: 36px; }
+  .mc-frame i { width: 30px; height: 30px; }
+  .mc-frame i[data-grip="nw"] { left: -15px; top: -15px; } .mc-frame i[data-grip="ne"] { right: -15px; top: -15px; }
+  .mc-frame i[data-grip="sw"] { left: -15px; bottom: -15px; } .mc-frame i[data-grip="se"] { right: -15px; bottom: -15px; }
+  .mc-frame i[data-grip="nw"]::after { left: 11px; top: 11px; } .mc-frame i[data-grip="ne"]::after { right: 11px; top: 11px; }
+  .mc-frame i[data-grip="sw"]::after { left: 11px; bottom: 11px; } .mc-frame i[data-grip="se"]::after { right: 11px; bottom: 11px; }
+}
+:root[data-motion="reduced"] .mc-body, :root[data-motion="reduced"] .mc-say, :root[data-motion="reduced"] .mc-tools, :root[data-motion="reduced"] .mc-tab { transition-duration: 0.01s; }
+:root[data-motion="reduced"] .nx-mascot[data-state="loading"] .mc-note::before { animation: none; }
+@media print { .nx-mascot { display: none; } }

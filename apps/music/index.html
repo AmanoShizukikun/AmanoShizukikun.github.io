@@ -1,0 +1,119 @@
+<!doctype html>
+<!-- GENERATED FILE 自動產生，請勿手改 — source 來源: src/pages/music.mjs — rebuild 重建: node tools/build.mjs · 1dd6491c -->
+<html lang="zh-Hant-TW" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<script>
+(function(){try{var d=document.documentElement,t=localStorage.getItem('theme')||'dark';d.setAttribute('data-theme',t);d.classList.add('js');}catch(e){}})();
+(function(){try{var d=document.documentElement,m=window.WebGL2RenderingContext&&matchMedia("(min-width: 900px) and (min-aspect-ratio: 5/4) and (min-height: 560px)");if(!m)return;var s=function(){d.classList.toggle('wk-staged',m.matches&&!d.classList.contains('no-gl'));};s();m.addEventListener('change',s);}catch(e){}})();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>天野靜樹 — 音樂播放器</title>
+<meta name="description" content="原創音樂的播放器。日蝕是唱盤：日冕畫到哪裡，歌就播到哪裡；盤面上一圈一圈靠近的，是接下來幾秒的聲音。">
+<meta name="author" content="天野靜樹">
+<meta name="theme-color" content="#0b0c0d">
+<link rel="canonical" href="https://amanoshizukikun.github.io/apps/music/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AMANO SHIZUKI">
+<meta property="og:title" content="天野靜樹 — 音樂播放器">
+<meta property="og:description" content="原創音樂的播放器。日蝕是唱盤：日冕畫到哪裡，歌就播到哪裡；盤面上一圈一圈靠近的，是接下來幾秒的聲音。">
+<meta property="og:url" content="https://amanoshizukikun.github.io/apps/music/">
+<meta property="og:image" content="https://amanoshizukikun.github.io/assets/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/img/icon-32.png">
+<link rel="apple-touch-icon" href="/assets/img/icon-180.png">
+<link rel="preload" href="/assets/fonts/barlow-condensed-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/base.css">
+<link rel="stylesheet" href="/assets/css/pages.css">
+<link rel="stylesheet" href="/assets/css/home.css">
+<link rel="stylesheet" href="/assets/css/live2d.css">
+<link rel="stylesheet" href="/assets/css/music.css">
+<link rel="stylesheet" href="/assets/css/lore.css">
+<script type="importmap">{"imports":{"three":"/assets/vendor/three/three.module.js"}}</script>
+<script type="module" src="/assets/js/app.js"></script>
+</head>
+<body>
+<a class="nx-skip" href="#view">跳到主要內容</a>
+<noscript><nav class="nx-noscript"><a href="/">首頁</a> · <a href="/profile/">檔案</a> · <a href="/works/">作品</a></nav></noscript>
+<main id="view" tabindex="-1" data-build="7d453c64" data-page="music" data-title="天野靜樹 — 音樂播放器" data-desc="原創音樂的播放器。日蝕是唱盤：日冕畫到哪裡，歌就播到哪裡；盤面上一圈一圈靠近的，是接下來幾秒的聲音。" data-app="music" data-name="音樂播放器" data-back="/works/">
+<div class="mu" id="mu">
+  <h1 class="nx-sr">音樂播放器 MUSIC WORKS</h1>
+  <div class="mu-scrim" aria-hidden="true"></div>
+
+  <!-- the turntable: JavaScript seats the eclipse of the world in this box and lays the disc over it -->
+  <div class="mu-stage" data-mu="stage">
+    <div class="mu-disc" data-mu="disc">
+      <canvas data-mu="canvas" aria-hidden="true"></canvas>
+      <button type="button" class="mu-disc__hit" data-act="toggle" aria-label="播放"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/></svg></button>
+    </div>
+    <p class="mu-tag" aria-hidden="true"><b data-mu="tag-time">0:00.0</b><span data-mu="tag-state">STANDBY</span></p>
+  </div>
+
+  <div class="mu-copy">
+    <p class="pg-kicker">MUSIC WORKS / 長門櫻</p>
+    <section class="mu-now" aria-label="目前曲目">
+      <span class="mu-cover"><img data-mu="cover" src="/assets/img/music/sakura-room.webp" alt="" width="720" height="720" decoding="async"></span>
+      <div class="mu-now__text" aria-live="polite">
+        <p class="mu-no"><b data-mu="no">01</b><i>/ 02</i></p>
+        <h2 class="mu-title" data-mu="title">長門桜の部屋</h2>
+        <p class="mu-meta"><span data-mu="meta">2026 · 93 BPM · CHILL</span></p>
+        <p class="mu-by">作曲 天野靜樹<i>Studio One</i></p>
+      </div>
+    </section>
+
+    <ol class="mu-list" data-mu="list" aria-label="曲目">
+      <li id="sakura-room" class="is-on">
+        <button type="button" class="mu-track" data-track="0" aria-current="true">
+          <i>01</i>
+          <span class="mu-track__img"><img src="/assets/img/music/sakura-room.webp" alt="" width="720" height="720" loading="lazy" decoding="async"></span>
+          <strong>長門桜の部屋</strong>
+          <span class="mu-track__meta">2026 · 93 BPM · CHILL</span>
+          <b>1:32</b>
+        </button>
+        <audio class="mu-native" controls preload="none" src="/assets/music/sakura-room.mp3"></audio>
+        <a class="mu-track__ext" href="https://www.youtube.com/watch?v=qJOaBYOGxuk" target="_blank" rel="noopener noreferrer" aria-label="在 YouTube 觀看 長門桜の部屋">YouTube ↗</a>
+      </li>
+      <li id="dream-mirror">
+        <button type="button" class="mu-track" data-track="1">
+          <i>02</i>
+          <span class="mu-track__img"><img src="/assets/img/music/dream-mirror.webp" alt="" width="720" height="720" loading="lazy" decoding="async"></span>
+          <strong>夢界鏡廻<small>Intro</small></strong>
+          <span class="mu-track__meta">2025 · 85 BPM</span>
+          <b>1:30</b>
+        </button>
+        <audio class="mu-native" controls preload="none" src="/assets/music/dream-mirror.mp3"></audio>
+        <a class="mu-track__ext" href="https://www.youtube.com/watch?v=xcnzCRhfVf8" target="_blank" rel="noopener noreferrer" aria-label="在 YouTube 觀看 夢界鏡廻">YouTube ↗</a>
+      </li>
+    </ol>
+    <p class="mu-sum">2 首 · 共 3:03</p>
+  </div>
+
+  <!-- the deck -->
+  <div class="mu-deck" role="group" aria-label="播放控制">
+    <div class="mu-ctl">
+      <button type="button" data-act="prev" aria-label="上一首"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 5h2.6v14H5.5zM19 5v14L8.6 12z"/></svg></button>
+      <button type="button" class="mu-play" data-act="toggle" aria-label="播放"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/></svg></button>
+      <button type="button" data-act="next" aria-label="下一首"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.9 5h2.6v14h-2.6zM5 5l10.4 7L5 19z"/></svg></button>
+    </div>
+    <div class="mu-bar">
+      <b class="mu-clock" data-mu="cur">0:00</b>
+      <div class="mu-scrub" data-mu="scrub" role="slider" tabindex="0" aria-label="播放位置" aria-valuemin="0" aria-valuemax="93" aria-valuenow="0" aria-valuetext="0:00 / 1:32">
+        <canvas data-mu="wave" aria-hidden="true"></canvas>
+        <i class="mu-scrub__head" data-mu="head" aria-hidden="true"></i>
+        <span class="mu-scrub__tip" data-mu="tip" aria-hidden="true"></span>
+      </div>
+      <span class="mu-clock" data-mu="dur">1:32</span>
+    </div>
+    <div class="mu-opt">
+      <button type="button" class="mu-txt" data-act="repeat" aria-label="循環：全部曲目"><i>LOOP</i><b data-mu="repeat">ALL</b></button>
+      <button type="button" class="mu-txt" data-act="mute" aria-pressed="false" aria-label="靜音"><i>VOL</i><b data-mu="vol">80</b></button>
+      <input type="range" class="mu-range" data-mu="volume" min="0" max="100" step="1" value="80" aria-label="音量">
+    </div>
+  </div>
+  <p class="mu-keys" aria-hidden="true"><span><kbd>SPACE</kbd>播放</span><span><kbd>←</kbd><kbd>→</kbd>5 秒</span><span><kbd>↑</kbd><kbd>↓</kbd>音量</span><span><kbd>N</kbd><kbd>P</kbd>換曲</span><span><kbd>M</kbd>靜音</span><span><kbd>R</kbd>循環</span></p>
+  <p class="mu-msg" data-mu="msg" role="status"></p>
+  <audio data-mu="audio" preload="none"></audio>
+</div>
+</main>
+</body>
+</html>

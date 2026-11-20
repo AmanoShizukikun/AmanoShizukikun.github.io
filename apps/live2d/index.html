@@ -1,0 +1,243 @@
+<!doctype html>
+<!-- GENERATED FILE 自動產生，請勿手改 — source 來源: src/pages/live2d.mjs — rebuild 重建: node tools/build.mjs · 2049a0ea -->
+<html lang="zh-Hant-TW" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<script>
+(function(){try{var d=document.documentElement,t=localStorage.getItem('theme')||'dark';d.setAttribute('data-theme',t);d.classList.add('js');}catch(e){}})();
+(function(){try{var d=document.documentElement,m=window.WebGL2RenderingContext&&matchMedia("(min-width: 900px) and (min-aspect-ratio: 5/4) and (min-height: 560px)");if(!m)return;var s=function(){d.classList.toggle('wk-staged',m.matches&&!d.classList.contains('no-gl'));};s();m.addEventListener('change',s);}catch(e){}})();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>天野靜樹 — Live2D 作品</title>
+<meta name="description" content="自製的 Live2D 角色模型。她們在頁面上即時運算：可以拆回貼圖、看每個零件的網格與圖層、拉動每一個參數，看頭髮怎麼被重力帶著走。">
+<meta name="author" content="天野靜樹">
+<meta name="theme-color" content="#0b0c0d">
+<link rel="canonical" href="https://amanoshizukikun.github.io/apps/live2d/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AMANO SHIZUKI">
+<meta property="og:title" content="天野靜樹 — Live2D 作品">
+<meta property="og:description" content="自製的 Live2D 角色模型。她們在頁面上即時運算：可以拆回貼圖、看每個零件的網格與圖層、拉動每一個參數，看頭髮怎麼被重力帶著走。">
+<meta property="og:url" content="https://amanoshizukikun.github.io/apps/live2d/">
+<meta property="og:image" content="https://amanoshizukikun.github.io/assets/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/img/icon-32.png">
+<link rel="apple-touch-icon" href="/assets/img/icon-180.png">
+<link rel="preload" href="/assets/fonts/barlow-condensed-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/base.css">
+<link rel="stylesheet" href="/assets/css/pages.css">
+<link rel="stylesheet" href="/assets/css/home.css">
+<link rel="stylesheet" href="/assets/css/live2d.css">
+<link rel="stylesheet" href="/assets/css/music.css">
+<link rel="stylesheet" href="/assets/css/lore.css">
+<script type="importmap">{"imports":{"three":"/assets/vendor/three/three.module.js"}}</script>
+<script type="module" src="/assets/js/app.js"></script>
+</head>
+<body>
+<a class="nx-skip" href="#view">跳到主要內容</a>
+<noscript><nav class="nx-noscript"><a href="/">首頁</a> · <a href="/profile/">檔案</a> · <a href="/works/">作品</a></nav></noscript>
+<main id="view" tabindex="-1" data-build="7d453c64" data-page="live2d" data-title="天野靜樹 — Live2D 作品" data-desc="自製的 Live2D 角色模型。她們在頁面上即時運算：可以拆回貼圖、看每個零件的網格與圖層、拉動每一個參數，看頭髮怎麼被重力帶著走。" data-app="live2d" data-name="Live2D 作品" data-back="/works/">
+<div class="l2" id="l2">
+  <div class="l2-scrim" aria-hidden="true"></div>
+
+  <!-- the stage: one canvas, drawn by assets/js/live2d/stage.js. .l2-frame is where the model stands (CSS decides). -->
+  <div class="l2-stage" aria-hidden="true">
+    <div class="l2-plate"></div>
+    <canvas class="l2-canvas" data-l2="canvas"></canvas>
+    <div class="l2-frame" data-l2="frame"></div>
+    <p class="l2-tag"><b data-l2="tag-code">NS-V5</b><span data-l2="tag-view">LIVE</span></p>
+    <p class="l2-load" data-l2="load">LOADING</p>
+  </div>
+
+  <div class="l2-cast" role="group" aria-label="選擇舞台上的模型">
+    <button type="button" data-model="0" aria-pressed="true"><i>01</i><b>NS-V5</b><span>長門櫻</span></button>
+    <button type="button" data-model="1" aria-pressed="false"><i>02</i><b>L2D-CMT-01</b><span>SUMI</span></button>
+    <button type="button" data-model="2" aria-pressed="false"><i>03</i><b>WL2D-01</b><span>三和音</span></button>
+  </div>
+
+  <nav class="hm-rail l2-rail" aria-label="Live2D 作品章節">
+    <a href="#l2-0"><i>00</i><span>序</span></a>
+    <a href="#l2-1"><i>01</i><span>檔案</span></a>
+    <a href="#l2-2"><i>02</i><span>拆圖</span></a>
+    <a href="#l2-3"><i>03</i><span>網格</span></a>
+    <a href="#l2-4"><i>04</i><span>層次</span></a>
+    <a href="#l2-5"><i>05</i><span>參數</span></a>
+    <a href="#l2-6"><i>06</i><span>物理</span></a>
+    <a href="#l2-7"><i>07</i><span>軌跡</span></a>
+    <a href="#l2-8"><i>08</i><span>接續</span></a>
+  </nav>
+
+  <div class="l2-doc">
+    <!-- 00 LIVE -->
+    <header class="l2-sec l2-hero" id="l2-0" data-sec data-shot="full">
+      <p class="pg-kicker">CODE WL2D / LIVE2D WORKS</p>
+      <h1 class="l2-title"><span>把一張畫</span><span>叫醒</span><small>LIVE2D 作品</small></h1>
+      <p class="l2-lead">Live2D 不重畫任何一格。它把一張圖拆成零件，替每個零件鋪上網格，再用幾十個參數去拉動它們——於是她會轉頭、眨眼，頭髮會慢半拍跟上。這裡是我做的模型，每一個都是當場運算出來的，不是影片。</p>
+      <dl class="l2-stats">
+        <div><dt>MODELS</dt><dd>03</dd></div>
+        <div><dt>SINCE</dt><dd>2021</dd></div>
+        <div class="l2-live-only"><dt>RENDER</dt><dd class="l2-ok">REALTIME</dd></div>
+      </dl>
+      <p class="l2-p l2-static-only">這個瀏覽器沒有啟動 WebGL（或 JavaScript），所以這裡只有靜態畫面：模型不會動，也不能拆開。</p>
+      <p class="l2-hint l2-live-only"><span class="l2-mouse">移動游標，她會看著你。點她一下試試。</span><span class="l2-touch">點畫面任何一處，她會看過去。點她本人試試。</span></p>
+      <p class="l2-go"><a class="hm-cta" href="#l2-1">看三個模型<b aria-hidden="true">↓</b></a><a class="hm-cta" href="#l2-2">把她拆開<b aria-hidden="true">↓</b></a></p>
+    </header>
+
+    <!-- 01 FILES -->
+    <section class="l2-sec" id="l2-1" data-sec data-shot="file" aria-labelledby="l2-h1">
+      <h2 class="l2-h" id="l2-h1"><i>01</i><span>檔案</span><small>FILES</small></h2>
+      <p class="l2-say">三個模型，<br>三個不同的起點。</p>
+      <p class="l2-p l2-live-only">選一個，舞台上就換成她。之後每一段拆的、動的，都是你選的這一個。</p>
+      <ol class="l2-files">
+        <li class="l2-file is-on" id="ns-v5" data-file="0">
+          <button type="button" class="l2-file__hit" data-model="0" aria-pressed="true">
+            <i>01</i><strong>NS-V5</strong><span>長門櫻<small>Ver 1.2</small></span>
+          </button>
+          <div class="l2-file__body"><div>
+            <img class="l2-file__img" src="/assets/img/live2d/ns-v5.webp" alt="NS-V5 長門櫻 的模型畫面" loading="lazy" decoding="async" width="720" height="1080">
+            <p class="l2-file__line">長門櫻計畫的主角：金髮、狐耳、女僕裝的仿生電子狐娘。</p>
+            <p class="l2-file__desc">目前最完整的一個。耳朵、尾巴、裙擺、圍裙和頭髮各自掛著擺錘，共十一組物理；手臂分成肩、肘、手三段，可以擺出姿勢；服裝做成一個參數，同一個模型可以換裝。</p>
+            <dl class="l2-file__credits"><div><dt>角色</dt><dd>長門櫻（長門櫻計畫）</dd></div><div><dt>建模</dt><dd>天野靜樹</dd></div></dl>
+            <dl class="l2-nums">
+              <div><dt>零件</dt><dd>59</dd></div><div><dt>頂點</dt><dd>2,793</dd></div><div><dt>三角形</dt><dd>4,201</dd></div>
+              <div><dt>參數</dt><dd>47</dd></div><div><dt>物理</dt><dd>11</dd></div><div><dt>畫布</dt><dd>2894 × 4093</dd></div>
+            </dl>
+            <p class="l2-outfit l2-live-only"><span>服裝</span><button type="button" data-outfit="1" aria-pressed="true">女僕裝</button><button type="button" data-outfit="0" aria-pressed="false">不穿圍裙</button><button type="button" data-outfit="-1" aria-pressed="false">只穿圍裙</button><button type="button" data-outfit="-2" aria-pressed="false">只穿內衣</button></p>
+          </div></div>
+        </li>
+        <li class="l2-file" id="l2d-cmt-01" data-file="1">
+          <button type="button" class="l2-file__hit" data-model="1" aria-pressed="false">
+            <i>02</i><strong>L2D-CMT-01</strong><span>SUMI<small>Ver 2.3</small></span>
+          </button>
+          <div class="l2-file__body"><div>
+            <img class="l2-file__img" src="/assets/img/live2d/l2d-cmt-01.webp" alt="L2D-CMT-01 SUMI 的模型畫面" loading="lazy" decoding="async" width="720" height="1080">
+            <p class="l2-file__line">繪師 Sumi 筆下的角色，由我負責讓她動起來。</p>
+            <p class="l2-file__desc">別人的畫、我的骨架：拿到的是一張完成的立繪，要自己判斷哪裡該拆、哪裡該補。鬢髮、側髮和辮子用蒙皮串成一節一節的旋轉，加上裙擺、緞帶與披紗，共十一組物理。</p>
+            <dl class="l2-file__credits"><div><dt>繪師</dt><dd>Sumi</dd></div><div><dt>建模</dt><dd>天野靜樹</dd></div></dl>
+            <dl class="l2-nums">
+              <div><dt>零件</dt><dd>56</dd></div><div><dt>頂點</dt><dd>2,308</dd></div><div><dt>三角形</dt><dd>3,203</dd></div>
+              <div><dt>參數</dt><dd>41</dd></div><div><dt>物理</dt><dd>11</dd></div><div><dt>畫布</dt><dd>3024 × 4032</dd></div>
+            </dl>
+          </div></div>
+        </li>
+        <li class="l2-file" id="wl2d-01" data-file="2">
+          <button type="button" class="l2-file__hit" data-model="2" aria-pressed="false">
+            <i>03</i><strong>WL2D-01</strong><span>三和音<small>2021</small></span>
+          </button>
+          <div class="l2-file__body"><div>
+            <img class="l2-file__img" src="/assets/img/live2d/wl2d-01.webp" alt="WL2D-01 三和音 的模型畫面" loading="lazy" decoding="async" width="720" height="1080">
+            <p class="l2-file__line">第一個模型。從紙上的草圖開始，一個人畫完、拆完、綁完。</p>
+            <p class="l2-file__desc">高中時做的第一個模型，代號 SGO：草圖、電繪、拆圖、建模全部自己來，大約花了十六個小時。頭部和身體都做了 X、Y、Z 三個方向，是當年那個教學網站的示範模型——參數的命名還看得出是初學者取的。</p>
+            <dl class="l2-file__credits"><div><dt>繪圖</dt><dd>天野靜樹</dd></div><div><dt>建模</dt><dd>天野靜樹</dd></div></dl>
+            <dl class="l2-nums">
+              <div><dt>零件</dt><dd>57</dd></div><div><dt>頂點</dt><dd>2,014</dd></div><div><dt>三角形</dt><dd>2,890</dd></div>
+              <div><dt>參數</dt><dd>36</dd></div><div><dt>物理</dt><dd>4</dd></div><div><dt>畫布</dt><dd>2480 × 3508</dd></div>
+            </dl>
+          </div></div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- 02 PARTS -->
+    <section class="l2-sec" id="l2-2" data-sec data-shot="sheet" aria-labelledby="l2-h2">
+      <h2 class="l2-h" id="l2-h2"><i>02</i><span>拆圖</span><small>PARTS</small></h2>
+      <p class="l2-say">在會動之前，<br>她是一張被拆開的圖。</p>
+      <p class="l2-p"><b data-l2="n-meshes">59</b> 個零件，排在一張 <b data-l2="n-atlas">4096 × 4096</b> 的貼圖上。<span class="l2-live-only">右邊就是那張貼圖——剛才的她，每一塊都在這裡。</span></p>
+      <ol class="l2-rules">
+        <li><i>01</i><div><h3>一個東西，拆成好幾層</h3><p>一隻眼睛是眼白、眼球、高光、上睫毛、下睫毛；頭髮分瀏海、側髮、後髮。拆得越細，之後能動的地方越多。</p></div></li>
+        <li><i>02</i><div><h3>看不到的地方也要畫</h3><p>嘴巴裡面、被瀏海蓋住的額頭、被衣服蓋住的肩膀。平常看不到，一轉頭就露出來。</p></div></li>
+        <li><i>03</i><div><h3>關節畫得比看得到的長</h3><p>脖子、手臂的接合處要多畫一截，轉動時才不會露出破口。</p></div></li>
+      </ol>
+      <p class="l2-note l2-live-only">往回捲，零件會一塊一塊飛回她身上。</p>
+    </section>
+
+    <!-- 03 MESH -->
+    <section class="l2-sec" id="l2-3" data-sec data-shot="mesh" aria-labelledby="l2-h3">
+      <h2 class="l2-h" id="l2-h3"><i>03</i><span>網格</span><small>MESH</small></h2>
+      <p class="l2-say">會動的不是圖，<br>是網格。</p>
+      <p class="l2-p">每個零件都鋪上一張三角網格。參數移動的是網格的頂點；圖只是貼在上面，跟著被拉開、擠壓。</p>
+      <dl class="l2-nums l2-nums--lg">
+        <div><dt>頂點</dt><dd data-l2="n-verts">2,793</dd></div><div><dt>三角形</dt><dd data-l2="n-tris">4,201</dd></div>
+      </dl>
+      <div class="l2-probe" data-l2="probe">
+        <p class="l2-probe__hint"><span class="l2-mouse">把游標移到她身上，看那一塊零件的網格。</span><span class="l2-touch">點她身上任何一處，看那一塊零件的網格。</span></p>
+        <dl><div><dt>零件</dt><dd data-p="id">—</dd></div><div><dt>頂點</dt><dd data-p="verts">—</dd></div><div><dt>三角形</dt><dd data-p="tris">—</dd></div><div><dt>繪製順序</dt><dd data-p="order">—</dd></div></dl>
+      </div>
+    </section>
+
+    <!-- 04 LAYERS -->
+    <section class="l2-sec" id="l2-4" data-sec data-shot="fan" aria-labelledby="l2-h4">
+      <h2 class="l2-h" id="l2-h4"><i>04</i><span>層次</span><small>LAYERS</small></h2>
+      <p class="l2-say">把她側過來，<br>是一疊紙。</p>
+      <p class="l2-p">零件沒有前後的深度，只有先畫、後畫的順序：後髮先畫，五官和瀏海後畫。把這個順序往旁邊拉開，就看得到每一層。</p>
+      <p class="l2-p">有些層只在另一層的範圍裡出現——眼球只畫在眼白裡，所以眼睛怎麼轉，都不會跑到臉上。這個模型有 <b data-l2="n-masked">7</b> 個零件是這樣被剪裁的。</p>
+      <div class="l2-probe" data-l2="probe">
+        <p class="l2-probe__hint"><span class="l2-mouse">把游標移到任何一層上。</span><span class="l2-touch">點任何一層。</span></p>
+        <dl><div><dt>零件</dt><dd data-p="id">—</dd></div><div><dt>頂點</dt><dd data-p="verts">—</dd></div><div><dt>三角形</dt><dd data-p="tris">—</dd></div><div><dt>繪製順序</dt><dd data-p="order">—</dd></div></dl>
+      </div>
+    </section>
+
+    <!-- 05 PARAMETERS -->
+    <section class="l2-sec" id="l2-5" data-sec data-shot="bust" aria-labelledby="l2-h5">
+      <h2 class="l2-h" id="l2-h5"><i>05</i><span>參數</span><small>PARAMETERS</small></h2>
+      <p class="l2-say">參數是她的關節。</p>
+      <p class="l2-p">一個參數只管一件事：頭往左右轉、眼睛開合、嘴角上揚。建模的工作，就是替每個參數的兩端各擺好一次網格，中間交給內插。</p>
+      <ol class="l2-axes l2-live-only" data-l2="axes">
+        <li data-axis="x"><b>X</b><span>左右轉</span><i></i></li>
+        <li data-axis="y"><b>Y</b><span>上下</span><i></i></li>
+        <li data-axis="z"><b>Z</b><span>傾斜</span><i></i></li>
+      </ol>
+      <p class="l2-note l2-live-only">捲過這三行，她會依序轉給你看；往回捲就倒著轉。</p>
+      <div class="l2-panel l2-live-only" data-l2="panel">
+        <p class="l2-panel__h"><b>換你來</b><span><i data-l2="n-params">47</i> 個參數，這裡列出能直接拉的</span></p>
+        <div class="l2-faces" role="group" aria-label="表情"><button type="button" data-face="rest" aria-pressed="true">平常</button><button type="button" data-face="smile" aria-pressed="false">微笑</button><button type="button" data-face="wink" aria-pressed="false">眨單眼</button><button type="button" data-face="wow" aria-pressed="false">驚訝</button><button type="button" data-face="shy" aria-pressed="false">害羞</button></div>
+        <div class="l2-sliders" data-l2="sliders"></div>
+        <p class="l2-panel__foot"><button type="button" data-act="reset">全部歸零</button></p>
+      </div>
+    </section>
+
+    <!-- 06 PHYSICS -->
+    <section class="l2-sec" id="l2-6" data-sec data-shot="full" aria-labelledby="l2-h6">
+      <h2 class="l2-h" id="l2-h6"><i>06</i><span>物理</span><small>PHYSICS</small></h2>
+      <p class="l2-say">剩下的，<br>交給重力。</p>
+      <p class="l2-p">頭髮、耳朵、尾巴、裙擺沒有人在控制。它們是掛在身上的擺錘：身體一動，它們慢半拍跟上，晃幾下才停。<span class="l2-live-only">下面每一根，都是她身上正在算的那一組。</span></p>
+      <div class="l2-phys l2-live-only">
+        <ul class="l2-pend" data-l2="pend"></ul>
+        <p class="l2-phys__go">
+          <button type="button" class="hm-cta" data-act="push">推她一下<b aria-hidden="true">→</b></button>
+          <label class="l2-wind"><span>風</span><input type="range" data-l2="wind" min="-1" max="1" step="0.01" value="0" aria-label="風向與風力"></label>
+        </p>
+      </div>
+      <p class="l2-note l2-live-only">捲動也算數：這一段捲得越快，風越大。</p>
+    </section>
+
+    <!-- 07 ORIGIN -->
+    <section class="l2-sec" id="l2-7" data-sec data-shot="full" aria-labelledby="l2-h7">
+      <h2 class="l2-h" id="l2-h7"><i>07</i><span>軌跡</span><small>ORIGIN</small></h2>
+      <p class="l2-say">這一頁的前身，<br>是高中時寫的教學網站。</p>
+      <ol class="l2-time" data-l2="time">
+        <li><span class="l2-time__when">2021.04</span><div><h3>WL2D-01 與第一個教學網站</h3><p>高中，為了一場網頁設計比賽，把剛學會的 Live2D 寫成一個教學網站：草圖、拆圖、建模、動畫、應用，一頁一頁教。示範用的模型就是 WL2D-01。當時中文資料很少，幾乎每一步都是試出來的。</p><p class="l2-time__more"><a href="https://ericchen920114.wixsite.com/live2" target="_blank" rel="noopener noreferrer">2021 年的原站 ↗</a><span>保留當年的樣子：沒寫完，內容也已過時</span></p></div></li>
+        <li><span class="l2-time__when">L2D-CMT-01</span><div><h3>替別人的畫建模</h3><p>繪師 Sumi 的角色。畫不是自己的，拆法就不能照自己的習慣來；這個模型一路改到 Ver 2.3。</p></div></li>
+        <li><span class="l2-time__when">2025.12</span><div><h3>模型搬上個人網站</h3><p>兩個模型成為個人網站的看板娘：在瀏覽器裡用 Cubism Web SDK 即時運算，換頁也不重新載入。</p></div></li>
+        <li><span class="l2-time__when">2026.03 — 04</span><div><h3>NS-V5：長門櫻</h3><p>Ver 1.0（3 月 9 日）、1.1（3 月 20 日）、1.2（4 月 2 日）。長門櫻有了可以動的身體：十一組物理、可換的服裝、能擺姿勢的手臂。</p></div></li>
+        <li><span class="l2-time__when">2026.11</span><div><h3>這一頁</h3><p>重寫 2021 年的那個網站。當年用截圖和影片說明的事，現在讓模型自己示範——為此另外寫了一個繪製器，好把她一層一層拆開來看。</p></div></li>
+      </ol>
+    </section>
+
+    <!-- 08 STAY -->
+    <section class="l2-sec l2-end" id="l2-8" data-sec data-shot="full" aria-labelledby="l2-h8">
+      <p class="pg-kicker">08 — 接續 / STAY</p>
+      <h2 class="l2-end__h" id="l2-h8">她可以<br>留下來。</h2>
+      <p class="l2-p">啟用看板娘，她會待在每一頁的角落，換頁也不會消失。<span class="l2-live-only">（在這一頁她已經站在舞台上，所以角落那個先讓開。）</span></p>
+      <p class="l2-go"><button type="button" class="hm-cta" data-act="mascot" aria-pressed="false"><span>啟用看板娘</span><b aria-hidden="true">→</b></button></p>
+      <ul class="l2-links">
+        <li><a href="/apps/nagato-sakura/"><b>PROJECT</b><span>長門櫻計畫</span><i aria-hidden="true">→</i></a></li>
+        <li><a href="/apps/nijigen/"><b>LORE</b><span>世界觀：常夜界的檔案</span><i aria-hidden="true">→</i></a></li>
+        <li><a href="/apps/ns-room/"><b>3D</b><span>長門櫻的房間</span><i aria-hidden="true">→</i></a></li>
+        <li><a href="/works/"><b>ARCHIVE</b><span>回到作品</span><i aria-hidden="true">→</i></a></li>
+      </ul>
+    </section>
+  </div>
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,2 @@
+# keep LF in the working tree on every platform: tools/build.mjs reads and signs the generated pages line by line
+* text=auto eol=lf

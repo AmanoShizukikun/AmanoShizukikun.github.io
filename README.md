@@ -1,39 +1,508 @@
-# AmanoShizukikun.github.io Blueprint
+# AmanoShizukikun.github.io — v2
 
-## System Overview
-本專案為建置於 GitHub Pages 的純前端靜態個人網站與互動作品集（Cyber Nexus 主題），無後端伺服器依賴。系統以根目錄首頁 `index.html` 與次級頁面群 `pages/` 作為個人簡歷入口，透過 `assets/js/` 提供全站共用的動態背景畫布引擎、主題與頁首高度設定、導覽系統與進場動畫，透過 `assets/live2d/` 提供延遲載入的 Cubism 5 Live2D 看板娘與自由編輯功能，並於 `projects/` 目錄承載獨立網頁應用（WebOS 模擬器、Forza 調教計算器、音樂播放器、長門櫻展示頁）與內嵌遊戲中心平台（`game-center`）。
+天野靜樹個人網站的重構版。純靜態、不需要打包工具，整個資料夾可以直接部署到 GitHub Pages。
 
-## Local Interface & Invariants
-根目錄包含首頁入口檔案 `[index.html]` 與開源授權條款 `LICENSE`，其局部介面、不變量與副作用如下：
-- **外部資源與腳本消費（`[index.html:head-links]`、`[index.html:external-scripts]`、`[index.html:external-globals-consumed]`）**：載入 `assets/images/logo.png`、Google Fonts（`Orbitron`、`Rajdhani`）與本地樣式表（`assets/css/core.css`、`components.css`、`animations.css`），並依序引入 `assets/js/core.js`、`live2d-manager.js`、`navigation.js`、`animations.js`，呼叫 `Core.initBackground`、`Core.storage.get/set`、`Core.BackgroundManager.apply`、`Core.initSmoothScroll`、`Core.initScrollReveal`、`Navigation.init`、`Navigation.pageTransition`、`Animations.init` 與 `Animations.createSakuraEffect`。
-- **DOM 介面與掛鉤（`[index.html:dom-ids-background-nav]`、`[index.html:dom-ids-settings]`、`[index.html:dom-ids-sections-avatar]`、`[index.html:nav-and-project-hooks]`）**：
-  - 導覽與背景：`#particles`、`#navSearch`、主導覽連結（`index.html`、`pages/*.html`、`projects/*/*.html`）及 `.side-nav` 錨點（`#hero`、`#projects`、`#contact`）。
-  - 設定面板：`#headerFixed`、`#headerHeightLabel`、`#headerHeightDesc`、`#headerHeightValue`、`#headerHeight`（50–100 步進 5，預設 75）、`#sideNavTextVisible`、`#themeModeLabel`、`#themeMode`（`dark`/`light`）、`#live2dToggle`、`#backgroundStyle`（11 種樣式選項）、`#animationStrengthLabel`、`#animationStrengthDesc`、`#animationValue`、`#animationStrength`（0–2 步進 1，預設 2）、`#fpsValue`、`#soundEnabled`。
-  - 區段與互動元件：`#hero`、`#avatar-stage`、`#avatar-img`、`#avatar-curtain`、`#curtain-logo`、`#curtain-handle`、`#projects`、`#contact`、`.typewriter-text[data-text]`、`.stat-number[data-target][data-suffix]`、`.contact-link[data-email="hackamsk@gmail.com"]`（搭配 `.copy-btn` 與 `.copy-tooltip`）及 `.project-link` / `.project-card[data-project]`（`nagato-sakura`、`gitHub-repository`、`live2d-portal`）。
-- **局部不變量**：
-  - `[index.html:head-script]`：繪製前 IIFE 於 `localStorage.getItem('theme')` 為空時預設 `data-theme="dark"`，僅於 `headerHeight` 為真值時解析 `parseInt(hh) + 'px'` 設定 `--header-height`，並以 `try/catch` 吞沒儲存與 DOM 例外。
-  - `[index.html:backgroundStyle-binding]`：缺乏 `#backgroundStyle` 時早退；預設值為 `'dom'`；若 `Core.BackgroundManager.apply` 未定義則退回呼叫 `Core.initBackground()`。
-  - `[index.html:animateNumbers]`：透過布林旗標 `hasAnimated` 與 `IntersectionObserver`（`threshold: 0.5`）的 `unobserve()` 確保 `.stat-number` 數字計數動畫僅執行一次；非數值 `data-target`（如 `∞`）直接顯示 `data-suffix`。
-  - `[index.html:project-link-click]`：外部 `http://`/`https://` 連結與 `#` 錨點不攔截；內部頁面連結必呼叫 `e.preventDefault()` 並依序循環 8 種 `exitTypes`（`geometric-warp`、`neon-pulse`、`sweep-wave`、`data-vortex`、`split-apart`、`glitch-tear`、`electron-collapse`、`cube-collapse`），若 `Navigation.pageTransition` 不可用則於 `300ms` 後改以 `window.location.href` 跳轉。
-  - `[index.html:doCopy]`：優先使用 `navigator.clipboard.writeText`，失敗或缺失時退回暫時 `<textarea>` 與 `document.execCommand('copy')`，並於 `1500ms` 後重置 `.copied`、`aria-pressed`、`blur()`、文字選取及提示氣泡狀態。
-  - `[index.html:avatar-curtain-click]` 與 `[index.html:css-pointer-events]`：頭像布幕切換延遲 `400ms` 依 `.active` 狀態交換 `assets/images/avatar-anime.jpg` 與 `assets/images/avatar.jpg`；`.project-card *` 停用指標事件防阻擋點擊，行動端（`<=768px`）`.profile-card` 停用指標事件並僅在互動子元素重啟 `pointer-events: auto`。
-- **局部副作用（`[index.html:head-links]`、`[index.html:head-script]`、`[index.html:DOMContentLoaded-init]`、`[index.html:animateNumbers]`、`[index.html:project-link-click]`、`[index.html:doCopy]`、`[index.html:avatar-curtain-click]`）**：同步讀寫 `localStorage`（`theme`、`headerHeight`、`backgroundStyle`）與 `document.documentElement` 屬性；發出 Google Fonts 與本地資源網路請求；執行 `IntersectionObserver`、`requestAnimationFrame`、`setTimeout`；點擊 `nagato-sakura` 卡片觸發 `Animations.createSakuraEffect(3000)`；操作系統剪貼簿與臨時 `<textarea>`；切換頭像圖片來源與轉場導航。
+## 本機預覽
 
-## Subdirectories & System Boundaries
-- `assets`: [./assets/README.md](./assets/README.md) - 網站核心前端腳本套件（`Core`、`Navigation`、`Animations`、`MarkdownRenderer`、`window.live2dManager`）與 Live2D 看板娘子系統（`waifu-tips.js`、`live2d-framework.js`、`waifu-config.json`、Cubism 執行期函式庫），另包含共用 CSS 與圖片資源。
-- `pages`: [./pages/README.md](./pages/README.md) - 次級靜態頁面群（`about.html`、`experience.html`、`skills.html`），共用 `<head>` 預載腳本與 13 個設定面板 DOM ID，實作區段動畫、Sticky 側欄狀態機與駭客揭露彩蛋。
-- `projects`: [./projects/README.md](./projects/README.md) - 獨立互動應用與遊戲集合，涵蓋 Forza 調教計算器、Game Center 平台與 5 款遊戲／3D 體驗、音樂播放器、長門櫻展示主頁與二次元展示頁，以及 Nagato Sakura WebOS 模擬器。
+```bash
+node tools/serve.mjs
+```
 
-## Global Invariants
-- **跨頁共用設定持久化與繪製前防閃爍（FOUC）契約**：全站 HTML 入口（`index.html`、`pages/*.html`、`projects/` 各頁面）於 `<head>` 優先執行同步 `try/catch` IIFE，讀取 `localStorage` 中的 `theme`（預設 `'dark'`）與 `headerHeight`，預先寫入 `document.documentElement` 的 `data-theme` 屬性與 `--header-height` CSS 變數。
-- **全站外殼腳本依賴順序與 DOM ID 契約**：使用全站外殼的頁面必須先載入 `assets/js/core.js`，再載入 `live2d-manager.js`、`navigation.js`、`animations.js`，並保留 `#particles`、`#navSearch` 及設定面板標準控制項 ID（`#headerFixed`、`#headerHeight`、`#sideNavTextVisible`、`#themeMode`、`#live2dToggle`、`#backgroundStyle`、`#animationStrength`、`#fpsValue`、`#soundEnabled`）。
-- **單一畫布互斥與效能降載**：`Core._createBackgroundManager` 切換背景樣式前必先呼叫 `stop()` 清除前一個全螢幕背景 `<canvas>`；WebGL／2D 遊戲與粒子引擎（如 `Core` DPR 上限 `1.5`、`cyberrace` 與 `particles.js` DPR 上限 `2`、`cyberrace` 與 `wallclimber` 物理步長 `dt <= 0.05s`）均各自設有限幅與可見性節流。
-- **平台內嵌與跳轉協作**：遊戲中心與子遊戲透過 `localStorage` 的 `sidebarCollapsed`／`gcSidebarCollapsed`／`showSidebar` 與 `sessionStorage.skipEntranceAnimation` 同步側邊欄狀態及略過返回大廳時的入場動畫；`game-center.html` 透過 `#game-iframe`（`allow="autoplay; fullscreen; midi"`）承載內嵌模式，`game-shell.js` 則偵測 `window.self !== window.top` 控制殼層是否注入。
+開啟 http://localhost:4173 。這個伺服器的行為和 GitHub Pages 一樣（目錄的 `index.html`、找不到時回傳 `404.html`）。
 
-## Global Side Effects
-- **瀏覽器儲存空間共享狀態**：全站跨頁面透過 `localStorage` 共享設定與狀態（包含 `theme`、`headerHeight`、`backgroundStyle`、`animationStrength`、`backgroundMouseEnabled`、`headerFixed`、`sideNavTextVisible`、`soundEnabled`、`live2dEnabled`、`cursorEffectEnabled`、`showSidebar`、`sidebarCollapsed`、`gcSidebarCollapsed`、`waifu-display`、`live2dQuitEnabled`、`modelId`、`modelTexturesId`、`waifu-custom-layout`、`waifu-tool-layout`、`snakeHighScore`、`pianoWaveformType`、`cyberrace` 紀錄及 `nagato-sakura-webos` 15 組專屬鍵值），並使用 `sessionStorage`（`loaderShown`、`nsLoaderShown`、`skipEntranceAnimation`、`waifu-message-priority`）。
-- **外部 CDN 與第三方網路依賴**：除本機靜態資產（`./assets/`、`.glb`、`.mp3`、`.mp4`、`./data/*.json`）外，各頁面依需求向 Google Fonts、Tailwind CSS CDN、Lucide Icons CDN、Three.js r128／OrbitControls／GLTFLoader CDN、Tween.js、Font Awesome、jQuery、Big.js、GitHub API／`corsproxy.io`（`nagato-sakura` 與 `nagato-sakura-webos`）及 `wttr.in`／`api.allorigins.win`／`nominatim.openstreetmap.org`（`nagato-sakura-webos`）發出網路請求。
-- **全域執行期資源與 Web API**：多數元件於前景維護 `requestAnimationFrame`、`setInterval`、`IntersectionObserver`、`ResizeObserver`、WebGL 上下文、Web Audio `AudioContext`、`Pointer Lock`、`Gamepad` 輪詢與動態 DOM／`<style>` 注入。
+## 架構
 
-## System Verification
-- Run: `<test-command>`
+```
+src/pages/                每一頁的來源，要改頁面就改這裡（見下方「頁面的來源與產生的檔案」）
+index.html, 404.html, profile/, works/, apps/<id>/, robots.txt, sitemap.xml
+                          ← 由 tools/build.mjs 從 src/pages/ 產生，不要手改
+assets/js/data/site.js    全站資料的唯一來源：導覽、聯絡方式、作品清單
+assets/js/app.js          進入點
+assets/js/core/           router.js（不重載換頁）、store.js（設定）、identity.js（身分層解密）
+assets/js/shell/          shell.js（頁首／選單／設定面板，只此一份）、unlock.js（點頭像解鎖真實身分）、mascot.js（看板娘）
+assets/js/pages/          各頁的掛載模組
+assets/js/live2d/         Live2D 作品頁用的模型執行層（puppet.js）與自製繪製器（stage.js）
+assets/js/os/             WebOS：系統本體、檔案系統、視窗管理、外殼與 12 個應用程式（見「WebOS」一節）
+assets/js/home/           全站共用的 WebGL 世界：world.js（常駐畫布與轉場）、scene.js（時間軸與場景）、gate.js（第 03 章觀測者的圓環）、gen.js（點雲生成）、shaders.js
+assets/data/              identity.sealed.json（加密後的真實身分，可以公開）
+private/                  identity.json（真實身分明文）——已列入 .gitignore，絕對不要上傳
+assets/css/               base.css（變數與外殼）、pages.css、home.css、live2d.css、music.css、lore.css、mascot.css（開啟看板娘時才載入）、webos.css、webos-shell.css 與 webos-apps.css（進入 WebOS 時才載入）
+assets/vendor/three/      three.js r187（隨專案提供，不走 CDN）
+assets/vendor/three-r128/ 遊戲用的 three.js r128 與 OrbitControls（原本走 CDN，現在隨專案提供）
+assets/vendor/lucide/     遊戲用的圖示庫（原本走 CDN）
+assets/fonts/             Barlow Condensed、IBM Plex Mono（隨專案提供）
+assets/music/             音樂播放器的音檔（.mp3）與事先算好的頻譜（.bin）
+assets/live2d/            Cubism Core、模型（model/）與網頁用的貼圖（web/）——Live2D 作品頁與看板娘共用
+legacy/                   舊站的獨立作品，原樣保留，由新外殼以內嵌框架載入
+tools/                    只放工具：build.mjs（產生頁面）、serve.mjs（本機預覽）、seal.mjs、music-scan.mjs、live2d-textures.mjs、lore-art.py、make-contour.mjs、patch-legacy.mjs、reskin-games.mjs
+```
+
+### 頁面的來源與產生的檔案
+
+同一頁會在專案裡出現兩次，例如個人檔案：
+
+| 檔案 | 是什麼 | 可以改嗎 |
+|---|---|---|
+| `src/pages/profile.html` | 來源：這一頁的標題、描述與內容 | 可以，改這個 |
+| `profile/index.html` | 產生的成品：來源套上全站共用的 `<head>` 之後的完整網頁，GitHub Pages 實際送出的就是它（網址 `/profile/`） | 不行，下次建置會被覆蓋 |
+
+成品必須放在專案根目錄，因為 GitHub Pages 是照資料夾位置對應網址的。分辨方法：成品的第二行都有 `GENERATED FILE 自動產生，請勿手改 — source 來源: src/pages/…`，寫著它是從哪個來源檔產生的。
+
+`src/pages/` 一頁一個檔案：
+
+| 來源 | 產生 |
+|---|---|
+| `home.html` | `index.html`（首頁） |
+| `profile.html` | `profile/index.html` |
+| `notfound.html` | `404.html` |
+| `works.mjs` | `works/index.html`，以及首頁的作品卡片 |
+| `games.mjs`、`sakura.mjs`、`live2d.mjs`、`music.mjs`、`webos.mjs` | `apps/game-center/`、`apps/nagato-sakura/`、`apps/live2d/`、`apps/music/`、`apps/webos/` |
+| `app.mjs` | 其餘的 `apps/<id>/`（內嵌舊作品的頁面，每款遊戲一頁） |
+
+- `.html` 是直接寫好的內容。檔案開頭的註解是這一頁的標題與描述（`title:`、`desc:` 各一行），其餘原封不動放進成品的 `<main>`。
+- `.mjs` 是「依資料寫出內容」的函式：文字多半在 `assets/js/data/`（`site.js`、`sakura.js`、`live2d.js`、`music.js`），版面在 `.mjs`。
+
+如果直接改了成品，下一次 `node tools/build.mjs` 不會覆蓋它，而是停下來列出被改過的檔案與對應的來源（每個成品的第二行帶有檢查碼）。把修改搬到來源檔之後再建置；確定要捨棄的話用 `node tools/build.mjs --force`。
+
+### 外殼只有一份
+
+頁首、選單、設定面板由 `assets/js/shell/shell.js` 在執行期渲染一次。每個 HTML 檔只有共用的 `<head>` 和自己的 `<main id="view">`。
+
+### 換頁不重新載入
+
+`router.js` 攔截站內連結，抓取目標頁的 HTML，只替換 `<main id="view">`。外殼和 Live2D 的 DOM 不會被動到，所以看板娘換頁時不會重載。每個路由同時也是實體檔案，直接開網址、重新整理、關閉 JavaScript 都能運作。
+
+### 整站是同一個 3D 世界
+
+WebGL 畫布放在外殼裡（`.nx-world`），由 `assets/js/home/world.js` 管理，換頁時不會卸載。各頁面不擁有場景，只負責「駕駛」它：每一格回報時間軸值 `t` 和取景方式。
+
+| 頁面 | 世界停在哪裡 |
+|---|---|
+| 首頁 | 整條時間軸，由捲動控制 |
+| 個人檔案 | 走向觀測者之門的那一段（t 1.93 → 2.4），由捲動控制，眼睛隨閱讀進度睜開 |
+| 作品 | 作品螺旋（t 5.3 → 5.72）。寬螢幕：清單固定在左側，捲動讓螺旋轉到下一件，轉到正面的那一件自動展開；窄螢幕：全部展開、依序排列 |
+| 404 | 第一章的測繪圖 |
+| 作品內嵌頁 | 暫停 |
+
+換頁轉場是同一個世界裡的一次連續飛行，沒有遮罩、沒有變暗、也沒有切換點：
+
+- 觀測者的圓環在 `gate.js`：由內到外是鏡框、齒環、裝甲環（十二片灰黑塗裝的裝甲與十二個維修艙交錯，裝甲上一層水泥灰的凸台以黑色模板字編號）、後方的支承軌與支腳、懸在上方的弧形冠、線稿刻度。配色以黑與深灰為主，裸鋼壓暗，唯一的淺色是少量使用的霧面水泥灰（編號凸台、冠的細邊、支腳護板）；塗裝與水泥的雲斑、針孔由材質著色器裡的實體噪聲產生，不用貼圖。零件全部由幾種形狀（切角的扇形板、車削輪廓、楔形、六角螺栓）程式生成並以 instancing 繪製，沒有外部模型檔；每個會動的部分都由時間軸值決定（`update(rot)`）。
+- `scene.js` 把一格畫面拆成三步：`sample(t)` 算出該時間軸位置的全部數值（鏡頭、材質、粒子），`mix(a, b, k)` 在兩組數值之間內插，`render(P)` 畫出來。
+- 換頁時 `router.js` 先記下目前畫面的狀態（`world.snapshot()`），再呼叫 `world.fly(from)`。之後每一格都畫「出發狀態」與「新頁面要求的狀態」之間的內插，鏡頭和所有物件直接飛過去，不經過中間的章節。
+- 粒子在著色器裡逐顆內插（`uStage` → `uStageB`，進度 `uBlend`），所以任何兩個隊形之間都能直接變形。
+- 舊頁面的文字留在原位淡出，新頁面的文字在飛行後半段淡入，兩者交疊。
+- 飛行時間依鏡頭距離決定（約 1.05–1.95 秒）。首頁右側章節按鈕用的是同一套飛行。
+- 除錯：在主控台把 `world.slow` 設成大於 1 的數字，可以把飛行放慢逐格檢查。
+
+### 畫質與負擔
+
+設定面板的「畫質」決定 3D 世界畫得多細（`scene.js` 開頭）：
+
+| | 高 | 低 |
+|---|---|---|
+| 粒子 | 56,000 | 30,000 |
+| 地形網格 | 240 × 240 | 170 × 170 |
+| 反鋸齒（MSAA） | 4× | 無 |
+| 解析度上限 | 裝置像素比 1.5，總像素約 500 萬 | 裝置像素比 1.25，總像素約 320 萬 |
+
+「自動」在小螢幕、四核心以下或記憶體 4 GB 以下的裝置用低，其餘用高。超過像素上限的螢幕（例如 4K）會以較低的解析度繪製再放大。
+
+世界只在畫面有變化時才以螢幕更新率重畫（捲動、換頁飛行、切換主題）。頁面正在緩動的東西（捲動的收尾、螺旋的轉動）一律算有變化，會畫到停穩為止。畫面停住時只剩環境動態（飄雪、顆粒、日冕的閃動），`world.js` 會降到每秒 30 次重畫。在 144 Hz 的螢幕上，這是靜止時負擔的主要來源：改之前每秒重畫約 145 次，改之後約 29 次。
+
+### 深色與淺色
+
+設定面板的「主題」有深色（預設）與淺色，記在這台裝置上（`localStorage` 的 `theme`）。淺色不是另一套頁面，而是同一個世界換一種畫法：深色是發光的東西浮在黑暗裡，淺色是把同一個世界畫在紙上。
+
+- **3D 世界**：`scene.js` 的每一格畫面多了一個數字 `light`（0 深色 · 1 紙）。兩種畫法之間不同的顏色用 `tint(顏色, 紙上的顏色)` 登記，著色器讀 `uLight`。切換主題時 `world.js` 把它緩動過去，不重建場景，所以是漸變而不是跳切。
+  - 地形：紙色的底、墨色的等高線與格線、琥珀色的計曲線。
+  - 粒子：深色時是疊加的光，紙上是蓋上去的墨（雪是灰塵、神樹是墨與琥珀、螺旋是鉛筆線、日冕是墨與琥珀），點也畫得大一些。
+  - 圓環：材質不變，仍是灰黑機械，只把線稿換成墨色；日蝕的本體兩種畫法都是黑的；05 的黃色海報兩種畫法相同。
+  - 後製：紙上幾乎不壓暗角。
+- **樣式**：顏色都走 `base.css` 的變數，淺色只是在 `:root[data-theme="light"]` 換一組值。除了 `--bg`、`--ink`、`--line` 之外有三個要分清楚：
+  - `--signal`：信號黃當「面」用（按鈕、色塊、粗線），兩種主題都是 `#ffc400`。
+  - `--mark`：信號色當「字與細線」用。深色時就是信號黃；黃字在紙上看不清楚，所以淺色時是較深的琥珀。寫新樣式時，文字用 `--mark`，底色用 `--signal`。
+  - `--veil`：文字與世界之間那層遮罩的顏色，寫成 `rgb(var(--veil) / 透明度)`；深色是近黑，淺色是紙色。
+- **例外**：
+  - WebOS 有自己的外觀設定，它背後的世界固定用深色畫法（`pages/webos.js` 的 `light: 0`），頁首也固定深色。
+  - 遊戲中心的截圖卡片、精選橫幅是「圖片上的文字」，固定深底淺字。
+  - 內嵌的遊戲維持深色外觀（`game-skin.css`）；幀率面板本來就是深色儀器。
+  - 首頁 03、07 章的文字在紙上會壓到圓環、插畫或日蝕本體，所以淺色時帶一圈紙色的光暈。
+
+### 身分層（破解模式）
+
+網站公開顯示的是化名「天野靜樹」。真實身分只以密文形式存在於網站中：
+
+- `private/identity.json`：明文，只留在你的電腦上。
+- `node tools/seal.mjs`：把它加密成 `assets/data/identity.sealed.json`（AES-256-GCM，金鑰由 PBKDF2-SHA256 從 `assets/js/core/seal-key.js` 的固定密語導出）。
+- **這不是保密**：密語就在公開的程式碼裡，任何人點頭像 10 下、或讀原始碼，都能看到真實身分。加密只是讓真實姓名不以明文出現在網頁原始碼和搜尋引擎裡。
+
+解鎖方式：
+
+1. **點頭像**：在個人檔案頁連續點頭像 10 下（兩下之間超過 1 秒就重新計算）。第 4 下起，頭像下方的說明會顯示進度 `DECRYPTING ▮▮▮▮▯▯▯▯▯▯`。
+2. **連結**：網址結尾加 `#key=`（任何值都可以，例如舊的 `https://amanoshizukikun.github.io/profile/#key=存取碼`），打開後自動解密，`#key=…` 會立刻從網址移除。以前放在履歷上的連結照樣有效。
+3. 解鎖過的裝置會記住，下次開啟直接顯示真實身分。個人檔案頁的「重新上鎖」可以復原。
+
+解鎖後，全站標有 `data-id` 的文字會換成真實資料：頁首、首頁大標、個人檔案的姓名／職稱／學歷／信箱、分頁標題。`identity.json` 的欄位：
+
+| 欄位 | 用途 |
+|---|---|
+| `name` | 英文姓名（取代 AMANO SHIZUKI；首頁大標會在第一個空格斷成兩行） |
+| `nameZh` | 中文姓名（取代 天野靜樹） |
+| `role`、`education`、`email` | 取代個人檔案對應欄位 |
+| `rows` | 只在解鎖後出現的額外欄位，`[["標籤", "內容"], …]` |
+| `links` | 只在解鎖後出現的連結，`[["文字", "網址"], …]`（例如履歷 PDF、LinkedIn） |
+| `photo` | 個人檔案頭像換成的照片：`private/` 裡的圖檔名稱（例如 `photo.webp`）。加密時直接嵌進密文，不會變成網站上可以單獨開啟的圖片 |
+
+沒寫的欄位會沿用公開的內容，例如不寫 `email` 就維持頁面上原本的信箱。
+
+修改 `identity.json` 後重新執行 `node tools/seal.mjs`。
+
+注意：部署時只能發佈 git 追蹤的檔案。如果用「整個資料夾上傳」的方式部署，要先排除 `private/`。
+
+### 作品清單
+
+作品只在 `assets/js/data/site.js` 的 `works` 定義一次，作品頁、首頁第 06 章、選單都從這裡來。目前八項：長門櫻計畫、遊戲中心、WebOS、音樂播放器、3D 作品、Live2D 作品、世界觀、GitHub 開源倉庫。
+
+- `src`：有的話會產生 `/apps/<id>/` 內嵌頁。
+- `href`：站外網址（例如 GitHub 開源倉庫）。這一項的每個連結都直接指向它、在新分頁開啟，箭頭顯示為 ↗。作品頁下方的 EXTERNAL 列只放 YouTube 頻道。
+- `items`：這一項底下包含的東西。帶 `src` 的子項目也會有自己的 `/apps/<id>/`（例如遊戲中心裡的每款遊戲）；沒有 `src` 的只是標籤（例如曲名、模型名）。作品頁不列出子項目，每一項只有一個「開啟」按鈕；子項目由各自的頁面（遊戲中心、播放器、Live2D 舞台）呈現。
+- 遊戲不會從作品頁直接開啟：一律進遊戲中心（`/apps/game-center/#<id>` 是遊戲庫裡那一款的詳情頁）再啟動。
+- `native`：這一項是本站自己的頁面（`games`、`sakura`、`live2d`、`music`、`webos`），不是內嵌的舊頁。它底下帶 `id` 的子項目對應那一頁裡的位置：`/apps/<頁面>/#<id>`。
+- 要把某個子項目搬到別的分類（例如 FH6 調教計算器），把它那一行從一個 `items` 剪到另一個即可，然後重新執行 `node tools/build.mjs`。
+
+### 版本戳記
+
+`tools/build.mjs` 會依 `assets/js`、`assets/css`、`src/pages` 的內容算出一個 8 碼的版本戳記，寫進每一頁的 `<main data-build>`，設定面板最下方也看得到（`BUILD xxxxxxxx`）。
+
+換頁時 `router.js` 會比對目標頁的戳記：如果和這個分頁正在執行的版本不同（分頁開著的期間網站被更新了），就改成整頁重新載入，避免舊的程式配上新的頁面。所以**改完程式碼或樣式後也要執行一次 `node tools/build.mjs`**，開著的分頁才會在下一次換頁時自動換成新版。
+
+想確認兩個瀏覽器跑的是不是同一版，比對設定面板最下方的 BUILD 即可。
+
+### 修改內容後
+
+```bash
+node tools/build.mjs
+```
+
+- 改導覽、作品清單、聯絡方式：編輯 `assets/js/data/site.js`
+- 改首頁、個人檔案、404 的文字、標題或描述：編輯 `src/pages/home.html`、`profile.html`、`notfound.html`
+- 改其他頁面的版面：編輯 `src/pages/<頁面>.mjs`；文字在 `assets/js/data/`
+- 改完都要重新執行上面的指令
+
+### 舊作品（legacy/）
+
+`legacy/projects/` 是從舊站複製過來的作品。`tools/patch-legacy.mjs` 會在每個 HTML 插入 `/assets/js/embed.js`：
+
+- 在外殼內嵌時：隱藏作品自己那份舊頁首、選單、設定面板
+- 被直接開啟時：轉址到對應的 `/apps/<id>/`
+
+如果之後從舊站重新複製檔案過來，再執行一次 `node tools/patch-legacy.mjs` 即可；遊戲相關的檔案還要再執行 `node tools/reskin-games.mjs`（見下一節）。
+
+`legacy/` 只留還在執行的東西：五個遊戲與工具、3D 房間、世界觀頁，以及它們載入的舊站共用樣式與腳本（`legacy/assets/`）。已經被本站頁面取代的兩份舊文件——舊遊戲大廳 `game-center/game-center.html` 與舊計畫頁 `nagato-sakura/nagato-sakura.html`——各只剩一個轉址用的空殼（只載入 `embed.js`），因為遊戲的「返回遊戲中心」與世界觀頁的連結仍指向這兩個位址；它們原本的樣式、腳本與圖片已移除。**從舊站重新複製檔案時不要蓋掉這兩個空殼**，否則舊大廳與舊計畫頁會整份回來。
+
+找沒在用的檔案時要注意，有些檔名是程式組出來的，光搜尋檔名會誤判：WebOS 桌布（`wall-<id>.webp`）、音樂頻譜（`<id>.bin`）、Cyber Race 的車輛與賽道（由 `cars_index.json`、`tracks_index.json` 列出）。
+
+### 長門櫻計畫頁面
+
+`/apps/nagato-sakura/` 是本站自己的頁面，不再內嵌舊頁（`legacy/projects/nagato-sakura/` 只剩一個轉到這一頁的空殼）。
+
+- 內容：`assets/js/data/sakura.js`（模組、調度範例、語言核心規格、修復模型、時間軸）。裡面的數字都來自各倉庫的 README 與更新記錄，要更新時改這個檔案再建置。
+- 版面：`src/pages/sakura.mjs`；互動：`assets/js/pages/sakura.js`；樣式：`pages.css` 的 nagato sakura project 區段。
+- 圖片：`assets/img/sakura/`。`role-*.webp` 是各倉庫的發行插圖，`*-off.webp`／`*-on.webp` 是修復前後的對照圖（來源 `Nagato-Sakura-GIF`，裁掉右下角的標籤）。
+
+頁面掛在首頁時間軸的第 05 章（粒子收束成長門櫻 → 黃色海報）：
+
+| 捲動位置 | 時間軸 | 畫面 |
+|---|---|---|
+| 第一屏 | 4.13 → 4.44 | 粒子收束成人形，左下的 COHERENCE 跟著走 |
+| 中段 | 4.44 → 4.54 | 人形在文字後方，畫面壓暗 |
+| 最後一屏 | → 4.76 | 整個畫面翻成黃色海報，文字與頁首改為墨色；立繪改以黃與墨雙色印刷（亮部留底色、陰影走琥珀、線稿與洋裝為墨），不留白色 |
+
+互動元件（沒有 WebGL 時也能用）：
+
+1. **調度示意**：選一句話，圖上會標出她把工作交給哪個模組、途中問過誰。這是示意，不是連線中的模型。
+2. **語言核心**：點選區塊裡的元件，顯示它的作用以及哪一代模型有用；層疊條隨捲動填滿。
+3. **修復前後**：拖動中線比較原圖與修復後；可切換《鏡花》《界律》《斷律》與放大倍率，鍵盤可用方向鍵。
+4. **職能**：寬螢幕時這一段會固定在畫面上，捲動帶動卡片橫向移動；手機則是左右滑動。
+
+### Live2D 作品頁面
+
+`/apps/live2d/` 是本站自己的頁面：模型在頁面上即時運算，捲動決定舞台怎麼呈現她。它是 2021 年那個 Live2D 教學網站的重寫——當年用截圖和影片說明的事，現在由模型本身示範。
+
+- 內容：`assets/js/data/live2d.js`（三個模型的檔案、參數的中文名稱、表情、擺錘名稱、時間軸）。
+- 版面：`src/pages/live2d.mjs`；互動：`assets/js/pages/live2d.js`；樣式：`assets/css/live2d.css`。
+- 執行層：`assets/js/live2d/puppet.js`（透過官方 Cubism Core 驅動模型：姿勢、視線、呼吸、眨眼，以及依 Cubism 演算法移植的 physics3 擺錘）。
+- 繪製器：`assets/js/live2d/stage.js`（自製 WebGL：繪製順序、剪裁遮罩、混合模式，另外能把模型拆開）。角落的看板娘用的是同一套執行層與繪製器（見「看板娘」一節）；在這一頁她會先退場，因為她已經站在舞台上。
+- 貼圖：`assets/live2d/web/<id>-hi.webp`／`-lo.webp` 是各模型貼圖「實際用到的那一塊」，大螢幕載入 hi、小螢幕載入 lo。由 `tools/live2d-textures.mjs` 產生（需要 `npm i sharp --no-save`）。
+- 靜態圖：`assets/img/live2d/<id>.webp`，沒有 WebGL 或 JavaScript 時顯示，是從繪製器擷取的畫面。
+- 作品縮圖：`assets/img/works/*.webp`（1280×800，16:10），是各作品頁在深色主題下的實際畫面；長門櫻計畫、遊戲中心、Live2D 作品是用無頭 Edge 開本機預覽伺服器擷取的。
+
+每一段向舞台要一種畫面（`data-shot`），捲動在相鄰兩段之間內插，往回捲就倒著走：
+
+| 段落 | 畫面 | 可以做的事 |
+|---|---|---|
+| 00 序 | 全身，跟著游標看 | 點她一下會臉紅 |
+| 01 檔案 | 全身＋畫布外框 | 切換三個模型；長門櫻可換裝 |
+| 02 拆圖 | 每個零件飛回貼圖上的位置 | — |
+| 03 網格 | 半身＋三角網格 | 游標移到零件上（觸控用點的）看它的編號、頂點、三角形、繪製順序 |
+| 04 層次 | 繪製順序往旁邊拉開成一疊 | 同上 |
+| 05 參數 | 半身 | 捲過 X／Y／Z 三行她會依序轉頭；表情按鈕；每個參數一條滑桿 |
+| 06 物理 | 全身 | 每組擺錘即時顯示；「推她一下」；風的滑桿；這一段捲得越快風越大 |
+| 07 軌跡 | 全身 | 時間軸隨捲動填滿 |
+| 08 接續 | 全身 | 開關看板娘 |
+
+背景是首頁時間軸的第 04 章（神樹），時間軸隨整頁捲動從 3.30 走到 3.82。
+
+兩種版面，由視窗形狀決定：寬的視窗文字在左、模型在右，整頁捲動；直的視窗（手機、直放的平板）模型固定在上半部，文字在下半部自己的區塊裡捲動。
+
+**新增一個模型**
+
+1. 把模型資料夾放進 `assets/live2d/model/`。
+2. 在 `tools/live2d-textures.mjs` 的清單加一行（貼圖路徑、邊長、實際用到的比例），執行它。
+3. 在 `assets/js/data/live2d.js` 的 `models` 加一筆。`crop` 要和上一步的比例相同；`eyes` 只有在「眼睛開合」的參數不叫 `ParamEyeLOpen`／`ParamEyeROpen` 時才需要；`veil` 是衣服底下的素體零件，拆開時不顯示；`stats` 是沒有 WebGL 時顯示的數字。
+4. 在 `assets/js/data/site.js` 的 Live2D 作品 `items` 加上同一個 `id`，作品頁就會有 `/apps/live2d/#<id>` 的連結。
+5. `node tools/build.mjs`。
+
+**刻意沒有放的東西**
+
+- 各模型衣服底下的素體（`veil`）在拆圖、層次兩種畫面不顯示。
+- 舊教學網站的 T1–T5 分級表、軟體安裝與接案行情。舊站本身只在「07 軌跡」的第一筆放了一個外部連結（`timeline` 的 `link` 欄位，拿掉該欄位連結就消失）；注意舊站的製作名單寫的是本名，而本站預設只顯示筆名。
+- 動作檔。舊站附的 hiyori_m01–10 是 Live2D 官方範例模型的動作，不是自己的作品，已隨舊的看板娘元件一起移除；這一頁只用參數、視線與物理。
+
+### 世界觀頁面
+
+`/apps/nijigen/` 是本站自己的頁面，介紹整個世界（常夜界）。它不用全站的 3D 世界當背景，而是以插畫推進，做法參考遊戲官網：全幅場景、去背立繪、斜切色塊與巨大的字。
+
+- 內容：`assets/js/data/lore.js`——世界、五條法則、十個地域、八個種族、十二位角色、四部十六章的故事、名詞，全部在這一個檔案。要改設定只改它，然後重新建置。
+- 版面：`src/pages/lore.mjs`；互動：`assets/js/pages/lore.js`；樣式：`assets/css/lore.css`。
+- 段落與演出：
+
+| 段落 | 演出 |
+|---|---|
+| 00 序 | 釘住的畫卷，由捲動推進四張插畫。第一張先以點陣印出，再化成插畫；每張在畫面上時緩慢推近，換張時霧合上再散開；最後一張前面站著天野靜樹的立繪 |
+| 01 世界 | 五條法則的條列；最靠近閱讀線的那一條是展開的，旁邊以點陣印出它的字徽 |
+| 02 地域 | 釘住的全幅插畫，捲動從一個地方換到下一個；左側清單可以直接跳 |
+| 03 角色 | 每位角色一張海報：去背全身立繪站在斜切的黃色塊上，一條角色代表色的斜條，地上橫著巨大的英文名；三個分組、一排頭像，方向鍵可切換 |
+| 04 故事 | 釘住的橫向卷軸，捲動把十六章往左拉；正中的那一章展開關鍵情節，背景換成那一章的插畫 |
+| 05 種族 | 與「世界」相同的條列加點陣字徽 |
+| 06 名詞 | 名詞表與出口 |
+
+- `/apps/nijigen/#<角色或地域的 id>` 會直接打開那一位角色或那個地域（例如 `#sakura`、`#latal`）。
+- 沒有 JavaScript、或視窗小於 900 px 時不釘住任何東西：插畫、地域、角色、章節依序排列。
+- 插畫是夜景，印在上面的字不論主題都是淺色；捲到插畫段落時頁首也會暫時換成淺色（`html.lr-dark`）。
+- 圖片在 `assets/img/lore/`，由 `tools/lore-art.py` 從原始 PNG 轉出（需要 Pillow；原始檔不在專案裡）：
+  - `cast-<id>.webp`：去背全身立繪，1024×1536。
+  - `face-<id>.webp`：頭像，由立繪的輪廓自動裁出；輪廓會誤判的（扛著鎚子、拿著法杖）在腳本開頭的 `FACE` 手動指定。
+  - `scene-<id>.webp`：場景，1600×900。十張地域加四張故事場景（`fall` 墜月之夜、`chain` 斷鏈、`rebirth` 御影之子、`welcome` 來訪者）。
+  - 建置時會檢查圖是否存在，不存在就以斜紋色塊代替。
+- 這些圖是 2026-11-18 用 ChatGPT 的圖像生成做的，全部在同一個對話裡依同一段畫風說明產生，所以畫風一致。天野靜樹、天野靜月、長門櫻、三和音四位附上了作者自己的設定圖當參考；其餘角色與所有場景只用文字描述。
+- 設定是 2026-11 重新整理過的版本。長門櫻的個人設定以 `人格設定.md` 為準；侵蝕（病嬌）支線屬於語言模型的訓練設計，不放在公開頁面上。
+
+### 看板娘
+
+設定面板的「看板娘（Live2D）」會讓一個模型站在畫面角落，換頁時不會重新載入。整個系統是 `assets/js/shell/mascot.js` 一個模組：
+
+- **引擎**：和 Live2D 作品頁同一套——`assets/js/live2d/puppet.js`（執行層）＋ `stage.js`（繪製器），底層是官方的 Cubism Core。模型也是同一份清單（`assets/js/data/live2d.js` 的三個模型，用較小的那張貼圖）。開啟之前什麼都不下載。
+- **台詞**：`assets/js/data/mascot.js`。每個模型的問候、閒聊、被碰到、被盯著看的句子都沿用舊站寫的原文；`hints` 把舊的提示句接到新站的元素上（設定鈕、選單鈕、各作品與聯絡連結）；`pages` 是換頁時說的話，這一組是新寫的。
+- **樣式**：`assets/css/mascot.css`，開啟時才載入。
+- **狀態**：off → loading → on；載入失敗會顯示提示與「重試」，不會自己把開關關掉。每次開、關、換模型都拿一張新的號碼牌，晚到的載入結果一律丟棄，所以連按開關或載入到一半離開都不會留下半成品。
+- **讓位**：在 Live2D 作品頁（她已經在舞台上）、音樂播放器（她會壓到播放鍵）與 WebOS（她在那裡是系統助理）會自動退場並停止繪製，名單是 `mascot.js` 開頭的 `AWAY`。分頁切到背景時也會停。
+- **工具列**（滑鼠移到她身上，或點她一下）：說句話、換一位、換裝（只有長門櫻有）、拍照、調整位置與大小、先收起來、關閉。按鈕排在她的方框內側靠畫面邊緣的那一邊，開合由程式控制（滑鼠移入就開、移出後留 0.7 秒；觸控點一下開 6 秒；鍵盤焦點在裡面時不關），不靠 CSS 的 hover——之前按鈕放在方框外面，滑鼠經過中間的空隙時工具列會消失而點不到。
+- **位置與大小**：平常直接拖她就能移動，連點兩下回到右下角。按「調整位置與大小」會出現一個視窗：上面是標題列，下面是她的方框。拖標題列移動；拉視窗的四個角縮放（上方兩個角在標題列的上緣，也就是視窗的頂部），等比例，高度 140–900 px，不會超出視窗。標題列右邊兩個圖示是「還原大小與位置」和「完成」，Esc 也能收起視窗。位置以「剩餘空間的比例」記錄，視窗縮小也不會跑出畫面。
+- **縮放時不閃爍**：改變畫布尺寸會清空畫布，所以每次改尺寸後立刻重畫一次，不等下一幀（`layout()` 的最後一步）。拖曳與縮放的手勢都掛在 `window` 上追蹤，在任何地方放開都會正常結束。
+- **收起**：縮成貼在畫面底部的一個標籤，上面是角色的名字；點它叫她回來。對話框上方也只顯示名字，不顯示模型代號。
+- **記在裝置上的設定**：`live2dEnabled`（開關，沿用舊站的鍵名）、`nxMascotModel`、`nxMascotPos`、`nxMascotSize`（高度，px）、`nxMascotMin`、`nxMascotOutfit_<模型>`。
+
+它取代了舊站帶過來的 live2d-widget 改版（`waifu-tips.js`、官方 Cubism 框架的壓縮檔、Cubism 2 執行期、`waifu-config.json`、`live2d.css`），那些檔案已刪除，原檔還在舊站的資料夾。舊元件的幾個問題是換掉它的原因：
+
+- 用固定的 `id="live2d"` 找畫布，頁面上有同名元素就會啟動失敗；
+- 開啟後只等 3 秒就當作完成，網路慢時會先露出空殼，或開關和畫面對不上；
+- 和 Live2D 作品頁各自載入一次 Cubism Core；
+- 提示詞全部綁在舊站的版面上，在新站幾乎不會觸發；
+- 說話時播放的動作是 Live2D 官方範例模型的動作檔。
+
+長門櫻的服裝參數有四個值，四套都提供（女僕裝、不穿圍裙、只穿圍裙、只穿內衣）。清單是 `assets/js/data/live2d.js` 的 `outfits`：Live2D 作品頁的換裝按鈕和看板娘輪替的順序都從這裡來。
+
+### 音樂播放器
+
+`/apps/music/` 是本站自己的頁面，取代了舊站的 `projects/music-player/`（新站裡的那份複本已刪除，原檔還在舊站的資料夾）。畫面固定一屏、不捲動：世界裡的日蝕是唱盤。
+
+站上其他頁面由捲動位置決定畫面，這一頁由播放位置決定：
+
+- **日冕＝進度**。日冕從 12 點鐘方向順時針畫出來，畫到哪裡歌就播到哪裡，播完剛好一圈（`scene.js` 的 `view.sweep`）。沿著盤緣拖曳就是拖進度。
+- **盤面＝接下來的聲音**。盤面上一圈一圈往外靠近的是接下來 8 秒多的頻譜：一圈是一個瞬間，低頻在下、高頻在上、左右對稱；貼著盤緣的黃色那一圈是此刻正在響的聲音。
+- 兩者都算自「播放位置」與「事先對整個音檔做的分析」，不是即時聽音訊算出來的。所以暫停時畫面停住、往回拖時畫面倒著走、還沒播的地方也看得到。歌不動，畫面就不動。
+
+檔案：
+
+- 內容：`assets/js/data/music.js`（曲名、年份、BPM、類型——都取自音檔本身的標籤——與 YouTube 連結）。
+- 版面：`src/pages/music.mjs`；互動：`assets/js/pages/music.js`；樣式：`assets/css/music.css`。
+- 音檔與封面：`assets/music/<id>.mp3`、`assets/img/music/<id>.webp`。
+- 分析：`node tools/music-scan.mjs`（需要 ffmpeg；不在 PATH 時用環境變數 `FFMPEG` 指定）。它把每首歌解碼後做 FFT，寫出 `assets/music/<id>.bin`（每秒 24 格、每格 56 個對數頻帶、每個值一個位元組）與 `assets/js/data/music-scan.js`（長度與進度條用的響度曲線）。
+- 世界：頁面停在首頁時間軸的第 07 章。`scene.eclipseFor()` 讓頁面算出要把鏡頭平移、拉遠多少，日蝕才會剛好落在版面留給它的格子（`.mu-stage`）裡；`scene.eclipse()` 回報它此刻在畫面上的位置，盤面的畫布就疊在那裡。
+
+操作：播放／暫停（盤面、按鈕、Space 或 K）、上一首／下一首（N／P；播超過 3 秒時「上一首」先回到開頭）、快轉（← → 各 5 秒，或拖進度條、拖盤緣）、音量（↑ ↓、M 靜音）、循環（R：全部／單曲）。音量、靜音與循環方式會記在這台裝置上。支援系統的媒體控制（Media Session：鎖定畫面與鍵盤媒體鍵）。離開這一頁音樂就停。
+
+三種情況下的樣子：
+
+- 沒有 WebGL：沒有日蝕，盤面自己畫出圓盤、刻度與一道黃色的進度弧，其餘相同。
+- 「減少動態」：播放時盤面只留下此刻那一圈，鏡頭不推近；暫停時仍顯示完整的盤面。
+- 沒有 JavaScript：頁面是一份曲目清單，每首歌用瀏覽器內建的播放控制。
+
+**新增一首歌**
+
+1. 音檔放到 `assets/music/<id>.mp3`，封面（正方形）放到 `assets/img/music/<id>.webp`。
+2. 在 `assets/js/data/music.js` 的 `tracks` 加一筆。
+3. `node tools/music-scan.mjs`，再 `node tools/build.mjs`。
+4. 在 `assets/js/data/site.js` 的音樂播放器 `items` 加上同一個 `id`，作品頁就會有 `/apps/music/#<id>` 的連結。
+
+在這一頁看板娘會先隱藏：她站的位置正好是播放按鈕。
+
+### WebOS
+
+`/apps/webos/` 是本站自己的頁面：一套在分頁裡執行的桌面環境（Nagato Sakura WebOS 2.1）。舊的單檔版本（2 萬行的 `nagato-sakura-webos.html`）已經從這個資料夾移除，原始檔還在舊站的資料夾裡。
+
+**結構**（`assets/js/os/`，沒有框架）
+
+| 檔案 | 內容 |
+| --- | --- |
+| `os.js` | 系統本體：開機、應用程式啟動、通知、外觀、快捷鍵、鎖定／重新啟動／離開 |
+| `kernel.js` | 訊息匯流排、系統設定（localStorage 的 `nxos`，一個 JSON）、音效合成、場景與桌布清單 |
+| `vfs.js` | 檔案系統 |
+| `wm.js` | 視窗管理：拖曳、縮放、貼齊（左右半、四個角、最大化）、層級、最小化、工作區、工作總覽、小畫面模式 |
+| `ui.js` | 元素建構、右鍵選單、對話框、檔案選擇器、提示框（系統自己畫，`title` 會被接手）、方向鍵在格狀按鈕間移動 |
+| `fileops.js` | 桌面與檔案總管共用的檔案操作與剪貼簿 |
+| `desktop.js` | 桌面圖示（就是 `/Home/Desktop` 的內容）與右上角的系統狀態 |
+| `shell.js` | 開機畫面、鎖定畫面與睡眠、工作列（開始／搜尋／工作總覽／小工具、應用程式、系統匣）、面板管理（同時只開一個）、工作總覽的工作區列 |
+| `start.js` | 開始選單（「普通」開始樣式）：已釘選（可拖曳排列）、最近使用的檔案、全部應用程式（清單／格狀）、使用者與電源選單 |
+| `search.js` | 搜尋頁：應用程式、檔案、設定、指令，算式直接算出答案；右側預覽 |
+| `tray.js` | 系統匣的兩個面板：快速設定（網路・音量）、通知＋月曆（時鐘）；專注計時（`os.timer`） |
+| `hub.js` | 小工具面板，以及開始畫面（「平板」開始樣式，磁貼可自由移動與分組）；兩者是同一個面板的兩種狀態 |
+| `apps.js` + `apps/` | 12 個應用程式，第一次開啟時才下載 |
+| `lib/expr.js` | 算式解析（計算機、終端機、助理、搜尋頁共用；不用 `eval`） |
+| `lib/lunar.js` | 農曆日期，取自瀏覽器自己的曆法資料（`Intl` 的 chinese 曆）；瀏覽器沒有時月曆就不顯示第二行 |
+
+頁面模組是 `assets/js/pages/webos.js`，樣式是 `assets/css/webos.css`（框架、桌面、視窗、工作列）、`webos-shell.css`（工作列開啟的面板）與 `webos-apps.css`（應用程式），都在進入這一頁時才載入。
+
+**工作列與面板**
+- 左側四個按鈕：開始、搜尋、工作總覽（上面的數字是目前的工作區；滾輪切換，右鍵列出所有工作區）、小工具。工作區不再排在工作列上，從工作總覽切換。
+- 右側：網路／音量／電池是一個按鈕，開啟**快速設定**（六個開關，網路與夜間光有第二層；亮度、音量；有媒體在播放時上方多一張控制卡）。時鐘開啟**通知＋月曆**（通知在上，月曆在下，含農曆；月曆下方是專注計時）。沒有通知圖示，未讀通知是時鐘右上角的一個小標記。
+- **開始樣式**有兩種，在設定 → 工作列與開始選一種，兩者不會同時出現：「普通」是開始選單，「平板」是全螢幕的開始畫面。
+- **開始選單**開啟時不會把游標放進輸入框；直接打字就進入搜尋頁。已釘選的應用程式用拖曳排列，也可以把「全部」裡的應用程式拖上去釘選。右下只有電源一顆按鈕，裡面是鎖定、睡眠、重新啟動、關機。睡眠會鎖定、關掉畫面並停止繪製背景場景。
+- **搜尋頁**（Alt Q）蓋住整個桌面：範圍分頁（Tab 切換）、鍵盤上下選擇、右側顯示選中項目的資訊與動作。沒輸入時列出最近的檔案、釘選的應用程式與常用指令。
+- **小工具面板**（Alt G）從左邊滑出。小工具有三種高度，可新增、移除、調整大小、拖曳標題列排序：時鐘、效能、月曆、便條、儲存空間、正在播放、最近的檔案、場景、問長門櫻、專注計時。面板關著的時候小工具不計時、不量測。
+- **開始畫面**（平板樣式）：左邊是小工具欄（可收起），右邊是所有應用程式的磁貼，分組、橫向捲動，大小隨畫面高度縮放。磁貼可以拖曳到任何位置、拖進別的群組，或拖到最右邊成立新群組（排列存在設定的 `tiles`）；右鍵可以改尺寸（小／寬／大）、移到群組、往前往後移，群組標題右鍵可以改名或恢復預設排列。寬與大的磁貼會顯示即時資訊。手機上只顯示磁貼，直向捲動。
+- 可拖曳的應用程式圖示與磁貼是 `div[role=button]` 而不是 `<button>`：Firefox 不讓 `<button>` 被拖曳。
+- 執行中的應用程式在工作列上停留會列出它的視窗；其餘按鈕顯示提示框。
+- **頁首**：在 WebOS 裡，網站頁首是系統的頂列——和底部工作列同樣的底板（跟著面板色調與玻璃材質），不再透出背景。夜間光與亮度的遮罩掛在 `<body>` 上，蓋住整個畫面，包含頁首。
+- 背景的等高線圖是 `assets/img/os/contour.svg`，由 `node tools/make-contour.mjs` 產生（雜訊場的等值線），以遮罩方式上色。
+
+**桌布是首頁那個世界。** 系統不自己畫背景，而是接手全站共用的 WebGL 世界（`world.drive`）：每個工作區對應首頁時間軸上的一個地點（`SCENES`：邊界、常雪原、觀測者、神樹、訊號），切換工作區就是鏡頭從一個地點飛到另一個（`world.fly`）；游標會讓鏡頭有一點視差，鎖定畫面與工作總覽時鏡頭會後退。桌布也可以換成插畫（`assets/img/os/`，四張）、自己的圖片或純色，這時世界會停止繪製。沒有 WebGL 的瀏覽器自動改用插畫。
+
+**檔案系統**
+- `/Home`（桌面、文件、圖片、音樂、下載）：目錄與文字檔存在 localStorage（`nxosFs`），從電腦匯入的檔案存在 IndexedDB（`nxos`）。全部留在這台裝置，不會上傳。
+- `/System`：唯讀，每次啟動時由網站自己的資料重建（桌布、`data/music.js` 的曲目、快捷鍵說明）。
+- `/Trash`：垃圾桶，記得每個項目原本的位置，可以還原。
+- 桌面圖示、檔案總管與其他應用程式看的是同一棵樹；檔案可以在桌面與視窗之間拖放，也可以從電腦拖進來。
+
+**應用程式**：檔案總管、長門櫻（助理）、瀏覽器、終端機、記事本、計算機、相簿、媒體播放器、繪圖板、遊戲中心、系統監控、設定。
+- 長門櫻用的是和 Live2D 作品頁、看板娘相同的執行層與繪製器（`live2d/puppet.js`、`stage.js`）。她依關鍵字與句型辦事（`apps/sakura.js` 的 `brain`）：開啟應用程式、換場景與桌布、調整系統、切換工作區、計算、找檔案、記事。**沒有接語言模型**，聽不懂的時候會直接說。
+- 遊戲中心把 `site.js` 裡的遊戲各自開在一個視窗，遊玩時間和網站的遊戲中心記在同一處（`core/library.js`）。
+- 瀏覽器能開本站的每一頁，以及允許被嵌入的網站。多數大型網站不允許，所以外部網址一律附上「在新分頁開啟」。在它裡面再開 `/apps/webos/` 不會啟動第二套系統。
+- 系統監控的數字都是在這個分頁量到的；瀏覽器不提供的項目寫「不提供」，不估算。
+- 終端機輸入 `help` 可以看到全部指令；`>`、`>>` 可以把輸出寫進檔案。
+
+**設定存在哪**：`nxos`（系統設定、釘選、小工具與磁貼的排列、便條、最近的檔案與各應用程式的偏好）、`nxosFs`（檔案目錄與文字檔）、IndexedDB `nxos`（匯入的檔案）、sessionStorage `nxosUp`（這個分頁已經開過機，回來時跳過完整開機與鎖定畫面）。設定 → 儲存空間可以重設檔案或設定。
+
+**鍵盤**：Alt A 開始、Alt Q 搜尋、Alt G 小工具、Alt Z 工作總覽、Alt ` 下一個視窗、Alt W 關閉、Alt M 最小化、Alt X 最大化、Alt Shift ←→↑↓ 貼齊、Alt 1–6 工作區、Alt S 顯示桌面、Alt L 鎖定。（焦點在內嵌的網頁或遊戲裡時會被它們接走。）
+
+**要知道的限制**
+- 從網站頁首離開這一頁時，視窗裡尚未儲存的內容不會保留（檔案與設定會）；重新整理或關閉分頁時，有未儲存內容會先詢問。
+- 系統音效預設關閉，是即時合成的，沒有音檔。
+- 舊版有而新版沒有的：天氣小工具與更新檢查（都要連外部服務，天氣還需要訪客的位置）、新聞小工具（原本是假資料）、影片桌布（兩個 mp4 共 17 MB，改成即時場景）、應用商店（原本就只是佔位）、夜燈排程、字型設定、工作列位置。
+- 專注計時只存在記憶體裡：離開這一頁就結束。
+- 作品頁的縮圖（`assets/img/works/webos.webp`）是 2.0 的畫面，工作列左側與現在不同。
+
+**新增應用程式**：在 `apps.js` 加一筆（`id`、名稱、圖示、分類、預設大小、`load`），在 `apps/` 寫一個匯出 `start(os, win, args)` 的模組，把介面放進 `win.body`；收尾工作放進 `win.cleanup`，要攔截關閉就設 `win.onClose`。樣式寫在 `webos-apps.css`，用視窗自己的寬度排版（`@container win`）。
+
+在預覽伺服器（localhost）上，主控台可以用 `nxos` 取得執行中的系統。
+
+### 遊戲中心與遊戲的外觀
+
+遊戲中心（`/apps/game-center/`）是本站自己的頁面，做成遊戲收藏庫（`assets/js/pages/games.js`，版面在 `src/pages/games.mjs`）。資料來自 `site.js` 裡遊戲中心那一項的 `items`（`cat` 分類、`pad` 是否支援手把、`shots` 詳情頁的截圖、`released`、`tags`）。
+
+- **遊戲庫**：精選輪播（7 秒換一款，取得焦點或滑鼠移上去時暫停）、分類標籤、排序（最近遊玩／遊玩時間／遊戲名稱）、篩選組別（遊戲類型／操作方式）、卡片格。
+- **詳情頁**：左邊截圖（可放大），右邊標題、說明、資料、標籤、操作方式（依目前使用的裝置顯示鍵盤或手把，可切換；資料在 `items[].controls`）、最愛與啟動按鈕。`/apps/game-center/#<id>` 會直接開在那一款的詳情頁。
+- **紀錄**：最愛、遊玩時間、最近遊玩存在這台裝置的 localStorage（`assets/js/core/library.js`）。
+- **底部按鍵列**：依最後使用的裝置顯示鍵盤或手把的按鍵，每一項也可以直接點。
+- **版面**（`pages.css` 的 game centre 區段）：寬 ≥ 900px 且高 ≥ 540px 時是「框架」版面，整頁固定在頁首、側欄、底部按鍵列之間，文件本身不捲動；詳情頁一定完整落在框架內（截圖大小由可用高度推算），遊戲庫只有在卡片排不下時才在框架內捲動。其餘（手機、直向平板、很矮的視窗）是上下堆疊、整頁捲動，啟動按鈕黏在畫面底部。
+
+**側欄**（`assets/js/shell/sidebar.js`）屬於外殼，遊戲庫和從遊戲庫開啟的每款遊戲共用同一條：展開／摺疊、遊戲中心、幀數顯示、關閉左側欄。關閉後可從設定面板的「遊戲中心側欄」開回來。遊戲頁面裡原本各自的側欄與 FPS 面板由 `embed.js` 關掉。
+
+**幀數顯示**（`assets/js/shell/osd.js`）是可拖曳的面板，有 FPS／ADV（幀時間與折線）／FULL（1% Low、JS Heap、時間）三種模式，設定面板的「幀率顯示」是同一個開關。
+
+**手把**（標準配置；`assets/js/core/gamepad.js` 把輪詢結果轉成事件）：
+
+| | 遊戲庫 | 詳情頁 |
+|---|---|---|
+| 十字鍵／左搖桿 | 移動焦點（最左欄再往左進入側欄，最上列再往上進入輪播） | 左右切換截圖 |
+| A | 開啟詳情（在輪播上是啟動） | 啟動遊戲 |
+| B | 取消／返回 | 返回遊戲庫 |
+| X | 排序 | 放大截圖 |
+| Y | 篩選 | 切換最愛 |
+| LB／RB | 切換分類 | 切換截圖 |
+| START | 直接啟動焦點上的遊戲 | — |
+
+鍵盤對應：方向鍵、Enter、Esc、X、Y、Q／E。
+
+遊戲內：
+- 任何遊戲裡**長按 VIEW（Back／Select）0.8 秒**回到遊戲庫（外殼負責，畫面下方會出現進度條）。
+- Cyber Race 自己就支援手把。
+- Neon Snake 和 Wall Climber 原本只支援鍵鼠，由 `assets/js/pad-bridge.js` 橋接：選單中用十字鍵／左搖桿選按鈕、A 確認、B 返回；遊戲中 Snake 是方向＋START 暫停＋B 退出，Wall Climber 是左搖桿移動、右搖桿視角、A 跳／攀爬、B 蹲／滑行、X 或 L3 切換跑步、START 暫停。
+- Cyber Piano 與 FH6 調教計算器維持鍵鼠操作。
+
+遊戲本身（Cyber Race、Neon Snake、Cyber Piano、Wall Climber）和 FH6 調教計算器仍是原本的程式，外觀分兩層改成全站風格：
+
+1. `tools/reskin-games.mjs`（改原始檔，只需執行一次，可重複執行）
+   - 把所有色碼依色相搬進全站色盤：青／藍／紫 → 同亮度的暖灰白，洋紅／粉紅／綠／黃 → 訊號黃，紅／橘 → 餘燼橘。畫在 canvas 裡的顏色也一起換。
+   - 移除 Google Fonts，把 CDN 上的 three.js r128、OrbitControls、lucide 改成 `assets/vendor/` 裡的本機檔案。
+   - 拿掉按鈕文字前後的裝飾用 emoji。
+   - Cyber Race 的 3D 世界（賽道、車輛、粒子、物理）沒有動，只換介面。
+2. `assets/css/game-skin.css`（由 `embed.js` 載入到這些頁面）
+   - 方角、細線、無光暈；把遊戲指定的字型名稱對應到本站的字型檔。
+   - 標題畫面改成首頁開場的排法：左下角大字、編號清單。
+
+遊戲裡的「返回遊戲中心」會交給外殼換頁（`embed.js` 攔下框架內的導覽，`pages/app.js` 接收訊息），所以舊大廳不會再出現。
+
+沒有改的：長門櫻的房間（歸在「3D 作品」，維持它自己的粉色風格）。
+
+## 首頁的滾動分鏡
+
+首頁是由捲動位置連續控制的單一 3D 場景，沒有使用影片或圖片序列。捲動位置換算成時間軸值 `t`（章節編號＋章節內進度），鏡頭、物件、後製和文字層全部由 `t` 決定：往下捲前進、往上捲倒退、停止捲動就停在該格。
+
+| 章節 | 內容 |
+|---|---|
+| 01 邊界 | 俯視的等高線測繪圖；捲動時畫面會出現橫向撕裂 |
+| 02 常雪原 | 等高線立起來變成 3D 地形 |
+| 03 觀測者 | 環形機械結構中的眼部特寫，鏡頭穿過瞳孔 |
+| 04 神樹 | 粒子匯聚成神樹 |
+| 05 御影之子 | 粒子凝聚成長門櫻的完整立繪，再轉為黃底海報：立繪以黃黑雙色印刷，白色只留給標題字 |
+| 06 作品 | 角色粒子崩散後重組成 DNA 雙股螺旋，作品面板沿螺旋由上往下排列（01 在最上方），螺旋是有體積的三角網格線框，每捲一段就順時針轉到下一件。捲動只決定「正面是哪一件」，轉過去的那一段由 `home/glide.js` 以固定的緩動完成（作品頁相同），所以滑鼠滾輪一格一格地捲也是平順的，停下時一定正對面板 |
+| 07 訊號 | 日蝕：光環隨捲動順時針畫完，到 100% 時閉合 |
+
+鏡頭關鍵格在 `assets/js/home/scene.js` 的 `CAM` 陣列，每個章節的捲動長度在 `src/pages/home.html` 的 `--len`。
+
+## 目前缺少的素材
+
+以下素材不存在，首頁以程序生成或現有 2D 插畫代替：
+
+- 角色的 3D 模型與機能服版本
+- 分層插畫（角色視差用）
+- 機械艙體、未來建築的 3D 場景模型
+- 長門櫻的高解析眼部特寫
+- Live2D 模型沒有自己的動作檔與表情檔（作品頁的表情是用參數組出來的）
+- 音樂作品只有播放器一頁，個別曲目沒有獨立頁面（`/apps/music/#<id>` 會把那一首放上唱盤）；曲目沒有歌詞或創作說明的文字
+
+## 授權
+
+程式碼：Apache-2.0。three.js 與字型各自的授權檔在 `assets/vendor/three/` 與 `assets/fonts/`。
