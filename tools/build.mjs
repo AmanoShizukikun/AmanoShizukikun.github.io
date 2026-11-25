@@ -20,11 +20,16 @@ const { live2dBody } = await load('live2d.mjs');
 const { musicBody } = await load('music.mjs');
 const { webosBody } = await load('webos.mjs');
 const { loreBody } = await load('lore.mjs');
+const { modelsBody, modelBody } = await load('models.mjs');
+const { roomBody } = await load('room.mjs');
 const live2d = await import(pathToFileURL(path.join(root, 'assets/js/data/live2d.js')).href);
 const music = await import(pathToFileURL(path.join(root, 'assets/js/data/music.js')).href);
 const musicScan = await import(pathToFileURL(path.join(root, 'assets/js/data/music-scan.js')).href);
 const sakura = await import(pathToFileURL(path.join(root, 'assets/js/data/sakura.js')).href);
 const lore = await import(pathToFileURL(path.join(root, 'assets/js/data/lore.js')).href);
+const models = await import(pathToFileURL(path.join(root, 'assets/js/data/models.js')).href);
+const { scan: modelScan } = await import(pathToFileURL(path.join(root, 'assets/js/data/models-scan.js')).href);
+const roomData = await import(pathToFileURL(path.join(root, 'assets/js/data/room.js')).href);
 const { site, nav, works, apps, hrefOf, linkAttrs, gameCats, WORKS_STAGED } = await import(pathToFileURL(path.join(root, 'assets/js/data/site.js')).href);
 
 // Build id: a fingerprint of the site's own code and views. Every page carries it, and the router compares it
@@ -80,7 +85,9 @@ const template = ({ url, page, title, desc, body, src, attrs = '', jsonld = '' }
 <link rel="stylesheet" href="/assets/css/live2d.css">
 <link rel="stylesheet" href="/assets/css/music.css">
 <link rel="stylesheet" href="/assets/css/lore.css">
-<script type="importmap">{"imports":{"three":"/assets/vendor/three/three.module.js"}}</script>
+<link rel="stylesheet" href="/assets/css/models.css">
+<link rel="stylesheet" href="/assets/css/room.css">
+<script type="importmap">{"imports":{"three":"/assets/vendor/three/three.module.js","three/addons/":"/assets/vendor/three/addons/"}}</script>
 <script type="module" src="/assets/js/app.js"></script>${jsonld}
 </head>
 <body>
@@ -98,6 +105,19 @@ const personLd = `
   '@context': 'https://schema.org', '@type': 'Person', name: site.nameZh, alternateName: ['Amano Shizuki', 'AmanoShizukikun'],
   url: site.origin + '/', jobTitle: 'AI Developer', image: site.origin + '/assets/img/og.jpg', sameAs: site.links.map((l) => l.href),
 })}</script>`;
+
+// ---------- 3D works: is every model file there, and does it still match its scan? ----------
+const exists = (url) => fs.existsSync(path.join(root, url.replace(/^\//, '')));
+for (const m of models.models) {
+  const file = path.join(root, models.fileOf(m).replace(/^\//, ''));
+  const seen = modelScan[m.id];
+  if (!/^[a-z0-9-]+$/.test(m.id)) console.warn(`3D 作品 ${m.id}: id 只能用小寫英文、數字與連字號`);
+  if (!fs.existsSync(file)) { console.warn(`3D 作品 ${m.id}: 找不到模型檔 ${models.fileOf(m)}`); continue; }
+  if (!seen || seen.bytes !== fs.statSync(file).size || seen.sum !== createHash('sha1').update(fs.readFileSync(file)).digest('hex').slice(0, 12)) {
+    console.warn(`3D 作品 ${m.id}: 模型檔和掃描結果不一致，請執行 node tools/models-scan.mjs`);
+  }
+  if (!exists(models.posterOf(m))) console.warn(`3D 作品 ${m.id}: 還沒有封面（在本機預覽打開 /apps/models/${m.id}/ 按「設為封面」）`);
+}
 
 // ---------- page list ----------
 const pages = [
@@ -148,6 +168,24 @@ const pages = [
     // an illustration that has not been made yet is not linked: the page shows the 3D world there instead
     src: 'lore.mjs', body: loreBody(lore, (img) => fs.existsSync(path.join(root, 'assets/img', img))), attrs: ` data-app="${esc(w.id)}" data-name="${esc(w.title)}" data-back="/works/"`,
   })),
+  ...works.filter((w) => w.native === 'models').flatMap((w) => [
+    {
+      out: `apps/${w.id}/index.html`, url: `/apps/${w.id}/`, page: 'models',
+      title: `${site.nameZh} — ${w.title}`, desc: w.desc,
+      src: 'models.mjs', body: modelsBody(w, models, modelScan, exists), attrs: ` data-app="${esc(w.id)}" data-name="${esc(w.title)}" data-back="/works/"`,
+    },
+    ...models.models.map((m) => ({
+      out: `apps/${w.id}/${m.id}/index.html`, url: `/apps/${w.id}/${m.id}/`, page: 'model',
+      title: `${site.nameZh} — ${m.title}（3D 作品）`, desc: `${m.title}：${m.desc[0]}`,
+      src: 'models.mjs', body: modelBody(m, models, modelScan, exists), attrs: ` data-app="${esc(w.id)}" data-name="${esc(m.title)}" data-back="/apps/${w.id}/"`,
+    })),
+  ]),
+  // 長門櫻的日常: an item of the 3D works with a page of its own (assets/js/pages/room.js)
+  ...works.flatMap((w) => (w.items || []).filter((i) => i.native === 'room').map((i) => ({
+    out: `apps/${i.id}/index.html`, url: `/apps/${i.id}/`, page: 'room',
+    title: `${site.nameZh} — ${i.title}`, desc: i.desc,
+    src: 'room.mjs', body: roomBody(i, roomData), attrs: ` data-app="${esc(i.id)}" data-name="${esc(i.title)}" data-back="/apps/${w.id}/"`,
+  }))),
   { out: '404.html', url: '/404.html', page: 'notfound', ...view('notfound.html') },
 ];
 

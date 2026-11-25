@@ -22,19 +22,22 @@ assets/js/core/           router.js（不重載換頁）、store.js（設定）�
 assets/js/shell/          shell.js（頁首／選單／設定面板，只此一份）、unlock.js（點頭像解鎖真實身分）、mascot.js（看板娘）
 assets/js/pages/          各頁的掛載模組
 assets/js/live2d/         Live2D 作品頁用的模型執行層（puppet.js）與自製繪製器（stage.js）
+assets/js/models/         3D 作品的模型檢視器（viewer.js）
+assets/js/room/           長門櫻的日常：生活模擬（life.js、agent.js）、她的身體（rig.js、poses.js）與房間（room.js）
+assets/models/<id>/       3D 作品：model.glb 與封面 poster.webp（見「3D 作品頁面」一節）
 assets/js/os/             WebOS：系統本體、檔案系統、視窗管理、外殼與 12 個應用程式（見「WebOS」一節）
 assets/js/home/           全站共用的 WebGL 世界：world.js（常駐畫布與轉場）、scene.js（時間軸與場景）、gate.js（第 03 章觀測者的圓環）、gen.js（點雲生成）、shaders.js
 assets/data/              identity.sealed.json（加密後的真實身分，可以公開）
 private/                  identity.json（真實身分明文）——已列入 .gitignore，絕對不要上傳
-assets/css/               base.css（變數與外殼）、pages.css、home.css、live2d.css、music.css、lore.css、mascot.css（開啟看板娘時才載入）、webos.css、webos-shell.css 與 webos-apps.css（進入 WebOS 時才載入）
-assets/vendor/three/      three.js r187（隨專案提供，不走 CDN）
+assets/css/               base.css（變數與外殼）、pages.css、home.css、live2d.css、music.css、lore.css、models.css、mascot.css（開啟看板娘時才載入）、webos.css、webos-shell.css 與 webos-apps.css（進入 WebOS 時才載入）
+assets/vendor/three/      three.js r187（隨專案提供，不走 CDN）；addons/ 是 3D 作品檢視器用的 GLTFLoader、OrbitControls、RoomEnvironment 與它們依賴的兩個工具模組（同版本，來自 npm 套件 three@0.187.0）
 assets/vendor/three-r128/ 遊戲用的 three.js r128 與 OrbitControls（原本走 CDN，現在隨專案提供）
 assets/vendor/lucide/     遊戲用的圖示庫（原本走 CDN）
 assets/fonts/             Barlow Condensed、IBM Plex Mono（隨專案提供）
 assets/music/             音樂播放器的音檔（.mp3）與事先算好的頻譜（.bin）
 assets/live2d/            Cubism Core、模型（model/）與網頁用的貼圖（web/）——Live2D 作品頁與看板娘共用
 legacy/                   舊站的獨立作品，原樣保留，由新外殼以內嵌框架載入
-tools/                    只放工具：build.mjs（產生頁面）、serve.mjs（本機預覽）、seal.mjs、music-scan.mjs、live2d-textures.mjs、lore-art.py、make-contour.mjs、patch-legacy.mjs、reskin-games.mjs
+tools/                    只放工具：build.mjs（產生頁面）、serve.mjs（本機預覽）、seal.mjs、music-scan.mjs、models-scan.mjs、blend-to-glb.py、glb-optimize.py、live2d-textures.mjs、lore-art.py、make-contour.mjs、patch-legacy.mjs、reskin-games.mjs
 ```
 
 ### 頁面的來源與產生的檔案
@@ -198,7 +201,7 @@ node tools/build.mjs
 
 如果之後從舊站重新複製檔案過來，再執行一次 `node tools/patch-legacy.mjs` 即可；遊戲相關的檔案還要再執行 `node tools/reskin-games.mjs`（見下一節）。
 
-`legacy/` 只留還在執行的東西：五個遊戲與工具、3D 房間、世界觀頁，以及它們載入的舊站共用樣式與腳本（`legacy/assets/`）。已經被本站頁面取代的兩份舊文件——舊遊戲大廳 `game-center/game-center.html` 與舊計畫頁 `nagato-sakura/nagato-sakura.html`——各只剩一個轉址用的空殼（只載入 `embed.js`），因為遊戲的「返回遊戲中心」與世界觀頁的連結仍指向這兩個位址；它們原本的樣式、腳本與圖片已移除。**從舊站重新複製檔案時不要蓋掉這兩個空殼**，否則舊大廳與舊計畫頁會整份回來。
+`legacy/` 只留還在執行的東西：五個遊戲與工具、世界觀頁，以及它們載入的舊站共用樣式與腳本（`legacy/assets/`）。已經被本站頁面取代的兩份舊文件——舊遊戲大廳 `game-center/game-center.html` 與舊計畫頁 `nagato-sakura/nagato-sakura.html`——各只剩一個轉址用的空殼（只載入 `embed.js`），因為遊戲的「返回遊戲中心」與世界觀頁的連結仍指向這兩個位址；它們原本的樣式、腳本與圖片已移除。**從舊站重新複製檔案時不要蓋掉這兩個空殼**，否則舊大廳與舊計畫頁會整份回來。
 
 找沒在用的檔案時要注意，有些檔名是程式組出來的，光搜尋檔名會誤判：WebOS 桌布（`wall-<id>.webp`）、音樂頻譜（`<id>.bin`）、Cyber Race 的車輛與賽道（由 `cars_index.json`、`tracks_index.json` 列出）。
 
@@ -268,6 +271,89 @@ node tools/build.mjs
 - 各模型衣服底下的素體（`veil`）在拆圖、層次兩種畫面不顯示。
 - 舊教學網站的 T1–T5 分級表、軟體安裝與接案行情。舊站本身只在「07 軌跡」的第一筆放了一個外部連結（`timeline` 的 `link` 欄位，拿掉該欄位連結就消失）；注意舊站的製作名單寫的是本名，而本站預設只顯示筆名。
 - 動作檔。舊站附的 hiyori_m01–10 是 Live2D 官方範例模型的動作，不是自己的作品，已隨舊的看板娘元件一起移除；這一頁只用參數、視線與物理。
+
+### 3D 作品頁面
+
+`/apps/models/` 是自製 3D 模型的蒐藏庫，`/apps/models/<id>/` 是每一件的檢視頁。版面像模型分享網站：一格一張封面，點進去是可以旋轉的模型。
+
+**蒐藏庫**：搜尋（名稱、英文名、分類、標籤、工具）、分類、標籤、排序（最新、最舊、名稱、面數、檔案大小）。條件寫在網址上（`?q=&kind=&tag=&sort=`），所以篩選結果可以直接分享，檢視頁的標籤也是連回這裡並套用該標籤。在頁面上按 `/` 會跳到搜尋框。每張卡片：封面、分類、骨架／形狀鍵／動畫的小圖示、名稱、面數、檔案大小、年份。
+
+**檢視頁**：
+- 檢視器（`assets/js/models/viewer.js`）：three.js 的 GLTFLoader 與 OrbitControls，室內環境光加主光與輪廓光，模型底下只有一層影子，背景是頁面自己的漸層（深色或淺色，跟著網站主題，也可以切換）。只在畫面有變化時才繪製，靜止時不耗 GPU。
+- 工具列：自動旋轉、重置視角；顯示方式「無光影／材質／素模／線框／法線」；光線「攝影棚／黃昏／夜晚」；背景；全螢幕。雙擊模型會以點到的地方為旋轉中心。在畫布上可用鍵盤：`A` 旋轉、`R` 重置、`1`–`5` 顯示方式、`L` 光線、`B` 背景、`F` 全螢幕，方向鍵平移。
+- 「無光影」（shadeless）只顯示貼圖本身的顏色，不受光影響，二次元角色本來就是這樣看的；分類是「角色」的作品預設用它，其他預設「材質」。資料裡的 `view.mode` 可以指定。
+- 模型有形狀鍵或動畫時，說明下方會多出滑桿或播放鈕。
+- 右側的「模型資訊」（三角面、頂點、網格、材質、貼圖、骨架、形狀鍵、動畫、檔案大小）全部是從模型檔本身算出來的，不是手寫的。
+- 預設視角：資料裡有 `view.camera` 就用它（比 16:9 窄的畫面會沿同一條線退後，但不會退得比裝下整個模型還遠）；沒有就從斜前方把整個模型框進畫面。
+
+**檔案**
+
+| 檔案 | 內容 |
+|---|---|
+| `assets/js/data/models.js` | 作品清單（手寫）：名稱、分類、日期、標籤、工具、說明、預設視角、連結 |
+| `assets/js/data/models-scan.js` | 從模型檔算出來的數字（由 `tools/models-scan.mjs` 產生，不要手改） |
+| `assets/models/<id>/model.glb` | 模型（放在別處的可以在資料裡用 `file` 指定） |
+| `assets/models/<id>/poster.webp` | 封面，1600×1000 |
+| `src/pages/models.mjs` | 蒐藏庫與檢視頁的版面 |
+| `assets/js/pages/models.js`、`model.js` | 蒐藏庫的篩選；檢視頁的工具列、載入與本機工具 |
+| `assets/css/models.css` | 樣式 |
+| `tools/models-scan.mjs` | 讀每一個 .glb，算出面數、骨架等寫進 `models-scan.js`（不需要安裝任何套件） |
+| `tools/blend-to-glb.py` | 用 Blender 把 .blend 匯出成網頁用的 .glb |
+| `tools/glb-optimize.py` | 不開 Blender，直接把太大的 .glb 縮小（需要 Pillow） |
+
+**新增一件作品**
+
+1. 匯出模型到 `assets/models/<id>/model.glb`（`<id>` 只用小寫英文、數字與連字號，它也是網址）。從 Blender 匯出可以用：
+   ```
+   blender -b 作品.blend --python tools/blend-to-glb.py -- assets/models/<id>/model.glb
+   ```
+   這會把大於 4K 的貼圖縮到 4K、貼圖存成 WebP、只匯出畫面上看得到的物件，並帶上骨架、形狀鍵與動畫；不會修改 .blend。選項：`--max-texture 2048`、`--quality 85`、`--all`（連隱藏的物件也匯出）。自己從 Blender 選單匯出也可以，格式選 glTF Binary（.glb），**不要開 Draco 壓縮**（檢視器沒有附解碼器）。
+2. 在 `assets/js/data/models.js` 的 `models` 加一筆（欄位說明在檔案開頭）。
+3. `node tools/models-scan.mjs`：算出面數、骨架、檔案大小等。
+4. `node tools/serve.mjs`，打開 `http://localhost:4173/apps/models/<id>/`。這兩個按鈕只在本機預覽出現：
+   - 調好角度後按「設為封面」：目前的畫面（含背景，不含工具列）會存成 `assets/models/<id>/poster.webp`。
+   - 「複製視角」：把目前的鏡頭複製成 `camera: { … }`，貼進這一件的 `view`，它就成為開啟時的視角。
+5. `node tools/build.mjs`。建置時會提醒：找不到模型檔、模型檔改過但沒有重新掃描、還沒有封面。
+
+改了模型檔之後要重跑第 3 步；想換封面就重做第 4 步再建置。
+
+**縮小一個太大的 .glb**（已經是 .glb、不想開 Blender 時）：
+```
+python tools/glb-optimize.py 原檔.glb assets/models/<id>/model.glb --max-texture 2048 --strip-animations --drop-morph-normals
+```
+貼圖縮到 2K 並轉成 WebP、只動到一部分頂點的形狀鍵改存成只記那些頂點、骨架權重與法線等改用較小的格式；`--strip-animations` 拿掉動畫（例如測試用的），`--drop-morph-normals` 拿掉形狀鍵對法線的影響（無光影時用不到）。
+
+**現有作品**（2026-11-21）：長門櫻（`Downloads\Sakura_v48_ExtendedInnerCorners.glb`，用上面那行從 98.9 MB 縮到 14.1 MB：45 張 8K 以下的貼圖縮成 2K、拿掉 21 段測試動畫與形狀鍵的法線）與長門櫻的房間。
+
+**本機預覽才有的寫入**：`tools/serve.mjs` 只接受一種寫入——`POST /__models/<id>/poster`，內容必須是 WebP、`<id>` 必須在 `models.js` 裡、請求必須來自本機預覽的頁面，而且只會寫到 `assets/models/<id>/poster.webp`。GitHub Pages 上沒有這個功能，按鈕也不會出現。
+
+### 長門櫻的日常（房間生活模擬）
+
+`/apps/ns-room/` 是長門櫻住在她房間裡的生活模擬（取代了舊的房間導覽，網址沿用）。3D 作品頁是「看模型」；這一頁是「看她過日子」：用的是同一個房間模型和同一個角色模型。
+
+**玩法**
+- 她照自己的需求過日子：精力、心情、陪伴、舒適、求知五項會隨時間下降，她會自己挑最能補回最缺那一項的事去做——累了去睡、無聊了看書或用筆電、寂寞了等你。深夜比較會去睡；剛做過的事比較不會馬上再做；也帶一點隨機，所以每次不一樣。
+- **點家具**：請她做事（床：睡覺、小睡、抱抱枕、看書、看窗外；書桌：用筆電、寫筆記；書櫃：看書；衣櫃：整理；地毯：伸展；窗戶：看窗外）。請求排在左上角，可以取消；她會先放下手邊的事（坐著的會先起身）。
+- **點她**：打招呼、摸摸頭、聊天、叫她去休息；她睡著時可以叫醒她（叫醒後一個半小時內不會又回去睡）。**點地板**：請她走過去。
+- **時間**：這裡的一分鐘是現實的一秒（1×），還有快轉與最快（4×、12×）和暫停；空白鍵、1、2、3。第一次來的時間跟著你的時鐘；她的狀態、時間與日記存在這台裝置的 localStorage（`nxRoom`）。
+- 白天、黃昏、夜晚的光不同：窗外的天色、陽光、天花板燈（她醒著的晚上會開）、檯燈（晚上在書桌時）、筆電螢幕；鬧鐘的指針跟著遊戲時間走。
+
+**她怎麼動**：角色模型沒有動畫檔，所有動作都是程式擺出來的（`assets/js/room/rig.js`）。一個姿勢只寫「幾根骨頭要指向哪裡」與幾個額外轉動，例如手臂往下、大腿往前；其餘骨頭維持原樣，換姿勢時平滑過渡。走路、坐下、躺下、跪坐、抱枕頭、看書、打字、寫字、伸懶腰、揮手、被摸頭……都在 `assets/js/room/poses.js`。臉是形狀鍵：會眨眼、說話時對口形，表情跟著在做的事（睡覺閉眼、被摸頭瞇眼、耳朵放鬆）。坐下時裙子會往前蓋住大腿，躺下時往內收。她用「無光影」材質（貼圖原色），再依房間的光調色，晚上會暗、開燈會暖。
+
+**檔案**
+
+| 檔案 | 內容 |
+|---|---|
+| `assets/js/data/room.js` | 需求、活動（地點、姿勢、補多少、做多久、台詞）、和她互動的方式、家具的選單、台詞——要加活動或改台詞都改這裡 |
+| `assets/js/room/life.js` | 時鐘、需求、她怎麼決定下一件事、你的請求佇列、日記、存檔 |
+| `assets/js/room/agent.js` | 把決定變成行動：走過去、轉身、拿書、坐下或上床、做、起身；你跟她互動時她停下來面向鏡頭 |
+| `assets/js/room/rig.js`、`poses.js` | 她的身體：解算姿勢、表情、說話、材質調色、點擊判定 |
+| `assets/js/room/room.js` | 房間：依 Blender 裡的物件名稱把網格分成家具、每個活動的位置（從家具本身量出來）、10 公分格子的走路地圖與尋路、時段光線、鬧鐘 |
+| `src/pages/room.mjs`、`assets/js/pages/room.js`、`assets/css/room.css` | 版面、場景與介面 |
+
+**加一個活動**：在 `data/room.js` 的 `activities` 加一筆（用現有的地點與姿勢就不用寫程式），再把它放進某件家具的 `actions`。需要新的位置就在 `room/room.js` 的 `spots` 加（位置可以用家具的包圍盒算）；需要新的姿勢就在 `room/poses.js` 加一個函式。
+
+**本機測試**：預覽伺服器上 `window.nsroom` 可以操作（`nsroom.life.queue.push('read')`、`nsroom.agent.interrupt()`、`nsroom.setSpeed(3)`、`nsroom.step(1/30)` 在預覽面板隱藏、畫面不更新時手動推進一格）。
 
 ### 世界觀頁面
 
@@ -474,7 +560,7 @@ node tools/build.mjs
 
 遊戲裡的「返回遊戲中心」會交給外殼換頁（`embed.js` 攔下框架內的導覽，`pages/app.js` 接收訊息），所以舊大廳不會再出現。
 
-沒有改的：長門櫻的房間（歸在「3D 作品」，維持它自己的粉色風格）。
+長門櫻的房間原本也是這裡的舊作品（Three.js r128 的房間導覽），2026-11-21 換成本站自己的頁面「長門櫻的日常」，舊檔案已移除（git 紀錄裡還有）。
 
 ## 首頁的滾動分鏡
 
@@ -486,7 +572,7 @@ node tools/build.mjs
 | 02 常雪原 | 等高線立起來變成 3D 地形 |
 | 03 觀測者 | 環形機械結構中的眼部特寫，鏡頭穿過瞳孔 |
 | 04 神樹 | 粒子匯聚成神樹 |
-| 05 御影之子 | 粒子凝聚成長門櫻的完整立繪，再轉為黃底海報：立繪以黃黑雙色印刷，白色只留給標題字 |
+| 05 御影之子 | 粒子凝聚成長門櫻的完整立繪，再轉為黃底海報：立繪以黃黑雙色印刷，白色只留給標題字。直立的螢幕（手機、直拿的平板）上鏡頭不退遠，她站得和桌機一樣大，文字壓在她的下半身上，底下墊一層漸層（海報時是黃色）；橫拿的平板也稍微拉近（`scene.js` 的 `upright`、`beside`） |
 | 06 作品 | 角色粒子崩散後重組成 DNA 雙股螺旋，作品面板沿螺旋由上往下排列（01 在最上方），螺旋是有體積的三角網格線框，每捲一段就順時針轉到下一件。捲動只決定「正面是哪一件」，轉過去的那一段由 `home/glide.js` 以固定的緩動完成（作品頁相同），所以滑鼠滾輪一格一格地捲也是平順的，停下時一定正對面板 |
 | 07 訊號 | 日蝕：光環隨捲動順時針畫完，到 100% 時閉合 |
 

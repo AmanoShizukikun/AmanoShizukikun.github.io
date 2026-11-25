@@ -391,11 +391,17 @@ export async function createScene(canvas, { quality = 'high' } = {}) {
     const fit = clamp01((aspect - 1.05) / 0.2) * Math.min(1, aspect / 1.78);
     const seat = (1 - seated * (1 - fit)) * (view && view.seat != null ? view.seat : 1);
     const mid = clamp01((1.6 - aspect) / 0.6) * seated;
+    // Chapter 05 on phones and tablets: she is a tall subject, and the pull-backs above and below (`mid`, `narrow`)
+    // exist for wide ones — with them she would stand small above the copy. Upright screens (copy below her) drop
+    // them and come in closer; landscape tablets (copy beside her) only come in a little.
+    const close = seated * (1 - smooth(4.93, 5.25, t));
+    const upright = clamp01((1.05 - aspect) / 0.25) * close;
+    const beside = mid * close * (1 - upright);
     camera.position.set(cam[0] * seat, cam[1], cam[2]);
     lookAt.set(cam[3] * seat, cam[4], cam[5]);
-    if (mid > 0) camera.position.lerp(lookAt, -mid * 0.3);
+    if (mid > 0) camera.position.lerp(lookAt, -mid * 0.3 * (1 - upright) + beside * 0.25);
     if (narrow > 0) {
-      camera.position.lerp(lookAt, -narrow * cam[7]);
+      camera.position.lerp(lookAt, -narrow * cam[7] * (1 - upright));
       // portrait: lift the eclipse into the upper half, clear of the copy
       const up = narrow * smooth(6.0, 6.36, t) * 80;
       camera.position.y -= up; lookAt.y -= up;
@@ -403,7 +409,7 @@ export async function createScene(canvas, { quality = 'high' } = {}) {
     if (view && view.pull) camera.position.lerp(lookAt, -view.pull);
     P.px = camera.position.x; P.py = camera.position.y; P.pz = camera.position.z;
     P.lx = lookAt.x; P.ly = lookAt.y; P.lz = lookAt.z;
-    P.fov = cam[6] + narrow * 14;
+    P.fov = cam[6] + narrow * 14 * (1 - upright);
     P.shift = view ? view.shift || 0 : 0;
     P.lift = view ? view.lift || 0 : 0;
 

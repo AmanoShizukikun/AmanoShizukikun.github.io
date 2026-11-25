@@ -31,7 +31,7 @@ export const nav = [
 //   img    capture under /assets/img/ (null → a drawn placeholder is used)
 //   items  what the entry contains. With `src` an item is an application of its own (→ /apps/<id>/);
 //          an item whose id equals its parent's opens the parent; without either it is just a label.
-//   native a page of the site itself instead of an embedded document ('games', 'sakura', 'live2d', 'music', 'webos', 'lore')
+//   native a page of the site itself instead of an embedded document ('games', 'sakura', 'live2d', 'music', 'webos', 'lore', 'models')
 export const works = [
   {
     id: 'nagato-sakura', title: '長門櫻計畫', en: 'NAGATO SAKURA PROJECT', kind: 'AI · LLM', year: '2021—',
@@ -120,11 +120,15 @@ export const works = [
     items: [{ id: 'sakura-room', title: '長門桜の部屋', note: '2026' }, { id: 'dream-mirror', title: '夢界鏡廻', note: 'Intro · 2025' }],
   },
   {
-    id: 'ns-room', title: '3D 作品', en: '3D WORKS', kind: 'WebGL · 3D', year: '2026',
-    desc: '以 Three.js 製作的 3D 場景。目前收錄可自由走訪、切換時段與視角的房間導覽。',
-    tech: ['Three.js', 'glTF'],
-    src: '/legacy/projects/game-center/games/nsroom/nsroom.html', img: 'works/room.webp',
-    items: [{ id: 'ns-room', title: '長門櫻的房間', note: '3D 房間導覽' }],
+    // a page of the site itself: the gallery (assets/js/pages/models.js) and one viewer page per model
+    // (/apps/models/<id>/, assets/js/pages/model.js); the models are listed in data/models.js. The item is 長門櫻的日常,
+    // a life simulation in her room (a page of the site too: assets/js/pages/room.js, data in data/room.js), at the
+    // address the old room tour had (/apps/ns-room/).
+    id: 'models', title: '3D 作品', en: '3D WORKS', kind: 'WebGL · 3D', year: '2026',
+    desc: '自製 3D 模型的蒐藏庫。每一件都在瀏覽器裡即時運算：可以旋轉、縮放，換成素模、線框或法線看它的結構，也看得到面數與骨架。',
+    tech: ['Blender', 'Three.js', 'glTF'],
+    src: null, native: 'models', img: 'works/models.webp',
+    items: [{ id: 'ns-room', title: '長門櫻的日常', en: 'A DAY WITH SAKURA', note: '生活模擬', native: 'room', desc: '長門櫻住在她的房間裡：累了去睡、無聊了看書或用筆電、寂寞了等你來。點家具可以請她做事，點她可以打招呼、摸摸頭、陪她聊天。' }],
   },
   {
     // a page of the site itself (assets/js/pages/live2d.js, content in data/live2d.js): the models run live on it.

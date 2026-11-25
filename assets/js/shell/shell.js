@@ -8,7 +8,8 @@ import { initSidebar } from './sidebar.js';
 import { initOsd } from './osd.js';
 
 const ICON = {
-  gear: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/></svg>',
+  // a six-tooth gear with flat-topped teeth around a hex bore (the old one, a dot with eight rays, read as "brightness")
+  gear: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.93 5.63L10.13 2.79L13.87 2.79L14.07 5.63A6.7 6.7 0 0 1 16.48 7.02L19.04 5.77L20.91 9.02L18.55 10.61A6.7 6.7 0 0 1 18.55 13.39L20.91 14.98L19.04 18.23L16.48 16.98A6.7 6.7 0 0 1 14.07 18.37L13.87 21.21L10.13 21.21L9.93 18.37A6.7 6.7 0 0 1 7.52 16.98L4.96 18.23L3.09 14.98L5.45 13.39A6.7 6.7 0 0 1 5.45 10.61L3.09 9.02L4.96 5.77L7.52 7.02A6.7 6.7 0 0 1 9.93 5.63ZM12 9.3L14.34 10.65L14.34 13.35L12 14.7L9.66 13.35L9.66 10.65Z"/></svg>',
   menu: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18M3 12h18M3 17h12"/></svg>',
   back: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H5M11 5.5 4.5 12l6.5 6.5"/></svg>',
   chev: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5.5 15.5 12 9 18.5"/></svg>',
@@ -146,7 +147,7 @@ function activeNav(root) {
   const here = root.querySelector('[data-app-title]');
   router.after((page, main) => {
     // pages below the works index (an application, the game centre, the project page) get the back control and their name in the bar
-    const sub = page === 'app' || page === 'games' || page === 'sakura' || page === 'live2d' || page === 'music' || page === 'webos' || page === 'lore';
+    const sub = page === 'app' || page === 'games' || page === 'sakura' || page === 'live2d' || page === 'music' || page === 'webos' || page === 'lore' || page === 'models' || page === 'model' || page === 'room';
     document.documentElement.classList.toggle('nx-sub', sub);
     back.setAttribute('href', main.dataset.back || '/works/');
     here.textContent = sub ? main.dataset.name || '' : '';
