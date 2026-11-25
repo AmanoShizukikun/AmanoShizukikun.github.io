@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- GENERATED FILE 自動產生，請勿手改 — source 來源: src/pages/app.mjs — rebuild 重建: node tools/build.mjs · 3a876089 -->
+<!-- GENERATED FILE 自動產生，請勿手改 — source 來源: src/pages/room.mjs — rebuild 重建: node tools/build.mjs · c6e8dfee -->
 <html lang="zh-Hant-TW" data-theme="dark">
 <head>
 <meta charset="utf-8">
@@ -8,15 +8,15 @@
 (function(){try{var d=document.documentElement,m=window.WebGL2RenderingContext&&matchMedia("(min-width: 900px) and (min-aspect-ratio: 5/4) and (min-height: 560px)");if(!m)return;var s=function(){d.classList.toggle('wk-staged',m.matches&&!d.classList.contains('no-gl'));};s();m.addEventListener('change',s);}catch(e){}})();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>天野靜樹 — 3D 作品</title>
-<meta name="description" content="以 Three.js 製作的 3D 場景。目前收錄可自由走訪、切換時段與視角的房間導覽。">
+<title>天野靜樹 — 長門櫻的日常</title>
+<meta name="description" content="長門櫻住在她的房間裡：累了去睡、無聊了看書或用筆電、寂寞了等你來。點家具可以請她做事，點她可以打招呼、摸摸頭、陪她聊天。">
 <meta name="author" content="天野靜樹">
 <meta name="theme-color" content="#0b0c0d">
 <link rel="canonical" href="https://amanoshizukikun.github.io/apps/ns-room/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AMANO SHIZUKI">
-<meta property="og:title" content="天野靜樹 — 3D 作品">
-<meta property="og:description" content="以 Three.js 製作的 3D 場景。目前收錄可自由走訪、切換時段與視角的房間導覽。">
+<meta property="og:title" content="天野靜樹 — 長門櫻的日常">
+<meta property="og:description" content="長門櫻住在她的房間裡：累了去睡、無聊了看書或用筆電、寂寞了等你來。點家具可以請她做事，點她可以打招呼、摸摸頭、陪她聊天。">
 <meta property="og:url" content="https://amanoshizukikun.github.io/apps/ns-room/">
 <meta property="og:image" content="https://amanoshizukikun.github.io/assets/img/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -29,18 +29,84 @@
 <link rel="stylesheet" href="/assets/css/live2d.css">
 <link rel="stylesheet" href="/assets/css/music.css">
 <link rel="stylesheet" href="/assets/css/lore.css">
-<script type="importmap">{"imports":{"three":"/assets/vendor/three/three.module.js"}}</script>
+<link rel="stylesheet" href="/assets/css/models.css">
+<link rel="stylesheet" href="/assets/css/room.css">
+<script type="importmap">{"imports":{"three":"/assets/vendor/three/three.module.js","three/addons/":"/assets/vendor/three/addons/"}}</script>
 <script type="module" src="/assets/js/app.js"></script>
 </head>
 <body>
 <a class="nx-skip" href="#view">跳到主要內容</a>
 <noscript><nav class="nx-noscript"><a href="/">首頁</a> · <a href="/profile/">檔案</a> · <a href="/works/">作品</a></nav></noscript>
-<main id="view" tabindex="-1" data-build="7d453c64" data-page="app" data-title="天野靜樹 — 3D 作品" data-desc="以 Three.js 製作的 3D 場景。目前收錄可自由走訪、切換時段與視角的房間導覽。" data-src="/legacy/projects/game-center/games/nsroom/nsroom.html" data-app="ns-room" data-name="3D 作品" data-back="/works/">
-<div class="app">
-  <h1 class="nx-sr">3D 作品 3D WORKS</h1>
-  <div class="app-stage" data-app-stage>
-    <noscript><p class="app-nojs">這個作品需要 JavaScript。<a href="/legacy/projects/game-center/games/nsroom/nsroom.html">直接開啟</a>　<a href="/works/">回到作品</a></p></noscript>
+<main id="view" tabindex="-1" data-build="6673010f" data-page="room" data-title="天野靜樹 — 長門櫻的日常" data-desc="長門櫻住在她的房間裡：累了去睡、無聊了看書或用筆電、寂寞了等你來。點家具可以請她做事，點她可以打招呼、摸摸頭、陪她聊天。" data-app="ns-room" data-name="長門櫻的日常" data-back="/apps/models/">
+<div class="rm" id="rm">
+  <div class="rm-stage" data-rm="stage">
+    <canvas class="rm-canvas" data-rm="canvas" tabindex="0" aria-label="長門櫻的房間。點家具可以請她做事，點她本人可以跟她互動；拖曳轉動鏡頭，滾輪縮放。"></canvas>
+    <div class="rm-layer" aria-hidden="false">
+      <i class="rm-mark" data-rm="mark" hidden></i>
+      <p class="rm-bubble" data-rm="bubble" hidden></p>
+      <div class="rm-menu" data-rm="menu" role="menu" hidden></div>
+    </div>
+
+    <div class="rm-hud" data-rm="hud" hidden>
+      <section class="rm-who" aria-label="長門櫻">
+        <img src="/assets/img/room/sakura.webp" alt="" width="160" height="160">
+        <div>
+          <p class="rm-name">長門櫻<small>NAGATO SAKURA</small></p>
+          <p class="rm-doing" data-rm="doing" aria-live="polite">—</p>
+          <p class="rm-mood"><i data-rm="dot"></i><span data-rm="mood">—</span></p>
+        </div>
+      </section>
+      <ol class="rm-queue" data-rm="queue" aria-label="你請她做的事"></ol>
+
+      <section class="rm-clock" aria-label="時間">
+        <p class="rm-time"><b data-rm="time">00:00</b><span data-rm="day">DAY 1</span></p>
+        <div class="rm-speed" role="radiogroup" aria-label="時間速度"><button type="button" role="radio" data-speed="0" aria-checked="false" title="暫停（空白鍵）" aria-label="暫停"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg></button><button type="button" role="radio" data-speed="1" aria-checked="false" title="一般速度（1）" aria-label="一般速度"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l10 7-10 7Z"/></svg></button><button type="button" role="radio" data-speed="2" aria-checked="false" title="快轉（2）" aria-label="快轉"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5l8 7-8 7Z M12 5l8 7-8 7Z"/></svg></button><button type="button" role="radio" data-speed="3" aria-checked="false" title="最快（3）" aria-label="最快"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5l7 7-7 7Z M9 5l7 7-7 7Z M16 5l7 7-7 7Z"/></svg></button></div>
+      </section>
+
+      <section class="rm-needs" aria-label="她的需求">
+        <div class="rm-need" data-need="energy"><span>精力</span><i><b></b></i><em>—</em></div>
+        <div class="rm-need" data-need="fun"><span>心情</span><i><b></b></i><em>—</em></div>
+        <div class="rm-need" data-need="social"><span>陪伴</span><i><b></b></i><em>—</em></div>
+        <div class="rm-need" data-need="comfort"><span>舒適</span><i><b></b></i><em>—</em></div>
+        <div class="rm-need" data-need="mind"><span>求知</span><i><b></b></i><em>—</em></div>
+      </section>
+
+      <section class="rm-log" aria-label="日記"><h2>日記<small>DIARY</small></h2><ol data-rm="log"></ol></section>
+
+      <div class="rm-tools">
+        <button type="button" data-act="follow" aria-pressed="false" title="鏡頭跟著她（F）">跟著她</button>
+        <button type="button" data-act="view" title="重置鏡頭（R）">重置鏡頭</button>
+        <button type="button" data-act="help" aria-expanded="false">玩法</button>
+      </div>
+    </div>
+
+    <div class="rm-help" data-rm="help" hidden>
+      <h2>長門櫻的日常</h2>
+      <p>這是她的房間。她會照自己的需求過日子：累了去睡、無聊了看書或用筆電、寂寞了等你來。</p>
+      <ul>
+        <li><b>點家具</b>：請她做事，例如睡覺、看書、看窗外。請求會排在左上角，可以取消。</li>
+        <li><b>點她</b>：打招呼、摸摸頭、聊天，或叫她去休息。她睡著時可以叫醒她。</li>
+        <li><b>點地板</b>：請她走過去。</li>
+        <li><b>時間</b>：右上角暫停或快轉（空白鍵、1、2、3）。這裡的一分鐘是一秒；她的狀態會記在這台裝置上。</li>
+        <li><b>鏡頭</b>：拖曳轉動、滾輪或雙指縮放，右鍵拖曳平移；「跟著她」讓鏡頭追著她走。</li>
+      </ul>
+      <button type="button" class="hm-cta" data-act="help-close">開始<b aria-hidden="true">→</b></button>
+    </div>
+
+    <div class="rm-load" data-rm="load" role="status">
+      <p data-rm="msg">正在走進她的房間</p>
+      <i><b data-rm="bar"></b></i>
+      <span data-rm="bytes"></span>
+    </div>
   </div>
+
+  <section class="rm-about">
+    <p class="pg-kicker">3D WORKS / LIFE</p>
+    <h1 class="rm-h">長門櫻的日常<small>A DAY WITH SAKURA</small></h1>
+    <p>長門櫻住在她的房間裡：累了去睡、無聊了看書或用筆電、寂寞了等你來。點家具可以請她做事，點她可以打招呼、摸摸頭、陪她聊天。</p>
+    <img src="/assets/models/ns-room/poster.webp" alt="長門櫻的房間" width="1600" height="1000" loading="lazy">
+    <p><a class="hm-cta" href="/apps/models/">看 3D 作品蒐藏庫<b aria-hidden="true">→</b></a></p>
+  </section>
 </div>
 </main>
 </body>

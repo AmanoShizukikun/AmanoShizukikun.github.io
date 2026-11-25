@@ -1,0 +1,120 @@
+/* ============================================================
+   room.css — 長門櫻的日常 (/apps/ns-room/), a life simulation in her room
+   Markup: src/pages/room.mjs · behaviour: assets/js/pages/room.js
+   ============================================================ */
+.rm { position: relative; }
+.rm-stage { position: relative; height: 100vh; height: 100dvh; overflow: hidden; background: var(--bg); }
+.rm-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: none; outline: none; touch-action: none; }
+.rm--ui .rm-canvas { display: block; }
+.rm-canvas:focus-visible { box-shadow: inset 0 0 0 2px var(--signal); }
+
+/* without JavaScript / WebGL: a page about the room */
+.rm-stage { display: none; }
+.rm--ui .rm-stage { display: block; }
+.rm--ui .rm-about { display: none; }
+.rm-about { max-width: 960px; margin: 0 auto; padding: calc(var(--header-h) + 64px) var(--gutter) 96px; }
+.rm-h { font: 600 clamp(36px, 6vw, 72px)/1.1 var(--f-serif); letter-spacing: 0.06em; margin-bottom: 20px; }
+.rm-h small { display: block; margin-top: 10px; font: 600 16px var(--f-display); letter-spacing: 0.3em; color: var(--ink-3); }
+.rm-about p { color: var(--ink-2); margin-bottom: 20px; }
+.rm-about img { width: 100%; height: auto; margin: 12px 0 24px; border: 1px solid var(--line-2); }
+
+/* ---------- things that float over the room ---------- */
+.rm-layer { position: absolute; inset: 0; pointer-events: none; }
+.rm-mark, .rm-bubble { position: absolute; left: 0; top: 0; will-change: transform; }
+.rm-mark { width: 0; height: 0; }
+.rm-mark::before { content: ""; position: absolute; left: -9px; top: -9px; width: 14px; height: 14px; border: 2px solid var(--c, #ffc400); border-radius: 50%; box-shadow: 0 0 10px var(--c, #ffc400); animation: rm-bob 2.4s ease-in-out infinite; }
+@keyframes rm-bob { 50% { translate: 0 -5px; } }
+.rm-bubble { margin: 0; width: max-content; max-width: min(260px, 70vw); padding: 8px 12px; translate: -50% -100%;
+  background: #fbfaf6; color: #15161a; border: 1px solid #15161a; font: 500 14px/1.5 var(--f-sans); box-shadow: 4px 4px 0 rgb(0 0 0 / 0.35); }
+.rm-bubble::after { content: ""; position: absolute; left: 50%; bottom: -7px; width: 12px; height: 12px; background: inherit; border-right: 1px solid #15161a; border-bottom: 1px solid #15161a; transform: translateX(-50%) rotate(45deg); }
+.rm-bubble.is-in { animation: rm-pop 0.25s var(--ease); }
+@keyframes rm-pop { from { opacity: 0; scale: 0.85; } }
+.rm-menu { position: absolute; min-width: 150px; padding: 6px; pointer-events: auto; background: rgb(var(--veil) / 0.94); border: 1px solid var(--line-2); box-shadow: 0 10px 30px rgb(0 0 0 / 0.35); backdrop-filter: blur(8px); }
+.rm-menu p { padding: 4px 8px 6px; margin-bottom: 4px; border-bottom: 1px solid var(--line); font: 600 12px var(--f-sans); letter-spacing: 0.16em; color: var(--mark); }
+.rm-menu button { display: block; width: 100%; padding: 7px 10px; text-align: left; font: 500 14px var(--f-sans); color: var(--ink); cursor: pointer; }
+.rm-menu button:hover, .rm-menu button:focus-visible { background: var(--signal); color: var(--signal-ink); outline: none; }
+
+/* ---------- the interface ---------- */
+.rm-hud { position: absolute; inset: calc(var(--header-h) + 10px) 14px 14px; pointer-events: none; display: grid;
+  grid-template: "who . clock" auto "queue . ." auto ". . ." 1fr "needs tools log" auto / minmax(0, 300px) 1fr minmax(0, 320px); gap: 10px; }
+.rm-hud[hidden] { display: none; }
+.rm-hud > * { pointer-events: auto; }
+.rm-panel, .rm-who, .rm-clock, .rm-needs, .rm-log { background: rgb(var(--veil) / 0.78); border: 1px solid var(--line-2); backdrop-filter: blur(8px); }
+.rm-who { grid-area: who; display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 12px; align-items: center; padding: 10px 14px 10px 10px; }
+.rm-who img { width: 58px; height: 58px; object-fit: cover; border: 1px solid var(--line-2); }
+.rm-name { font: 600 18px/1.2 var(--f-serif); letter-spacing: 0.1em; }
+.rm-name small { margin-left: 8px; font: 600 10px var(--f-display); letter-spacing: 0.24em; color: var(--ink-3); }
+.rm-doing { margin: 3px 0 2px; font: 500 13px/1.4 var(--f-sans); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rm-mood { display: flex; align-items: center; gap: 6px; font: 500 12px var(--f-sans); color: var(--ink-2); }
+.rm-mood i { width: 8px; height: 8px; border-radius: 50%; background: #ffc400; }
+.rm-queue { grid-area: queue; display: flex; flex-wrap: wrap; gap: 6px; align-content: start; list-style: none; padding: 0; margin: 0; }
+.rm-queue li { display: flex; align-items: center; gap: 6px; padding: 3px 4px 3px 10px; background: var(--signal); color: var(--signal-ink); font: 600 12px var(--f-sans); }
+.rm-queue li:first-child::before { content: "下一件"; font-weight: 500; opacity: 0.7; margin-right: 2px; }
+.rm-queue button { width: 20px; height: 20px; font: 600 14px/1 var(--f-sans); color: inherit; cursor: pointer; }
+.rm-queue button:hover { background: rgb(0 0 0 / 0.15); }
+.rm-clock { grid-area: clock; justify-self: end; display: flex; align-items: center; gap: 14px; padding: 8px 10px 8px 14px; }
+.rm-time { display: grid; }
+.rm-time b { font: 600 26px/1 var(--f-display); letter-spacing: 0.06em; color: var(--ink); }
+.rm-time span { font: 500 11px var(--f-mono); letter-spacing: 0.12em; color: var(--ink-3); }
+.rm-speed { display: flex; border: 1px solid var(--line-2); }
+.rm-speed button { display: grid; place-items: center; width: 34px; height: 30px; color: var(--ink-2); cursor: pointer; }
+.rm-speed button + button { border-left: 1px solid var(--line); }
+.rm-speed svg { width: 16px; height: 16px; fill: currentColor; stroke: currentColor; stroke-width: 1.4; stroke-linejoin: round; }
+.rm-speed button[data-speed="0"] svg { fill: none; stroke-width: 2.4; }
+.rm-speed button[aria-checked="true"] { background: var(--signal); color: var(--signal-ink); }
+.rm-speed button:focus-visible { outline: 2px solid var(--signal); outline-offset: -2px; }
+.rm-needs { grid-area: needs; align-self: end; display: grid; gap: 7px; padding: 12px 14px; }
+.rm-need { display: grid; grid-template-columns: 2.8em minmax(0, 1fr) 2em; align-items: center; gap: 10px; font: 500 12px var(--f-sans); color: var(--ink-2); }
+.rm-need i { height: 6px; background: rgb(128 128 128 / 0.25); overflow: hidden; }
+.rm-need b { display: block; height: 100%; width: 50%; background: #7fd38a; transition: width 0.4s, background-color 0.4s; }
+.rm-need em { font: 500 11px var(--f-mono); font-style: normal; color: var(--ink-3); text-align: right; }
+.rm-log { grid-area: log; align-self: end; padding: 10px 14px 12px; max-height: 210px; overflow: hidden; }
+.rm-log h2 { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; font: 600 14px var(--f-serif); letter-spacing: 0.16em; }
+.rm-log h2 small { font: 500 10px var(--f-mono); letter-spacing: 0.2em; color: var(--ink-3); }
+.rm-log ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
+.rm-log li { display: grid; grid-template-columns: 3.4em minmax(0, 1fr); gap: 8px; font: 400 12.5px/1.5 var(--f-sans); color: var(--ink-2); }
+.rm-log li:first-child { color: var(--ink); }
+.rm-log time { font: 500 11px/1.7 var(--f-mono); color: var(--ink-3); }
+.rm-tools { grid-area: tools; align-self: end; justify-self: center; display: flex; gap: 6px; }
+.rm-tools button { padding: 7px 12px; border: 1px solid var(--line-2); background: rgb(var(--veil) / 0.78); backdrop-filter: blur(8px); font: 500 13px var(--f-sans); color: var(--ink-2); cursor: pointer; }
+.rm-tools button:hover { color: var(--ink); border-color: var(--ink-3); }
+.rm-tools button[aria-pressed="true"] { background: var(--signal); color: var(--signal-ink); border-color: var(--signal); }
+
+.rm-help { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: min(520px, calc(100% - 32px)); max-height: calc(100% - var(--header-h) - 40px); overflow: auto;
+  padding: 24px 26px; background: rgb(var(--veil) / 0.95); border: 1px solid var(--line-2); box-shadow: 0 20px 60px rgb(0 0 0 / 0.4); backdrop-filter: blur(10px); }
+.rm-help[hidden] { display: none; }
+.rm-help h2 { font: 600 24px var(--f-serif); letter-spacing: 0.12em; margin-bottom: 12px; }
+.rm-help p { color: var(--ink-2); margin-bottom: 12px; }
+.rm-help ul { list-style: none; padding: 0; margin: 0 0 18px; display: grid; gap: 8px; }
+.rm-help li { font-size: 14px; color: var(--ink-2); padding-left: 14px; border-left: 2px solid var(--signal); }
+.rm-help b { color: var(--ink); font-weight: 600; }
+
+.rm-load { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 12px; background: var(--bg); color: var(--ink-2); font: 500 12px var(--f-mono); letter-spacing: 0.14em; transition: opacity 0.6s, visibility 0s 0.6s; }
+.rm-load p { font: 500 15px var(--f-serif); letter-spacing: 0.3em; color: var(--ink); }
+.rm-load i { width: min(300px, 60vw); height: 2px; background: var(--line-2); }
+.rm-load b { display: block; width: 0; height: 100%; background: var(--signal); transition: width 0.2s; }
+.rm-load.is-done { opacity: 0; visibility: hidden; }
+.rm-load.is-error p { max-width: 28em; text-align: center; letter-spacing: 0.06em; line-height: 1.8; }
+.rm-load.is-error i, .rm-load.is-error span { display: none; }
+
+/* ---------- small screens ---------- */
+@media (max-width: 760px) {
+  .rm-hud { inset: calc(var(--header-h) + 6px) 8px 8px; gap: 6px;
+    grid-template: "who clock" auto "queue queue" auto ". ." 1fr "log log" auto "needs needs" auto "tools tools" auto / minmax(0, 1fr) auto; }
+  .rm-who { grid-template-columns: 40px minmax(0, 1fr); padding: 6px 10px 6px 6px; gap: 8px; }
+  .rm-who img { width: 40px; height: 40px; }
+  .rm-name { font-size: 15px; }
+  .rm-name small { display: none; }
+  .rm-clock { flex-direction: column; align-items: flex-end; gap: 6px; padding: 6px 8px; }
+  .rm-time b { font-size: 20px; text-align: right; }
+  .rm-speed button { width: 28px; height: 26px; }
+  .rm-needs { grid-template-columns: 1fr 1fr; gap: 6px 14px; padding: 8px 10px; }
+  .rm-need { grid-template-columns: 2.6em minmax(0, 1fr); }
+  .rm-need em { display: none; }
+  .rm-log { max-height: 74px; padding: 6px 10px; }
+  .rm-log h2 { display: none; }
+  .rm-log li:nth-child(n + 3) { display: none; }
+  .rm-tools { justify-self: stretch; }
+  .rm-tools button { flex: 1; padding: 6px 8px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .rm-mark::before, .rm-bubble.is-in { animation: none; } }

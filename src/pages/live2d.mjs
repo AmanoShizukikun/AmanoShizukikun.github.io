@@ -164,7 +164,7 @@ export function live2dBody({ models, faces, timeline, rules }) {
       <ul class="l2-links">
         <li><a href="/apps/nagato-sakura/"><b>PROJECT</b><span>長門櫻計畫</span><i aria-hidden="true">→</i></a></li>
         <li><a href="/apps/nijigen/"><b>LORE</b><span>世界觀：常夜界的檔案</span><i aria-hidden="true">→</i></a></li>
-        <li><a href="/apps/ns-room/"><b>3D</b><span>長門櫻的房間</span><i aria-hidden="true">→</i></a></li>
+        <li><a href="/apps/models/"><b>3D</b><span>3D 作品：長門櫻與她的房間</span><i aria-hidden="true">→</i></a></li>
         <li><a href="/works/"><b>ARCHIVE</b><span>回到作品</span><i aria-hidden="true">→</i></a></li>
       </ul>
     </section>

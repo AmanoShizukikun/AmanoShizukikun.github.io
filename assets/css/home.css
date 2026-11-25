@@ -201,6 +201,11 @@
   .hm-rail { right: 4px; }
   .hm-rail a i { display: none; }
   .hm-l1, .hm-l3, .hm-l4 { background: linear-gradient(0deg, rgb(var(--veil) / calc(0.86 * (1 - var(--poster, 0)))) 0%, rgb(var(--veil) / calc(0.5 * (1 - var(--poster, 0)))) 48%, transparent 78%); }
+  /* 05: she stands larger here, behind the copy (scene.js, `upright`), so the veil under the copy is a little
+     denser; in the poster it is the poster's own field, laid back over her legs, so the ink copy stays legible */
+  .hm-l4 { background:
+    linear-gradient(0deg, rgb(255 196 0 / calc(0.84 * var(--poster, 0))) 0%, rgb(255 196 0 / calc(0.6 * var(--poster, 0))) 40%, transparent 64%),
+    linear-gradient(0deg, rgb(var(--veil) / calc(0.88 * (1 - var(--poster, 0)))) 0%, rgb(var(--veil) / calc(0.58 * (1 - var(--poster, 0)))) 44%, transparent 74%); }
   .hm-hint { right: var(--gutter); }
   .hm-ringsvg { right: -18vw; width: 80vw; height: 80vw; }
   .hm-sub { flex-wrap: wrap; gap: 6px 12px; }

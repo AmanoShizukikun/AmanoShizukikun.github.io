@@ -20,6 +20,9 @@ const PAGES = {
   music: () => import('../pages/music.js'),
   webos: () => import('../pages/webos.js'),
   lore: () => import('../pages/lore.js'),
+  models: () => import('../pages/models.js'),
+  model: () => import('../pages/model.js'),
+  room: () => import('../pages/room.js'),
   notfound: () => import('../pages/notfound.js'),
 };
 
